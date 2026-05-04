@@ -16,15 +16,7 @@
         </div>
     @endif
 
-    <div class="mb-4 rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-50">
-        <div class="font-semibold">Akun Demo</div>
-        <div class="mt-2 space-y-1 text-amber-50/90">
-            <div><span class="font-medium">Admin:</span> admin@gmail.com</div>
-            <div><span class="font-medium">Dosen:</span> dosen@gmail.com</div>
-            <div><span class="font-medium">Mahasiswa:</span> mahasiswa@gmail.com</div>
-            <div><span class="font-medium">Password:</span> password</div>
-        </div>
-    </div>
+   
 
     <form method="POST" action="{{ route('login') }}">
         @csrf
