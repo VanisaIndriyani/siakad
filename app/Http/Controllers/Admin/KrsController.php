@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Absensi;
+use App\Models\AbsensiItem;
 use App\Models\Khs;
 use App\Models\KhsItem;
 use App\Models\Krs;
@@ -60,7 +62,7 @@ class KrsController extends Controller
         cache()->forget('admin_pending_krs_count');
 
         if ($validated['status_approval'] === 'approved') {
-            $krs->loadMissing(['items']);
+            $krs->loadMissing(['items', 'mahasiswa']);
 
             $khs = Khs::query()->firstOrCreate(
                 [
@@ -77,6 +79,36 @@ class KrsController extends Controller
                     'khs_id' => $khs->id,
                     'mata_kuliah_id' => $item->mata_kuliah_id,
                 ]);
+            }
+
+            $jurusan = (string) ($krs->mahasiswa?->program_studi ?? '');
+            if ($jurusan !== '') {
+                $mkIds = $krs->items->pluck('mata_kuliah_id')->map(fn ($v) => (int) $v)->all();
+                foreach ($mkIds as $mkId) {
+                    foreach (range(1, 16) as $pertemuan) {
+                        $absensi = Absensi::query()->firstOrCreate(
+                            [
+                                'jurusan' => $jurusan,
+                                'semester' => (int) $krs->semester,
+                                'mata_kuliah_id' => $mkId,
+                                'pertemuan' => $pertemuan,
+                            ],
+                            [
+                                'created_by_user_id' => null,
+                            ]
+                        );
+
+                        AbsensiItem::query()->firstOrCreate(
+                            [
+                                'absensi_id' => $absensi->id,
+                                'mahasiswa_id' => (int) $krs->mahasiswa_id,
+                            ],
+                            [
+                                'status' => null,
+                            ]
+                        );
+                    }
+                }
             }
         }
 

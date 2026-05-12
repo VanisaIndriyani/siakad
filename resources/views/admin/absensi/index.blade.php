@@ -1,6 +1,6 @@
 <x-portal-layout :title="'Absensi - '.config('app.name')" subtitle="Kelola Absensi">
     <x-slot:sidebar>
-        @include('admin.partials.sidebar')
+        @include($sidebarView ?? 'admin.partials.sidebar')
     </x-slot:sidebar>
 
     <div class="flex items-center justify-between gap-3 mb-5">
@@ -11,7 +11,7 @@
     </div>
 
     <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
-        <form method="GET" action="{{ route('admin.absensi.index') }}" class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+        <form method="GET" action="{{ route(($routePrefix ?? 'admin').'.absensi.index') }}" class="grid grid-cols-1 lg:grid-cols-4 gap-4">
             <div>
                 <label class="text-sm text-emerald-100/80">Jurusan</label>
                 <select name="jurusan" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" onchange="this.form.submit()">
@@ -43,7 +43,7 @@
             </div>
 
             <div class="lg:col-span-4 flex items-center justify-end gap-3">
-                <a href="{{ route('admin.absensi.index') }}" class="h-11 px-5 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                <a href="{{ route(($routePrefix ?? 'admin').'.absensi.index') }}" class="h-11 px-5 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                     Reset
                 </a>
                 <button class="h-11 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition font-medium">
@@ -64,7 +64,7 @@
 
             <div class="mt-4 flex flex-wrap gap-2">
                 @foreach (range(1, 16) as $p)
-                    <a href="{{ route('admin.absensi.entry', ['jurusan' => $jurusan, 'semester' => $semester, 'mata_kuliah_id' => $mataKuliahId, 'pertemuan' => $p]) }}"
+                    <a href="{{ route(($routePrefix ?? 'admin').'.absensi.entry', ['jurusan' => $jurusan, 'semester' => $semester, 'mata_kuliah_id' => $mataKuliahId, 'pertemuan' => $p]) }}"
                        class="h-10 px-4 inline-flex items-center justify-center rounded-xl border transition {{ $sessions->firstWhere('pertemuan', $p) ? 'bg-emerald-500/15 border-emerald-400/25 hover:bg-emerald-500/20' : 'bg-white/5 border-white/10 hover:bg-white/10' }}">
                         Pertemuan {{ $p }}
                     </a>
@@ -90,7 +90,7 @@
                                     <td class="px-4 py-3 text-emerald-100/80">{{ (int) $s->terisi_count }}/{{ (int) $s->items_count }}</td>
                                     <td class="px-4 py-3">
                                         <div class="flex items-center justify-end">
-                                            <a href="{{ route('admin.absensi.entry', ['jurusan' => $jurusan, 'semester' => $semester, 'mata_kuliah_id' => $mataKuliahId, 'pertemuan' => $s->pertemuan]) }}"
+                                            <a href="{{ route(($routePrefix ?? 'admin').'.absensi.entry', ['jurusan' => $jurusan, 'semester' => $semester, 'mata_kuliah_id' => $mataKuliahId, 'pertemuan' => $s->pertemuan]) }}"
                                                class="h-9 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                                                 <i class="fa-solid fa-pen-to-square"></i>
                                                 Isi

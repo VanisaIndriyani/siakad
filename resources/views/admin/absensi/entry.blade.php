@@ -1,6 +1,6 @@
 <x-portal-layout :title="'Input Absensi - '.config('app.name')" subtitle="Input Absensi">
     <x-slot:sidebar>
-        @include('admin.partials.sidebar')
+        @include($sidebarView ?? 'admin.partials.sidebar')
     </x-slot:sidebar>
 
     <div class="flex items-center justify-between gap-3 mb-5">
@@ -10,14 +10,26 @@
                 {{ $absensi->jurusan }} • Semester {{ $absensi->semester }} • {{ $absensi->mataKuliah?->kode }} - {{ $absensi->mataKuliah?->nama }} • Pertemuan {{ $absensi->pertemuan }}
             </div>
         </div>
-        <a href="{{ route('admin.absensi.index', ['jurusan' => $absensi->jurusan, 'semester' => $absensi->semester, 'mata_kuliah_id' => $absensi->mata_kuliah_id]) }}"
-           class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
-            <i class="fa-solid fa-arrow-left"></i>
-            Kembali
-        </a>
+        <div class="flex items-center gap-2">
+            <a href="{{ route(($routePrefix ?? 'admin').'.absensi.export.pdf', $absensi) }}"
+               class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                <i class="fa-solid fa-file-pdf text-red-300"></i>
+                PDF
+            </a>
+            <a href="{{ route(($routePrefix ?? 'admin').'.absensi.export.excel', $absensi) }}"
+               class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                <i class="fa-solid fa-file-excel text-emerald-300"></i>
+                Excel
+            </a>
+            <a href="{{ route(($routePrefix ?? 'admin').'.absensi.index', ['jurusan' => $absensi->jurusan, 'semester' => $absensi->semester, 'mata_kuliah_id' => $absensi->mata_kuliah_id]) }}"
+               class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                <i class="fa-solid fa-arrow-left"></i>
+                Kembali
+            </a>
+        </div>
     </div>
 
-    <form method="POST" action="{{ route('admin.absensi.update', $absensi) }}" class="rounded-2xl bg-white/5 border border-white/10 p-5">
+    <form method="POST" action="{{ route(($routePrefix ?? 'admin').'.absensi.update', $absensi) }}" class="rounded-2xl bg-white/5 border border-white/10 p-5">
         @csrf
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">

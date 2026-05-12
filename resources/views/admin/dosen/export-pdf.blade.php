@@ -56,6 +56,7 @@
                     <tr>
                         <th>Nama</th>
                         <th>NIDN</th>
+                        <th>NUPTK</th>
                         <th>Nomor HP</th>
                         <th>Mata Kuliah</th>
                     </tr>
@@ -65,6 +66,7 @@
                         <tr>
                             <td>{{ $row->nama }}</td>
                             <td>{{ $row->nidn }}</td>
+                            <td>{{ $row->nuptk }}</td>
                             <td>{{ $row->nomor_hp }}</td>
                             <td>{{ $row->mata_kuliah }}</td>
                         </tr>

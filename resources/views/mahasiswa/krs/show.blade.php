@@ -3,19 +3,46 @@
         @include('mahasiswa.partials.sidebar')
     </x-slot:sidebar>
 
+    <style>
+        @media print {
+            aside, header, .no-print { display: none !important; }
+            .lg\:pl-72 { padding-left: 0 !important; }
+            main { padding: 0 !important; }
+            body { background: #fff !important; color: #000 !important; }
+            table { page-break-inside: auto; }
+            tr { page-break-inside: avoid; page-break-after: auto; }
+        }
+    </style>
+
+    @php
+        $mahasiswa = auth()->user()->mahasiswa;
+        $items = $krs->items->sortBy(fn ($item) => (string) ($item->mataKuliah?->kode ?? ''));
+        $totalSks = $items->sum(fn ($item) => (int) ($item->mataKuliah?->sks ?? 0));
+    @endphp
+
     <div class="flex items-center justify-between gap-3 mb-5">
         <div>
-            <div class="text-xl font-semibold">Detail KRS</div>
-            <div class="text-sm text-emerald-100/70">Semester {{ $krs->semester }} • {{ $krs->tahun_ajaran ?? '-' }}</div>
+            <div class="text-xl font-semibold">Kartu Rencana Studi (KRS)</div>
+            <div class="text-sm text-emerald-100/70">
+                {{ $mahasiswa?->nama_lengkap ?? auth()->user()->name }}
+                @if ($mahasiswa?->npm)
+                    • {{ $mahasiswa->npm }}
+                @endif
+                • {{ $krs->tahun_ajaran ?? '-' }} • Semester {{ $krs->semester }}
+            </div>
         </div>
         <div class="flex items-center gap-2">
             @if ($krs->status_approval !== 'approved')
-                <a href="{{ route('mahasiswa.krs.edit', $krs) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                <a href="{{ route('mahasiswa.krs.edit', $krs) }}" class="no-print h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                     <i class="fa-solid fa-pen"></i>
                     Edit
                 </a>
             @endif
-            <a href="{{ route('mahasiswa.krs.index') }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+            <button type="button" onclick="window.print()" class="no-print h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                <i class="fa-solid fa-print"></i>
+                Cetak
+            </button>
+            <a href="{{ route('mahasiswa.krs.index') }}" class="no-print h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                 <i class="fa-solid fa-arrow-left"></i>
                 Kembali
             </a>
@@ -50,24 +77,37 @@
                 <table class="min-w-full text-sm">
                     <thead class="bg-white/5 text-emerald-100/80">
                         <tr>
-                            <th class="text-left font-medium px-4 py-3">Kode</th>
-                            <th class="text-left font-medium px-4 py-3">Nama</th>
+                            <th class="text-left font-medium px-4 py-3 w-16">No</th>
+                            <th class="text-left font-medium px-4 py-3">Kode Mata Kuliah</th>
+                            <th class="text-left font-medium px-4 py-3">Mata Kuliah</th>
                             <th class="text-left font-medium px-4 py-3">SKS</th>
+                            <th class="text-left font-medium px-4 py-3">Semester</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-white/10">
-                        @forelse ($krs->items as $item)
+                        @forelse ($items as $item)
                             <tr class="hover:bg-white/5">
+                                <td class="px-4 py-3 text-emerald-100/80">{{ $loop->iteration }}</td>
                                 <td class="px-4 py-3 font-medium">{{ $item->mataKuliah?->kode }}</td>
                                 <td class="px-4 py-3 text-emerald-100/80">{{ $item->mataKuliah?->nama }}</td>
                                 <td class="px-4 py-3 text-emerald-100/80">{{ $item->mataKuliah?->sks }}</td>
+                                <td class="px-4 py-3 text-emerald-100/80">{{ $krs->semester }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="3" class="px-4 py-10 text-center text-emerald-100/70">Belum ada mata kuliah.</td>
+                                <td colspan="5" class="px-4 py-10 text-center text-emerald-100/70">Belum ada mata kuliah.</td>
                             </tr>
                         @endforelse
                     </tbody>
+                    @if ($items->count() > 0)
+                        <tfoot class="bg-white/5">
+                            <tr>
+                                <td class="px-4 py-3 font-medium" colspan="3">Total SKS</td>
+                                <td class="px-4 py-3 font-medium">{{ $totalSks }}</td>
+                                <td class="px-4 py-3"></td>
+                            </tr>
+                        </tfoot>
+                    @endif
                 </table>
             </div>
         </div>

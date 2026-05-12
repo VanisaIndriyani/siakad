@@ -30,8 +30,15 @@ class KhsController extends Controller
         }
 
         $khs = Khs::query()
+            ->with(['items.mataKuliah'])
             ->withCount('items')
+            ->withCount(['items as nilai_count' => function ($q) {
+                $q->whereNotNull('nilai_huruf')->orWhereNotNull('nilai_angka');
+            }])
             ->where('mahasiswa_id', $mahasiswa->id)
+            ->whereHas('items', function ($q) {
+                $q->whereNotNull('nilai_huruf')->orWhereNotNull('nilai_angka');
+            })
             ->orderBy('semester')
             ->get();
 
@@ -44,7 +51,12 @@ class KhsController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
-        abort_unless($user->mahasiswa && $khs->mahasiswa_id === $user->mahasiswa->id, 403);
+        if (! $user->mahasiswa) {
+            return redirect()->route('mahasiswa.khs.index')->with('error', 'Profil mahasiswa belum tersedia.');
+        }
+        if ((int) $khs->mahasiswa_id !== (int) $user->mahasiswa->id) {
+            return redirect()->route('mahasiswa.khs.index')->with('error', 'Akses ditolak.');
+        }
 
         $khs->load(['items.mataKuliah', 'mahasiswa']);
 

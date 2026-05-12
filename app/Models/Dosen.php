@@ -17,6 +17,7 @@ class Dosen extends Model
         'user_id',
         'nama',
         'nidn',
+        'nuptk',
         'alamat',
         'nomor_hp',
         'mata_kuliah',

@@ -20,7 +20,7 @@
 
         <div>
             <div class="text-lg font-semibold">Nilai per Mata Kuliah</div>
-            <div class="text-sm text-emerald-100/70">Dosen hanya menginput nilai untuk tiap mata kuliah pada KRS ini.</div>
+            <div class="text-sm text-emerald-100/70">Yang ditampilkan hanya mata kuliah yang kamu ampu.</div>
         </div>
 
         <div class="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
@@ -35,7 +35,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-white/10">
-                        @foreach ($krs->items as $item)
+                        @foreach (($items ?? $krs->items) as $item)
                             @php
                                 $mk = $item->mataKuliah;
                                 $existingItem = $existing->get($item->mata_kuliah_id);
@@ -62,9 +62,9 @@
                                 </td>
                             </tr>
                         @endforeach
-                        @if ($krs->items->count() === 0)
+                        @if (($items ?? $krs->items)->count() === 0)
                             <tr>
-                                <td colspan="4" class="px-4 py-10 text-center text-emerald-100/70">Tidak ada mata kuliah pada KRS ini.</td>
+                                <td colspan="4" class="px-4 py-10 text-center text-emerald-100/70">Tidak ada mata kuliah yang bisa kamu nilai pada KRS ini.</td>
                             </tr>
                         @endif
                     </tbody>

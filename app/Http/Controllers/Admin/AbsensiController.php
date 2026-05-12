@@ -7,10 +7,13 @@ use App\Models\Absensi;
 use App\Models\AbsensiItem;
 use App\Models\Mahasiswa;
 use App\Models\MataKuliah;
+use Dompdf\Dompdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class AbsensiController extends Controller
 {
@@ -25,11 +28,22 @@ class AbsensiController extends Controller
 
     public function index(Request $request): View
     {
+        $routePrefix = $request->user()?->isDosen() ? 'dosen' : 'admin';
+        $sidebarView = $request->user()?->isDosen() ? 'dosen.partials.sidebar' : 'admin.partials.sidebar';
+
         $jurusan = trim((string) $request->get('jurusan', ''));
         $semester = (int) $request->get('semester', 0);
         $mataKuliahId = (int) $request->get('mata_kuliah_id', 0);
 
+        $dosen = $request->user()?->isDosen() ? $request->user()?->dosen : null;
+        if ($request->user()?->isDosen() && ! $dosen) {
+            abort(403);
+        }
+
         $mataKuliahQuery = MataKuliah::query()->orderBy('semester')->orderBy('kode');
+        if ($dosen) {
+            $mataKuliahQuery->where('dosen_id', $dosen->id);
+        }
         if ($semester >= 1 && $semester <= 8) {
             $mataKuliahQuery->where('semester', $semester);
         }
@@ -68,11 +82,21 @@ class AbsensiController extends Controller
             'semester' => $semester ?: null,
             'mataKuliahId' => $mataKuliahId ?: null,
             'sessions' => $sessions,
+            'routePrefix' => $routePrefix,
+            'sidebarView' => $sidebarView,
         ]);
     }
 
     public function entry(Request $request): View
     {
+        $routePrefix = $request->user()?->isDosen() ? 'dosen' : 'admin';
+        $sidebarView = $request->user()?->isDosen() ? 'dosen.partials.sidebar' : 'admin.partials.sidebar';
+
+        $dosen = $request->user()?->isDosen() ? $request->user()?->dosen : null;
+        if ($request->user()?->isDosen() && ! $dosen) {
+            abort(403);
+        }
+
         $validated = $request->validate([
             'jurusan' => ['required', 'string'],
             'semester' => ['required', 'integer', 'min:1', 'max:8'],
@@ -81,7 +105,8 @@ class AbsensiController extends Controller
                 'integer',
                 Rule::exists('mata_kuliah', 'id')
                     ->where('semester', (int) $request->input('semester'))
-                    ->where('jurusan', (string) $request->input('jurusan')),
+                    ->where('jurusan', (string) $request->input('jurusan'))
+                    ->when($dosen, fn ($q) => $q->where('dosen_id', $dosen->id)),
             ],
             'pertemuan' => ['required', 'integer', 'min:1', 'max:16'],
         ]);
@@ -126,11 +151,24 @@ class AbsensiController extends Controller
 
         return view('admin.absensi.entry', [
             'absensi' => $absensi,
+            'routePrefix' => $routePrefix,
+            'sidebarView' => $sidebarView,
         ]);
     }
 
     public function update(Request $request, Absensi $absensi): RedirectResponse
     {
+        $routePrefix = $request->user()?->isDosen() ? 'dosen' : 'admin';
+
+        if ($request->user()?->isDosen()) {
+            $dosen = $request->user()?->dosen;
+            if (! $dosen) {
+                abort(403);
+            }
+            $absensi->loadMissing('mataKuliah');
+            abort_unless((int) ($absensi->mataKuliah?->dosen_id ?? 0) === (int) $dosen->id, 403);
+        }
+
         $validated = $request->validate([
             'tanggal' => ['nullable', 'date'],
             'status' => ['required', 'array'],
@@ -156,11 +194,115 @@ class AbsensiController extends Controller
             ]);
         }
 
-        return redirect()->route('admin.absensi.entry', [
+        return redirect()->route($routePrefix.'.absensi.entry', [
             'jurusan' => $absensi->jurusan,
             'semester' => $absensi->semester,
             'mata_kuliah_id' => $absensi->mata_kuliah_id,
             'pertemuan' => $absensi->pertemuan,
         ])->with('success', 'Absensi berhasil disimpan.');
+    }
+
+    public function exportPdf(Request $request, Absensi $absensi)
+    {
+        $routePrefix = $request->user()?->isDosen() ? 'dosen' : 'admin';
+
+        if ($request->user()?->isDosen()) {
+            $dosen = $request->user()?->dosen;
+            if (! $dosen) {
+                abort(403);
+            }
+            $absensi->loadMissing('mataKuliah');
+            abort_unless((int) ($absensi->mataKuliah?->dosen_id ?? 0) === (int) $dosen->id, 403);
+        }
+
+        $absensi->load(['mataKuliah', 'items.mahasiswa']);
+        $items = $absensi->items->sortBy(fn ($i) => (string) ($i->mahasiswa?->npm ?? ''))->values();
+
+        $html = view('admin.absensi.export-pdf', [
+            'absensi' => $absensi,
+            'items' => $items,
+            'role' => $routePrefix,
+        ])->render();
+
+        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $mk = $absensi->mataKuliah;
+        $safeKode = preg_replace('/[^A-Za-z0-9._-]+/', '-', (string) ($mk?->kode ?? 'MK'));
+        $filename = 'absensi-'.$safeKode.'-P'.$absensi->pertemuan.'.pdf';
+
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ]);
+    }
+
+    public function exportExcel(Request $request, Absensi $absensi)
+    {
+        $routePrefix = $request->user()?->isDosen() ? 'dosen' : 'admin';
+
+        if ($request->user()?->isDosen()) {
+            $dosen = $request->user()?->dosen;
+            if (! $dosen) {
+                abort(403);
+            }
+            $absensi->loadMissing('mataKuliah');
+            abort_unless((int) ($absensi->mataKuliah?->dosen_id ?? 0) === (int) $dosen->id, 403);
+        }
+
+        $absensi->load(['mataKuliah', 'items.mahasiswa']);
+        $items = $absensi->items->sortBy(fn ($i) => (string) ($i->mahasiswa?->npm ?? ''))->values();
+
+        $mk = $absensi->mataKuliah;
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Absensi');
+
+        $sheet->setCellValue('A1', 'ABSENSI');
+        $sheet->setCellValue('A2', 'Jurusan');
+        $sheet->setCellValue('B2', $absensi->jurusan);
+        $sheet->setCellValue('A3', 'Semester');
+        $sheet->setCellValue('B3', (int) $absensi->semester);
+        $sheet->setCellValue('A4', 'Mata Kuliah');
+        $sheet->setCellValue('B4', ($mk?->kode ?? '').' - '.($mk?->nama ?? ''));
+        $sheet->setCellValue('A5', 'Pertemuan');
+        $sheet->setCellValue('B5', (int) $absensi->pertemuan);
+        $sheet->setCellValue('A6', 'Tanggal');
+        $sheet->setCellValue('B6', $absensi->tanggal?->format('d/m/Y') ?? '');
+
+        $headers = ['No', 'NPM', 'Nama', 'Status', 'Keterangan', 'Paraf'];
+        $headerRow = 8;
+        foreach ($headers as $col => $label) {
+            $sheet->setCellValueByColumnAndRow($col + 1, $headerRow, $label);
+        }
+
+        $rowIndex = $headerRow + 1;
+        foreach ($items as $i => $item) {
+            $sheet->setCellValueByColumnAndRow(1, $rowIndex, $i + 1);
+            $sheet->setCellValueByColumnAndRow(2, $rowIndex, $item->mahasiswa?->npm ?? '');
+            $sheet->setCellValueByColumnAndRow(3, $rowIndex, $item->mahasiswa?->nama_lengkap ?? '');
+            $sheet->setCellValueByColumnAndRow(4, $rowIndex, '');
+            $sheet->setCellValueByColumnAndRow(5, $rowIndex, '');
+            $sheet->setCellValueByColumnAndRow(6, $rowIndex, '');
+            $rowIndex++;
+        }
+
+        foreach ([1 => 6, 2 => 18, 3 => 32, 4 => 10, 5 => 22, 6 => 10] as $col => $width) {
+            $sheet->getColumnDimensionByColumn($col)->setWidth($width);
+        }
+
+        $writer = new Xlsx($spreadsheet);
+
+        $safeKode = preg_replace('/[^A-Za-z0-9._-]+/', '-', (string) ($mk?->kode ?? 'MK'));
+        $filename = 'absensi-'.$safeKode.'-P'.$absensi->pertemuan.'.xlsx';
+
+        return response()->streamDownload(function () use ($writer) {
+            $writer->save('php://output');
+        }, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
     }
 }

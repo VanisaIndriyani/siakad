@@ -65,6 +65,8 @@ Route::prefix('admin')
         Route::get('/absensi', [AdminAbsensiController::class, 'index'])->name('absensi.index');
         Route::get('/absensi/entry', [AdminAbsensiController::class, 'entry'])->name('absensi.entry');
         Route::post('/absensi/{absensi}', [AdminAbsensiController::class, 'update'])->name('absensi.update');
+        Route::get('/absensi/{absensi}/export/pdf', [AdminAbsensiController::class, 'exportPdf'])->name('absensi.export.pdf');
+        Route::get('/absensi/{absensi}/export/excel', [AdminAbsensiController::class, 'exportExcel'])->name('absensi.export.excel');
     });
 
 Route::prefix('mahasiswa')
@@ -103,6 +105,12 @@ Route::prefix('dosen')
         Route::get('/nilai', [DosenNilaiController::class, 'index'])->name('nilai.index');
         Route::get('/nilai/{krs}', [DosenNilaiController::class, 'edit'])->name('nilai.edit');
         Route::put('/nilai/{krs}', [DosenNilaiController::class, 'update'])->name('nilai.update');
+
+        Route::get('/absensi', [AdminAbsensiController::class, 'index'])->name('absensi.index');
+        Route::get('/absensi/entry', [AdminAbsensiController::class, 'entry'])->name('absensi.entry');
+        Route::post('/absensi/{absensi}', [AdminAbsensiController::class, 'update'])->name('absensi.update');
+        Route::get('/absensi/{absensi}/export/pdf', [AdminAbsensiController::class, 'exportPdf'])->name('absensi.export.pdf');
+        Route::get('/absensi/{absensi}/export/excel', [AdminAbsensiController::class, 'exportExcel'])->name('absensi.export.excel');
 
         Route::get('/profil', [DosenProfilController::class, 'show'])->name('profil');
         Route::post('/profil', [DosenProfilController::class, 'update'])->name('profil.update');

@@ -65,7 +65,7 @@ class MataKuliahController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'kode' => ['required', 'string', 'max:50', 'unique:mata_kuliah,kode'],
+            'kode' => ['required', 'string', 'max:50'],
             'nama' => ['required', 'string', 'max:255'],
             'jurusan' => ['required', 'string', Rule::in(self::JURUSAN)],
             'sks' => ['required', 'integer', 'min:1', 'max:24'],
@@ -92,7 +92,7 @@ class MataKuliahController extends Controller
     public function update(Request $request, MataKuliah $mataKuliah): RedirectResponse
     {
         $validated = $request->validate([
-            'kode' => ['required', 'string', 'max:50', 'unique:mata_kuliah,kode,'.$mataKuliah->id],
+            'kode' => ['required', 'string', 'max:50'],
             'nama' => ['required', 'string', 'max:255'],
             'jurusan' => ['required', 'string', Rule::in(self::JURUSAN)],
             'sks' => ['required', 'integer', 'min:1', 'max:24'],

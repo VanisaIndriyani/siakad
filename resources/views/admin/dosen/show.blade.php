@@ -39,6 +39,10 @@
                     <div class="mt-1 font-medium">{{ $dosen->nidn }}</div>
                 </div>
                 <div class="rounded-xl bg-white/5 border border-white/10 p-4">
+                    <div class="text-emerald-100/70">NUPTK</div>
+                    <div class="mt-1 font-medium">{{ $dosen->nuptk ?? '-' }}</div>
+                </div>
+                <div class="rounded-xl bg-white/5 border border-white/10 p-4">
                     <div class="text-emerald-100/70">Nomor HP</div>
                     <div class="mt-1 font-medium">{{ $dosen->nomor_hp ?? '-' }}</div>
                 </div>

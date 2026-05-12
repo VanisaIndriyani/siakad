@@ -20,13 +20,20 @@ class NilaiController extends Controller
 
         $query = Krs::query()
             ->with(['mahasiswa', 'mahasiswa.user'])
-            ->withCount('items')
             ->where('status_approval', 'approved');
 
         if ($dosen) {
             $query->whereHas('items.mataKuliah', function ($sub) use ($dosen) {
                 $sub->where('dosen_id', $dosen->id);
             });
+
+            $query->withCount(['items as items_count' => function ($sub) use ($dosen) {
+                $sub->whereHas('mataKuliah', function ($q) use ($dosen) {
+                    $q->where('dosen_id', $dosen->id);
+                });
+            }]);
+        } else {
+            $query->withCount('items');
         }
 
         if ($q !== '') {
@@ -58,6 +65,9 @@ class NilaiController extends Controller
         }
 
         $krs->load(['mahasiswa', 'items.mataKuliah']);
+        $items = $dosen
+            ? $krs->items->filter(fn ($it) => (int) ($it->mataKuliah?->dosen_id ?? 0) === (int) $dosen->id)->values()
+            : $krs->items;
 
         $khs = Khs::query()
             ->where('mahasiswa_id', $krs->mahasiswa_id)
@@ -76,6 +86,7 @@ class NilaiController extends Controller
             'krs' => $krs,
             'khs' => $khs,
             'existing' => $existing,
+            'items' => $items,
         ]);
     }
 
@@ -108,8 +119,15 @@ class NilaiController extends Controller
             return redirect()->route('dosen.nilai.index')->with('error', 'KHS belum disiapkan Admin.');
         }
 
-        $krs->load('items');
-        $mkIds = $krs->items->pluck('mata_kuliah_id')->all();
+        $krs->load(['items.mataKuliah']);
+        $mkIds = $dosen
+            ? $krs->items
+                ->filter(fn ($it) => (int) ($it->mataKuliah?->dosen_id ?? 0) === (int) $dosen->id)
+                ->pluck('mata_kuliah_id')
+                ->map(fn ($v) => (int) $v)
+                ->values()
+                ->all()
+            : $krs->items->pluck('mata_kuliah_id')->map(fn ($v) => (int) $v)->values()->all();
 
         $khsItems = $khs->items()->whereIn('mata_kuliah_id', $mkIds)->get()->keyBy('mata_kuliah_id');
         if ($khsItems->count() !== count($mkIds)) {

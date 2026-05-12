@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Mahasiswa;
 
 use App\Http\Controllers\Controller;
+use App\Models\Absensi;
+use App\Models\AbsensiItem;
 use App\Models\Krs;
 use App\Models\KrsItem;
 use App\Models\MataKuliah;
@@ -14,6 +16,57 @@ use Illuminate\View\View;
 
 class KrsController extends Controller
 {
+    private function ensureAbsensiForMahasiswa(int $mahasiswaId, string $jurusan, int $semester, array $mataKuliahIds): void
+    {
+        $mataKuliahIds = array_values(array_unique(array_map('intval', $mataKuliahIds)));
+        if (count($mataKuliahIds) === 0) {
+            return;
+        }
+
+        foreach ($mataKuliahIds as $mkId) {
+            foreach (range(1, 16) as $pertemuan) {
+                $absensi = Absensi::query()->firstOrCreate(
+                    [
+                        'jurusan' => $jurusan,
+                        'semester' => $semester,
+                        'mata_kuliah_id' => $mkId,
+                        'pertemuan' => $pertemuan,
+                    ],
+                    [
+                        'created_by_user_id' => null,
+                    ]
+                );
+
+                AbsensiItem::query()->firstOrCreate(
+                    [
+                        'absensi_id' => $absensi->id,
+                        'mahasiswa_id' => $mahasiswaId,
+                    ],
+                    [
+                        'status' => null,
+                    ]
+                );
+            }
+        }
+    }
+
+    private function removeAbsensiForMahasiswa(int $mahasiswaId, string $jurusan, int $semester, array $mataKuliahIds): void
+    {
+        $mataKuliahIds = array_values(array_unique(array_map('intval', $mataKuliahIds)));
+        if (count($mataKuliahIds) === 0) {
+            return;
+        }
+
+        AbsensiItem::query()
+            ->where('mahasiswa_id', $mahasiswaId)
+            ->whereHas('absensi', function ($q) use ($jurusan, $semester, $mataKuliahIds) {
+                $q->where('jurusan', $jurusan)
+                    ->where('semester', $semester)
+                    ->whereIn('mata_kuliah_id', $mataKuliahIds);
+            })
+            ->delete();
+    }
+
     public function index(Request $request): View
     {
         /** @var User $user */
@@ -21,6 +74,7 @@ class KrsController extends Controller
         $mahasiswa = $user->mahasiswa;
 
         $krs = Krs::query()
+            ->with(['items.mataKuliah'])
             ->withCount('items')
             ->where('mahasiswa_id', $mahasiswa?->id)
             ->orderByDesc('id')
@@ -91,6 +145,8 @@ class KrsController extends Controller
             ]);
         }
 
+        $this->ensureAbsensiForMahasiswa($mahasiswa->id, (string) $mahasiswa->program_studi, (int) $validated['semester'], (array) $validated['mata_kuliah_id']);
+
         return redirect()->route('mahasiswa.krs.show', $krs)->with('success', 'KRS berhasil dibuat dan menunggu approval.');
     }
 
@@ -99,7 +155,12 @@ class KrsController extends Controller
         /** @var User $user */
         $user = $request->user();
 
-        abort_unless($user->mahasiswa && $krs->mahasiswa_id === $user->mahasiswa->id, 403);
+        if (! $user->mahasiswa) {
+            return redirect()->route('mahasiswa.krs.index')->with('error', 'Profil mahasiswa belum tersedia.');
+        }
+        if ((int) $krs->mahasiswa_id !== (int) $user->mahasiswa->id) {
+            return redirect()->route('mahasiswa.krs.index')->with('error', 'Akses ditolak.');
+        }
 
         $krs->load(['items.mataKuliah']);
 
@@ -112,7 +173,12 @@ class KrsController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
-        abort_unless($user->mahasiswa && $krs->mahasiswa_id === $user->mahasiswa->id, 403);
+        if (! $user->mahasiswa) {
+            return redirect()->route('mahasiswa.krs.index')->with('error', 'Profil mahasiswa belum tersedia.');
+        }
+        if ((int) $krs->mahasiswa_id !== (int) $user->mahasiswa->id) {
+            return redirect()->route('mahasiswa.krs.index')->with('error', 'Akses ditolak.');
+        }
 
         if ($krs->status_approval === 'approved') {
             return redirect()->route('mahasiswa.krs.show', $krs)->with('error', 'KRS sudah disetujui dan tidak dapat diubah.');
@@ -137,7 +203,12 @@ class KrsController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
-        abort_unless($user->mahasiswa && $krs->mahasiswa_id === $user->mahasiswa->id, 403);
+        if (! $user->mahasiswa) {
+            return redirect()->route('mahasiswa.krs.index')->with('error', 'Profil mahasiswa belum tersedia.');
+        }
+        if ((int) $krs->mahasiswa_id !== (int) $user->mahasiswa->id) {
+            return redirect()->route('mahasiswa.krs.index')->with('error', 'Akses ditolak.');
+        }
 
         if ($krs->status_approval === 'approved') {
             return redirect()->route('mahasiswa.krs.show', $krs)->with('error', 'KRS sudah disetujui dan tidak dapat diubah.');
@@ -172,6 +243,12 @@ class KrsController extends Controller
                 'krs_id' => $krs->id,
                 'mata_kuliah_id' => $mkId,
             ]);
+        }
+
+        $jurusan = (string) $user->mahasiswa->program_studi;
+        if ($jurusan !== '') {
+            $this->removeAbsensiForMahasiswa((int) $user->mahasiswa->id, $jurusan, (int) $krs->semester, (array) $toDelete);
+            $this->ensureAbsensiForMahasiswa((int) $user->mahasiswa->id, $jurusan, (int) $krs->semester, (array) $incoming);
         }
 
         return redirect()->route('mahasiswa.krs.show', $krs)->with('success', 'KRS berhasil diperbarui dan menunggu approval.');

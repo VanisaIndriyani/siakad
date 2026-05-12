@@ -21,7 +21,7 @@
                     <tr>
                         <th class="text-left font-medium px-4 py-3">Semester</th>
                         <th class="text-left font-medium px-4 py-3">Tahun Ajaran</th>
-                        <th class="text-left font-medium px-4 py-3">MK</th>
+                        <th class="text-left font-medium px-4 py-3">Mata Kuliah</th>
                         <th class="text-left font-medium px-4 py-3">Status</th>
                         <th class="text-right font-medium px-4 py-3">Aksi</th>
                     </tr>
@@ -34,11 +34,25 @@
                                 'rejected' => 'bg-red-500/15 border-red-500/20 text-red-100',
                                 default => 'bg-yellow-500/15 border-yellow-500/20 text-yellow-100',
                             };
+                            $mkCodes = $row->items
+                                ->map(fn ($i) => $i->mataKuliah?->kode)
+                                ->filter()
+                                ->sort()
+                                ->values();
+                            $mkPreview = $mkCodes->take(3)->implode(', ');
+                            $mkMore = max(0, $mkCodes->count() - 3);
                         @endphp
                         <tr class="hover:bg-white/5">
                             <td class="px-4 py-3 font-medium">{{ $row->semester }}</td>
                             <td class="px-4 py-3 text-emerald-100/80">{{ $row->tahun_ajaran ?? '-' }}</td>
-                            <td class="px-4 py-3 text-emerald-100/80">{{ $row->items_count }}</td>
+                            <td class="px-4 py-3 text-emerald-100/80">
+                                <div class="font-medium text-white">{{ $row->items_count }} MK</div>
+                                @if ($mkPreview !== '')
+                                    <div class="mt-1 text-xs text-emerald-100/60">
+                                        {{ $mkPreview }}@if ($mkMore > 0), +{{ $mkMore }} lagi @endif
+                                    </div>
+                                @endif
+                            </td>
                             <td class="px-4 py-3">
                                 <span class="inline-flex items-center rounded-full border px-3 py-1 text-xs {{ $badge }}">
                                     {{ strtoupper($row->status_approval) }}
