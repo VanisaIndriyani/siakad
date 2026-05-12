@@ -171,6 +171,7 @@ class AbsensiController extends Controller
 
         $validated = $request->validate([
             'tanggal' => ['nullable', 'date'],
+            'materi' => ['nullable', 'string'],
             'status' => ['required', 'array'],
             'status.*' => ['nullable', 'in:hadir,izin,sakit,alpha'],
             'keterangan' => ['nullable', 'array'],
@@ -179,6 +180,7 @@ class AbsensiController extends Controller
 
         $absensi->update([
             'tanggal' => $validated['tanggal'] ?? null,
+            'materi' => $validated['materi'] ?? null,
         ]);
 
         $items = $absensi->items()->get()->keyBy('id');
@@ -272,9 +274,11 @@ class AbsensiController extends Controller
         $sheet->setCellValue('B5', (int) $absensi->pertemuan);
         $sheet->setCellValue('A6', 'Tanggal');
         $sheet->setCellValue('B6', $absensi->tanggal?->format('d/m/Y') ?? '');
+        $sheet->setCellValue('A7', 'Materi');
+        $sheet->setCellValue('B7', $absensi->materi ?? '');
 
         $headers = ['No', 'NPM', 'Nama', 'Status', 'Keterangan', 'Paraf'];
-        $headerRow = 8;
+        $headerRow = 9;
         foreach ($headers as $col => $label) {
             $sheet->setCellValueByColumnAndRow($col + 1, $headerRow, $label);
         }

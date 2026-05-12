@@ -19,6 +19,19 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
+                        <label class="text-sm text-emerald-100/80">NIK</label>
+                        <input name="nik" value="{{ old('nik', $dosen?->nik ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
+                        @error('nik') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
+                    </div>
+                    <div>
+                        <label class="text-sm text-emerald-100/80">Nomor SK</label>
+                        <input name="nomor_sk" value="{{ old('nomor_sk', $dosen?->nomor_sk ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
+                        @error('nomor_sk') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
                         <label class="text-sm text-emerald-100/80">Nomor HP</label>
                         <input name="nomor_hp" value="{{ old('nomor_hp', $dosen?->nomor_hp ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
                         @error('nomor_hp') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
@@ -63,6 +76,14 @@
                 <div class="flex items-center justify-between">
                     <span>Email</span>
                     <span class="font-medium text-white">{{ auth()->user()->email }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span>NIK</span>
+                    <span class="font-medium text-white">{{ $dosen?->nik ?? '-' }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span>Nomor SK</span>
+                    <span class="font-medium text-white">{{ $dosen?->nomor_sk ?? '-' }}</span>
                 </div>
             </div>
         </div>

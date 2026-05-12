@@ -35,12 +35,20 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <div class="rounded-xl bg-white/5 border border-white/10 p-4">
+                    <div class="text-emerald-100/70">NIK</div>
+                    <div class="mt-1 font-medium">{{ $dosen->nik ?? '-' }}</div>
+                </div>
+                <div class="rounded-xl bg-white/5 border border-white/10 p-4">
                     <div class="text-emerald-100/70">NIDN</div>
                     <div class="mt-1 font-medium">{{ $dosen->nidn }}</div>
                 </div>
                 <div class="rounded-xl bg-white/5 border border-white/10 p-4">
                     <div class="text-emerald-100/70">NUPTK</div>
                     <div class="mt-1 font-medium">{{ $dosen->nuptk ?? '-' }}</div>
+                </div>
+                <div class="rounded-xl bg-white/5 border border-white/10 p-4">
+                    <div class="text-emerald-100/70">Nomor SK</div>
+                    <div class="mt-1 font-medium">{{ $dosen->nomor_sk ?? '-' }}</div>
                 </div>
                 <div class="rounded-xl bg-white/5 border border-white/10 p-4">
                     <div class="text-emerald-100/70">Nomor HP</div>

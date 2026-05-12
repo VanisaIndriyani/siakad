@@ -32,6 +32,8 @@ class ProfilController extends Controller
         }
 
         $validated = $request->validate([
+            'nik' => ['nullable', 'string', 'max:50', 'unique:dosen,nik,'.$dosen->id],
+            'nomor_sk' => ['nullable', 'string', 'max:255'],
             'alamat' => ['nullable', 'string'],
             'nomor_hp' => ['nullable', 'string', 'max:50'],
             'mata_kuliah' => ['nullable', 'string', 'max:255'],
@@ -45,6 +47,8 @@ class ProfilController extends Controller
             $dosen->foto_path = $request->file('foto')->store('photos/dosen', 'public');
         }
 
+        $dosen->nik = $validated['nik'] ?? $dosen->nik;
+        $dosen->nomor_sk = $validated['nomor_sk'] ?? $dosen->nomor_sk;
         $dosen->alamat = $validated['alamat'] ?? $dosen->alamat;
         $dosen->nomor_hp = $validated['nomor_hp'] ?? $dosen->nomor_hp;
         $dosen->mata_kuliah = $validated['mata_kuliah'] ?? $dosen->mata_kuliah;

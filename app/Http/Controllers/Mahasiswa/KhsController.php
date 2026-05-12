@@ -30,7 +30,7 @@ class KhsController extends Controller
         }
 
         $khs = Khs::query()
-            ->with(['items.mataKuliah'])
+            ->with(['items.mataKuliah.dosen'])
             ->withCount('items')
             ->withCount(['items as nilai_count' => function ($q) {
                 $q->whereNotNull('nilai_huruf')->orWhereNotNull('nilai_angka');
@@ -58,7 +58,7 @@ class KhsController extends Controller
             return redirect()->route('mahasiswa.khs.index')->with('error', 'Akses ditolak.');
         }
 
-        $khs->load(['items.mataKuliah', 'mahasiswa']);
+        $khs->load(['items.mataKuliah.dosen', 'mahasiswa']);
 
         return view('mahasiswa.khs.show', [
             'khs' => $khs,

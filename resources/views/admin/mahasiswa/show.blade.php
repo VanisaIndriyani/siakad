@@ -18,6 +18,10 @@
             </div>
         </div>
         <div class="flex items-center gap-2">
+            <a href="{{ route('admin.mahasiswa.create') }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition">
+                <i class="fa-solid fa-plus"></i>
+                <span class="text-sm font-medium">Tambah</span>
+            </a>
             <a href="{{ route('admin.mahasiswa.edit', $mahasiswa) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                 <i class="fa-solid fa-pen"></i>
                 Edit

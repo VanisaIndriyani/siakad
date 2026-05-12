@@ -25,8 +25,10 @@ class DosenController extends Controller
         if ($q !== '') {
             $query->where(function ($sub) use ($q) {
                 $sub->where('nama', 'like', "%{$q}%")
+                    ->orWhere('nik', 'like', "%{$q}%")
                     ->orWhere('nidn', 'like', "%{$q}%")
                     ->orWhere('nuptk', 'like', "%{$q}%")
+                    ->orWhere('nomor_sk', 'like', "%{$q}%")
                     ->orWhere('mata_kuliah', 'like', "%{$q}%");
             });
         }
@@ -54,8 +56,10 @@ class DosenController extends Controller
     {
         $validated = $request->validate([
             'nama' => ['required', 'string', 'max:255'],
+            'nik' => ['nullable', 'string', 'max:50', 'unique:dosen,nik'],
             'nidn' => ['required', 'string', 'max:50', 'unique:dosen,nidn'],
             'nuptk' => ['nullable', 'string', 'max:50', 'unique:dosen,nuptk'],
+            'nomor_sk' => ['nullable', 'string', 'max:255'],
             'alamat' => ['nullable', 'string'],
             'nomor_hp' => ['nullable', 'string', 'max:50'],
             'mata_kuliah' => ['nullable', 'string', 'max:255'],
@@ -85,8 +89,10 @@ class DosenController extends Controller
         $dosen = Dosen::query()->create([
             'user_id' => $user->id,
             'nama' => $validated['nama'],
+            'nik' => $validated['nik'] ?? null,
             'nidn' => $validated['nidn'],
             'nuptk' => $validated['nuptk'] ?? null,
+            'nomor_sk' => $validated['nomor_sk'] ?? null,
             'alamat' => $validated['alamat'] ?? null,
             'nomor_hp' => $validated['nomor_hp'] ?? null,
             'mata_kuliah' => $validated['mata_kuliah'] ?? null,
@@ -116,8 +122,10 @@ class DosenController extends Controller
     {
         $validated = $request->validate([
             'nama' => ['required', 'string', 'max:255'],
+            'nik' => ['nullable', 'string', 'max:50', 'unique:dosen,nik,'.$dosen->id],
             'nidn' => ['required', 'string', 'max:50', 'unique:dosen,nidn,'.$dosen->id],
             'nuptk' => ['nullable', 'string', 'max:50', 'unique:dosen,nuptk,'.$dosen->id],
+            'nomor_sk' => ['nullable', 'string', 'max:255'],
             'alamat' => ['nullable', 'string'],
             'nomor_hp' => ['nullable', 'string', 'max:50'],
             'mata_kuliah' => ['nullable', 'string', 'max:255'],
@@ -133,8 +141,10 @@ class DosenController extends Controller
 
         $dosen->fill([
             'nama' => $validated['nama'],
+            'nik' => $validated['nik'] ?? null,
             'nidn' => $validated['nidn'],
             'nuptk' => $validated['nuptk'] ?? null,
+            'nomor_sk' => $validated['nomor_sk'] ?? null,
             'alamat' => $validated['alamat'] ?? null,
             'nomor_hp' => $validated['nomor_hp'] ?? null,
             'mata_kuliah' => $validated['mata_kuliah'] ?? null,
@@ -170,8 +180,10 @@ class DosenController extends Controller
         if ($q !== '') {
             $query->where(function ($sub) use ($q) {
                 $sub->where('nama', 'like', "%{$q}%")
+                    ->orWhere('nik', 'like', "%{$q}%")
                     ->orWhere('nidn', 'like', "%{$q}%")
                     ->orWhere('nuptk', 'like', "%{$q}%")
+                    ->orWhere('nomor_sk', 'like', "%{$q}%")
                     ->orWhere('mata_kuliah', 'like', "%{$q}%");
             });
         }
@@ -198,8 +210,10 @@ class DosenController extends Controller
         if ($q !== '') {
             $query->where(function ($sub) use ($q) {
                 $sub->where('nama', 'like', "%{$q}%")
+                    ->orWhere('nik', 'like', "%{$q}%")
                     ->orWhere('nidn', 'like', "%{$q}%")
                     ->orWhere('nuptk', 'like', "%{$q}%")
+                    ->orWhere('nomor_sk', 'like', "%{$q}%")
                     ->orWhere('mata_kuliah', 'like', "%{$q}%");
             });
         }
@@ -210,7 +224,7 @@ class DosenController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Dosen');
 
-        $headers = ['Nama', 'NIDN', 'NUPTK', 'Nomor HP', 'Mata Kuliah'];
+        $headers = ['Nama', 'NIK', 'NIDN', 'NUPTK', 'Nomor SK', 'Nomor HP', 'Mata Kuliah'];
         foreach ($headers as $col => $label) {
             $sheet->setCellValueByColumnAndRow($col + 1, 1, $label);
         }
@@ -218,10 +232,12 @@ class DosenController extends Controller
         $rowIndex = 2;
         foreach ($rows as $row) {
             $sheet->setCellValueByColumnAndRow(1, $rowIndex, $row->nama);
-            $sheet->setCellValueByColumnAndRow(2, $rowIndex, $row->nidn);
-            $sheet->setCellValueByColumnAndRow(3, $rowIndex, $row->nuptk);
-            $sheet->setCellValueByColumnAndRow(4, $rowIndex, $row->nomor_hp);
-            $sheet->setCellValueByColumnAndRow(5, $rowIndex, $row->mata_kuliah);
+            $sheet->setCellValueByColumnAndRow(2, $rowIndex, $row->nik);
+            $sheet->setCellValueByColumnAndRow(3, $rowIndex, $row->nidn);
+            $sheet->setCellValueByColumnAndRow(4, $rowIndex, $row->nuptk);
+            $sheet->setCellValueByColumnAndRow(5, $rowIndex, $row->nomor_sk);
+            $sheet->setCellValueByColumnAndRow(6, $rowIndex, $row->nomor_hp);
+            $sheet->setCellValueByColumnAndRow(7, $rowIndex, $row->mata_kuliah);
             $rowIndex++;
         }
 

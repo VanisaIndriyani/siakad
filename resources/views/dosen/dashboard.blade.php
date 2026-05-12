@@ -37,8 +37,16 @@
             <div class="text-lg font-semibold">Informasi</div>
             <div class="mt-4 space-y-3 text-sm text-emerald-100/75">
                 <div class="flex items-center justify-between">
+                    <span>NIK</span>
+                    <span class="font-medium text-white">{{ $dosen?->nik ?? '-' }}</span>
+                </div>
+                <div class="flex items-center justify-between">
                     <span>NIDN</span>
                     <span class="font-medium text-white">{{ $dosen?->nidn ?? '-' }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span>Nomor SK</span>
+                    <span class="font-medium text-white">{{ $dosen?->nomor_sk ?? '-' }}</span>
                 </div>
                 <div class="flex items-center justify-between">
                     <span>Mata Kuliah</span>

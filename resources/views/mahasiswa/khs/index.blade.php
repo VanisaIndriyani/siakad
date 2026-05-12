@@ -102,7 +102,12 @@
                                     <tr class="hover:bg-white/5">
                                         <td class="px-4 py-3 text-emerald-100/80">{{ $loop->iteration }}</td>
                                         <td class="px-4 py-3 font-medium">{{ $item->mataKuliah?->kode }}</td>
-                                        <td class="px-4 py-3 text-emerald-100/80">{{ $item->mataKuliah?->nama }}</td>
+                                        <td class="px-4 py-3 text-emerald-100/80">
+                                            <div>{{ $item->mataKuliah?->nama }}</div>
+                                            @if ($item->mataKuliah?->dosen)
+                                                <div class="text-xs mt-0.5 text-emerald-100/50">Dosen: {{ $item->mataKuliah->dosen->nama }}</div>
+                                            @endif
+                                        </td>
                                         <td class="px-4 py-3 text-emerald-100/80">{{ $item->mataKuliah?->sks }}</td>
                                         <td class="px-4 py-3 text-emerald-100/80">{{ $item->nilai_huruf ?? '-' }}</td>
                                         <td class="px-4 py-3 text-emerald-100/80">{{ $formatAngka($bobot) }}</td>

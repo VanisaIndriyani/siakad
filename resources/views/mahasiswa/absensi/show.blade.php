@@ -21,6 +21,7 @@
                     <tr>
                         <th class="text-left font-medium px-4 py-3">Pertemuan</th>
                         <th class="text-left font-medium px-4 py-3">Tanggal</th>
+                        <th class="text-left font-medium px-4 py-3">Materi</th>
                         <th class="text-left font-medium px-4 py-3">Status</th>
                         <th class="text-left font-medium px-4 py-3">Keterangan</th>
                     </tr>
@@ -47,6 +48,7 @@
                         <tr class="hover:bg-white/5">
                             <td class="px-4 py-3 font-medium">Pertemuan {{ $item->absensi->pertemuan }}</td>
                             <td class="px-4 py-3 text-emerald-100/80">{{ $item->absensi->tanggal?->format('d/m/Y') ?? '-' }}</td>
+                            <td class="px-4 py-3 text-emerald-100/80">{{ $item->absensi->materi ?? '-' }}</td>
                             <td class="px-4 py-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full border {{ $badge }}">{{ $label }}</span>
                             </td>
@@ -54,7 +56,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-4 py-10 text-center text-emerald-100/70">Belum ada data absensi.</td>
+                            <td colspan="5" class="px-4 py-10 text-center text-emerald-100/70">Belum ada data absensi.</td>
                         </tr>
                     @endforelse
                 </tbody>

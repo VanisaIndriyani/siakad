@@ -78,6 +78,7 @@
                             <tr>
                                 <th class="text-left font-medium px-4 py-3">Pertemuan</th>
                                 <th class="text-left font-medium px-4 py-3">Tanggal</th>
+                                <th class="text-left font-medium px-4 py-3">Materi</th>
                                 <th class="text-left font-medium px-4 py-3">Terisi</th>
                                 <th class="text-right font-medium px-4 py-3">Aksi</th>
                             </tr>
@@ -87,6 +88,7 @@
                                 <tr class="hover:bg-white/5">
                                     <td class="px-4 py-3 font-medium">Pertemuan {{ $s->pertemuan }}</td>
                                     <td class="px-4 py-3 text-emerald-100/80">{{ $s->tanggal?->format('d/m/Y') ?? '-' }}</td>
+                                    <td class="px-4 py-3 text-emerald-100/80 max-w-xs truncate">{{ $s->materi ?? '-' }}</td>
                                     <td class="px-4 py-3 text-emerald-100/80">{{ (int) $s->terisi_count }}/{{ (int) $s->items_count }}</td>
                                     <td class="px-4 py-3">
                                         <div class="flex items-center justify-end">
@@ -100,7 +102,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="px-4 py-10 text-center text-emerald-100/70">Belum ada pertemuan yang dibuat. Klik pertemuan di atas untuk mulai.</td>
+                                    <td colspan="5" class="px-4 py-10 text-center text-emerald-100/70">Belum ada pertemuan yang dibuat. Klik pertemuan di atas untuk mulai.</td>
                                 </tr>
                             @endforelse
                         </tbody>

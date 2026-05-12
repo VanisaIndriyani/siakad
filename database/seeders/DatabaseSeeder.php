@@ -57,7 +57,9 @@ class DatabaseSeeder extends Seeder
                 ['user_id' => $user->id],
                 [
                     'nama' => $row['nama'],
+                    'nik' => '1234567890'.rand(100, 999),
                     'nidn' => $row['nidn'],
+                    'nomor_sk' => 'SK/'.rand(100, 999).'/2026',
                     'alamat' => 'Kampus Hijau, Kota',
                     'nomor_hp' => '081234567800',
                     'mata_kuliah' => $row['mata_kuliah'],

@@ -38,7 +38,12 @@
                 <input type="date" name="tanggal" value="{{ old('tanggal', $absensi->tanggal?->format('Y-m-d')) }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
                 @error('tanggal') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
             </div>
-            <div class="lg:col-span-2 flex flex-col gap-3 lg:items-end">
+            <div class="lg:col-span-2">
+                <label class="text-sm text-emerald-100/80">Materi Pembelajaran</label>
+                <input name="materi" value="{{ old('materi', $absensi->materi) }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" placeholder="Masukkan materi yang diajarkan..." />
+                @error('materi') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
+            </div>
+            <div class="lg:col-span-3 flex flex-col gap-3 lg:items-end">
                 <div class="w-full max-w-lg">
                     <label class="text-sm text-emerald-100/80">Cari (nama / NPM)</label>
                     <input id="absensiSearch" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" placeholder="Ketik untuk filter..." />

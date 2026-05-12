@@ -44,6 +44,7 @@
                             <div class="meta-row"><span class="muted">Jurusan:</span> {{ $absensi->jurusan }} • <span class="muted">Semester:</span> {{ $absensi->semester }}</div>
                             <div class="meta-row"><span class="muted">Mata Kuliah:</span> {{ $mk?->kode }} - {{ $mk?->nama }}</div>
                             <div class="meta-row"><span class="muted">Pertemuan:</span> {{ $absensi->pertemuan }} • <span class="muted">Tanggal:</span> {{ $absensi->tanggal?->format('d/m/Y') ?? '__________' }}</div>
+                            <div class="meta-row"><span class="muted">Materi:</span> {{ $absensi->materi ?? '__________' }}</div>
                         </div>
                     </td>
                     <td style="width: 160px; text-align: right; vertical-align: top;">

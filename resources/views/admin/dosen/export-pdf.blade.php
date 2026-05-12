@@ -55,8 +55,10 @@
                 <thead>
                     <tr>
                         <th>Nama</th>
+                        <th>NIK</th>
                         <th>NIDN</th>
                         <th>NUPTK</th>
+                        <th>Nomor SK</th>
                         <th>Nomor HP</th>
                         <th>Mata Kuliah</th>
                     </tr>
@@ -65,8 +67,10 @@
                     @foreach ($rows as $row)
                         <tr>
                             <td>{{ $row->nama }}</td>
+                            <td>{{ $row->nik }}</td>
                             <td>{{ $row->nidn }}</td>
                             <td>{{ $row->nuptk }}</td>
+                            <td>{{ $row->nomor_sk }}</td>
                             <td>{{ $row->nomor_hp }}</td>
                             <td>{{ $row->mata_kuliah }}</td>
                         </tr>
