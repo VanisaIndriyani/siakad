@@ -15,11 +15,19 @@
                     <p style="color: rgba(52,211,153,0.6); font-size: 14px; font-weight: 500; margin-top: 5px;">{{ $pembayaran->mahasiswa->nama_lengkap }} ({{ $pembayaran->mahasiswa->npm }})</p>
                 </div>
             </div>
-            <a href="{{ route('keuangan.pembayaran.index') }}" 
-               style="text-decoration: none; background-color: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); padding: 12px 20px; border-radius: 12px; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
-                <i class="fa-solid fa-arrow-left"></i>
-                KEMBALI
-            </a>
+            <div class="no-print" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <a href="{{ route('keuangan.pembayaran.pdf', $pembayaran) }}"
+                   style="text-decoration: none; background-color: rgba(59,130,246,0.12); color: #bfdbfe; border: 1px solid rgba(59,130,246,0.22); padding: 12px 16px; border-radius: 12px; font-size: 12px; font-weight: 900; display: inline-flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 1px;">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    PDF
+                </a>
+              
+                <a href="{{ route('keuangan.pembayaran.index') }}" 
+                   style="text-decoration: none; background-color: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); padding: 12px 20px; border-radius: 12px; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    KEMBALI
+                </a>
+            </div>
         </div>
 
         <div style="display: flex; flex-wrap: wrap; gap: 30px;">
@@ -33,6 +41,10 @@
                         <div style="padding: 15px; background-color: rgba(255,255,255,0.02); border-radius: 15px; border: 1px solid rgba(255,255,255,0.05);">
                             <span style="color: rgba(255,255,255,0.3); font-size: 10px; font-weight: 700; text-transform: uppercase;">Semester / TA</span>
                             <div style="color: white; font-size: 15px; font-weight: 700; margin-top: 5px;">Semester {{ $pembayaran->semester }} ({{ $pembayaran->tahun_ajaran }})</div>
+                        </div>
+                        <div style="padding: 15px; background-color: rgba(255,255,255,0.02); border-radius: 15px; border: 1px solid rgba(255,255,255,0.05);">
+                            <span style="color: rgba(255,255,255,0.3); font-size: 10px; font-weight: 700; text-transform: uppercase;">Jenis Tagihan</span>
+                            <div style="color: white; font-size: 15px; font-weight: 800; margin-top: 5px;">{{ $pembayaran->jenis_tagihan ?? '-' }}</div>
                         </div>
                         <div style="padding: 15px; background-color: rgba(255,255,255,0.02); border-radius: 15px; border: 1px solid rgba(255,255,255,0.05);">
                             <span style="color: rgba(255,255,255,0.3); font-size: 10px; font-weight: 700; text-transform: uppercase;">Total Tagihan</span>
@@ -125,6 +137,12 @@
                                                style="text-decoration: none; color: #34d399; font-size: 11px; font-weight: 800; display: inline-flex; align-items: center; gap: 5px; margin-top: 5px; background-color: rgba(16,185,129,0.1); padding: 4px 12px; border-radius: 6px; border: 1px solid rgba(16,185,129,0.2);">
                                                 <i class="fa-solid fa-image"></i> LIHAT BUKTI
                                             </a>
+                                            <div style="margin-top: 10px;">
+                                                <a href="{{ asset('storage/'.$detail->bukti_pembayaran) }}" target="_blank" style="text-decoration: none;">
+                                                    <img src="{{ asset('storage/'.$detail->bukti_pembayaran) }}" alt="Bukti Pembayaran"
+                                                         style="width: 120px; height: 90px; object-fit: cover; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12);" />
+                                                </a>
+                                            </div>
                                         @endif
                                     </div>
                                 </div>
@@ -150,4 +168,11 @@
             </div>
         </div>
     </div>
+
+    <style>
+        @media print {
+            aside, nav, .no-print, button, a { display: none !important; }
+            body { background: white !important; }
+        }
+    </style>
 </x-portal-layout>

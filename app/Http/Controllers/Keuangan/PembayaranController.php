@@ -6,16 +6,34 @@ use App\Http\Controllers\Controller;
 use App\Models\Mahasiswa;
 use App\Models\Pembayaran;
 use App\Models\PembayaranDetail;
+use Dompdf\Dompdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class PembayaranController extends Controller
 {
+    private const JENIS_TAGIHAN = [
+        'SPP',
+        'Ujian Semester',
+        'Herregistrasi',
+        'PPL',
+        'KKN',
+        'Ujian Munaqasah',
+        'Jurnal',
+        'Wisudah',
+        'Ujian Komprehensif',
+    ];
+
     public function index(Request $request): View
     {
         $q = trim((string) $request->get('q', ''));
+        $semester = (int) $request->get('semester', 0);
+        $angkatan = (int) $request->get('angkatan', 0);
+        $jenisTagihan = trim((string) $request->get('jenis_tagihan', ''));
+
         $query = Pembayaran::query()->with('mahasiswa');
 
         if ($q !== '') {
@@ -24,24 +42,70 @@ class PembayaranController extends Controller
                     ->orWhere('npm', 'like', "%{$q}%");
             });
         }
+        if ($semester > 0) {
+            $query->where('semester', $semester);
+        }
+        if ($jenisTagihan !== '') {
+            $query->where('jenis_tagihan', $jenisTagihan);
+        }
+        if ($angkatan > 0) {
+            $query->whereHas('mahasiswa', function ($sub) use ($angkatan) {
+                $sub->where('angkatan', $angkatan);
+            });
+        }
 
         $pembayarans = $query->orderByDesc('id')->paginate(10)->withQueryString();
 
-        return view('keuangan.pembayaran.index', compact('pembayarans', 'q'));
+        $angkatanList = Mahasiswa::query()
+            ->selectRaw('angkatan')
+            ->whereNotNull('angkatan')
+            ->distinct()
+            ->orderBy('angkatan')
+            ->pluck('angkatan')
+            ->map(fn ($v) => (int) $v)
+            ->values()
+            ->all();
+
+        return view('keuangan.pembayaran.index', [
+            'pembayarans' => $pembayarans,
+            'q' => $q,
+            'semester' => $semester ?: null,
+            'angkatan' => $angkatan ?: null,
+            'jenis_tagihan' => $jenisTagihan ?: null,
+            'jenisTagihanList' => self::JENIS_TAGIHAN,
+            'angkatanList' => $angkatanList,
+        ]);
     }
 
     public function create(): View
     {
         $mahasiswa = Mahasiswa::query()->orderBy('nama_lengkap')->get();
-        return view('keuangan.pembayaran.create', compact('mahasiswa'));
+        $angkatanList = Mahasiswa::query()
+            ->selectRaw('angkatan')
+            ->whereNotNull('angkatan')
+            ->distinct()
+            ->orderBy('angkatan')
+            ->pluck('angkatan')
+            ->map(fn ($v) => (int) $v)
+            ->values()
+            ->all();
+
+        return view('keuangan.pembayaran.create', [
+            'mahasiswa' => $mahasiswa,
+            'jenisTagihanList' => self::JENIS_TAGIHAN,
+            'angkatanList' => $angkatanList,
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'mahasiswa_id' => ['required', 'exists:mahasiswa,id'],
+            'mode' => ['required', 'string', Rule::in(['single', 'angkatan', 'all'])],
+            'mahasiswa_id' => ['nullable', 'exists:mahasiswa,id'],
+            'angkatan' => ['nullable', 'integer', 'min:1900', 'max:2100'],
             'semester' => ['required', 'integer', 'min:1', 'max:14'],
             'tahun_ajaran' => ['required', 'string'],
+            'jenis_tagihan' => ['required', 'string', 'max:100'],
             'total_biaya' => ['required', 'numeric', 'min:0'],
             'catatan' => ['nullable', 'string'],
             'jumlah_bayar' => ['nullable', 'numeric', 'min:0'],
@@ -49,33 +113,78 @@ class PembayaranController extends Controller
             'bukti_pembayaran' => ['nullable', 'image', 'max:2048'],
         ]);
 
-        $pembayaran = Pembayaran::create([
-            'mahasiswa_id' => $validated['mahasiswa_id'],
-            'semester' => $validated['semester'],
-            'tahun_ajaran' => $validated['tahun_ajaran'],
-            'total_biaya' => $validated['total_biaya'],
-            'catatan' => $validated['catatan'],
-        ]);
+        $mode = $validated['mode'];
+        $semester = (int) $validated['semester'];
+        $tahunAjaran = (string) $validated['tahun_ajaran'];
+        $jenisTagihan = (string) $validated['jenis_tagihan'];
+        $totalBiaya = (float) $validated['total_biaya'];
+        $catatan = $validated['catatan'] ?? null;
 
-        $jumlahBayar = $validated['jumlah_bayar'] ?? 0;
-        
-        if ($jumlahBayar > 0) {
-            $buktiPath = null;
-            if ($request->hasFile('bukti_pembayaran')) {
-                $buktiPath = $request->file('bukti_pembayaran')->store('pembayaran/bukti', 'public');
+        $targetMahasiswaQuery = Mahasiswa::query();
+        if ($mode === 'single') {
+            if (empty($validated['mahasiswa_id'])) {
+                return back()->with('error', 'Mahasiswa wajib dipilih untuk mode Single.');
             }
-
-            $pembayaran->details()->create([
-                'jumlah_bayar' => $jumlahBayar,
-                'tanggal_bayar' => $validated['tanggal_bayar'] ?? now(),
-                'bukti_pembayaran' => $buktiPath,
-                'keterangan' => 'Pembayaran awal',
-            ]);
+            $targetMahasiswaQuery->where('id', (int) $validated['mahasiswa_id']);
+        } elseif ($mode === 'angkatan') {
+            if (empty($validated['angkatan'])) {
+                return back()->with('error', 'Angkatan wajib dipilih untuk mode Angkatan.');
+            }
+            $targetMahasiswaQuery->where('angkatan', (int) $validated['angkatan']);
         }
 
-        $pembayaran->updateStatus();
+        $targetMahasiswa = $targetMahasiswaQuery->get(['id']);
+        if ($targetMahasiswa->isEmpty()) {
+            return back()->with('error', 'Tidak ada mahasiswa yang cocok dengan filter.');
+        }
 
-        return redirect()->route('keuangan.pembayaran.index')->with('success', 'Data pembayaran berhasil ditambahkan.');
+        $created = 0;
+        $skipped = 0;
+
+        $buktiPath = null;
+        $jumlahBayar = (float) ($validated['jumlah_bayar'] ?? 0);
+        if ($jumlahBayar > 0 && $request->hasFile('bukti_pembayaran')) {
+            $buktiPath = $request->file('bukti_pembayaran')->store('pembayaran/bukti', 'public');
+        }
+
+        foreach ($targetMahasiswa as $m) {
+            $pembayaran = Pembayaran::query()->firstOrCreate(
+                [
+                    'mahasiswa_id' => (int) $m->id,
+                    'semester' => $semester,
+                    'tahun_ajaran' => $tahunAjaran,
+                    'jenis_tagihan' => $jenisTagihan,
+                ],
+                [
+                    'total_biaya' => $totalBiaya,
+                    'catatan' => $catatan,
+                ]
+            );
+
+            if (! $pembayaran->wasRecentlyCreated) {
+                $skipped++;
+                continue;
+            }
+
+            $created++;
+
+            if ($jumlahBayar > 0) {
+                $pembayaran->details()->create([
+                    'jumlah_bayar' => $jumlahBayar,
+                    'tanggal_bayar' => $validated['tanggal_bayar'] ?? now(),
+                    'bukti_pembayaran' => $buktiPath,
+                    'keterangan' => 'Pembayaran awal',
+                ]);
+            }
+
+            $pembayaran->updateStatus();
+        }
+
+        $msg = $created > 0
+            ? "Tagihan berhasil dibuat: {$created}. Duplikat dilewati: {$skipped}."
+            : "Tidak ada tagihan baru dibuat. Duplikat dilewati: {$skipped}.";
+
+        return redirect()->route('keuangan.pembayaran.index')->with('success', $msg);
     }
 
     public function show(Pembayaran $pembayaran): View
@@ -121,5 +230,74 @@ class PembayaranController extends Controller
         }
         $pembayaran->delete();
         return redirect()->route('keuangan.pembayaran.index')->with('success', 'Data pembayaran berhasil dihapus.');
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $q = trim((string) $request->get('q', ''));
+        $semester = (int) $request->get('semester', 0);
+        $angkatan = (int) $request->get('angkatan', 0);
+        $jenisTagihan = trim((string) $request->get('jenis_tagihan', ''));
+
+        $query = Pembayaran::query()->with('mahasiswa')->orderByDesc('id');
+        if ($q !== '') {
+            $query->whereHas('mahasiswa', function ($sub) use ($q) {
+                $sub->where('nama_lengkap', 'like', "%{$q}%")
+                    ->orWhere('npm', 'like', "%{$q}%");
+            });
+        }
+        if ($semester > 0) {
+            $query->where('semester', $semester);
+        }
+        if ($jenisTagihan !== '') {
+            $query->where('jenis_tagihan', $jenisTagihan);
+        }
+        if ($angkatan > 0) {
+            $query->whereHas('mahasiswa', function ($sub) use ($angkatan) {
+                $sub->where('angkatan', $angkatan);
+            });
+        }
+
+        $rows = $query->get();
+        $html = view('keuangan.pembayaran.export-pdf', [
+            'rows' => $rows,
+            'q' => $q,
+            'semester' => $semester ?: null,
+            'angkatan' => $angkatan ?: null,
+            'jenis_tagihan' => $jenisTagihan ?: null,
+        ])->render();
+
+        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->render();
+
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="pembayaran.pdf"',
+        ]);
+    }
+
+    public function downloadPdf(Pembayaran $pembayaran)
+    {
+        $pembayaran->load(['mahasiswa', 'details' => function ($q) {
+            $q->orderByDesc('tanggal_bayar');
+        }]);
+
+        $html = view('keuangan.pembayaran.detail-pdf', [
+            'pembayaran' => $pembayaran,
+        ])->render();
+
+        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $filename = 'pembayaran-'.$pembayaran->id.'.pdf';
+
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ]);
     }
 }

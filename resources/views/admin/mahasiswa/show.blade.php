@@ -58,6 +58,10 @@
                                 <div style="color: white; font-size: 15px; font-weight: 700; background-color: rgba(255,255,255,0.03); padding: 12px 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">{{ $mahasiswa->nisn ?? '-' }}</div>
                             </div>
                             <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <label style="color: rgba(52,211,153,0.5); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;">Nama Ibu Kandung</label>
+                                <div style="color: white; font-size: 15px; font-weight: 700; background-color: rgba(255,255,255,0.03); padding: 12px 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">{{ $mahasiswa->nama_ibu ?? '-' }}</div>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
                                 <label style="color: rgba(52,211,153,0.5); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;">Tempat, Tanggal Lahir</label>
                                 <div style="color: white; font-size: 15px; font-weight: 700; background-color: rgba(255,255,255,0.03); padding: 12px 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">{{ $mahasiswa->tempat_lahir ?? '-' }}, {{ $mahasiswa->tanggal_lahir ? $mahasiswa->tanggal_lahir->format('d F Y') : '-' }}</div>
                             </div>
@@ -96,7 +100,7 @@
                     <div style="padding: 30px; display: flex; flex-direction: column; gap: 30px;">
                         <div style="display: flex; flex-direction: column; gap: 8px;">
                             <label style="color: rgba(56,189,248,0.5); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;">Jalan / Alamat Lengkap</label>
-                            <div style="color: white; font-size: 15px; font-weight: 700; background-color: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); line-height: 1.6;">{{ $mahasiswa->jalan ?? '-' }}</div>
+                            <div style="color: white; font-size: 15px; font-weight: 700; background-color: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); line-height: 1.6;">{{ $mahasiswa->jalan ?: ($mahasiswa->alamat ?? '-') }}</div>
                         </div>
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px;">
                             <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -116,6 +120,16 @@
                                 <div style="color: white; font-size: 15px; font-weight: 700; background-color: rgba(255,255,255,0.03); padding: 12px 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">{{ $mahasiswa->kode_pos ?? '-' }}</div>
                             </div>
                         </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px;">
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <label style="color: rgba(56,189,248,0.5); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;">Jenis Tinggal</label>
+                                <div style="color: white; font-size: 15px; font-weight: 700; background-color: rgba(255,255,255,0.03); padding: 12px 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">{{ $mahasiswa->jenis_tinggal ?? '-' }}</div>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <label style="color: rgba(56,189,248,0.5); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;">Alat Transportasi</label>
+                                <div style="color: white; font-size: 15px; font-weight: 700; background-color: rgba(255,255,255,0.03); padding: 12px 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">{{ $mahasiswa->alat_transportasi ?? '-' }}</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -129,12 +143,28 @@
                         </div>
                         <div style="padding: 25px; display: flex; flex-direction: column; gap: 20px;">
                             <div>
+                                <label style="color: rgba(255,255,255,0.3); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">NIK Ayah</label>
+                                <div style="color: white; font-size: 14px; font-weight: 700; margin-top: 5px; font-family: monospace;">{{ $mahasiswa->ayah_nik ?? '-' }}</div>
+                            </div>
+                            <div>
                                 <label style="color: rgba(255,255,255,0.3); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Nama Ayah</label>
                                 <div style="color: white; font-size: 14px; font-weight: 700; margin-top: 5px;">{{ $mahasiswa->ayah_nama ?? '-' }}</div>
                             </div>
                             <div>
+                                <label style="color: rgba(255,255,255,0.3); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Tanggal Lahir</label>
+                                <div style="color: white; font-size: 14px; font-weight: 700; margin-top: 5px;">{{ $mahasiswa->ayah_tanggal_lahir?->format('d/m/Y') ?? '-' }}</div>
+                            </div>
+                            <div>
+                                <label style="color: rgba(255,255,255,0.3); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Pendidikan</label>
+                                <div style="color: white; font-size: 14px; font-weight: 700; margin-top: 5px;">{{ $mahasiswa->ayah_pendidikan ?? '-' }}</div>
+                            </div>
+                            <div>
                                 <label style="color: rgba(255,255,255,0.3); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Pekerjaan</label>
                                 <div style="color: white; font-size: 14px; font-weight: 700; margin-top: 5px;">{{ $mahasiswa->ayah_pekerjaan ?? '-' }}</div>
+                            </div>
+                            <div>
+                                <label style="color: rgba(255,255,255,0.3); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Penghasilan</label>
+                                <div style="color: white; font-size: 14px; font-weight: 700; margin-top: 5px;">{{ $mahasiswa->ayah_penghasilan ?? '-' }}</div>
                             </div>
                         </div>
                     </div>
@@ -146,12 +176,28 @@
                         </div>
                         <div style="padding: 25px; display: flex; flex-direction: column; gap: 20px;">
                             <div>
+                                <label style="color: rgba(255,255,255,0.3); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">NIK Ibu</label>
+                                <div style="color: white; font-size: 14px; font-weight: 700; margin-top: 5px; font-family: monospace;">{{ $mahasiswa->ibu_nik ?? '-' }}</div>
+                            </div>
+                            <div>
                                 <label style="color: rgba(255,255,255,0.3); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Nama Ibu Kandung</label>
                                 <div style="color: white; font-size: 14px; font-weight: 700; margin-top: 5px;">{{ $mahasiswa->ibu_nama ?? '-' }}</div>
                             </div>
                             <div>
+                                <label style="color: rgba(255,255,255,0.3); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Tanggal Lahir</label>
+                                <div style="color: white; font-size: 14px; font-weight: 700; margin-top: 5px;">{{ $mahasiswa->ibu_tanggal_lahir?->format('d/m/Y') ?? '-' }}</div>
+                            </div>
+                            <div>
+                                <label style="color: rgba(255,255,255,0.3); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Pendidikan</label>
+                                <div style="color: white; font-size: 14px; font-weight: 700; margin-top: 5px;">{{ $mahasiswa->ibu_pendidikan ?? '-' }}</div>
+                            </div>
+                            <div>
                                 <label style="color: rgba(255,255,255,0.3); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Pekerjaan</label>
                                 <div style="color: white; font-size: 14px; font-weight: 700; margin-top: 5px;">{{ $mahasiswa->ibu_pekerjaan ?? '-' }}</div>
+                            </div>
+                            <div>
+                                <label style="color: rgba(255,255,255,0.3); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Penghasilan</label>
+                                <div style="color: white; font-size: 14px; font-weight: 700; margin-top: 5px;">{{ $mahasiswa->ibu_penghasilan ?? '-' }}</div>
                             </div>
                         </div>
                     </div>

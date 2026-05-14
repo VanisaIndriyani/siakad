@@ -9,6 +9,7 @@ use App\Models\Krs;
 use App\Models\KrsItem;
 use App\Models\MataKuliah;
 use App\Models\User;
+use Dompdf\Dompdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -166,6 +167,37 @@ class KrsController extends Controller
 
         return view('mahasiswa.krs.show', [
             'krs' => $krs,
+        ]);
+    }
+
+    public function pdf(Request $request, Krs $krs)
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        if (! $user->mahasiswa) {
+            return redirect()->route('mahasiswa.krs.index')->with('error', 'Profil mahasiswa belum tersedia.');
+        }
+        if ((int) $krs->mahasiswa_id !== (int) $user->mahasiswa->id) {
+            return redirect()->route('mahasiswa.krs.index')->with('error', 'Akses ditolak.');
+        }
+
+        $krs->load(['items.mataKuliah']);
+
+        $html = view('mahasiswa.krs.pdf', [
+            'krs' => $krs,
+        ])->render();
+
+        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $filename = 'krs-'.$krs->id.'.pdf';
+
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ]);
     }
 

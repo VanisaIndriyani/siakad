@@ -12,6 +12,7 @@ class Pembayaran extends Model
         'mahasiswa_id',
         'semester',
         'tahun_ajaran',
+        'jenis_tagihan',
         'total_biaya',
         'total_dibayar',
         'status_pembayaran',

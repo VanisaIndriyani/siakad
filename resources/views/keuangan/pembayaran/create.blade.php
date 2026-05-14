@@ -30,18 +30,41 @@
                 </div>
 
                 <div style="padding: 30px; display: flex; flex-direction: column; gap: 25px;">
-                    <!-- Mahasiswa Selection -->
                     <div style="display: flex; flex-direction: column; gap: 8px;">
-                        <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Pilih Mahasiswa*</label>
-                        <select name="mahasiswa_id" style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px; outline: none; font-weight: 600;" required>
-                            <option value="" disabled selected>-- Pilih Mahasiswa --</option>
-                            @foreach ($mahasiswa as $m)
-                                <option value="{{ $m->id }}" @selected(old('mahasiswa_id') == $m->id) style="background-color: #0d2a23;">
-                                    {{ $m->nama_lengkap }} ({{ $m->npm }})
-                                </option>
-                            @endforeach
+                        <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Mode Input*</label>
+                        <select name="mode" id="mode" style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px; outline: none; font-weight: 600;" required>
+                            @php $mode = old('mode', 'single'); @endphp
+                            <option value="single" @selected($mode === 'single') style="background-color: #0d2a23;">Single (1 Mahasiswa)</option>
+                            <option value="angkatan" @selected($mode === 'angkatan') style="background-color: #0d2a23;">Per Angkatan</option>
+                            <option value="all" @selected($mode === 'all') style="background-color: #0d2a23;">Semua Mahasiswa</option>
                         </select>
-                        @error('mahasiswa_id') <div style="color: #f87171; font-size: 11px; margin-top: 4px;">{{ $message }}</div> @enderror
+                        @error('mode') <div style="color: #f87171; font-size: 11px; margin-top: 4px;">{{ $message }}</div> @enderror
+                    </div>
+
+                    <!-- Mahasiswa/Angkatan Selection -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Pilih Mahasiswa</label>
+                            <select name="mahasiswa_id" id="mahasiswa_id" style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px; outline: none; font-weight: 600;">
+                                <option value="" style="background-color: #0d2a23;">-- Pilih Mahasiswa --</option>
+                                @foreach ($mahasiswa as $m)
+                                    <option value="{{ $m->id }}" @selected(old('mahasiswa_id') == $m->id) style="background-color: #0d2a23;">
+                                        {{ $m->nama_lengkap }} ({{ $m->npm }})
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('mahasiswa_id') <div style="color: #f87171; font-size: 11px; margin-top: 4px;">{{ $message }}</div> @enderror
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Angkatan</label>
+                            <select name="angkatan" id="angkatan" style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px; outline: none; font-weight: 600;">
+                                <option value="" style="background-color: #0d2a23;">-- Pilih Angkatan --</option>
+                                @foreach ($angkatanList as $a)
+                                    <option value="{{ $a }}" @selected((string) old('angkatan') === (string) $a) style="background-color: #0d2a23;">{{ $a }}</option>
+                                @endforeach
+                            </select>
+                            @error('angkatan') <div style="color: #f87171; font-size: 11px; margin-top: 4px;">{{ $message }}</div> @enderror
+                        </div>
                     </div>
 
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
@@ -59,6 +82,24 @@
                             <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Tahun Ajaran*</label>
                             <input type="text" name="tahun_ajaran" value="{{ old('tahun_ajaran', date('Y').'/'.(date('Y')+1)) }}" 
                                 style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px; outline: none; font-weight: 600;" placeholder="Contoh: 2026/2027" required />
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Jenis Tagihan*</label>
+                            <select name="jenis_tagihan" style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px; outline: none; font-weight: 600;" required>
+                                <option value="" disabled @selected(!old('jenis_tagihan')) style="background-color: #0d2a23;">-- Pilih Jenis Tagihan --</option>
+                                @foreach ($jenisTagihanList as $jt)
+                                    <option value="{{ $jt }}" @selected(old('jenis_tagihan') === $jt) style="background-color: #0d2a23;">{{ $jt }}</option>
+                                @endforeach
+                            </select>
+                            @error('jenis_tagihan') <div style="color: #f87171; font-size: 11px; margin-top: 4px;">{{ $message }}</div> @enderror
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Catatan / Keterangan</label>
+                            <input type="text" name="catatan" value="{{ old('catatan') }}" 
+                                style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px; outline: none;" placeholder="Contoh: Pembayaran UKT" />
                         </div>
                     </div>
 
@@ -90,17 +131,12 @@
                         </div>
                     </div>
 
-                    <!-- Bukti & Keterangan -->
+                    <!-- Bukti -->
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
                         <div style="display: flex; flex-direction: column; gap: 8px;">
                             <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Bukti Bayar Awal</label>
                             <input type="file" name="bukti_pembayaran" 
                                 style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 12px 15px; outline: none; font-size: 12px;" />
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 8px;">
-                            <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Catatan / Keterangan</label>
-                            <input type="text" name="catatan" value="{{ old('catatan') }}" 
-                                style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px; outline: none;" placeholder="Contoh: Pembayaran UKT" />
                         </div>
                     </div>
                 </div>
@@ -116,4 +152,30 @@
             </div>
         </form>
     </div>
+
+    <script>
+        (function () {
+            const modeEl = document.getElementById('mode');
+            const mahasiswaEl = document.getElementById('mahasiswa_id');
+            const angkatanEl = document.getElementById('angkatan');
+
+            function sync() {
+                const mode = modeEl ? modeEl.value : 'single';
+                const isSingle = mode === 'single';
+                const isAngkatan = mode === 'angkatan';
+
+                if (mahasiswaEl) {
+                    mahasiswaEl.disabled = !isSingle;
+                    mahasiswaEl.required = isSingle;
+                }
+                if (angkatanEl) {
+                    angkatanEl.disabled = !isAngkatan;
+                    angkatanEl.required = isAngkatan;
+                }
+            }
+
+            if (modeEl) modeEl.addEventListener('change', sync);
+            sync();
+        })();
+    </script>
 </x-portal-layout>

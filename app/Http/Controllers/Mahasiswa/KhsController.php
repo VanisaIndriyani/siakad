@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Mahasiswa;
 use App\Http\Controllers\Controller;
 use App\Models\Khs;
 use App\Models\User;
+use Dompdf\Dompdf;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -62,6 +63,36 @@ class KhsController extends Controller
 
         return view('mahasiswa.khs.show', [
             'khs' => $khs,
+        ]);
+    }
+
+    public function pdf(Request $request, Khs $khs)
+    {
+        /** @var User $user */
+        $user = $request->user();
+        if (! $user->mahasiswa) {
+            return redirect()->route('mahasiswa.khs.index')->with('error', 'Profil mahasiswa belum tersedia.');
+        }
+        if ((int) $khs->mahasiswa_id !== (int) $user->mahasiswa->id) {
+            return redirect()->route('mahasiswa.khs.index')->with('error', 'Akses ditolak.');
+        }
+
+        $khs->load(['items.mataKuliah.dosen', 'mahasiswa']);
+
+        $html = view('mahasiswa.khs.pdf', [
+            'khs' => $khs,
+        ])->render();
+
+        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $filename = 'khs-'.$khs->id.'.pdf';
+
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ]);
     }
 }

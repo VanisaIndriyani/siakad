@@ -7,6 +7,7 @@ use App\Models\Khs;
 use App\Models\Krs;
 use App\Models\Pembayaran;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -80,5 +81,38 @@ class DashboardController extends Controller
             ->get();
 
         return view('mahasiswa.pembayaran.index', compact('pembayarans'));
+    }
+
+    public function uploadPembayaran(Request $request, Pembayaran $pembayaran): RedirectResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+        $mahasiswa = $user->mahasiswa;
+
+        if (! $mahasiswa) {
+            return back()->with('error', 'Profil mahasiswa belum tersedia.');
+        }
+
+        abort_unless((int) $pembayaran->mahasiswa_id === (int) $mahasiswa->id, 403);
+
+        $validated = $request->validate([
+            'jumlah_bayar' => ['required', 'numeric', 'min:1'],
+            'tanggal_bayar' => ['nullable', 'date'],
+            'bukti_pembayaran' => ['required', 'image', 'max:2048'],
+            'keterangan' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $buktiPath = $request->file('bukti_pembayaran')->store('pembayaran/bukti', 'public');
+
+        $pembayaran->details()->create([
+            'jumlah_bayar' => $validated['jumlah_bayar'],
+            'tanggal_bayar' => $validated['tanggal_bayar'] ?? now(),
+            'bukti_pembayaran' => $buktiPath,
+            'keterangan' => $validated['keterangan'] ?: 'Upload mahasiswa',
+        ]);
+
+        $pembayaran->updateStatus();
+
+        return back()->with('success', 'Bukti pembayaran berhasil diupload.');
     }
 }

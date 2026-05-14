@@ -83,16 +83,19 @@ Route::prefix('mahasiswa')
         Route::get('/krs/create', [MahasiswaKrsController::class, 'create'])->name('krs.create');
         Route::post('/krs', [MahasiswaKrsController::class, 'store'])->name('krs.store');
         Route::get('/krs/{krs}', [MahasiswaKrsController::class, 'show'])->name('krs.show');
+        Route::get('/krs/{krs}/pdf', [MahasiswaKrsController::class, 'pdf'])->name('krs.pdf');
         Route::get('/krs/{krs}/edit', [MahasiswaKrsController::class, 'edit'])->name('krs.edit');
         Route::put('/krs/{krs}', [MahasiswaKrsController::class, 'update'])->name('krs.update');
 
         Route::get('/khs', [MahasiswaKhsController::class, 'index'])->name('khs.index');
         Route::get('/khs/{khs}', [MahasiswaKhsController::class, 'show'])->name('khs.show');
+        Route::get('/khs/{khs}/pdf', [MahasiswaKhsController::class, 'pdf'])->name('khs.pdf');
 
         Route::get('/absensi', [MahasiswaAbsensiController::class, 'index'])->name('absensi.index');
         Route::get('/absensi/{mataKuliah}/{semester}', [MahasiswaAbsensiController::class, 'show'])->name('absensi.show');
 
         Route::get('/pembayaran', [MahasiswaDashboardController::class, 'pembayaran'])->name('pembayaran.index');
+        Route::post('/pembayaran/{pembayaran}/upload', [MahasiswaDashboardController::class, 'uploadPembayaran'])->name('pembayaran.upload');
 
         Route::get('/biodata/pdf', BiodataPdfController::class)->name('biodata.pdf');
     });
@@ -124,6 +127,8 @@ Route::prefix('keuangan')
     ->middleware(['auth', 'role:keuangan,admin'])
     ->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, '__invoke'])->name('dashboard');
+        Route::get('pembayaran/export/pdf', [KeuanganPembayaranController::class, 'exportPdf'])->name('pembayaran.export.pdf');
+        Route::get('pembayaran/{pembayaran}/pdf', [KeuanganPembayaranController::class, 'downloadPdf'])->name('pembayaran.pdf');
         Route::resource('pembayaran', KeuanganPembayaranController::class);
         Route::post('pembayaran/{pembayaran}/cicilan', [KeuanganPembayaranController::class, 'addCicilan'])->name('pembayaran.cicilan');
     });

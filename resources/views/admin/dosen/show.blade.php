@@ -40,7 +40,7 @@
                 </div>
                 <div class="rounded-xl bg-white/5 border border-white/10 p-4">
                     <div class="text-emerald-100/70">NIDN</div>
-                    <div class="mt-1 font-medium">{{ $dosen->nidn }}</div>
+                    <div class="mt-1 font-medium">{{ $dosen->nidn ?? '-' }}</div>
                 </div>
                 <div class="rounded-xl bg-white/5 border border-white/10 p-4">
                     <div class="text-emerald-100/70">NUPTK</div>
@@ -49,6 +49,52 @@
                 <div class="rounded-xl bg-white/5 border border-white/10 p-4">
                     <div class="text-emerald-100/70">Nomor SK</div>
                     <div class="mt-1 font-medium">{{ $dosen->nomor_sk ?? '-' }}</div>
+                </div>
+                <div class="rounded-xl bg-white/5 border border-white/10 p-4">
+                    <div class="text-emerald-100/70">Email</div>
+                    <div class="mt-1 font-medium">{{ $dosen->email ?? '-' }}</div>
+                </div>
+                <div class="rounded-xl bg-white/5 border border-white/10 p-4">
+                    <div class="text-emerald-100/70">Tempat / Tanggal Lahir</div>
+                    <div class="mt-1 font-medium">
+                        {{ $dosen->tempat_lahir ?? '-' }} / {{ $dosen->tanggal_lahir?->format('d/m/Y') ?? '-' }}
+                    </div>
+                </div>
+                <div class="rounded-xl bg-white/5 border border-white/10 p-4">
+                    <div class="text-emerald-100/70">NIP</div>
+                    <div class="mt-1 font-medium">{{ $dosen->nip ?? '-' }}</div>
+                </div>
+                <div class="rounded-xl bg-white/5 border border-white/10 p-4">
+                    <div class="text-emerald-100/70">Jabatan Fungsional</div>
+                    <div class="mt-1 font-medium">{{ $dosen->jabatan_fungsional ?? '-' }}</div>
+                </div>
+                <div class="rounded-xl bg-white/5 border border-white/10 p-4">
+                    <div class="text-emerald-100/70">Kepangkatan</div>
+                    <div class="mt-1 font-medium">{{ $dosen->kepangkatan ?? '-' }}</div>
+                </div>
+                <div class="rounded-xl bg-white/5 border border-white/10 p-4">
+                    <div class="text-emerald-100/70">Pendidikan Terakhir</div>
+                    <div class="mt-1 font-medium">{{ $dosen->pendidikan_terakhir ?? '-' }}</div>
+                </div>
+                <div class="rounded-xl bg-white/5 border border-white/10 p-4">
+                    <div class="text-emerald-100/70">Rumpun Ilmu</div>
+                    <div class="mt-1 font-medium">{{ $dosen->rumpun_ilmu ?? '-' }}</div>
+                </div>
+                <div class="rounded-xl bg-white/5 border border-white/10 p-4">
+                    <div class="text-emerald-100/70">Status Serdos</div>
+                    <div class="mt-1 font-medium">{{ $dosen->status_serdos ?? '-' }}</div>
+                </div>
+                <div class="rounded-xl bg-white/5 border border-white/10 p-4">
+                    <div class="text-emerald-100/70">Status Pegawai</div>
+                    <div class="mt-1 font-medium">{{ $dosen->status_pegawai ?? '-' }}</div>
+                </div>
+                <div class="rounded-xl bg-white/5 border border-white/10 p-4">
+                    <div class="text-emerald-100/70">Ikatan Kerja</div>
+                    <div class="mt-1 font-medium">{{ $dosen->ikatan_kerja ?? '-' }}</div>
+                </div>
+                <div class="rounded-xl bg-white/5 border border-white/10 p-4">
+                    <div class="text-emerald-100/70">Pengangkatan</div>
+                    <div class="mt-1 font-medium">{{ $dosen->tanggal_pengangkatan?->format('d/m/Y') ?? '-' }}</div>
                 </div>
                 <div class="rounded-xl bg-white/5 border border-white/10 p-4">
                     <div class="text-emerald-100/70">Nomor HP</div>

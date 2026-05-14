@@ -4,11 +4,24 @@
     </x-slot:sidebar>
 
     <style>
+        .print-only { display: none; }
         @media print {
             aside, header, .no-print { display: none !important; }
+            .print-only { display: block !important; }
             .lg\:pl-72 { padding-left: 0 !important; }
             main { padding: 0 !important; }
             body { background: #fff !important; color: #000 !important; }
+            @page { margin: 16mm 12mm; }
+            .print-content, .print-content * { color: #000 !important; }
+            .print-content .rounded-2xl,
+            .print-content .bg-white\/5,
+            .print-content .bg-white\/10,
+            .print-content .border,
+            .print-content [class*="bg-"],
+            .print-content [class*="border-"] { background: transparent !important; box-shadow: none !important; }
+            .print-content table { border-collapse: collapse !important; }
+            .print-content th, .print-content td { border: 1px solid #111827 !important; }
+            .print-content thead { background: transparent !important; }
             table { page-break-inside: auto; }
             tr { page-break-inside: avoid; page-break-after: auto; }
         }
@@ -18,9 +31,84 @@
         $mahasiswa = auth()->user()->mahasiswa;
         $items = $krs->items->sortBy(fn ($item) => (string) ($item->mataKuliah?->kode ?? ''));
         $totalSks = $items->sum(fn ($item) => (int) ($item->mataKuliah?->sks ?? 0));
+
+        $logoPath = public_path('img/lo.jpeg');
+        $logoBase64 = null;
+        if (is_string($logoPath) && file_exists($logoPath)) {
+            $data = file_get_contents($logoPath);
+            $logoBase64 = 'data:image/' . pathinfo($logoPath, PATHINFO_EXTENSION) . ';base64,' . base64_encode($data);
+        }
+        $kopLine1 = 'INSTITUT AGAMA ISLAM';
+        $kopLine2 = "DARUD DA'WAH WAL IRSYAD";
+        $kopLine3 = 'SIDENRENG RAPPANG';
+        $kopLine4 = 'TERAKREDITASI INSTITUSI • SK: 576/SK/BAN-PT/Akred/PT/IV/2021';
+        $kopLine5 = 'Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang';
+        $kopLine6 = 'E-mail : iaiddisrapp@gmail.com  Website : www.yppddisrapp.ac.id';
     @endphp
 
-    <div class="flex items-center justify-between gap-3 mb-5">
+    <div class="print-only" style="margin-bottom: 14px;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style="width: 120px; vertical-align: middle; padding-top: 2px;">
+                    @if($logoBase64)
+                        <img src="{{ $logoBase64 }}" alt="Logo" style="display: block; width: 95px; height: auto;" />
+                    @endif
+                </td>
+                <td style="text-align: center;">
+                    <div style="color: #6b7280; font-size: 18px; font-weight: 700; letter-spacing: 0.2px; line-height: 1.15;">{{ $kopLine1 }}</div>
+                    <div style="color: #6b7280; font-size: 26px; font-weight: 900; letter-spacing: 0.6px; margin-top: 2px; line-height: 1.1;">{{ $kopLine2 }}</div>
+                    <div style="color: #6b7280; font-size: 18px; font-weight: 800; letter-spacing: 0.2px; margin-top: 1px; line-height: 1.15;">{{ $kopLine3 }}</div>
+                    <div style="color: #6b7280; font-size: 11px; margin-top: 6px; font-weight: 700; line-height: 1.2;">{{ $kopLine4 }}</div>
+                    <div style="color: #6b7280; font-size: 11px; margin-top: 2px; line-height: 1.2;">{{ $kopLine5 }}</div>
+                    <div style="color: #6b7280; font-size: 11px; margin-top: 2px; line-height: 1.2;">{{ $kopLine6 }}</div>
+                </td>
+                <td style="width: 120px;"></td>
+            </tr>
+        </table>
+        <div style="border-top: 3px solid #6b7280; margin-top: 10px;"></div>
+        <div style="border-top: 1px solid #6b7280; margin-top: 4px;"></div>
+        <div style="text-align: center; margin-top: 14px; font-size: 12px; font-weight: 800;">Kartu Rencana Studi (KRS)</div>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 14px;">
+            <tr>
+                <td style="border: 1px solid #111827; padding: 10px 12px; width: 50%; vertical-align: top;">
+                    <div style="display: flex; justify-content: space-between; gap: 10px; font-size: 11px;">
+                        <div>Jenjang/Program</div>
+                        <div style="font-weight: 700;">
+                            @php
+                                $ps = strtoupper((string) ($mahasiswa?->program_studi ?? ''));
+                                $jenjang = str_contains($ps, 'S2') ? 'S2' : (str_contains($ps, 'S3') ? 'S3' : ($ps !== '' ? 'S1' : '-'));
+                            @endphp
+                            {{ $jenjang }}
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; gap: 10px; font-size: 11px; margin-top: 6px;">
+                        <div>Prodi</div>
+                        <div style="font-weight: 700;">{{ $mahasiswa?->program_studi ?? '-' }}</div>
+                    </div>
+                </td>
+                <td style="border: 1px solid #111827; padding: 10px 12px; width: 50%; vertical-align: top;">
+                    <div style="display: flex; justify-content: space-between; gap: 10px; font-size: 11px;">
+                        <div>Nama</div>
+                        <div style="font-weight: 700;">{{ $mahasiswa?->nama_lengkap ?? auth()->user()->name }}</div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; gap: 10px; font-size: 11px; margin-top: 6px;">
+                        <div>NPM</div>
+                        <div style="font-weight: 700;">{{ $mahasiswa?->npm ?? '-' }}</div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; gap: 10px; font-size: 11px; margin-top: 6px;">
+                        <div>Tahun Akademik</div>
+                        <div style="font-weight: 700;">{{ $krs->tahun_ajaran ?? '-' }}</div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; gap: 10px; font-size: 11px; margin-top: 6px;">
+                        <div>Semester</div>
+                        <div style="font-weight: 700;">{{ $krs->semester }}</div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="no-print flex items-center justify-between gap-3 mb-5">
         <div>
             <div class="text-xl font-semibold">Kartu Rencana Studi (KRS)</div>
             <div class="text-sm text-emerald-100/70">
@@ -38,6 +126,7 @@
                     Edit
                 </a>
             @endif
+           
             <button type="button" onclick="window.print()" class="no-print h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                 <i class="fa-solid fa-print"></i>
                 Cetak
@@ -49,8 +138,8 @@
         </div>
     </div>
 
-    <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
-        <div class="flex flex-wrap items-center gap-3 text-sm">
+    <div class="rounded-2xl bg-white/5 border border-white/10 p-5 print-content">
+        <div class="no-print flex flex-wrap items-center gap-3 text-sm">
             @php
                 $badge = match ($krs->status_approval) {
                     'approved' => 'bg-emerald-500/15 border-emerald-500/20 text-emerald-100',
@@ -72,12 +161,14 @@
             @endif
         </div>
 
-        @if ($krs->catatan_approval)
-            <div class="mt-4 p-4 rounded-xl bg-white/5 border border-white/10">
-                <div class="text-xs font-semibold text-emerald-100/60 uppercase tracking-wider">Keterangan Admin:</div>
-                <div class="mt-1 text-sm text-emerald-100/90 whitespace-pre-line">{{ $krs->catatan_approval }}</div>
-            </div>
-        @endif
+        <div class="no-print">
+            @if ($krs->catatan_approval)
+                <div class="mt-4 p-4 rounded-xl bg-white/5 border border-white/10">
+                    <div class="text-xs font-semibold text-emerald-100/60 uppercase tracking-wider">Keterangan Admin:</div>
+                    <div class="mt-1 text-sm text-emerald-100/90 whitespace-pre-line">{{ $krs->catatan_approval }}</div>
+                </div>
+            @endif
+        </div>
 
         <div class="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
             <div class="overflow-x-auto">
@@ -117,6 +208,31 @@
                     @endif
                 </table>
             </div>
+        </div>
+
+        <div class="print-only" style="margin-top: 28mm;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td style="border: 1px solid #111827; width: 33.33%; text-align: center; padding: 10px 8px;">
+                        <div style="font-size: 11px; font-weight: 700;">Ketua Prodi</div>
+                        <div style="height: 60px;"></div>
+                        <div style="font-size: 10px; font-weight: 700;">TTD</div>
+                        <div style="margin-top: 10px; font-size: 11px;">Nama</div>
+                    </td>
+                    <td style="border: 1px solid #111827; width: 33.33%; text-align: center; padding: 10px 8px;">
+                        <div style="font-size: 11px; font-weight: 700;">Sekretaris Prodi</div>
+                        <div style="height: 60px;"></div>
+                        <div style="font-size: 10px; font-weight: 700;">TTD</div>
+                        <div style="margin-top: 10px; font-size: 11px;">Nama</div>
+                    </td>
+                    <td style="border: 1px solid #111827; width: 33.33%; text-align: center; padding: 10px 8px;">
+                        <div style="font-size: 11px; font-weight: 700;">Mahasiswa</div>
+                        <div style="height: 60px;"></div>
+                        <div style="font-size: 10px; font-weight: 700;">TTD</div>
+                        <div style="margin-top: 10px; font-size: 11px;">{{ $mahasiswa?->nama_lengkap ?? auth()->user()->name }}</div>
+                    </td>
+                </tr>
+            </table>
         </div>
     </div>
 </x-portal-layout>
