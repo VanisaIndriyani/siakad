@@ -28,14 +28,6 @@ Route::any('/', function () {
         : redirect()->route('login');
 });
 
-Route::get('/clear-cache', function() {
-    \Illuminate\Support\Facades\Artisan::call('route:clear');
-    \Illuminate\Support\Facades\Artisan::call('config:clear');
-    \Illuminate\Support\Facades\Artisan::call('cache:clear');
-    \Illuminate\Support\Facades\Artisan::call('view:clear');
-    return "Cache cleared successfully!";
-});
-
 Route::get('/dashboard', DashboardController::class)->middleware('auth')->name('dashboard');
 
 Route::middleware('auth')->group(function () {
