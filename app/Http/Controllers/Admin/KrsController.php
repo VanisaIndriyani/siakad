@@ -56,6 +56,7 @@ class KrsController extends Controller
     {
         $validated = $request->validate([
             'status_approval' => ['required', 'in:pending,approved,rejected'],
+            'catatan_approval' => ['nullable', 'string'],
         ]);
 
         $krs->update($validated);

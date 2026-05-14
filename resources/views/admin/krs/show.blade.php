@@ -76,6 +76,12 @@
                     @error('status_approval') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
                 </div>
 
+                <div>
+                    <label class="text-sm text-emerald-100/80">Keterangan / Catatan</label>
+                    <textarea name="catatan_approval" rows="3" class="mt-2 w-full rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" placeholder="Contoh: Pengajuan KRS direject karena mata kuliah penuh atau alasan lainnya.">{{ old('catatan_approval', $krs->catatan_approval) }}</textarea>
+                    @error('catatan_approval') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
+                </div>
+
                 <button class="w-full h-11 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition font-medium">
                     Simpan
                 </button>

@@ -19,6 +19,7 @@ class Krs extends Model
         'tahun_ajaran',
         'status_approval',
         'approved_by_dosen_id',
+        'catatan_approval',
     ];
 
     public function mahasiswa(): BelongsTo

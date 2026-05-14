@@ -72,6 +72,13 @@
             @endif
         </div>
 
+        @if ($krs->catatan_approval)
+            <div class="mt-4 p-4 rounded-xl bg-white/5 border border-white/10">
+                <div class="text-xs font-semibold text-emerald-100/60 uppercase tracking-wider">Keterangan Admin:</div>
+                <div class="mt-1 text-sm text-emerald-100/90 whitespace-pre-line">{{ $krs->catatan_approval }}</div>
+            </div>
+        @endif
+
         <div class="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
             <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
