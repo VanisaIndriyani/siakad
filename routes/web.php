@@ -22,10 +22,10 @@ use App\Http\Controllers\Keuangan\PembayaranController as KeuanganPembayaranCont
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
+Route::match(['get', 'head'], '/', function () {
     return auth()->check()
-        ? redirect()->route('dashboard')
-        : redirect()->route('login');
+        ? redirect()->to('/dashboard')
+        : redirect()->to('/login');
 });
 
 Route::get('/dashboard', DashboardController::class)->middleware('auth')->name('dashboard');
