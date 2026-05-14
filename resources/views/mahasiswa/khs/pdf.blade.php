@@ -8,10 +8,11 @@
         @page { margin: 18mm 14mm; }
         body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #111827; }
         table { width: 100%; border-collapse: collapse; }
-        .kop-title-1 { color: #6b7280; font-size: 18px; font-weight: 700; margin: 0; line-height: 1.15; }
-        .kop-title-2 { color: #6b7280; font-size: 26px; font-weight: 900; margin: 2px 0 0; letter-spacing: 0.6px; line-height: 1.1; }
-        .kop-title-3 { color: #6b7280; font-size: 18px; font-weight: 800; margin: 1px 0 0; line-height: 1.15; }
-        .kop-meta { color: #6b7280; font-size: 11px; margin-top: 6px; line-height: 1.2; }
+        .kop-green { color: #0a8f3d; }
+        .kop-title-1 { color: #0a8f3d; font-size: 18px; font-weight: 800; margin: 0; line-height: 1.15; }
+        .kop-title-2 { color: #0a8f3d; font-size: 26px; font-weight: 900; margin: 2px 0 0; letter-spacing: 0.6px; line-height: 1.1; }
+        .kop-title-3 { color: #0a8f3d; font-size: 18px; font-weight: 900; margin: 1px 0 0; line-height: 1.15; }
+        .kop-meta { color: #0a8f3d; font-size: 11px; margin-top: 6px; line-height: 1.2; }
         .kop-line-1 { border-top: 3px solid #6b7280; margin-top: 10px; }
         .kop-line-2 { border-top: 1px solid #6b7280; margin-top: 4px; }
         .doc-title { text-align: center; font-size: 12px; font-weight: 900; margin: 14px 0 10px; }
@@ -143,4 +144,3 @@
     </table>
 </body>
 </html>
-

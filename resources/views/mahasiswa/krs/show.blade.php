@@ -55,12 +55,12 @@
                     @endif
                 </td>
                 <td style="text-align: center;">
-                    <div style="color: #6b7280; font-size: 18px; font-weight: 700; letter-spacing: 0.2px; line-height: 1.15;">{{ $kopLine1 }}</div>
-                    <div style="color: #6b7280; font-size: 26px; font-weight: 900; letter-spacing: 0.6px; margin-top: 2px; line-height: 1.1;">{{ $kopLine2 }}</div>
-                    <div style="color: #6b7280; font-size: 18px; font-weight: 800; letter-spacing: 0.2px; margin-top: 1px; line-height: 1.15;">{{ $kopLine3 }}</div>
-                    <div style="color: #6b7280; font-size: 11px; margin-top: 6px; font-weight: 700; line-height: 1.2;">{{ $kopLine4 }}</div>
-                    <div style="color: #6b7280; font-size: 11px; margin-top: 2px; line-height: 1.2;">{{ $kopLine5 }}</div>
-                    <div style="color: #6b7280; font-size: 11px; margin-top: 2px; line-height: 1.2;">{{ $kopLine6 }}</div>
+                    <div style="color: #0a8f3d; font-size: 18px; font-weight: 800; letter-spacing: 0.2px; line-height: 1.15;">{{ $kopLine1 }}</div>
+                    <div style="color: #0a8f3d; font-size: 26px; font-weight: 900; letter-spacing: 0.6px; margin-top: 2px; line-height: 1.1;">{{ $kopLine2 }}</div>
+                    <div style="color: #0a8f3d; font-size: 18px; font-weight: 900; letter-spacing: 0.2px; margin-top: 1px; line-height: 1.15;">{{ $kopLine3 }}</div>
+                    <div style="color: #0a8f3d; font-size: 11px; margin-top: 6px; font-weight: 800; line-height: 1.2;">{{ $kopLine4 }}</div>
+                    <div style="color: #0a8f3d; font-size: 11px; margin-top: 2px; line-height: 1.2;">{{ $kopLine5 }}</div>
+                    <div style="color: #0a8f3d; font-size: 11px; margin-top: 2px; line-height: 1.2;">{{ $kopLine6 }}</div>
                 </td>
                 <td style="width: 120px;"></td>
             </tr>
