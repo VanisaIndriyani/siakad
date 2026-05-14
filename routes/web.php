@@ -121,7 +121,7 @@ Route::prefix('dosen')
 
 Route::prefix('keuangan')
     ->name('keuangan.')
-    ->middleware(['auth', 'role:keuangan'])
+    ->middleware(['auth', 'role:keuangan,admin'])
     ->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, '__invoke'])->name('dashboard');
         Route::resource('pembayaran', KeuanganPembayaranController::class);
