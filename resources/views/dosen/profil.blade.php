@@ -24,10 +24,16 @@
                         @error('nik') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
                     </div>
                     <div>
-                        <label class="text-sm text-emerald-100/80">Nomor SK</label>
-                        <input name="nomor_sk" value="{{ old('nomor_sk', $dosen?->nomor_sk ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
-                        @error('nomor_sk') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
+                        <label class="text-sm text-emerald-100/80">NUPTK</label>
+                        <input name="nuptk" value="{{ old('nuptk', $dosen?->nuptk ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
+                        @error('nuptk') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
                     </div>
+                </div>
+
+                <div>
+                    <label class="text-sm text-emerald-100/80">Nomor SK</label>
+                    <input name="nomor_sk" value="{{ old('nomor_sk', $dosen?->nomor_sk ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
+                    @error('nomor_sk') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -56,13 +56,10 @@ class DosenController extends Controller
     {
         $validated = $request->validate([
             'nama' => ['required', 'string', 'max:255'],
-            'nik' => ['nullable', 'string', 'max:50', 'unique:dosen,nik'],
             'nidn' => ['required', 'string', 'max:50', 'unique:dosen,nidn'],
+            'nik' => ['nullable', 'string', 'max:50', 'unique:dosen,nik'],
             'nuptk' => ['nullable', 'string', 'max:50', 'unique:dosen,nuptk'],
             'nomor_sk' => ['nullable', 'string', 'max:255'],
-            'alamat' => ['nullable', 'string'],
-            'nomor_hp' => ['nullable', 'string', 'max:50'],
-            'mata_kuliah' => ['nullable', 'string', 'max:255'],
             'foto' => ['nullable', 'image', 'max:2048'],
         ]);
 
@@ -122,13 +119,10 @@ class DosenController extends Controller
     {
         $validated = $request->validate([
             'nama' => ['required', 'string', 'max:255'],
-            'nik' => ['nullable', 'string', 'max:50', 'unique:dosen,nik,'.$dosen->id],
             'nidn' => ['required', 'string', 'max:50', 'unique:dosen,nidn,'.$dosen->id],
+            'nik' => ['nullable', 'string', 'max:50', 'unique:dosen,nik,'.$dosen->id],
             'nuptk' => ['nullable', 'string', 'max:50', 'unique:dosen,nuptk,'.$dosen->id],
             'nomor_sk' => ['nullable', 'string', 'max:255'],
-            'alamat' => ['nullable', 'string'],
-            'nomor_hp' => ['nullable', 'string', 'max:50'],
-            'mata_kuliah' => ['nullable', 'string', 'max:255'],
             'foto' => ['nullable', 'image', 'max:2048'],
         ]);
 
@@ -141,13 +135,10 @@ class DosenController extends Controller
 
         $dosen->fill([
             'nama' => $validated['nama'],
-            'nik' => $validated['nik'] ?? null,
+            'nik' => $validated['nik'] ?? $dosen->nik,
             'nidn' => $validated['nidn'],
-            'nuptk' => $validated['nuptk'] ?? null,
-            'nomor_sk' => $validated['nomor_sk'] ?? null,
-            'alamat' => $validated['alamat'] ?? null,
-            'nomor_hp' => $validated['nomor_hp'] ?? null,
-            'mata_kuliah' => $validated['mata_kuliah'] ?? null,
+            'nuptk' => $validated['nuptk'] ?? $dosen->nuptk,
+            'nomor_sk' => $validated['nomor_sk'] ?? $dosen->nomor_sk,
         ])->save();
 
         $dosen->user?->update(['name' => $validated['nama']]);

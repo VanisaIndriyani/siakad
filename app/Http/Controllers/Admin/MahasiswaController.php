@@ -68,16 +68,10 @@ class MahasiswaController extends Controller
     {
         $validated = $request->validate([
             'nama_lengkap' => ['required', 'string', 'max:255'],
-            'tempat_lahir' => ['nullable', 'string', 'max:255'],
-            'tanggal_lahir' => ['nullable', 'date'],
-            'nik' => ['nullable', 'string', 'max:50'],
             'npm' => ['required', 'string', 'max:50', 'unique:mahasiswa,npm'],
-            'alamat' => ['nullable', 'string'],
-            'nomor_telp' => ['nullable', 'string', 'max:50'],
-            'angkatan' => ['nullable', 'integer', 'min:1900', 'max:2100'],
             'program_studi' => ['required', 'string', 'max:255', Rule::in(self::JURUSAN)],
-            'asal_sekolah' => ['nullable', 'string', 'max:255'],
             'status_mahasiswa' => ['required', 'string', 'max:50'],
+            'angkatan' => ['nullable', 'integer', 'min:1900', 'max:2100'],
             'foto' => ['nullable', 'image', 'max:2048'],
         ]);
 
@@ -104,16 +98,10 @@ class MahasiswaController extends Controller
         $mahasiswa = Mahasiswa::query()->create([
             'user_id' => $user->id,
             'nama_lengkap' => $validated['nama_lengkap'],
-            'tempat_lahir' => $validated['tempat_lahir'] ?? null,
-            'tanggal_lahir' => $validated['tanggal_lahir'] ?? null,
-            'nik' => $validated['nik'] ?? null,
             'npm' => $validated['npm'],
-            'alamat' => $validated['alamat'] ?? null,
-            'nomor_telp' => $validated['nomor_telp'] ?? null,
-            'angkatan' => $validated['angkatan'] ?? null,
             'program_studi' => $validated['program_studi'],
-            'asal_sekolah' => $validated['asal_sekolah'] ?? null,
             'status_mahasiswa' => $validated['status_mahasiswa'],
+            'angkatan' => $validated['angkatan'] ?? null,
             'foto_path' => $fotoPath,
         ]);
 
@@ -148,16 +136,10 @@ class MahasiswaController extends Controller
     {
         $validated = $request->validate([
             'nama_lengkap' => ['required', 'string', 'max:255'],
-            'tempat_lahir' => ['nullable', 'string', 'max:255'],
-            'tanggal_lahir' => ['nullable', 'date'],
-            'nik' => ['nullable', 'string', 'max:50'],
             'npm' => ['required', 'string', 'max:50', 'unique:mahasiswa,npm,'.$mahasiswa->id],
-            'alamat' => ['nullable', 'string'],
-            'nomor_telp' => ['nullable', 'string', 'max:50'],
-            'angkatan' => ['nullable', 'integer', 'min:1900', 'max:2100'],
             'program_studi' => ['required', 'string', 'max:255', Rule::in(self::JURUSAN)],
-            'asal_sekolah' => ['nullable', 'string', 'max:255'],
             'status_mahasiswa' => ['required', 'string', 'max:50'],
+            'angkatan' => ['nullable', 'integer', 'min:1900', 'max:2100'],
             'foto' => ['nullable', 'image', 'max:2048'],
         ]);
 
@@ -170,16 +152,10 @@ class MahasiswaController extends Controller
 
         $mahasiswa->fill([
             'nama_lengkap' => $validated['nama_lengkap'],
-            'tempat_lahir' => $validated['tempat_lahir'] ?? null,
-            'tanggal_lahir' => $validated['tanggal_lahir'] ?? null,
-            'nik' => $validated['nik'] ?? null,
             'npm' => $validated['npm'],
-            'alamat' => $validated['alamat'] ?? null,
-            'nomor_telp' => $validated['nomor_telp'] ?? null,
-            'angkatan' => $validated['angkatan'] ?? null,
             'program_studi' => $validated['program_studi'],
-            'asal_sekolah' => $validated['asal_sekolah'] ?? null,
             'status_mahasiswa' => $validated['status_mahasiswa'],
+            'angkatan' => $validated['angkatan'] ?? null,
         ])->save();
 
         $mahasiswa->user?->update(['name' => $validated['nama_lengkap']]);

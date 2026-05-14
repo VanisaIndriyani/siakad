@@ -66,16 +66,36 @@
                     <div class="mt-1 font-medium">{{ $mahasiswa->program_studi ?? '-' }}</div>
                 </div>
                 <div class="rounded-xl bg-white/5 border border-white/10 p-4">
-                    <div class="text-emerald-100/70">Asal Sekolah</div>
-                    <div class="mt-1 font-medium">{{ $mahasiswa->asal_sekolah ?? '-' }}</div>
-                </div>
-                <div class="rounded-xl bg-white/5 border border-white/10 p-4">
                     <div class="text-emerald-100/70">Status</div>
                     <div class="mt-1 font-medium">{{ $mahasiswa->status_mahasiswa }}</div>
                 </div>
+                <div class="rounded-xl bg-white/5 border border-white/10 p-4">
+                    <div class="text-emerald-100/70">NISN</div>
+                    <div class="mt-1 font-medium">{{ $mahasiswa->nisn ?? '-' }}</div>
+                </div>
+                <div class="rounded-xl bg-white/5 border border-white/10 p-4">
+                    <div class="text-emerald-100/70">Jenis Kelamin</div>
+                    <div class="mt-1 font-medium">{{ $mahasiswa->jenis_kelamin ?? '-' }}</div>
+                </div>
+                <div class="rounded-xl bg-white/5 border border-white/10 p-4">
+                    <div class="text-emerald-100/70">Agama</div>
+                    <div class="mt-1 font-medium">{{ $mahasiswa->agama ?? '-' }}</div>
+                </div>
+                <div class="rounded-xl bg-white/5 border border-white/10 p-4">
+                    <div class="text-emerald-100/70">Kewarganegaraan</div>
+                    <div class="mt-1 font-medium">{{ $mahasiswa->kewarganegaraan ?? '-' }}</div>
+                </div>
                 <div class="sm:col-span-2 rounded-xl bg-white/5 border border-white/10 p-4">
-                    <div class="text-emerald-100/70">Alamat</div>
-                    <div class="mt-1 font-medium whitespace-pre-line">{{ $mahasiswa->alamat ?? '-' }}</div>
+                    <div class="text-emerald-100/70">Alamat Lengkap (PD-DIKTI)</div>
+                    <div class="mt-1 font-medium">
+                        @if($mahasiswa->jalan) {{ $mahasiswa->jalan }}, @endif
+                        @if($mahasiswa->dusun) Dusun {{ $mahasiswa->dusun }}, @endif
+                        @if($mahasiswa->rt) RT {{ $mahasiswa->rt }} / RW {{ $mahasiswa->rw }}, @endif
+                        @if($mahasiswa->kelurahan) {{ $mahasiswa->kelurahan }}, @endif
+                        @if($mahasiswa->kecamatan) {{ $mahasiswa->kecamatan }}, @endif
+                        @if($mahasiswa->kode_pos) {{ $mahasiswa->kode_pos }} @endif
+                        @if(!$mahasiswa->jalan && !$mahasiswa->kelurahan) - @endif
+                    </div>
                 </div>
             </div>
         </div>
