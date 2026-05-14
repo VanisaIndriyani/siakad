@@ -24,38 +24,38 @@
                         
                         <div>
                             <label class="text-xs font-semibold text-emerald-100/50 uppercase tracking-wider">Tempat Lahir*</label>
-                            <input name="tempat_lahir" value="{{ old('tempat_lahir', $mahasiswa?->tempat_lahir ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-white/[0.05] border border-white/10 px-4 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none" required />
+                            <input name="tempat_lahir" value="{{ old('tempat_lahir', $mahasiswa?->tempat_lahir ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-[#0a1f1a] border border-white/10 px-4 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none" required />
                             @error('tempat_lahir') <div class="mt-1 text-[11px] text-red-400">{{ $message }}</div> @enderror
                         </div>
                         
                         <div>
                             <label class="text-xs font-semibold text-emerald-100/50 uppercase tracking-wider">Tanggal Lahir*</label>
-                            <input type="date" name="tanggal_lahir" value="{{ old('tanggal_lahir', $mahasiswa?->tanggal_lahir?->format('Y-m-d')) }}" class="mt-2 w-full h-11 rounded-xl bg-white/[0.05] border border-white/10 px-4 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none" required />
+                            <input type="date" name="tanggal_lahir" value="{{ old('tanggal_lahir', $mahasiswa?->tanggal_lahir?->format('Y-m-d')) }}" class="mt-2 w-full h-11 rounded-xl bg-[#0a1f1a] border border-white/10 px-4 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none" required />
                             @error('tanggal_lahir') <div class="mt-1 text-[11px] text-red-400">{{ $message }}</div> @enderror
                         </div>
                         
                         <div>
                             <label class="text-xs font-semibold text-emerald-100/50 uppercase tracking-wider">Jenis Kelamin*</label>
-                            <select name="jenis_kelamin" class="mt-2 w-full h-11 rounded-xl bg-white/[0.05] border border-white/10 px-4 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none appearance-none" required>
+                            <select name="jenis_kelamin" class="mt-2 w-full h-11 rounded-xl bg-[#0a1f1a] border border-white/10 px-4 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none appearance-none" required>
                                 <option value="" disabled @selected(!old('jenis_kelamin', $mahasiswa?->jenis_kelamin))>Pilih Jenis Kelamin</option>
-                                <option value="Laki-laki" @selected(old('jenis_kelamin', $mahasiswa?->jenis_kelamin) === 'Laki-laki') class="bg-[#0d2a23]">Laki-laki</option>
-                                <option value="Perempuan" @selected(old('jenis_kelamin', $mahasiswa?->jenis_kelamin) === 'Perempuan') class="bg-[#0d2a23]">Perempuan</option>
+                                <option value="Laki-laki" @selected(old('jenis_kelamin', $mahasiswa?->jenis_kelamin) === 'Laki-laki') class="bg-[#0a1f1a]">Laki-laki</option>
+                                <option value="Perempuan" @selected(old('jenis_kelamin', $mahasiswa?->jenis_kelamin) === 'Perempuan') class="bg-[#0a1f1a]">Perempuan</option>
                             </select>
                             @error('jenis_kelamin') <div class="mt-1 text-[11px] text-red-400">{{ $message }}</div> @enderror
                         </div>
                         
                         <div>
                             <label class="text-xs font-semibold text-emerald-100/50 uppercase tracking-wider">Nama Ibu Kandung*</label>
-                            <input name="nama_ibu" value="{{ old('nama_ibu', $mahasiswa?->nama_ibu ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-white/[0.05] border border-white/10 px-4 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none" required />
+                            <input name="nama_ibu" value="{{ old('nama_ibu', $mahasiswa?->nama_ibu ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-[#0a1f1a] border border-white/10 px-4 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none" required />
                             @error('nama_ibu') <div class="mt-1 text-[11px] text-red-400">{{ $message }}</div> @enderror
                         </div>
                         
                         <div>
                             <label class="text-xs font-semibold text-emerald-100/50 uppercase tracking-wider">Agama*</label>
-                            <select name="agama" class="mt-2 w-full h-11 rounded-xl bg-white/[0.05] border border-white/10 px-4 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none appearance-none" required>
+                            <select name="agama" class="mt-2 w-full h-11 rounded-xl bg-[#0a1f1a] border border-white/10 px-4 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none appearance-none" required>
                                 <option value="" disabled @selected(!old('agama', $mahasiswa?->agama))>Pilih Agama</option>
                                 @foreach(['Islam', 'Kristen', 'Katolik', 'Hindu', 'Budha', 'Konghucu'] as $agama)
-                                    <option value="{{ $agama }}" @selected(old('agama', $mahasiswa?->agama) === $agama) class="bg-[#0d2a23]">{{ $agama }}</option>
+                                    <option value="{{ $agama }}" @selected(old('agama', $mahasiswa?->agama) === $agama) class="bg-[#0a1f1a]">{{ $agama }}</option>
                                 @endforeach
                             </select>
                             @error('agama') <div class="mt-1 text-[11px] text-red-400">{{ $message }}</div> @enderror
@@ -63,19 +63,19 @@
                         
                         <div>
                             <label class="text-xs font-semibold text-emerald-100/50 uppercase tracking-wider">Kewarganegaraan*</label>
-                            <input name="kewarganegaraan" value="{{ old('kewarganegaraan', $mahasiswa?->kewarganegaraan ?? 'Indonesia') }}" class="mt-2 w-full h-11 rounded-xl bg-white/[0.05] border border-white/10 px-4 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none" required />
+                            <input name="kewarganegaraan" value="{{ old('kewarganegaraan', $mahasiswa?->kewarganegaraan ?? 'Indonesia') }}" class="mt-2 w-full h-11 rounded-xl bg-[#0a1f1a] border border-white/10 px-4 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none" required />
                             @error('kewarganegaraan') <div class="mt-1 text-[11px] text-red-400">{{ $message }}</div> @enderror
                         </div>
                         
                         <div>
                             <label class="text-xs font-semibold text-emerald-100/50 uppercase tracking-wider">NIK*</label>
-                            <input name="nik" value="{{ old('nik', $mahasiswa?->nik ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-white/[0.05] border border-white/10 px-4 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none" required />
+                            <input name="nik" value="{{ old('nik', $mahasiswa?->nik ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-[#0a1f1a] border border-white/10 px-4 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none" required />
                             @error('nik') <div class="mt-1 text-[11px] text-red-400">{{ $message }}</div> @enderror
                         </div>
                         
                         <div>
                             <label class="text-xs font-semibold text-emerald-100/50 uppercase tracking-wider">NISN*</label>
-                            <input name="nisn" value="{{ old('nisn', $mahasiswa?->nisn ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-white/[0.05] border border-white/10 px-4 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none" required />
+                            <input name="nisn" value="{{ old('nisn', $mahasiswa?->nisn ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-[#0a1f1a] border border-white/10 px-4 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none" required />
                             @error('nisn') <div class="mt-1 text-[11px] text-red-400">{{ $message }}</div> @enderror
                         </div>
                     </div>
@@ -91,33 +91,34 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div class="md:col-span-2">
                             <label class="text-xs font-semibold text-emerald-100/50 uppercase tracking-wider">Jalan / Alamat Lengkap</label>
-                            <input name="jalan" value="{{ old('jalan', $mahasiswa?->jalan ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-white/[0.05] border border-white/10 px-4 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none" />
+                            <input name="jalan" value="{{ old('jalan', $mahasiswa?->jalan ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-[#0a1f1a] border border-white/10 px-4 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none" />
                         </div>
                         
                         <div>
                             <label class="text-xs font-semibold text-emerald-100/50 uppercase tracking-wider">Kelurahan*</label>
-                            <input name="kelurahan" value="{{ old('kelurahan', $mahasiswa?->kelurahan ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-white/[0.05] border border-white/10 px-4 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none" required />
+                            <input name="kelurahan" value="{{ old('kelurahan', $mahasiswa?->kelurahan ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-[#0a1f1a] border border-white/10 px-4 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none" required />
                         </div>
                         
                         <div>
                             <label class="text-xs font-semibold text-emerald-100/50 uppercase tracking-wider">Kecamatan*</label>
-                            <input name="kecamatan" value="{{ old('kecamatan', $mahasiswa?->kecamatan ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-white/[0.05] border border-white/10 px-4 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none" required />
+                            <input name="kecamatan" value="{{ old('kecamatan', $mahasiswa?->kecamatan ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-[#0a1f1a] border border-white/10 px-4 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none" required />
                         </div>
                         
                         <div>
                             <label class="text-xs font-semibold text-emerald-100/50 uppercase tracking-wider">Nomor HP*</label>
-                            <input name="nomor_telp" value="{{ old('nomor_telp', $mahasiswa?->nomor_telp ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-white/[0.05] border border-white/10 px-4 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none" required />
+                            <input name="nomor_telp" value="{{ old('nomor_telp', $mahasiswa?->nomor_telp ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-[#0a1f1a] border border-white/10 px-4 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none" required />
                         </div>
 
                         <div>
                             <label class="text-xs font-semibold text-emerald-100/50 uppercase tracking-wider">Kode Pos</label>
-                            <input name="kode_pos" value="{{ old('kode_pos', $mahasiswa?->kode_pos ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-white/[0.05] border border-white/10 px-4 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none" />
+                            <input name="kode_pos" value="{{ old('kode_pos', $mahasiswa?->kode_pos ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-[#0a1f1a] border border-white/10 px-4 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none" />
                         </div>
                     </div>
                 </div>
 
                 <div class="flex items-center justify-end pb-10">
-                    <button class="h-12 px-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition-all font-bold text-white shadow-lg shadow-emerald-900/20 uppercase tracking-widest text-sm">
+                    <button type="submit" class="h-12 px-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition-all font-bold text-white shadow-lg shadow-emerald-900/40 uppercase tracking-widest text-sm flex items-center gap-2 border border-emerald-500/20">
+                        <i class="fa-solid fa-save"></i>
                         Simpan Perubahan
                     </button>
                 </div>
