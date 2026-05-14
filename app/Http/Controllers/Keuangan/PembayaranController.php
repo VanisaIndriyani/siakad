@@ -32,8 +32,8 @@ class PembayaranController extends Controller
 
     public function create(): View
     {
-        $mahasiswas = Mahasiswa::query()->orderBy('nama_lengkap')->get();
-        return view('keuangan.pembayaran.create', compact('mahasiswas'));
+        $mahasiswa = Mahasiswa::query()->orderBy('nama_lengkap')->get();
+        return view('keuangan.pembayaran.create', compact('mahasiswa'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -44,10 +44,9 @@ class PembayaranController extends Controller
             'tahun_ajaran' => ['required', 'string'],
             'total_biaya' => ['required', 'numeric', 'min:0'],
             'catatan' => ['nullable', 'string'],
-            'jumlah_bayar' => ['required', 'numeric', 'min:0'],
-            'tanggal_bayar' => ['required', 'date'],
+            'jumlah_bayar' => ['nullable', 'numeric', 'min:0'],
+            'tanggal_bayar' => ['nullable', 'date'],
             'bukti_pembayaran' => ['nullable', 'image', 'max:2048'],
-            'keterangan_bayar' => ['nullable', 'string'],
         ]);
 
         $pembayaran = Pembayaran::create([
@@ -58,17 +57,21 @@ class PembayaranController extends Controller
             'catatan' => $validated['catatan'],
         ]);
 
-        $buktiPath = null;
-        if ($request->hasFile('bukti_pembayaran')) {
-            $buktiPath = $request->file('bukti_pembayaran')->store('pembayaran/bukti', 'public');
-        }
+        $jumlahBayar = $validated['jumlah_bayar'] ?? 0;
+        
+        if ($jumlahBayar > 0) {
+            $buktiPath = null;
+            if ($request->hasFile('bukti_pembayaran')) {
+                $buktiPath = $request->file('bukti_pembayaran')->store('pembayaran/bukti', 'public');
+            }
 
-        $pembayaran->details()->create([
-            'jumlah_bayar' => $validated['jumlah_bayar'],
-            'tanggal_bayar' => $validated['tanggal_bayar'],
-            'bukti_pembayaran' => $buktiPath,
-            'keterangan' => $validated['keterangan_bayar'],
-        ]);
+            $pembayaran->details()->create([
+                'jumlah_bayar' => $jumlahBayar,
+                'tanggal_bayar' => $validated['tanggal_bayar'] ?? now(),
+                'bukti_pembayaran' => $buktiPath,
+                'keterangan' => 'Pembayaran awal',
+            ]);
+        }
 
         $pembayaran->updateStatus();
 
@@ -87,7 +90,7 @@ class PembayaranController extends Controller
     {
         $validated = $request->validate([
             'jumlah_bayar' => ['required', 'numeric', 'min:1'],
-            'tanggal_bayar' => ['required', 'date'],
+            'tanggal_bayar' => ['nullable', 'date'],
             'bukti_pembayaran' => ['nullable', 'image', 'max:2048'],
             'keterangan' => ['nullable', 'string'],
         ]);
@@ -99,14 +102,14 @@ class PembayaranController extends Controller
 
         $pembayaran->details()->create([
             'jumlah_bayar' => $validated['jumlah_bayar'],
-            'tanggal_bayar' => $validated['tanggal_bayar'],
+            'tanggal_bayar' => $validated['tanggal_bayar'] ?? now(),
             'bukti_pembayaran' => $buktiPath,
             'keterangan' => $validated['keterangan'],
         ]);
 
         $pembayaran->updateStatus();
 
-        return back()->with('success', 'Cicilan pembayaran berhasil ditambahkan.');
+        return redirect()->back()->with('success', 'Pembayaran cicilan berhasil ditambahkan.');
     }
 
     public function destroy(Pembayaran $pembayaran): RedirectResponse

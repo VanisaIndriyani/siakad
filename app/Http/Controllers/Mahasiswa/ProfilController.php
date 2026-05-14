@@ -51,6 +51,7 @@ class ProfilController extends Controller
             'jenis_tinggal' => ['nullable', 'string', 'max:100'],
             'alat_transportasi' => ['nullable', 'string', 'max:100'],
             'nomor_telp' => ['nullable', 'string', 'max:50'],
+            'email' => ['nullable', 'email', 'max:255', 'unique:users,email,'.$user->id],
             'penerima_kps' => ['nullable', 'string', 'in:Ya,Tidak'],
             'no_kps' => ['nullable', 'string', 'max:100'],
             'ayah_nik' => ['nullable', 'string', 'max:50'],
@@ -75,7 +76,12 @@ class ProfilController extends Controller
             $mahasiswa->foto_path = $request->file('foto')->store('photos/mahasiswa', 'public');
         }
 
-        $mahasiswa->fill($validated);
+        // Update email user
+        if (isset($validated['email'])) {
+            $user->update(['email' => $validated['email']]);
+        }
+
+        $mahasiswa->fill(collect($validated)->except('email')->toArray());
         $mahasiswa->save();
 
         return redirect()->route('mahasiswa.profil')->with('success', 'Profil berhasil diperbarui.');

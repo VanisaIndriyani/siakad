@@ -3,93 +3,115 @@
         @include('keuangan.partials.sidebar')
     </x-slot:sidebar>
 
-    <div class="max-w-4xl mx-auto">
-        <div class="mb-6 flex items-center justify-between">
+    <div style="max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 30px; padding-bottom: 50px;">
+        <!-- Header -->
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 20px;">
             <div>
-                <h1 class="text-2xl font-bold text-white">Input Pembayaran Baru</h1>
-                <p class="text-sm text-emerald-100/70">Masukkan data pembayaran semester untuk mahasiswa.</p>
+                <h1 style="color: white; font-size: 1.8rem; font-weight: 800; margin: 0; letter-spacing: -0.5px;">INPUT PEMBAYARAN</h1>
+                <p style="color: rgba(52,211,153,0.6); font-size: 14px; font-weight: 500; margin-top: 5px;">Mendaftarkan tagihan semester baru untuk mahasiswa.</p>
             </div>
-            <a href="{{ route('keuangan.pembayaran.index') }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-white">
-                <i class="fa-solid fa-arrow-left"></i> Kembali
+            <a href="{{ route('keuangan.pembayaran.index') }}" 
+               style="text-decoration: none; background-color: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); padding: 12px 20px; border-radius: 12px; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-arrow-left"></i>
+                KEMBALI
             </a>
         </div>
 
-        <form action="{{ route('keuangan.pembayaran.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+        <form action="{{ route('keuangan.pembayaran.store') }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 30px;">
             @csrf
             
-            <div class="rounded-2xl bg-white/5 border border-white/10 p-6 space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="md:col-span-2">
-                        <label class="text-sm text-emerald-100/80 font-medium">Mahasiswa</label>
-                        <select name="mahasiswa_id" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:ring-emerald-400 focus:border-emerald-400 text-white" required>
-                            <option value="" disabled selected class="text-black">Pilih Mahasiswa</option>
-                            @foreach($mahasiswas as $m)
-                                <option value="{{ $m->id }}" @selected(old('mahasiswa_id') == $m->id) class="text-black">
-                                    {{ $m->npm }} - {{ $m->nama_lengkap }}
+            <!-- Card Form -->
+            <div style="background-color: #0d2a23 !important; border-radius: 24px; border: 1px solid rgba(255,255,255,0.08); overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
+                <div style="padding: 25px 30px; background: linear-gradient(135deg, rgba(16,185,129,0.12) 0%, transparent 100%); border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 15px;">
+                    <div style="height: 40px; width: 40px; border-radius: 10px; background-color: rgba(16,185,129,0.2); border: 1px solid rgba(16,185,129,0.3); display: flex; align-items: center; justify-content: center;">
+                        <i class="fa-solid fa-file-invoice-dollar" style="color: #34d399;"></i>
+                    </div>
+                    <h2 style="color: white; font-size: 14px; font-weight: 800; margin: 0; text-transform: uppercase; letter-spacing: 1px;">Detail Tagihan Semester</h2>
+                </div>
+
+                <div style="padding: 30px; display: flex; flex-direction: column; gap: 25px;">
+                    <!-- Mahasiswa Selection -->
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Pilih Mahasiswa*</label>
+                        <select name="mahasiswa_id" style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px; outline: none; font-weight: 600;" required>
+                            <option value="" disabled selected>-- Pilih Mahasiswa --</option>
+                            @foreach ($mahasiswa as $m)
+                                <option value="{{ $m->id }}" @selected(old('mahasiswa_id') == $m->id) style="background-color: #0d2a23;">
+                                    {{ $m->nama_lengkap }} ({{ $m->npm }})
                                 </option>
                             @endforeach
                         </select>
-                        @error('mahasiswa_id') <p class="mt-1 text-xs text-red-400">{{ $message }}</p> @enderror
+                        @error('mahasiswa_id') <div style="color: #f87171; font-size: 11px; margin-top: 4px;">{{ $message }}</div> @enderror
                     </div>
 
-                    <div>
-                        <label class="text-sm text-emerald-100/80 font-medium">Semester</label>
-                        <input type="number" name="semester" value="{{ old('semester') }}" min="1" max="14" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:ring-emerald-400 focus:border-emerald-400 text-white" required />
-                        @error('semester') <p class="mt-1 text-xs text-red-400">{{ $message }}</p> @enderror
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                        <!-- Semester -->
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Semester*</label>
+                            <select name="semester" style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px; outline: none; font-weight: 600;" required>
+                                @foreach (range(1, 8) as $s)
+                                    <option value="{{ $s }}" @selected(old('semester') == $s) style="background-color: #0d2a23;">Semester {{ $s }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <!-- Tahun Ajaran -->
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Tahun Ajaran*</label>
+                            <input type="text" name="tahun_ajaran" value="{{ old('tahun_ajaran', date('Y').'/'.(date('Y')+1)) }}" 
+                                style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px; outline: none; font-weight: 600;" placeholder="Contoh: 2026/2027" required />
+                        </div>
                     </div>
 
-                    <div>
-                        <label class="text-sm text-emerald-100/80 font-medium">Tahun Ajaran</label>
-                        <input type="text" name="tahun_ajaran" value="{{ old('tahun_ajaran', date('Y').'/'.(date('Y')+1)) }}" placeholder="Contoh: 2026/2027" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:ring-emerald-400 focus:border-emerald-400 text-white" required />
-                        @error('tahun_ajaran') <p class="mt-1 text-xs text-red-400">{{ $message }}</p> @enderror
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                        <!-- Total Biaya -->
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Total Biaya Semester (Rp)*</label>
+                            <div style="position: relative;">
+                                <input type="number" name="total_biaya" value="{{ old('total_biaya') }}" 
+                                    style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: #34d399 !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px 0 45px; font-weight: 800; outline: none; font-size: 1.1rem;" placeholder="0" required />
+                                <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.2); font-weight: 800;">Rp</span>
+                            </div>
+                        </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                        <!-- Jumlah Bayar Awal -->
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Bayar Awal (Opsional)</label>
+                            <div style="position: relative;">
+                                <input type="number" name="jumlah_bayar" value="{{ old('jumlah_bayar', 0) }}" 
+                                    style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px 0 45px; font-weight: 700; outline: none;" placeholder="0" />
+                                <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.2); font-weight: 800;">Rp</span>
+                            </div>
+                        </div>
+                        <!-- Tanggal Bayar -->
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Tanggal Bayar</label>
+                            <input type="date" name="tanggal_bayar" value="{{ old('tanggal_bayar', date('Y-m-d')) }}" 
+                                style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px; outline: none; font-weight: 600;" />
+                        </div>
                     </div>
 
-                    <div>
-                        <label class="text-sm text-emerald-100/80 font-medium">Total Biaya Semester (Rp)</label>
-                        <input type="number" name="total_biaya" value="{{ old('total_biaya') }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:ring-emerald-400 focus:border-emerald-400 text-white" required />
-                        @error('total_biaya') <p class="mt-1 text-xs text-red-400">{{ $message }}</p> @enderror
-                    </div>
-
-                    <div class="md:col-span-2">
-                        <label class="text-sm text-emerald-100/80 font-medium">Catatan / Keterangan Pembayaran</label>
-                        <textarea name="catatan" rows="2" class="mt-2 w-full rounded-xl bg-white/5 border border-white/10 focus:ring-emerald-400 focus:border-emerald-400 text-white" placeholder="Keterangan umum pembayaran...">{{ old('catatan') }}</textarea>
+                    <!-- Bukti & Keterangan -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Bukti Bayar Awal</label>
+                            <input type="file" name="bukti_pembayaran" 
+                                style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 12px 15px; outline: none; font-size: 12px;" />
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Catatan / Keterangan</label>
+                            <input type="text" name="catatan" value="{{ old('catatan') }}" 
+                                style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px; outline: none;" placeholder="Contoh: Pembayaran UKT" />
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="rounded-2xl bg-white/5 border border-white/10 p-6 space-y-4">
-                <h2 class="text-lg font-bold text-emerald-400 flex items-center gap-2">
-                    <i class="fa-solid fa-receipt"></i> Data Pembayaran Pertama (DP / Lunas)
-                </h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-sm text-emerald-100/80 font-medium">Jumlah Bayar (Rp)</label>
-                        <input type="number" name="jumlah_bayar" value="{{ old('jumlah_bayar') }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:ring-emerald-400 focus:border-emerald-400 text-white" required />
-                        @error('jumlah_bayar') <p class="mt-1 text-xs text-red-400">{{ $message }}</p> @enderror
-                    </div>
-
-                    <div>
-                        <label class="text-sm text-emerald-100/80 font-medium">Tanggal Bayar</label>
-                        <input type="date" name="tanggal_bayar" value="{{ old('tanggal_bayar', date('Y-m-d')) }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:ring-emerald-400 focus:border-emerald-400 text-white" required />
-                        @error('tanggal_bayar') <p class="mt-1 text-xs text-red-400">{{ $message }}</p> @enderror
-                    </div>
-
-                    <div class="md:col-span-2">
-                        <label class="text-sm text-emerald-100/80 font-medium">Bukti Pembayaran (Foto/Scan)</label>
-                        <input type="file" name="bukti_pembayaran" accept="image/*" class="mt-2 w-full rounded-xl bg-white/5 border border-white/10 file:bg-white/10 file:border-0 file:text-white file:px-4 file:py-2 file:rounded-xl" />
-                        @error('bukti_pembayaran') <p class="mt-1 text-xs text-red-400">{{ $message }}</p> @enderror
-                    </div>
-
-                    <div class="md:col-span-2">
-                        <label class="text-sm text-emerald-100/80 font-medium">Keterangan Transaksi</label>
-                        <input type="text" name="keterangan_bayar" value="{{ old('keterangan_bayar') }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:ring-emerald-400 focus:border-emerald-400 text-white" placeholder="Contoh: Pembayaran melalui Bank Transfer" />
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex items-center justify-end">
-                <button type="submit" class="h-12 px-10 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition font-bold text-white shadow-lg shadow-emerald-600/20">
-                    SIMPAN DATA PEMBAYARAN
+            <!-- Submit -->
+            <div style="display: flex; justify-content: center; md:justify-content: flex-end;">
+                <button type="submit" 
+                    style="background: linear-gradient(to right, #059669, #10b981); color: white; border: none; padding: 18px 60px; border-radius: 18px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 12px; box-shadow: 0 15px 30px rgba(16,185,129,0.3);">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    SIMPAN TAGIHAN
                 </button>
             </div>
         </form>

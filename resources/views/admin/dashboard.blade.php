@@ -23,19 +23,22 @@
             </div>
         @endif
 
-        <div class="rounded-2xl bg-emerald-500/10 border border-emerald-400/15 p-5">
-            <div class="text-emerald-100/70 text-sm">Total Tagihan (Rp)</div>
-            <div class="mt-2 text-2xl font-semibold">{{ number_format($totalBiaya, 0, ',', '.') }}</div>
-        </div>
-        <div class="rounded-2xl bg-sky-500/10 border border-sky-400/15 p-5">
-            <div class="text-sky-100/80 text-sm">Total Dibayar (Rp)</div>
-            <div class="mt-2 text-2xl font-semibold">{{ number_format($totalDibayar, 0, ',', '.') }}</div>
-        </div>
-        <div class="rounded-2xl bg-red-500/10 border border-red-400/15 p-5">
-            <div class="text-red-100/80 text-sm">Sisa Piutang (Rp)</div>
-            <div class="mt-2 text-2xl font-semibold">{{ number_format($totalBiaya - $totalDibayar, 0, ',', '.') }}</div>
-        </div>
         @if (auth()->user()->role === 'keuangan')
+            <div class="rounded-2xl bg-emerald-500/10 border border-emerald-400/15 p-5">
+                <div class="text-emerald-100/70 text-sm">Total Tagihan (Rp)</div>
+                <div class="mt-2 text-2xl font-semibold">{{ number_format($totalBiaya, 0, ',', '.') }}</div>
+            </div>
+
+            <div class="rounded-2xl bg-sky-500/10 border border-sky-400/15 p-5">
+                <div class="text-sky-100/80 text-sm">Total Dibayar (Rp)</div>
+                <div class="mt-2 text-2xl font-semibold">{{ number_format($totalDibayar, 0, ',', '.') }}</div>
+            </div>
+
+            <div class="rounded-2xl bg-red-500/10 border border-red-400/15 p-5">
+                <div class="text-red-100/80 text-sm">Sisa Piutang (Rp)</div>
+                <div class="mt-2 text-2xl font-semibold">{{ number_format($totalBiaya - $totalDibayar, 0, ',', '.') }}</div>
+            </div>
+
             <div class="rounded-2xl bg-violet-500/10 border border-violet-400/15 p-5">
                 <div class="text-violet-100/80 text-sm">Target Mahasiswa</div>
                 <div class="mt-2 text-3xl font-semibold">{{ number_format($totalMahasiswa) }}</div>
@@ -96,20 +99,31 @@
                 }]
             },
             options: {
-                animation: false,
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false }
+                    legend: {
+                        display: false
+                    }
                 },
                 scales: {
-                    x: {
-                        ticks: { color: 'rgba(236, 253, 245, 0.85)' },
-                        grid: { color: 'rgba(255, 255, 255, 0.06)' }
-                    },
                     y: {
-                        ticks: { color: 'rgba(236, 253, 245, 0.85)' },
-                        grid: { color: 'rgba(255, 255, 255, 0.06)' }
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.05)'
+                        },
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.5)',
+                            stepSize: 1
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.5)'
+                        }
                     }
                 }
             }
@@ -123,29 +137,31 @@
                 datasets: [{
                     data: roleValues,
                     backgroundColor: [
-                        'rgba(16, 185, 129, 0.85)',
-                        'rgba(34, 197, 94, 0.60)',
-                        'rgba(5, 150, 105, 0.45)',
+                        'rgba(16, 185, 129, 0.6)',
+                        'rgba(16, 185, 129, 0.4)',
+                        'rgba(16, 185, 129, 0.2)'
                     ],
-                    borderColor: 'rgba(5, 46, 35, 1)',
-                    borderWidth: 2,
+                    borderColor: 'rgba(16, 185, 129, 0.8)',
+                    borderWidth: 1,
+                    hoverOffset: 10
                 }]
             },
             options: {
-                animation: false,
                 responsive: true,
                 maintainAspectRatio: false,
-                cutout: '68%',
                 plugins: {
                     legend: {
                         position: 'bottom',
                         labels: {
-                            color: 'rgba(236, 253, 245, 0.85)',
-                            boxWidth: 12,
-                            boxHeight: 12,
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            padding: 20,
+                            font: {
+                                size: 11
+                            }
                         }
                     }
-                }
+                },
+                cutout: '70%'
             }
         });
     </script>

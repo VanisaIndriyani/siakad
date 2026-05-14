@@ -3,79 +3,110 @@
         @include('mahasiswa.partials.sidebar')
     </x-slot:sidebar>
 
-    <div class="space-y-6 text-white">
-        <div>
-            <h1 class="text-2xl font-bold">Riwayat Pembayaran</h1>
-            <p class="text-sm text-emerald-100/70">Daftar pembayaran semester dan status tagihan Anda.</p>
+    <div style="display: flex; flex-direction: column; gap: 30px; padding-bottom: 50px;">
+        <!-- Header -->
+        <div style="display: flex; flex-direction: column; gap: 5px;">
+            <h1 style="color: white; font-size: 1.8rem; font-weight: 800; margin: 0; letter-spacing: -0.5px;">RIWAYAT PEMBAYARAN</h1>
+            <p style="color: rgba(52,211,153,0.6); font-size: 14px; font-weight: 500;">Daftar pembayaran semester dan status tagihan akademik Anda.</p>
         </div>
 
-        <div class="grid grid-cols-1 gap-6">
+        <div style="display: flex; flex-direction: column; gap: 25px;">
             @forelse($pembayarans as $p)
-            <div class="rounded-2xl bg-white/5 border border-white/10 overflow-hidden">
-                <div class="p-6 border-b border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/5">
+            <div style="background-color: #0d2a23 !important; border-radius: 24px; border: 1px solid rgba(255,255,255,0.08); overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.2);">
+                <!-- Card Header -->
+                <div style="padding: 25px 30px; background: linear-gradient(135deg, rgba(16,185,129,0.1) 0%, transparent 100%); border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px;">
                     <div>
-                        <div class="text-xs text-emerald-100/40 uppercase tracking-wider font-semibold">Semester {{ $p->semester }}</div>
-                        <div class="text-xl font-bold">{{ $p->tahun_ajaran }}</div>
+                        <div style="color: rgba(52,211,153,0.6); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px;">Semester {{ $p->semester }}</div>
+                        <div style="color: white; font-size: 1.4rem; font-weight: 800; margin-top: 2px;">TA {{ $p->tahun_ajaran }}</div>
                     </div>
-                    <div class="flex flex-wrap items-center gap-6">
-                        <div>
-                            <div class="text-xs text-emerald-100/40 font-medium">Total Tagihan</div>
-                            <div class="text-lg font-bold text-emerald-400">Rp {{ number_format($p->total_biaya, 0, ',', '.') }}</div>
+                    
+                    <div style="display: flex; flex-wrap: wrap; gap: 30px; align-items: center;">
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <span style="color: rgba(255,255,255,0.3); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Total Tagihan</span>
+                            <span style="color: #34d399; font-size: 1.1rem; font-weight: 800;">Rp {{ number_format($p->total_biaya, 0, ',', '.') }}</span>
                         </div>
-                        <div>
-                            <div class="text-xs text-emerald-100/40 font-medium">Telah Dibayar</div>
-                            <div class="text-lg font-bold text-sky-400">Rp {{ number_format($p->total_dibayar, 0, ',', '.') }}</div>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <span style="color: rgba(255,255,255,0.3); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Telah Dibayar</span>
+                            <span style="color: #38bdf8; font-size: 1.1rem; font-weight: 800;">Rp {{ number_format($p->total_dibayar, 0, ',', '.') }}</span>
                         </div>
                         <div>
                             @php
-                                $badge = match($p->status_pembayaran) {
-                                    'Lunas' => 'bg-emerald-500/20 text-emerald-400 border-emerald-500/20',
-                                    'Cicil' => 'bg-amber-500/20 text-amber-400 border-amber-500/20',
-                                    default => 'bg-red-500/20 text-red-400 border-red-500/20'
+                                $statusStyle = match($p->status_pembayaran) {
+                                    'Lunas' => 'background-color: rgba(16,185,129,0.2); color: #10b981; border: 1px solid rgba(16,185,129,0.3);',
+                                    'Cicil' => 'background-color: rgba(245,158,11,0.2); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3);',
+                                    default => 'background-color: rgba(239,68,68,0.2); color: #f87171; border: 1px solid rgba(239,68,68,0.3);'
                                 };
                             @endphp
-                            <span class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-bold {{ $badge }}">
-                                {{ strtoupper($p->status_pembayaran) }}
+                            <span style="{{ $statusStyle }} padding: 6px 16px; border-radius: 10px; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;">
+                                {{ $p->status_pembayaran }}
                             </span>
                         </div>
                     </div>
                 </div>
 
-                <div class="p-6">
-                    <h3 class="text-sm font-semibold text-emerald-100/60 mb-4">Riwayat Transaksi</h3>
-                    <div class="space-y-3">
-                        @foreach($p->details as $detail)
-                        <div class="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
-                            <div class="flex items-center gap-4">
-                                <div class="text-sm font-bold">Rp {{ number_format($detail->jumlah_bayar, 0, ',', '.') }}</div>
-                                <div class="text-xs text-emerald-100/40">{{ $detail->tanggal_bayar->format('d/m/Y') }}</div>
+                <!-- Progress Bar -->
+                @php
+                    $persen = $p->total_biaya > 0 ? ($p->total_dibayar / $p->total_biaya) * 100 : 0;
+                    $persen = min(100, $persen);
+                @endphp
+                <div style="height: 6px; background-color: rgba(255,255,255,0.03); width: 100%; position: relative;">
+                    <div style="height: 100%; background: linear-gradient(to right, #10b981, #34d399); width: {{ $persen }}%; border-radius: 0 3px 3px 0; box-shadow: 0 0 10px rgba(16,185,129,0.3);"></div>
+                </div>
+
+                <div style="padding: 30px;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                        <i class="fa-solid fa-clock-rotate-left" style="color: rgba(52,211,153,0.4); font-size: 12px;"></i>
+                        <h3 style="color: rgba(255,255,255,0.5); font-size: 12px; font-weight: 800; margin: 0; text-transform: uppercase; letter-spacing: 1px;">Riwayat Transaksi</h3>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        @forelse($p->details as $detail)
+                        <div style="background-color: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 16px; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; gap: 15px;">
+                            <div style="display: flex; align-items: center; gap: 20px;">
+                                <div style="height: 40px; width: 40px; background-color: rgba(16,185,129,0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fa-solid fa-receipt" style="color: #10b981;"></i>
+                                </div>
+                                <div>
+                                    <div style="color: white; font-weight: 700; font-size: 14px;">Rp {{ number_format($detail->jumlah_bayar, 0, ',', '.') }}</div>
+                                    <div style="color: rgba(255,255,255,0.3); font-size: 11px; margin-top: 2px;">{{ $detail->tanggal_bayar->format('d F Y') }}</div>
+                                </div>
                             </div>
-                            <div class="flex items-center gap-4">
-                                <span class="text-xs text-emerald-100/60 italic">{{ $detail->keterangan }}</span>
+                            
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                @if($detail->keterangan)
+                                    <span style="color: rgba(255,255,255,0.4); font-size: 12px; font-style: italic;">{{ $detail->keterangan }}</span>
+                                @endif
                                 @if($detail->bukti_pembayaran)
-                                <a href="{{ asset('storage/'.$detail->bukti_pembayaran) }}" target="_blank" class="text-xs text-emerald-400 hover:underline">
-                                    <i class="fa-solid fa-image"></i> Bukti
+                                <a href="{{ asset('storage/'.$detail->bukti_pembayaran) }}" target="_blank" 
+                                   style="text-decoration: none; background-color: rgba(16,185,129,0.1); color: #34d399; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700; display: flex; align-items: center; gap: 6px; border: 1px solid rgba(16,185,129,0.2);">
+                                    <i class="fa-solid fa-image"></i> BUKTI
                                 </a>
                                 @endif
                             </div>
                         </div>
-                        @endforeach
+                        @empty
+                        <div style="text-align: center; padding: 20px; color: rgba(255,255,255,0.2); font-size: 13px; font-style: italic;">Belum ada riwayat transaksi.</div>
+                        @endforelse
                     </div>
                     
                     @if($p->catatan)
-                    <div class="mt-4 p-3 rounded-xl bg-amber-500/5 border border-amber-500/10">
-                        <div class="text-[10px] text-amber-500/60 uppercase font-bold">Catatan Keuangan:</div>
-                        <div class="text-xs text-emerald-100/80">{{ $p->catatan }}</div>
+                    <div style="margin-top: 25px; padding: 20px; border-radius: 16px; background-color: rgba(245,158,11,0.05); border: 1px solid rgba(245,158,11,0.1); display: flex; gap: 15px;">
+                        <i class="fa-solid fa-circle-info" style="color: #f59e0b; font-size: 1.1rem; margin-top: 2px;"></i>
+                        <div>
+                            <div style="color: #f59e0b; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">Catatan Bagian Keuangan:</div>
+                            <div style="color: rgba(255,255,255,0.7); font-size: 13px; line-height: 1.6;">{{ $p->catatan }}</div>
+                        </div>
                     </div>
                     @endif
                 </div>
             </div>
             @empty
-            <div class="rounded-2xl bg-white/5 border border-white/10 p-10 text-center">
-                <div class="text-emerald-100/30 text-5xl mb-4">
-                    <i class="fa-solid fa-money-bill-transfer"></i>
+            <div style="background-color: #0d2a23 !important; border-radius: 24px; border: 1px solid rgba(255,255,255,0.08); padding: 80px 40px; text-align: center;">
+                <div style="height: 100px; width: 100px; background-color: rgba(255,255,255,0.03); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px auto;">
+                    <i class="fa-solid fa-money-bill-transfer" style="font-size: 3rem; color: rgba(255,255,255,0.05);"></i>
                 </div>
-                <div class="text-emerald-100/50 font-medium">Belum ada data pembayaran yang tercatat.</div>
+                <h3 style="color: white; font-size: 1.1rem; font-weight: 700; margin: 0;">Belum Ada Riwayat</h3>
+                <p style="color: rgba(255,255,255,0.3); font-size: 14px; margin-top: 10px;">Data pembayaran semester Anda belum tercatat di sistem.</p>
             </div>
             @endforelse
         </div>
