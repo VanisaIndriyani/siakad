@@ -226,18 +226,18 @@ class DosenController extends Controller
 
         $headers = ['Nama', 'NIK', 'NIDN', 'NUPTK', 'Nomor SK', 'Nomor HP', 'Mata Kuliah'];
         foreach ($headers as $col => $label) {
-            $sheet->setCellValueByColumnAndRow($col + 1, 1, $label);
+            $sheet->setCellValue([$col + 1, 1], $label);
         }
 
         $rowIndex = 2;
         foreach ($rows as $row) {
-            $sheet->setCellValueByColumnAndRow(1, $rowIndex, $row->nama);
-            $sheet->setCellValueByColumnAndRow(2, $rowIndex, $row->nik);
-            $sheet->setCellValueByColumnAndRow(3, $rowIndex, $row->nidn);
-            $sheet->setCellValueByColumnAndRow(4, $rowIndex, $row->nuptk);
-            $sheet->setCellValueByColumnAndRow(5, $rowIndex, $row->nomor_sk);
-            $sheet->setCellValueByColumnAndRow(6, $rowIndex, $row->nomor_hp);
-            $sheet->setCellValueByColumnAndRow(7, $rowIndex, $row->mata_kuliah);
+            $sheet->setCellValue([1, $rowIndex], $row->nama);
+            $sheet->setCellValue([2, $rowIndex], $row->nik);
+            $sheet->setCellValue([3, $rowIndex], $row->nidn);
+            $sheet->setCellValue([4, $rowIndex], $row->nuptk);
+            $sheet->setCellValue([5, $rowIndex], $row->nomor_sk);
+            $sheet->setCellValue([6, $rowIndex], $row->nomor_hp);
+            $sheet->setCellValue([7, $rowIndex], $row->mata_kuliah);
             $rowIndex++;
         }
 

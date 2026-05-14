@@ -280,17 +280,17 @@ class AbsensiController extends Controller
         $headers = ['No', 'NPM', 'Nama', 'Status', 'Keterangan', 'Paraf'];
         $headerRow = 9;
         foreach ($headers as $col => $label) {
-            $sheet->setCellValueByColumnAndRow($col + 1, $headerRow, $label);
+            $sheet->setCellValue([$col + 1, $headerRow], $label);
         }
 
         $rowIndex = $headerRow + 1;
         foreach ($items as $i => $item) {
-            $sheet->setCellValueByColumnAndRow(1, $rowIndex, $i + 1);
-            $sheet->setCellValueByColumnAndRow(2, $rowIndex, $item->mahasiswa?->npm ?? '');
-            $sheet->setCellValueByColumnAndRow(3, $rowIndex, $item->mahasiswa?->nama_lengkap ?? '');
-            $sheet->setCellValueByColumnAndRow(4, $rowIndex, '');
-            $sheet->setCellValueByColumnAndRow(5, $rowIndex, '');
-            $sheet->setCellValueByColumnAndRow(6, $rowIndex, '');
+            $sheet->setCellValue([1, $rowIndex], $i + 1);
+            $sheet->setCellValue([2, $rowIndex], $item->mahasiswa?->npm ?? '');
+            $sheet->setCellValue([3, $rowIndex], $item->mahasiswa?->nama_lengkap ?? '');
+            $sheet->setCellValue([4, $rowIndex], '');
+            $sheet->setCellValue([5, $rowIndex], '');
+            $sheet->setCellValue([6, $rowIndex], '');
             $rowIndex++;
         }
 

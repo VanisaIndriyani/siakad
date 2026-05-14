@@ -256,18 +256,18 @@ class MahasiswaController extends Controller
 
         $headers = ['Nama', 'NPM', 'NIK', 'Angkatan', 'Program Studi', 'Nomor Telp', 'Status'];
         foreach ($headers as $col => $label) {
-            $sheet->setCellValueByColumnAndRow($col + 1, 1, $label);
+            $sheet->setCellValue([$col + 1, 1], $label);
         }
 
         $rowIndex = 2;
         foreach ($rows as $row) {
-            $sheet->setCellValueByColumnAndRow(1, $rowIndex, $row->nama_lengkap);
-            $sheet->setCellValueByColumnAndRow(2, $rowIndex, $row->npm);
-            $sheet->setCellValueByColumnAndRow(3, $rowIndex, $row->nik);
-            $sheet->setCellValueByColumnAndRow(4, $rowIndex, $row->angkatan);
-            $sheet->setCellValueByColumnAndRow(5, $rowIndex, $row->program_studi);
-            $sheet->setCellValueByColumnAndRow(6, $rowIndex, $row->nomor_telp);
-            $sheet->setCellValueByColumnAndRow(7, $rowIndex, $row->status_mahasiswa);
+            $sheet->setCellValue([1, $rowIndex], $row->nama_lengkap);
+            $sheet->setCellValue([2, $rowIndex], $row->npm);
+            $sheet->setCellValue([3, $rowIndex], $row->nik);
+            $sheet->setCellValue([4, $rowIndex], $row->angkatan);
+            $sheet->setCellValue([5, $rowIndex], $row->program_studi);
+            $sheet->setCellValue([6, $rowIndex], $row->nomor_telp);
+            $sheet->setCellValue([7, $rowIndex], $row->status_mahasiswa);
             $rowIndex++;
         }
 
