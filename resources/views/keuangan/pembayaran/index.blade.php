@@ -1,6 +1,6 @@
 <x-portal-layout :title="'Pembayaran - '.config('app.name')" subtitle="Manajemen Pembayaran">
     <x-slot:sidebar>
-        @include('keuangan.partials.sidebar')
+        @include('admin.partials.sidebar')
     </x-slot:sidebar>
 
     <div style="display: flex; flex-direction: column; gap: 25px; padding-bottom: 50px;">

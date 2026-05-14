@@ -70,7 +70,7 @@
                         Tambah Cicilan
                     </h3>
                     
-                    <form action="{{ route('keuangan.pembayaran.add-cicilan', $pembayaran) }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 20px;">
+                    <form action="{{ route('keuangan.pembayaran.cicilan', $pembayaran) }}" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 20px;">
                         @csrf
                         <div style="display: flex; flex-direction: column; gap: 8px;">
                             <label style="color: rgba(255,255,255,0.4); font-size: 10px; font-weight: 700; text-transform: uppercase;">Jumlah Bayar (Rp)*</label>
