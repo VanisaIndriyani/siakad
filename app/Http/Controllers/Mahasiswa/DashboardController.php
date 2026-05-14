@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Mahasiswa;
 use App\Http\Controllers\Controller;
 use App\Models\Khs;
 use App\Models\Krs;
+use App\Models\Pembayaran;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -62,5 +63,22 @@ class DashboardController extends Controller
             'chartLabels' => $ipsChart->pluck('semester')->map(fn ($s) => 'S'.$s),
             'chartValues' => $ipsChart->pluck('ips'),
         ]);
+    }
+
+    public function pembayaran(Request $request): View
+    {
+        /** @var User $user */
+        $user = $request->user();
+        $mahasiswa = $user->mahasiswa;
+
+        $pembayarans = Pembayaran::query()
+            ->with(['details' => function($q) {
+                $q->orderByDesc('tanggal_bayar');
+            }])
+            ->where('mahasiswa_id', $mahasiswa->id)
+            ->orderByDesc('semester')
+            ->get();
+
+        return view('mahasiswa.pembayaran.index', compact('pembayarans'));
     }
 }

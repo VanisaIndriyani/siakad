@@ -18,6 +18,7 @@ use App\Http\Controllers\Mahasiswa\BiodataPdfController;
 use App\Http\Controllers\Mahasiswa\KhsController as MahasiswaKhsController;
 use App\Http\Controllers\Mahasiswa\KrsController as MahasiswaKrsController;
 use App\Http\Controllers\Mahasiswa\ProfilController as MahasiswaProfilController;
+use App\Http\Controllers\Keuangan\PembayaranController as KeuanganPembayaranController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -91,6 +92,8 @@ Route::prefix('mahasiswa')
         Route::get('/absensi', [MahasiswaAbsensiController::class, 'index'])->name('absensi.index');
         Route::get('/absensi/{mataKuliah}/{semester}', [MahasiswaAbsensiController::class, 'show'])->name('absensi.show');
 
+        Route::get('/pembayaran', [MahasiswaDashboardController::class, 'pembayaran'])->name('pembayaran.index');
+
         Route::get('/biodata/pdf', BiodataPdfController::class)->name('biodata.pdf');
     });
 
@@ -114,6 +117,15 @@ Route::prefix('dosen')
 
         Route::get('/profil', [DosenProfilController::class, 'show'])->name('profil');
         Route::post('/profil', [DosenProfilController::class, 'update'])->name('profil.update');
+    });
+
+Route::prefix('keuangan')
+    ->name('keuangan.')
+    ->middleware(['auth', 'role:keuangan'])
+    ->group(function () {
+        Route::get('/dashboard', [AdminDashboardController::class, '__invoke'])->name('dashboard');
+        Route::resource('pembayaran', KeuanganPembayaranController::class);
+        Route::post('pembayaran/{pembayaran}/cicilan', [KeuanganPembayaranController::class, 'addCicilan'])->name('pembayaran.cicilan');
     });
 
 require __DIR__.'/auth.php';
