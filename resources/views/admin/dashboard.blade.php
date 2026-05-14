@@ -1,25 +1,46 @@
-<x-portal-layout :title="'Dashboard Admin - '.config('app.name')" subtitle="Dashboard Admin">
+<x-portal-layout :title="(auth()->user()->role === 'keuangan' ? 'Dashboard Keuangan' : 'Dashboard Admin') . ' - '.config('app.name')" :subtitle="auth()->user()->role === 'keuangan' ? 'Dashboard Keuangan' : 'Dashboard Admin'">
     <x-slot:sidebar>
         @include('admin.partials.sidebar')
     </x-slot:sidebar>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        @if (auth()->user()->role === 'admin')
+            <div class="rounded-2xl bg-emerald-500/10 border border-emerald-400/15 p-5">
+                <div class="text-emerald-100/70 text-sm">Total Mahasiswa</div>
+                <div class="mt-2 text-3xl font-semibold">{{ number_format($totalMahasiswa) }}</div>
+            </div>
+            <div class="rounded-2xl bg-sky-500/10 border border-sky-400/15 p-5">
+                <div class="text-sky-100/80 text-sm">Total Dosen</div>
+                <div class="mt-2 text-3xl font-semibold">{{ number_format($totalDosen) }}</div>
+            </div>
+            <div class="rounded-2xl bg-amber-500/10 border border-amber-400/15 p-5">
+                <div class="text-amber-100/80 text-sm">Total KRS</div>
+                <div class="mt-2 text-3xl font-semibold">{{ number_format($totalKrs) }}</div>
+            </div>
+            <div class="rounded-2xl bg-violet-500/10 border border-violet-400/15 p-5">
+                <div class="text-violet-100/80 text-sm">Total KHS</div>
+                <div class="mt-2 text-3xl font-semibold">{{ number_format($totalKhs) }}</div>
+            </div>
+        @endif
+
         <div class="rounded-2xl bg-emerald-500/10 border border-emerald-400/15 p-5">
-            <div class="text-emerald-100/70 text-sm">Total Mahasiswa</div>
-            <div class="mt-2 text-3xl font-semibold">{{ number_format($totalMahasiswa) }}</div>
+            <div class="text-emerald-100/70 text-sm">Total Tagihan (Rp)</div>
+            <div class="mt-2 text-2xl font-semibold">{{ number_format($totalBiaya, 0, ',', '.') }}</div>
         </div>
         <div class="rounded-2xl bg-sky-500/10 border border-sky-400/15 p-5">
-            <div class="text-sky-100/80 text-sm">Total Dosen</div>
-            <div class="mt-2 text-3xl font-semibold">{{ number_format($totalDosen) }}</div>
+            <div class="text-sky-100/80 text-sm">Total Dibayar (Rp)</div>
+            <div class="mt-2 text-2xl font-semibold">{{ number_format($totalDibayar, 0, ',', '.') }}</div>
         </div>
-        <div class="rounded-2xl bg-amber-500/10 border border-amber-400/15 p-5">
-            <div class="text-amber-100/80 text-sm">Total KRS</div>
-            <div class="mt-2 text-3xl font-semibold">{{ number_format($totalKrs) }}</div>
+        <div class="rounded-2xl bg-red-500/10 border border-red-400/15 p-5">
+            <div class="text-red-100/80 text-sm">Sisa Piutang (Rp)</div>
+            <div class="mt-2 text-2xl font-semibold">{{ number_format($totalBiaya - $totalDibayar, 0, ',', '.') }}</div>
         </div>
-        <div class="rounded-2xl bg-violet-500/10 border border-violet-400/15 p-5">
-            <div class="text-violet-100/80 text-sm">Total KHS</div>
-            <div class="mt-2 text-3xl font-semibold">{{ number_format($totalKhs) }}</div>
-        </div>
+        @if (auth()->user()->role === 'keuangan')
+            <div class="rounded-2xl bg-violet-500/10 border border-violet-400/15 p-5">
+                <div class="text-violet-100/80 text-sm">Target Mahasiswa</div>
+                <div class="mt-2 text-3xl font-semibold">{{ number_format($totalMahasiswa) }}</div>
+            </div>
+        @endif
     </div>
 
     <div class="mt-6 grid grid-cols-1 xl:grid-cols-3 gap-4">
