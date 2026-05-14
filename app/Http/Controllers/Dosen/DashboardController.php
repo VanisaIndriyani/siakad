@@ -22,7 +22,9 @@ class DashboardController extends Controller
             ? Krs::query()
                 ->where('status_approval', 'approved')
                 ->whereHas('items.mataKuliah', function ($q) use ($dosen) {
-                    $q->where('dosen_id', $dosen->id);
+                    $q->where(function ($qq) use ($dosen) {
+                        $qq->where('dosen_id', $dosen->id)->orWhere('dosen_id_2', $dosen->id);
+                    });
                 })
                 ->count()
             : 0;
@@ -33,7 +35,9 @@ class DashboardController extends Controller
                 ->join('krs_items', 'krs_items.krs_id', '=', 'krs.id')
                 ->join('mata_kuliah', 'mata_kuliah.id', '=', 'krs_items.mata_kuliah_id')
                 ->where('krs.status_approval', 'approved')
-                ->where('mata_kuliah.dosen_id', $dosen->id)
+                ->where(function ($q) use ($dosen) {
+                    $q->where('mata_kuliah.dosen_id', $dosen->id)->orWhere('mata_kuliah.dosen_id_2', $dosen->id);
+                })
                 ->groupBy('krs.semester')
                 ->orderBy('krs.semester')
                 ->get()

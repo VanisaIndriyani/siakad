@@ -20,11 +20,17 @@ class MataKuliah extends Model
         'sks',
         'semester',
         'dosen_id',
+        'dosen_id_2',
     ];
 
     public function dosen(): BelongsTo
     {
         return $this->belongsTo(Dosen::class);
+    }
+
+    public function dosen2(): BelongsTo
+    {
+        return $this->belongsTo(Dosen::class, 'dosen_id_2');
     }
 
     public function krsItems(): HasMany

@@ -42,7 +42,9 @@ class AbsensiController extends Controller
 
         $mataKuliahQuery = MataKuliah::query()->orderBy('semester')->orderBy('kode');
         if ($dosen) {
-            $mataKuliahQuery->where('dosen_id', $dosen->id);
+            $mataKuliahQuery->where(function ($q) use ($dosen) {
+                $q->where('dosen_id', $dosen->id)->orWhere('dosen_id_2', $dosen->id);
+            });
         }
         if ($semester >= 1 && $semester <= 8) {
             $mataKuliahQuery->where('semester', $semester);
@@ -106,7 +108,11 @@ class AbsensiController extends Controller
                 Rule::exists('mata_kuliah', 'id')
                     ->where('semester', (int) $request->input('semester'))
                     ->where('jurusan', (string) $request->input('jurusan'))
-                    ->when($dosen, fn ($q) => $q->where('dosen_id', $dosen->id)),
+                    ->when($dosen, function ($q) use ($dosen) {
+                        $q->where(function ($qq) use ($dosen) {
+                            $qq->where('dosen_id', $dosen->id)->orWhere('dosen_id_2', $dosen->id);
+                        });
+                    }),
             ],
             'pertemuan' => ['required', 'integer', 'min:1', 'max:16'],
         ]);
@@ -166,7 +172,7 @@ class AbsensiController extends Controller
                 abort(403);
             }
             $absensi->loadMissing('mataKuliah');
-            abort_unless((int) ($absensi->mataKuliah?->dosen_id ?? 0) === (int) $dosen->id, 403);
+            abort_unless(in_array((int) $dosen->id, [(int) ($absensi->mataKuliah?->dosen_id ?? 0), (int) ($absensi->mataKuliah?->dosen_id_2 ?? 0)], true), 403);
         }
 
         $validated = $request->validate([
@@ -214,7 +220,7 @@ class AbsensiController extends Controller
                 abort(403);
             }
             $absensi->loadMissing('mataKuliah');
-            abort_unless((int) ($absensi->mataKuliah?->dosen_id ?? 0) === (int) $dosen->id, 403);
+            abort_unless(in_array((int) $dosen->id, [(int) ($absensi->mataKuliah?->dosen_id ?? 0), (int) ($absensi->mataKuliah?->dosen_id_2 ?? 0)], true), 403);
         }
 
         $absensi->load(['mataKuliah', 'items.mahasiswa']);
@@ -251,7 +257,7 @@ class AbsensiController extends Controller
                 abort(403);
             }
             $absensi->loadMissing('mataKuliah');
-            abort_unless((int) ($absensi->mataKuliah?->dosen_id ?? 0) === (int) $dosen->id, 403);
+            abort_unless(in_array((int) $dosen->id, [(int) ($absensi->mataKuliah?->dosen_id ?? 0), (int) ($absensi->mataKuliah?->dosen_id_2 ?? 0)], true), 403);
         }
 
         $absensi->load(['mataKuliah', 'items.mahasiswa']);

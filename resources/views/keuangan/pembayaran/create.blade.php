@@ -1,6 +1,6 @@
 <x-portal-layout :title="'Input Pembayaran - '.config('app.name')" subtitle="Input Pembayaran Baru">
     <x-slot:sidebar>
-        @include('keuangan.partials.sidebar')
+        @include('admin.partials.sidebar')
     </x-slot:sidebar>
 
     <div style="max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 30px; padding-bottom: 50px;">

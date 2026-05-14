@@ -31,8 +31,12 @@ class MahasiswaController extends Controller
     public function index(Request $request): View
     {
         $q = trim((string) $request->get('q', ''));
+        $status = trim((string) $request->get('status', ''));
 
         $query = Mahasiswa::query()->with('user');
+        if ($status !== '') {
+            $query->where('status_mahasiswa', $status);
+        }
         if ($q !== '') {
             $query->where(function ($sub) use ($q) {
                 $sub->where('nama_lengkap', 'like', "%{$q}%")
@@ -54,6 +58,7 @@ class MahasiswaController extends Controller
         return view('admin.mahasiswa.index', [
             'mahasiswa' => $mahasiswa,
             'q' => $q,
+            'status' => $status ?: null,
         ]);
     }
 
@@ -183,8 +188,12 @@ class MahasiswaController extends Controller
     public function exportPdf(Request $request)
     {
         $q = trim((string) $request->get('q', ''));
+        $status = trim((string) $request->get('status', ''));
 
         $query = Mahasiswa::query()->with('user')->orderByDesc('id');
+        if ($status !== '') {
+            $query->where('status_mahasiswa', $status);
+        }
         if ($q !== '') {
             $query->where(function ($sub) use ($q) {
                 $sub->where('nama_lengkap', 'like', "%{$q}%")
@@ -212,8 +221,12 @@ class MahasiswaController extends Controller
     public function exportExcel(Request $request)
     {
         $q = trim((string) $request->get('q', ''));
+        $status = trim((string) $request->get('status', ''));
 
         $query = Mahasiswa::query()->with('user')->orderByDesc('id');
+        if ($status !== '') {
+            $query->where('status_mahasiswa', $status);
+        }
         if ($q !== '') {
             $query->where(function ($sub) use ($q) {
                 $sub->where('nama_lengkap', 'like', "%{$q}%")

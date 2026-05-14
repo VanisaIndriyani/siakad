@@ -56,14 +56,15 @@ class DosenController extends Controller
     {
         $validated = $request->validate([
             'nama' => ['required', 'string', 'max:255'],
-            'nidn' => ['required', 'string', 'max:50', 'unique:dosen,nidn'],
-            'nik' => ['nullable', 'string', 'max:50', 'unique:dosen,nik'],
+            'nidn' => ['nullable', 'string', 'max:50', 'unique:dosen,nidn'],
+            'nik' => ['required', 'string', 'max:50', 'unique:dosen,nik'],
             'nuptk' => ['nullable', 'string', 'max:50', 'unique:dosen,nuptk'],
             'nomor_sk' => ['nullable', 'string', 'max:255'],
             'foto' => ['nullable', 'image', 'max:2048'],
         ]);
 
-        $emailBase = Str::lower(preg_replace('/\s+/', '', $validated['nidn'])).'@kampus.ac.id';
+        $identifier = (string) ($validated['nidn'] ?? $validated['nik']);
+        $emailBase = Str::lower(preg_replace('/\s+/', '', $identifier)).'@kampus.ac.id';
         $email = $emailBase;
         $i = 1;
         while (User::query()->where('email', $email)->exists()) {
@@ -87,7 +88,7 @@ class DosenController extends Controller
             'user_id' => $user->id,
             'nama' => $validated['nama'],
             'nik' => $validated['nik'] ?? null,
-            'nidn' => $validated['nidn'],
+            'nidn' => $validated['nidn'] ?? null,
             'nuptk' => $validated['nuptk'] ?? null,
             'nomor_sk' => $validated['nomor_sk'] ?? null,
             'alamat' => $validated['alamat'] ?? null,
@@ -119,8 +120,8 @@ class DosenController extends Controller
     {
         $validated = $request->validate([
             'nama' => ['required', 'string', 'max:255'],
-            'nidn' => ['required', 'string', 'max:50', 'unique:dosen,nidn,'.$dosen->id],
-            'nik' => ['nullable', 'string', 'max:50', 'unique:dosen,nik,'.$dosen->id],
+            'nidn' => ['nullable', 'string', 'max:50', 'unique:dosen,nidn,'.$dosen->id],
+            'nik' => ['required', 'string', 'max:50', 'unique:dosen,nik,'.$dosen->id],
             'nuptk' => ['nullable', 'string', 'max:50', 'unique:dosen,nuptk,'.$dosen->id],
             'nomor_sk' => ['nullable', 'string', 'max:255'],
             'foto' => ['nullable', 'image', 'max:2048'],
@@ -135,8 +136,8 @@ class DosenController extends Controller
 
         $dosen->fill([
             'nama' => $validated['nama'],
-            'nik' => $validated['nik'] ?? $dosen->nik,
-            'nidn' => $validated['nidn'],
+            'nik' => $validated['nik'],
+            'nidn' => $validated['nidn'] ?? $dosen->nidn,
             'nuptk' => $validated['nuptk'] ?? $dosen->nuptk,
             'nomor_sk' => $validated['nomor_sk'] ?? $dosen->nomor_sk,
         ])->save();

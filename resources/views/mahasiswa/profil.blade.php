@@ -109,6 +109,36 @@
                             @error('email') <div style="color: #f87171; font-size: 11px; margin-top: 4px;">{{ $message }}</div> @enderror
                         </div>
 
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Pendidikan Ayah</label>
+                                <input name="ayah_pendidikan" value="{{ old('ayah_pendidikan', $mahasiswa?->ayah_pendidikan ?? '') }}"
+                                    style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px; outline: none;" />
+                                @error('ayah_pendidikan') <div style="color: #f87171; font-size: 11px; margin-top: 4px;">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Penghasilan Ayah</label>
+                                <input name="ayah_penghasilan" value="{{ old('ayah_penghasilan', $mahasiswa?->ayah_penghasilan ?? '') }}"
+                                    style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px; outline: none;" />
+                                @error('ayah_penghasilan') <div style="color: #f87171; font-size: 11px; margin-top: 4px;">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Pendidikan Ibu</label>
+                                <input name="ibu_pendidikan" value="{{ old('ibu_pendidikan', $mahasiswa?->ibu_pendidikan ?? '') }}"
+                                    style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px; outline: none;" />
+                                @error('ibu_pendidikan') <div style="color: #f87171; font-size: 11px; margin-top: 4px;">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Penghasilan Ibu</label>
+                                <input name="ibu_penghasilan" value="{{ old('ibu_penghasilan', $mahasiswa?->ibu_penghasilan ?? '') }}"
+                                    style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px; outline: none;" />
+                                @error('ibu_penghasilan') <div style="color: #f87171; font-size: 11px; margin-top: 4px;">{{ $message }}</div> @enderror
+                            </div>
+                        </div>
+
                         <!-- Upload Foto -->
                         <div style="display: flex; flex-direction: column; gap: 8px;">
                             <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Foto Profil (Format: JPG, PNG, Max: 2MB)</label>
@@ -267,21 +297,11 @@
                                 <input type="date" name="ayah_tanggal_lahir" value="{{ old('ayah_tanggal_lahir', $mahasiswa?->ayah_tanggal_lahir?->format('Y-m-d')) }}" 
                                     style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px; outline: none;" />
                             </div>
-                            <div style="display: flex; flex-direction: column; gap: 8px;">
-                                <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Pendidikan Ayah</label>
-                                <input name="ayah_pendidikan" value="{{ old('ayah_pendidikan', $mahasiswa?->ayah_pendidikan ?? '') }}" 
-                                    style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px; outline: none;" />
-                            </div>
                         </div>
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
                             <div style="display: flex; flex-direction: column; gap: 8px;">
                                 <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Pekerjaan Ayah</label>
                                 <input name="ayah_pekerjaan" value="{{ old('ayah_pekerjaan', $mahasiswa?->ayah_pekerjaan ?? '') }}" 
-                                    style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px; outline: none;" />
-                            </div>
-                            <div style="display: flex; flex-direction: column; gap: 8px;">
-                                <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Penghasilan Ayah</label>
-                                <input name="ayah_penghasilan" value="{{ old('ayah_penghasilan', $mahasiswa?->ayah_penghasilan ?? '') }}" 
                                     style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px; outline: none;" />
                             </div>
                         </div>
@@ -321,21 +341,11 @@
                                 <input type="date" name="ibu_tanggal_lahir" value="{{ old('ibu_tanggal_lahir', $mahasiswa?->ibu_tanggal_lahir?->format('Y-m-d')) }}" 
                                     style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px; outline: none;" />
                             </div>
-                            <div style="display: flex; flex-direction: column; gap: 8px;">
-                                <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Pendidikan Ibu</label>
-                                <input name="ibu_pendidikan" value="{{ old('ibu_pendidikan', $mahasiswa?->ibu_pendidikan ?? '') }}" 
-                                    style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px; outline: none;" />
-                            </div>
                         </div>
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
                             <div style="display: flex; flex-direction: column; gap: 8px;">
                                 <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Pekerjaan Ibu</label>
                                 <input name="ibu_pekerjaan" value="{{ old('ibu_pekerjaan', $mahasiswa?->ibu_pekerjaan ?? '') }}" 
-                                    style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px; outline: none;" />
-                            </div>
-                            <div style="display: flex; flex-direction: column; gap: 8px;">
-                                <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Penghasilan Ibu</label>
-                                <input name="ibu_penghasilan" value="{{ old('ibu_penghasilan', $mahasiswa?->ibu_penghasilan ?? '') }}" 
                                     style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px; outline: none;" />
                             </div>
                         </div>

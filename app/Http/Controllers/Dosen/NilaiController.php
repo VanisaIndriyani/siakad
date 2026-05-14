@@ -24,12 +24,16 @@ class NilaiController extends Controller
 
         if ($dosen) {
             $query->whereHas('items.mataKuliah', function ($sub) use ($dosen) {
-                $sub->where('dosen_id', $dosen->id);
+                $sub->where(function ($q) use ($dosen) {
+                    $q->where('dosen_id', $dosen->id)->orWhere('dosen_id_2', $dosen->id);
+                });
             });
 
             $query->withCount(['items as items_count' => function ($sub) use ($dosen) {
                 $sub->whereHas('mataKuliah', function ($q) use ($dosen) {
-                    $q->where('dosen_id', $dosen->id);
+                    $q->where(function ($qq) use ($dosen) {
+                        $qq->where('dosen_id', $dosen->id)->orWhere('dosen_id_2', $dosen->id);
+                    });
                 });
             }]);
         } else {
@@ -58,7 +62,9 @@ class NilaiController extends Controller
         $dosen = request()->user()?->dosen;
         if ($dosen) {
             $allowed = $krs->items()->whereHas('mataKuliah', function ($q) use ($dosen) {
-                $q->where('dosen_id', $dosen->id);
+                $q->where(function ($qq) use ($dosen) {
+                    $qq->where('dosen_id', $dosen->id)->orWhere('dosen_id_2', $dosen->id);
+                });
             })->exists();
 
             abort_unless($allowed, 403);
@@ -66,7 +72,7 @@ class NilaiController extends Controller
 
         $krs->load(['mahasiswa', 'items.mataKuliah']);
         $items = $dosen
-            ? $krs->items->filter(fn ($it) => (int) ($it->mataKuliah?->dosen_id ?? 0) === (int) $dosen->id)->values()
+            ? $krs->items->filter(fn ($it) => in_array((int) $dosen->id, [(int) ($it->mataKuliah?->dosen_id ?? 0), (int) ($it->mataKuliah?->dosen_id_2 ?? 0)], true))->values()
             : $krs->items;
 
         $khs = Khs::query()
@@ -97,7 +103,9 @@ class NilaiController extends Controller
         $dosen = $request->user()?->dosen;
         if ($dosen) {
             $allowed = $krs->items()->whereHas('mataKuliah', function ($q) use ($dosen) {
-                $q->where('dosen_id', $dosen->id);
+                $q->where(function ($qq) use ($dosen) {
+                    $qq->where('dosen_id', $dosen->id)->orWhere('dosen_id_2', $dosen->id);
+                });
             })->exists();
 
             abort_unless($allowed, 403);
@@ -122,7 +130,7 @@ class NilaiController extends Controller
         $krs->load(['items.mataKuliah']);
         $mkIds = $dosen
             ? $krs->items
-                ->filter(fn ($it) => (int) ($it->mataKuliah?->dosen_id ?? 0) === (int) $dosen->id)
+                ->filter(fn ($it) => in_array((int) $dosen->id, [(int) ($it->mataKuliah?->dosen_id ?? 0), (int) ($it->mataKuliah?->dosen_id_2 ?? 0)], true))
                 ->pluck('mata_kuliah_id')
                 ->map(fn ($v) => (int) $v)
                 ->values()

@@ -48,15 +48,27 @@
                 <input type="number" name="semester" value="{{ old('semester', $mataKuliah->semester) }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" required />
                 @error('semester') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
             </div>
-            <div class="lg:col-span-2">
-                <label class="text-sm text-emerald-100/80">Dosen Pengampu (opsional)</label>
-                <select name="dosen_id" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400">
-                    <option value="" class="text-black">-</option>
-                    @foreach ($dosen as $d)
-                        <option value="{{ $d->id }}" @selected(old('dosen_id', $mataKuliah->dosen_id) == $d->id) class="text-black">{{ $d->nama }} ({{ $d->nidn }})</option>
-                    @endforeach
-                </select>
-                @error('dosen_id') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
+            <div class="lg:col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div>
+                    <label class="text-sm text-emerald-100/80">Dosen 1 (opsional)</label>
+                    <select name="dosen_id" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400">
+                        <option value="" class="text-black">-</option>
+                        @foreach ($dosen as $d)
+                            <option value="{{ $d->id }}" @selected(old('dosen_id', $mataKuliah->dosen_id) == $d->id) class="text-black">{{ $d->nama }} ({{ $d->nidn }})</option>
+                        @endforeach
+                    </select>
+                    @error('dosen_id') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
+                </div>
+                <div>
+                    <label class="text-sm text-emerald-100/80">Dosen 2 (opsional)</label>
+                    <select name="dosen_id_2" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400">
+                        <option value="" class="text-black">-</option>
+                        @foreach ($dosen as $d)
+                            <option value="{{ $d->id }}" @selected(old('dosen_id_2', $mataKuliah->dosen_id_2) == $d->id) class="text-black">{{ $d->nama }} ({{ $d->nidn }})</option>
+                        @endforeach
+                    </select>
+                    @error('dosen_id_2') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
+                </div>
             </div>
         </div>
 

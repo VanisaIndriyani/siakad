@@ -27,7 +27,7 @@ class MataKuliahController extends Controller
         $jurusan = trim((string) $request->get('jurusan', ''));
         $semester = (int) $request->get('semester', 0);
 
-        $query = MataKuliah::query()->with('dosen');
+        $query = MataKuliah::query()->with(['dosen', 'dosen2']);
         if ($jurusan !== '') {
             $query->where('jurusan', $jurusan);
         }
@@ -71,6 +71,7 @@ class MataKuliahController extends Controller
             'sks' => ['required', 'integer', 'min:1', 'max:24'],
             'semester' => ['required', 'integer', 'min:1', 'max:8'],
             'dosen_id' => ['nullable', 'exists:dosen,id'],
+            'dosen_id_2' => ['nullable', 'exists:dosen,id', 'different:dosen_id'],
         ]);
 
         MataKuliah::query()->create($validated);
@@ -98,6 +99,7 @@ class MataKuliahController extends Controller
             'sks' => ['required', 'integer', 'min:1', 'max:24'],
             'semester' => ['required', 'integer', 'min:1', 'max:8'],
             'dosen_id' => ['nullable', 'exists:dosen,id'],
+            'dosen_id_2' => ['nullable', 'exists:dosen,id', 'different:dosen_id'],
         ]);
 
         $mataKuliah->update($validated);

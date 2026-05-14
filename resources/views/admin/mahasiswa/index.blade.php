@@ -9,11 +9,11 @@
             <div class="text-sm text-emerald-100/70">CRUD, pencarian, export, dan detail mahasiswa.</div>
         </div>
         <div class="flex items-center gap-2">
-            <a href="{{ route('admin.mahasiswa.export.pdf', ['q' => $q]) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+            <a href="{{ route('admin.mahasiswa.export.pdf', ['q' => $q, 'status' => $status]) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                 <i class="fa-solid fa-file-pdf text-red-300"></i>
                 <span class="text-sm font-medium">PDF</span>
             </a>
-            <a href="{{ route('admin.mahasiswa.export.excel', ['q' => $q]) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+            <a href="{{ route('admin.mahasiswa.export.excel', ['q' => $q, 'status' => $status]) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                 <i class="fa-solid fa-file-excel text-emerald-300"></i>
                 <span class="text-sm font-medium">Excel</span>
             </a>
@@ -26,12 +26,13 @@
 
     <div class="mt-5" x-data="{
         q: @js($q),
+        status: @js($status),
         tableHtml: null,
         loading: false,
         timer: null,
         fetchTable() {
             this.loading = true;
-            fetch(`{{ route('admin.mahasiswa.index') }}?q=${encodeURIComponent(this.q || '')}&partial=1`, {
+            fetch(`{{ route('admin.mahasiswa.index') }}?q=${encodeURIComponent(this.q || '')}&status=${encodeURIComponent(this.status || '')}&partial=1`, {
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
             .then(r => r.text())
@@ -53,7 +54,7 @@
                     <i class="fa-solid fa-circle-notch fa-spin"></i>
                 </div>
             </div>
-            <a href="{{ route('admin.mahasiswa.index') }}" class="h-11 px-4 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+            <a href="{{ route('admin.mahasiswa.index', ['status' => $status]) }}" class="h-11 px-4 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                 Reset
             </a>
         </div>

@@ -74,7 +74,12 @@
                                         <td class="px-4 py-3 font-medium">{{ $row->kode }}</td>
                                         <td class="px-4 py-3 text-emerald-100/80">{{ $row->nama }}</td>
                                         <td class="px-4 py-3 text-emerald-100/80">{{ $row->sks }}</td>
-                                        <td class="px-4 py-3 text-emerald-100/80">{{ $row->dosen?->nama ?? '-' }}</td>
+                                        <td class="px-4 py-3 text-emerald-100/80">
+                                            <div class="font-medium text-white">{{ $row->dosen?->nama ?? '-' }}</div>
+                                            @if ($row->dosen2?->nama)
+                                                <div class="text-xs text-emerald-100/70 mt-1">{{ $row->dosen2?->nama }}</div>
+                                            @endif
+                                        </td>
                                         <td class="px-4 py-3">
                                             <div class="flex items-center justify-end gap-2">
                                                 <a href="{{ route('admin.mata-kuliah.edit', $row) }}" class="h-9 w-9 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition" title="Edit">
