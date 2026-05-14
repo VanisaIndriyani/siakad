@@ -57,6 +57,11 @@
                                 <span class="inline-flex items-center rounded-full border px-3 py-1 text-xs {{ $badge }}">
                                     {{ strtoupper($row->status_approval) }}
                                 </span>
+                                @if ($row->status_approval === 'rejected' && $row->catatan_approval)
+                                    <div class="mt-1.5 text-[11px] text-red-200/80 italic max-w-[180px] leading-tight">
+                                        Ket: {{ $row->catatan_approval }}
+                                    </div>
+                                @endif
                             </td>
                             <td class="px-4 py-3">
                                 <div class="flex items-center justify-end gap-2">
