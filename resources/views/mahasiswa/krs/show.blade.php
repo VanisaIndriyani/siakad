@@ -87,7 +87,7 @@
                 <td style="width: 50%; vertical-align: top;">
                     <table style="width: 100%; border-collapse: collapse;">
                         <tr><td style="width: 140px;">Jenjang/Program</td><td style="width: 10px; text-align: center;">:</td><td>{{ $jenjang }}</td></tr>
-                        <tr><td>Fakultas</td><td style="text-align: center;">:</td><td>-</td></tr>
+                        <tr><td>Fakultas</td><td style="text-align: center;">:</td><td>{{ $mahasiswa?->fakultas ?? '-' }}</td></tr>
                         <tr><td>Program Studi</td><td style="text-align: center;">:</td><td>{{ $mahasiswa?->program_studi ?? '-' }}</td></tr>
                     </table>
                 </td>

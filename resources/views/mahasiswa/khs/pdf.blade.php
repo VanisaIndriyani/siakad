@@ -8,9 +8,9 @@
         @page { margin: 16mm 14mm; }
         body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #111827; }
         table { width: 100%; border-collapse: collapse; }
-        .kop-title-1 { color: #111827; font-size: 18px; font-weight: 800; margin: 0; line-height: 1.15; }
-        .kop-title-2 { color: #111827; font-size: 26px; font-weight: 900; margin: 2px 0 0; letter-spacing: 0.6px; line-height: 1.1; }
-        .kop-title-3 { color: #111827; font-size: 18px; font-weight: 900; margin: 1px 0 0; line-height: 1.15; }
+        .kop-title-1 { color: #111827; font-size: 19px; font-weight: 800; margin: 0; line-height: 1.12; }
+        .kop-title-2 { color: #111827; font-size: 28px; font-weight: 900; margin: 1px 0 0; letter-spacing: 0.6px; line-height: 1.08; }
+        .kop-title-3 { color: #111827; font-size: 19px; font-weight: 900; margin: 1px 0 0; line-height: 1.12; }
         .kop-meta { color: #111827; font-size: 11px; margin-top: 3px; line-height: 1.2; }
         .kop-line-1 { border-top: 3px solid #6b7280; margin-top: 7px; }
         .kop-line-2 { border-top: 1px solid #6b7280; margin-top: 3px; }
@@ -56,9 +56,9 @@
 
     <table>
         <tr>
-            <td style="width: 120px; vertical-align: middle; padding-top: 2px;">
+            <td style="width: 135px; vertical-align: middle; padding-top: 2px;">
                 @if($logoBase64)
-                    <img src="{{ $logoBase64 }}" alt="Logo" style="display: block; width: 115px; height: auto;" />
+                    <img src="{{ $logoBase64 }}" alt="Logo" style="display: block; width: 125px; height: auto;" />
                 @endif
             </td>
             <td style="text-align: center;">
@@ -69,7 +69,7 @@
                 <div class="kop-meta">{{ $kop5 }}</div>
                 <div class="kop-meta">{{ $kop6 }}</div>
             </td>
-            <td style="width: 120px;"></td>
+            <td style="width: 135px;"></td>
         </tr>
     </table>
     <div class="kop-line-1"></div>
@@ -85,6 +85,11 @@
                         <td class="label">Jenjang/Program</td>
                         <td class="colon">:</td>
                         <td class="value">{{ $jenjang }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Fakultas</td>
+                        <td class="colon">:</td>
+                        <td class="value">{{ $mahasiswa?->fakultas ?? '-' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Program Studi</td>

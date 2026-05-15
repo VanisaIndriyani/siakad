@@ -67,12 +67,29 @@
             </form>
         </div>
 
+        <form id="bulkDeleteForm" action="{{ route('keuangan.pembayaran.bulk-delete') }}" method="POST" class="no-print" onsubmit="return confirm('Hapus semua pembayaran yang dicentang?')">
+            @csrf
+            @method('DELETE')
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+                <div id="bulkDeleteHint" style="color: rgba(255,255,255,0.35); font-size: 12px; font-weight: 600;">
+                    Pilih data dengan ceklis untuk hapus cepat.
+                </div>
+                <button id="bulkDeleteBtn" type="submit" disabled
+                        style="height: 44px; padding: 0 16px; background-color: rgba(239,68,68,0.12); color: #f87171; border-radius: 12px; border: 1px solid rgba(239,68,68,0.22); font-weight: 900; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 1px; opacity: .55;">
+                    <i class="fa-solid fa-trash-can"></i>
+                    Hapus Terpilih (0)
+                </button>
+            </div>
+
         <!-- Table Card -->
         <div style="background-color: #0d2a23 !important; border-radius: 24px; border: 1px solid rgba(255,255,255,0.08); overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
             <div style="overflow-x: auto;">
                 <table style="width: 100%; border-collapse: collapse; min-width: 900px;">
                     <thead>
                         <tr style="background-color: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <th style="padding: 20px 15px; width: 44px; text-align: center; color: rgba(52,211,153,0.5); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;">
+                                <input id="selectAllPayments" type="checkbox" style="width: 16px; height: 16px; accent-color: #10b981; cursor: pointer;" />
+                            </th>
                             <th style="padding: 20px 25px; text-align: left; color: rgba(52,211,153,0.5); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;">Mahasiswa</th>
                             <th style="padding: 20px 25px; text-align: left; color: rgba(52,211,153,0.5); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;">Semester</th>
                             <th style="padding: 20px 25px; text-align: left; color: rgba(52,211,153,0.5); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;">Tagihan</th>
@@ -86,6 +103,10 @@
                     <tbody>
                         @forelse ($pembayarans as $p)
                             <tr style="border-bottom: 1px solid rgba(255,255,255,0.03); transition: background-color 0.3s;">
+                                <td style="padding: 20px 15px; text-align: center;">
+                                    <input class="payment-check" type="checkbox" name="ids[]" value="{{ $p->id }}"
+                                           style="width: 16px; height: 16px; accent-color: #10b981; cursor: pointer;" />
+                                </td>
                                 <td style="padding: 20px 25px;">
                                     <div style="color: white; font-weight: 700; font-size: 14px;">{{ $p->mahasiswa->nama_lengkap }}</div>
                                     <div style="color: rgba(52,211,153,0.5); font-family: monospace; font-size: 12px; margin-top: 3px; font-weight: 600;">{{ $p->mahasiswa->npm }}</div>
@@ -140,7 +161,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" style="padding: 60px 0; text-align: center;">
+                                <td colspan="9" style="padding: 60px 0; text-align: center;">
                                     <i class="fa-solid fa-folder-open" style="font-size: 3rem; color: rgba(255,255,255,0.05); display: block; margin-bottom: 15px;"></i>
                                     <span style="color: rgba(255,255,255,0.2); font-size: 14px; font-weight: 500;">Belum ada data pembayaran yang tercatat.</span>
                                 </td>
@@ -150,6 +171,7 @@
                 </table>
             </div>
         </div>
+        </form>
 
         @if($pembayarans->hasPages())
             <div style="margin-top: 15px;">
@@ -165,4 +187,41 @@
             table { min-width: 0 !important; }
         }
     </style>
+
+    <script>
+        (function () {
+            const selectAll = document.getElementById('selectAllPayments');
+            const checks = Array.from(document.querySelectorAll('.payment-check'));
+            const btn = document.getElementById('bulkDeleteBtn');
+
+            if (!btn || checks.length === 0) {
+                if (selectAll) selectAll.disabled = true;
+                return;
+            }
+
+            const update = () => {
+                const checked = checks.filter((c) => c.checked).length;
+                btn.textContent = `Hapus Terpilih (${checked})`;
+                btn.disabled = checked === 0;
+                btn.style.opacity = checked === 0 ? '.55' : '1';
+                btn.style.cursor = checked === 0 ? 'not-allowed' : 'pointer';
+
+                if (selectAll) {
+                    selectAll.checked = checked === checks.length;
+                    selectAll.indeterminate = checked > 0 && checked < checks.length;
+                }
+            };
+
+            checks.forEach((c) => c.addEventListener('change', update));
+
+            if (selectAll) {
+                selectAll.addEventListener('change', () => {
+                    checks.forEach((c) => { c.checked = selectAll.checked; });
+                    update();
+                });
+            }
+
+            update();
+        })();
+    </script>
 </x-portal-layout>

@@ -133,8 +133,10 @@
                         <!-- Tanggal Bayar -->
                         <div style="display: flex; flex-direction: column; gap: 8px;">
                             <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Tanggal Bayar</label>
-                            <input type="date" name="tanggal_bayar" value="{{ old('tanggal_bayar', date('Y-m-d')) }}" 
-                                style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px; outline: none; font-weight: 600;" />
+                            <input type="hidden" name="tanggal_bayar" id="tanggal_bayar" value="{{ old('tanggal_bayar', date('Y-m-d')) }}" />
+                            <input type="text" inputmode="numeric" autocomplete="off" placeholder="dd/mm/yyyy"
+                                   data-date-target="tanggal_bayar" value="{{ old('tanggal_bayar', date('Y-m-d')) }}"
+                                   style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px; outline: none; font-weight: 600;" />
                         </div>
                     </div>
 
@@ -220,6 +222,70 @@
                     });
                 });
             });
+        })();
+
+        (function () {
+            const pad2 = (n) => String(n).padStart(2, '0');
+            const ymdToDmy = (ymd) => {
+                const m = String(ymd || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+                if (!m) return '';
+                return `${m[3]}/${m[2]}/${m[1]}`;
+            };
+            const dmyToYmd = (dmy) => {
+                const m = String(dmy || '').match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+                if (!m) return null;
+                const dd = parseInt(m[1], 10);
+                const mm = parseInt(m[2], 10);
+                const yyyy = parseInt(m[3], 10);
+                if (yyyy < 1900 || yyyy > 2100) return null;
+                if (mm < 1 || mm > 12) return null;
+                if (dd < 1 || dd > 31) return null;
+                const dt = new Date(yyyy, mm - 1, dd);
+                if (dt.getFullYear() !== yyyy || dt.getMonth() !== (mm - 1) || dt.getDate() !== dd) return null;
+                return `${yyyy}-${pad2(mm)}-${pad2(dd)}`;
+            };
+            const normalizeDmyTyping = (raw) => {
+                const digits = String(raw || '').replace(/[^\d]/g, '').slice(0, 8);
+                const dd = digits.slice(0, 2);
+                const mm = digits.slice(2, 4);
+                const yyyy = digits.slice(4, 8);
+                let out = dd;
+                if (mm.length) out += '/' + mm;
+                if (yyyy.length) out += '/' + yyyy;
+                return out;
+            };
+
+            function bindDateInput(displayEl) {
+                const targetId = displayEl.getAttribute('data-date-target');
+                if (!targetId) return;
+                const hiddenEl = document.getElementById(targetId);
+                if (!hiddenEl) return;
+
+                const init = () => {
+                    const ymd = hiddenEl.value;
+                    displayEl.value = ymdToDmy(ymd) || '';
+                };
+
+                displayEl.addEventListener('input', () => {
+                    displayEl.value = normalizeDmyTyping(displayEl.value);
+                    const ymd = dmyToYmd(displayEl.value);
+                    hiddenEl.value = ymd || '';
+                });
+
+                displayEl.addEventListener('blur', () => {
+                    const ymd = dmyToYmd(displayEl.value);
+                    if (ymd) {
+                        hiddenEl.value = ymd;
+                        displayEl.value = ymdToDmy(ymd) || displayEl.value;
+                    } else if (displayEl.value.trim() === '') {
+                        hiddenEl.value = '';
+                    }
+                });
+
+                init();
+            }
+
+            document.querySelectorAll('input[data-date-target]').forEach(bindDateInput);
         })();
     </script>
 </x-portal-layout>

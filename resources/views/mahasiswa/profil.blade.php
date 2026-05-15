@@ -81,6 +81,20 @@
                                     style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px; outline: none;" required />
                             </div>
                         </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Fakultas</label>
+                                <select name="fakultas" style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px; outline: none;">
+                                    @php $selectedFak = old('fakultas', $mahasiswa?->fakultas ?? ''); @endphp
+                                    <option value="" @selected($selectedFak === '') style="background-color: #0d2a23;">-</option>
+                                    @foreach (($fakultasList ?? []) as $opt)
+                                        <option value="{{ $opt }}" @selected($selectedFak === $opt) style="background-color: #0d2a23;">{{ $opt }}</option>
+                                    @endforeach
+                                </select>
+                                @error('fakultas') <div style="color: #f87171; font-size: 11px; margin-top: 4px;">{{ $message }}</div> @enderror
+                            </div>
+                        </div>
                         
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px;">
                             <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -387,6 +401,10 @@
                     <div style="padding: 15px; background-color: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 15px;">
                         <span style="color: rgba(255,255,255,0.4); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Program Studi</span>
                         <div style="color: white; font-size: 13px; font-weight: 700; margin-top: 4px;">{{ $mahasiswa?->program_studi ?? '-' }}</div>
+                    </div>
+                    <div style="padding: 15px; background-color: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 15px;">
+                        <span style="color: rgba(255,255,255,0.4); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Fakultas</span>
+                        <div style="color: white; font-size: 13px; font-weight: 700; margin-top: 4px;">{{ $mahasiswa?->fakultas ?? '-' }}</div>
                     </div>
                     <div style="padding: 15px; background-color: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 15px;">
                         <span style="color: rgba(255,255,255,0.4); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Angkatan</span>

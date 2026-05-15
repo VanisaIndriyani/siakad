@@ -30,7 +30,6 @@ class PembayaranController extends Controller
         'Ujian Munaqasah',
         'Jurnal',
         'Wisuda',
-        'Wisudah',
         'Ujian Komprehensif',
     ];
 
@@ -255,6 +254,41 @@ class PembayaranController extends Controller
         return back()->with('success', 'Status pembayaran berhasil diperbarui.');
     }
 
+    public function updateDetail(Request $request, Pembayaran $pembayaran, PembayaranDetail $detail): RedirectResponse
+    {
+        abort_unless((int) $detail->pembayaran_id === (int) $pembayaran->id, 404);
+        abort_unless((string) ($detail->status_approval ?? 'approved') === 'approved', 403);
+
+        $validated = $request->validate([
+            'jumlah_bayar' => ['required', 'numeric', 'min:1'],
+            'tanggal_bayar' => ['required', 'date'],
+            'bukti_pembayaran' => ['nullable', 'image', 'max:2048'],
+            'keterangan' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $buktiPath = $detail->bukti_pembayaran;
+        if ($request->hasFile('bukti_pembayaran')) {
+            $newPath = $request->file('bukti_pembayaran')->store('pembayaran/bukti', 'public');
+            if ($buktiPath) {
+                Storage::disk('public')->delete($buktiPath);
+            }
+            $buktiPath = $newPath;
+        }
+
+        $detail->update([
+            'jumlah_bayar' => (float) $validated['jumlah_bayar'],
+            'tanggal_bayar' => $validated['tanggal_bayar'],
+            'bukti_pembayaran' => $buktiPath,
+            'keterangan' => $validated['keterangan'] ?: null,
+            'approved_at' => now(),
+            'approved_by_user_id' => $request->user()?->id,
+        ]);
+
+        $pembayaran->updateStatus();
+
+        return back()->with('success', 'Detail pembayaran berhasil diperbarui.');
+    }
+
     public function destroy(Pembayaran $pembayaran): RedirectResponse
     {
         foreach ($pembayaran->details as $detail) {
@@ -264,6 +298,39 @@ class PembayaranController extends Controller
         }
         $pembayaran->delete();
         return redirect()->route('keuangan.pembayaran.index')->with('success', 'Data pembayaran berhasil dihapus.');
+    }
+
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer'],
+        ]);
+
+        $ids = array_values(array_unique(array_map('intval', (array) $validated['ids'])));
+        if (count($ids) === 0) {
+            return back()->with('error', 'Tidak ada data yang dipilih.');
+        }
+
+        $rows = Pembayaran::query()
+            ->with('details')
+            ->whereIn('id', $ids)
+            ->get();
+
+        if ($rows->isEmpty()) {
+            return back()->with('error', 'Tidak ada data yang cocok untuk dihapus.');
+        }
+
+        foreach ($rows as $pembayaran) {
+            foreach ($pembayaran->details as $detail) {
+                if ($detail->bukti_pembayaran) {
+                    Storage::disk('public')->delete($detail->bukti_pembayaran);
+                }
+            }
+            $pembayaran->delete();
+        }
+
+        return redirect()->route('keuangan.pembayaran.index')->with('success', 'Data pembayaran terpilih berhasil dihapus.');
     }
 
     public function exportPdf(Request $request)

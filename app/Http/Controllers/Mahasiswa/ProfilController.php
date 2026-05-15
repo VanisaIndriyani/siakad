@@ -7,10 +7,17 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class ProfilController extends Controller
 {
+    private const FAKULTAS = [
+        'Fakultas Tarbiyah & Keguruan',
+        'Fakultas Syariah & Hukum',
+        'Fakultas Ekonomi & Bisnis Islam',
+    ];
+
     public function show(Request $request): View
     {
         /** @var User $user */
@@ -18,6 +25,7 @@ class ProfilController extends Controller
 
         return view('mahasiswa.profil', [
             'mahasiswa' => $user->mahasiswa,
+            'fakultasList' => self::FAKULTAS,
         ]);
     }
 
@@ -37,6 +45,7 @@ class ProfilController extends Controller
             'jenis_kelamin' => ['nullable', 'string', 'in:Laki-laki,Perempuan'],
             'nama_ibu' => ['nullable', 'string', 'max:255'],
             'agama' => ['nullable', 'string', 'max:50'],
+            'fakultas' => ['nullable', 'string', Rule::in(self::FAKULTAS)],
             'kewarganegaraan' => ['nullable', 'string', 'max:100'],
             'nik' => ['nullable', 'string', 'max:50'],
             'nisn' => ['nullable', 'string', 'max:50'],

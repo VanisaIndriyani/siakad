@@ -39,6 +39,7 @@ class Mahasiswa extends Model
         'nomor_telp',
         'angkatan',
         'program_studi',
+        'fakultas',
         'asal_sekolah',
         'status_mahasiswa',
         'foto_path',

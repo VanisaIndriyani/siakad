@@ -135,6 +135,8 @@ Route::prefix('keuangan')
         Route::get('pembayaran/export/pdf', [KeuanganPembayaranController::class, 'exportPdf'])->name('pembayaran.export.pdf');
         Route::get('pembayaran/{pembayaran}/pdf', [KeuanganPembayaranController::class, 'downloadPdf'])->name('pembayaran.pdf');
         Route::patch('pembayaran/{pembayaran}/detail/{detail}/status', [KeuanganPembayaranController::class, 'updateDetailStatus'])->name('pembayaran.detail.status');
+        Route::patch('pembayaran/{pembayaran}/detail/{detail}', [KeuanganPembayaranController::class, 'updateDetail'])->name('pembayaran.detail.update');
+        Route::delete('pembayaran/bulk-delete', [KeuanganPembayaranController::class, 'bulkDestroy'])->name('pembayaran.bulk-delete');
         Route::resource('pembayaran', KeuanganPembayaranController::class);
         Route::post('pembayaran/{pembayaran}/cicilan', [KeuanganPembayaranController::class, 'addCicilan'])->name('pembayaran.cicilan');
     });

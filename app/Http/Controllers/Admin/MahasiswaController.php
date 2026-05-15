@@ -28,6 +28,12 @@ class MahasiswaController extends Controller
         'Ekonomi Syariah',
     ];
 
+    private const FAKULTAS = [
+        'Fakultas Tarbiyah & Keguruan',
+        'Fakultas Syariah & Hukum',
+        'Fakultas Ekonomi & Bisnis Islam',
+    ];
+
     public function index(Request $request): View
     {
         $q = trim((string) $request->get('q', ''));
@@ -66,6 +72,7 @@ class MahasiswaController extends Controller
     {
         return view('admin.mahasiswa.create', [
             'jurusan' => self::JURUSAN,
+            'fakultasList' => self::FAKULTAS,
         ]);
     }
 
@@ -75,6 +82,7 @@ class MahasiswaController extends Controller
             'nama_lengkap' => ['required', 'string', 'max:255'],
             'npm' => ['required', 'string', 'max:50', 'unique:mahasiswa,npm'],
             'program_studi' => ['required', 'string', 'max:255', Rule::in(self::JURUSAN)],
+            'fakultas' => ['nullable', 'string', Rule::in(self::FAKULTAS)],
             'status_mahasiswa' => ['required', 'string', 'max:50'],
             'angkatan' => ['nullable', 'integer', 'min:1900', 'max:2100'],
             'foto' => ['nullable', 'image', 'max:2048'],
@@ -105,6 +113,7 @@ class MahasiswaController extends Controller
             'nama_lengkap' => $validated['nama_lengkap'],
             'npm' => $validated['npm'],
             'program_studi' => $validated['program_studi'],
+            'fakultas' => $validated['fakultas'] ?? null,
             'status_mahasiswa' => $validated['status_mahasiswa'],
             'angkatan' => $validated['angkatan'] ?? null,
             'foto_path' => $fotoPath,
@@ -134,6 +143,7 @@ class MahasiswaController extends Controller
         return view('admin.mahasiswa.edit', [
             'mahasiswa' => $mahasiswa,
             'jurusan' => self::JURUSAN,
+            'fakultasList' => self::FAKULTAS,
         ]);
     }
 
@@ -143,6 +153,7 @@ class MahasiswaController extends Controller
             'nama_lengkap' => ['required', 'string', 'max:255'],
             'npm' => ['required', 'string', 'max:50', 'unique:mahasiswa,npm,'.$mahasiswa->id],
             'program_studi' => ['required', 'string', 'max:255', Rule::in(self::JURUSAN)],
+            'fakultas' => ['nullable', 'string', Rule::in(self::FAKULTAS)],
             'status_mahasiswa' => ['required', 'string', 'max:50'],
             'angkatan' => ['nullable', 'integer', 'min:1900', 'max:2100'],
             'foto' => ['nullable', 'image', 'max:2048'],
@@ -159,6 +170,7 @@ class MahasiswaController extends Controller
             'nama_lengkap' => $validated['nama_lengkap'],
             'npm' => $validated['npm'],
             'program_studi' => $validated['program_studi'],
+            'fakultas' => $validated['fakultas'] ?? null,
             'status_mahasiswa' => $validated['status_mahasiswa'],
             'angkatan' => $validated['angkatan'] ?? null,
         ])->save();

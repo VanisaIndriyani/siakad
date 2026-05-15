@@ -30,6 +30,20 @@
     </div>
 
     <div>
+        <label class="text-sm text-emerald-100/80">Fakultas</label>
+        <select name="fakultas" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400">
+            @php
+                $selectedFak = old('fakultas', $mahasiswa->fakultas ?? '');
+            @endphp
+            <option value="" @selected($selectedFak === '') class="text-black">-</option>
+            @foreach (($fakultasList ?? []) as $opt)
+                <option value="{{ $opt }}" @selected($selectedFak === $opt) class="text-black">{{ $opt }}</option>
+            @endforeach
+        </select>
+        @error('fakultas') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
+    </div>
+
+    <div>
         <label class="text-sm text-emerald-100/80">Angkatan (Tahun Masuk)</label>
         <input type="number" name="angkatan" value="{{ old('angkatan', $mahasiswa->angkatan ?? date('Y')) }}" min="1900" max="2100" placeholder="Contoh: 2026" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
         @error('angkatan') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
