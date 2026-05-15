@@ -9,12 +9,12 @@
         body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #111827; }
         table { width: 100%; border-collapse: collapse; }
         .kop-title-1 { color: #111827; font-size: 19px; font-weight: 800; margin: 0; line-height: 1.12; }
-        .kop-title-2 { color: #111827; font-size: 28px; font-weight: 900; margin: 1px 0 0; letter-spacing: 0.6px; line-height: 1.08; }
+        .kop-title-2 { color: #111827; font-size: 27px; font-weight: 900; margin: 1px 0 0; letter-spacing: 0.4px; line-height: 1.06; }
         .kop-title-3 { color: #111827; font-size: 19px; font-weight: 900; margin: 1px 0 0; line-height: 1.12; }
         .kop-meta { color: #111827; font-size: 11px; margin-top: 3px; line-height: 1.2; }
         .kop-line-1 { border-top: 3px solid #6b7280; margin-top: 7px; }
         .kop-line-2 { border-top: 1px solid #6b7280; margin-top: 3px; }
-        .doc-title { text-align: center; font-size: 14px; font-weight: 900; margin: 10px 0 6px; }
+        .doc-title { text-align: center; font-size: 14px; font-weight: 900; margin: 12px 0 6px; }
         .kv2 { width: 100%; border-collapse: collapse; }
         .kv2 td { padding: 2px 0; font-size: 11px; vertical-align: top; }
         .kv2 .label { width: 140px; }
@@ -57,7 +57,7 @@
 
     <table>
         <tr>
-            <td style="width: 135px; vertical-align: middle; padding-top: 2px;">
+            <td style="width: 130px; vertical-align: middle; padding-top: 2px;">
                 @if($logoBase64)
                     <img src="{{ $logoBase64 }}" alt="Logo" style="display: block; width: 125px; height: auto;" />
                 @endif
@@ -70,7 +70,7 @@
                 <div class="kop-meta">{{ $kop5 }}</div>
                 <div class="kop-meta">{{ $kop6 }}</div>
             </td>
-            <td style="width: 135px;"></td>
+            <td style="width: 90px;"></td>
         </tr>
     </table>
     <div class="kop-line-1"></div>
@@ -150,7 +150,7 @@
         </tbody>
     </table>
 
-    <table style="margin-top: 22mm;">
+    <table style="margin-top: 16mm;">
         <tr>
             <td style="width: 33.33%; text-align: center; vertical-align: top;">
                 <div style="font-size: 11px; font-weight: 700;">Ketua Prodi</div>

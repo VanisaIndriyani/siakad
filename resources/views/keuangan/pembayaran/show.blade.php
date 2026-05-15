@@ -167,9 +167,9 @@
                                             </div>
                                         @endif
 
-                                        @if(($detail->status_approval ?? 'approved') === 'approved')
+                                        @if(($detail->status_approval ?? 'approved') === 'pending')
                                             <div style="margin-top: 10px; display: flex; justify-content: flex-end;">
-                                                <button type="button" data-toggle-edit-detail="{{ $detail->id }}"
+                                                <button type="button" data-toggle-approve-detail="{{ $detail->id }}"
                                                         style="height: 34px; padding: 0 12px; border-radius: 10px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.85); font-weight: 900; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
                                                     <i class="fa-solid fa-pen"></i>
                                                     Edit
@@ -180,7 +180,7 @@
                                 </div>
                             </div>
                             @if(($detail->status_approval ?? 'approved') === 'pending')
-                                <div style="margin-top: -6px; margin-bottom: 6px; padding: 16px 18px; border-radius: 16px; border: 1px solid rgba(245,158,11,0.18); background: rgba(245,158,11,0.06); display: flex; flex-wrap: wrap; gap: 10px; align-items: end; justify-content: space-between;">
+                                <div data-approve-detail-panel="{{ $detail->id }}" style="display: none; margin-top: -6px; margin-bottom: 6px; padding: 16px 18px; border-radius: 16px; border: 1px solid rgba(245,158,11,0.18); background: rgba(245,158,11,0.06); flex-wrap: wrap; gap: 10px; align-items: end; justify-content: space-between;">
                                     <form method="POST" action="{{ route('keuangan.pembayaran.detail.status', [$pembayaran, $detail]) }}" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: end;">
                                         @csrf
                                         @method('PATCH')
@@ -206,45 +206,6 @@
                                         <button type="submit" style="height: 44px; padding: 0 18px; border-radius: 12px; background: rgba(239,68,68,0.16); border: 1px solid rgba(239,68,68,0.24); color: #f87171; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; cursor: pointer;">
                                             Tolak
                                         </button>
-                                    </form>
-                                </div>
-                            @endif
-                            @if(($detail->status_approval ?? 'approved') === 'approved')
-                                <div data-edit-detail-panel="{{ $detail->id }}" style="display: none; margin-top: -6px; margin-bottom: 6px; padding: 16px 18px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06);">
-                                    <form method="POST" action="{{ route('keuangan.pembayaran.detail.update', [$pembayaran, $detail]) }}" enctype="multipart/form-data"
-                                          style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; align-items: end;">
-                                        @csrf
-                                        @method('PATCH')
-                                        <div style="display: flex; flex-direction: column; gap: 6px;">
-                                            <label style="color: rgba(255,255,255,0.45); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Jumlah Bayar (Rp)</label>
-                                            <input type="number" name="jumlah_bayar" value="{{ old('jumlah_bayar', $detail->jumlah_bayar) }}" min="1" step="0.01" required
-                                                   style="width: 100%; height: 44px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 14px; outline: none; font-weight: 700;" />
-                                        </div>
-                                        <div style="display: flex; flex-direction: column; gap: 6px;">
-                                            <label style="color: rgba(255,255,255,0.45); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Tanggal Bayar</label>
-                                            <input type="date" name="tanggal_bayar" value="{{ old('tanggal_bayar', optional($detail->tanggal_bayar)->format('Y-m-d')) }}" required
-                                                   style="width: 100%; height: 44px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 14px; outline: none; font-weight: 700;" />
-                                        </div>
-                                        <div style="display: flex; flex-direction: column; gap: 6px;">
-                                            <label style="color: rgba(255,255,255,0.45); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Keterangan</label>
-                                            <input type="text" name="keterangan" maxlength="255" value="{{ old('keterangan', $detail->keterangan) }}"
-                                                   style="width: 100%; height: 44px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 14px; outline: none; font-weight: 600;" />
-                                        </div>
-                                        <div style="display: flex; flex-direction: column; gap: 6px;">
-                                            <label style="color: rgba(255,255,255,0.45); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Ganti Bukti (Opsional)</label>
-                                            <input type="file" name="bukti_pembayaran" accept="image/*"
-                                                   style="width: 100%; height: 44px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 10px 14px; outline: none; font-size: 12px;" />
-                                        </div>
-                                        <div style="display: flex; gap: 10px;">
-                                            <button type="submit"
-                                                    style="height: 44px; padding: 0 16px; border-radius: 12px; background: linear-gradient(135deg, #10b981, #059669); border: none; color: white; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; cursor: pointer;">
-                                                Simpan
-                                            </button>
-                                            <button type="button" data-toggle-edit-detail="{{ $detail->id }}"
-                                                    style="height: 44px; padding: 0 16px; border-radius: 12px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.8); font-weight: 900; letter-spacing: 1px; text-transform: uppercase; cursor: pointer;">
-                                                Tutup
-                                            </button>
-                                        </div>
                                     </form>
                                 </div>
                             @endif
@@ -279,12 +240,12 @@
 
     <script>
         (function () {
-            document.querySelectorAll('[data-toggle-edit-detail]').forEach((btn) => {
+            document.querySelectorAll('[data-toggle-approve-detail]').forEach((btn) => {
                 btn.addEventListener('click', () => {
-                    const id = btn.getAttribute('data-toggle-edit-detail');
-                    const panel = document.querySelector(`[data-edit-detail-panel="${id}"]`);
+                    const id = btn.getAttribute('data-toggle-approve-detail');
+                    const panel = document.querySelector(`[data-approve-detail-panel="${id}"]`);
                     if (!panel) return;
-                    panel.style.display = panel.style.display === 'none' || panel.style.display === '' ? 'block' : 'none';
+                    panel.style.display = panel.style.display === 'none' || panel.style.display === '' ? 'flex' : 'none';
                 });
             });
         })();

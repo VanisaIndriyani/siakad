@@ -45,10 +45,12 @@ Route::prefix('admin')
 
         Route::get('/mahasiswa/export/pdf', [AdminMahasiswaController::class, 'exportPdf'])->name('mahasiswa.export.pdf');
         Route::get('/mahasiswa/export/excel', [AdminMahasiswaController::class, 'exportExcel'])->name('mahasiswa.export.excel');
+        Route::delete('/mahasiswa/bulk-delete', [AdminMahasiswaController::class, 'bulkDestroy'])->name('mahasiswa.bulk-delete');
         Route::resource('mahasiswa', AdminMahasiswaController::class);
 
         Route::get('/dosen/export/pdf', [AdminDosenController::class, 'exportPdf'])->name('dosen.export.pdf');
         Route::get('/dosen/export/excel', [AdminDosenController::class, 'exportExcel'])->name('dosen.export.excel');
+        Route::delete('/dosen/bulk-delete', [AdminDosenController::class, 'bulkDestroy'])->name('dosen.bulk-delete');
         Route::resource('dosen', AdminDosenController::class);
 
         Route::resource('mata-kuliah', AdminMataKuliahController::class)->except(['show']);
@@ -135,7 +137,6 @@ Route::prefix('keuangan')
         Route::get('pembayaran/export/pdf', [KeuanganPembayaranController::class, 'exportPdf'])->name('pembayaran.export.pdf');
         Route::get('pembayaran/{pembayaran}/pdf', [KeuanganPembayaranController::class, 'downloadPdf'])->name('pembayaran.pdf');
         Route::patch('pembayaran/{pembayaran}/detail/{detail}/status', [KeuanganPembayaranController::class, 'updateDetailStatus'])->name('pembayaran.detail.status');
-        Route::patch('pembayaran/{pembayaran}/detail/{detail}', [KeuanganPembayaranController::class, 'updateDetail'])->name('pembayaran.detail.update');
         Route::delete('pembayaran/bulk-delete', [KeuanganPembayaranController::class, 'bulkDestroy'])->name('pembayaran.bulk-delete');
         Route::resource('pembayaran', KeuanganPembayaranController::class);
         Route::post('pembayaran/{pembayaran}/cicilan', [KeuanganPembayaranController::class, 'addCicilan'])->name('pembayaran.cicilan');

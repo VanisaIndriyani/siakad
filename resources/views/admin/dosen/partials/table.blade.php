@@ -3,6 +3,10 @@
         <table class="min-w-full text-sm">
             <thead class="bg-white/5 text-emerald-100/80">
                 <tr>
+                    <th class="text-left font-medium px-4 py-3 w-10">
+                        <input type="checkbox" data-bulk="select-all"
+                               class="h-4 w-4 rounded border-white/20 bg-white/5 text-emerald-500 focus:ring-emerald-500/40" />
+                    </th>
                     <th class="text-left font-medium px-4 py-3">Dosen</th>
                     <th class="text-left font-medium px-4 py-3">NIDN</th>
                     <th class="text-left font-medium px-4 py-3">NUPTK</th>
@@ -14,6 +18,10 @@
             <tbody class="divide-y divide-white/10">
                 @forelse ($dosen as $row)
                     <tr class="hover:bg-white/5">
+                        <td class="px-4 py-3">
+                            <input type="checkbox" name="ids[]" value="{{ $row->id }}" data-bulk="row"
+                                   class="h-4 w-4 rounded border-white/20 bg-white/5 text-emerald-500 focus:ring-emerald-500/40" />
+                        </td>
                         <td class="px-4 py-3">
                             <div class="flex items-center gap-3">
                                 @if ($row->foto_path)
@@ -53,7 +61,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="px-4 py-10 text-center text-emerald-100/70">Data tidak ditemukan.</td>
+                        <td colspan="7" class="px-4 py-10 text-center text-emerald-100/70">Data tidak ditemukan.</td>
                     </tr>
                 @endforelse
             </tbody>

@@ -28,16 +28,45 @@
         q: @js($q),
         tableHtml: null,
         loading: false,
+        selectedIds: [],
         fetchTable() {
             this.loading = true;
             fetch(`{{ route('admin.dosen.index') }}?q=${encodeURIComponent(this.q || '')}&partial=1`, {
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
             .then(r => r.text())
-            .then(html => { this.tableHtml = html; })
+            .then(html => { this.tableHtml = html; this.$nextTick(() => this.syncSelectedFromDom()); })
             .finally(() => { this.loading = false; });
-        }
-    }" x-init="tableHtml = $refs.initial.innerHTML">
+        },
+        onBulkChange(e) {
+            const t = e.target;
+            if (!(t instanceof HTMLInputElement)) return;
+
+            if (t.dataset.bulk === 'select-all') {
+                const rows = this.$refs.bulkForm.querySelectorAll('input[data-bulk=\"row\"]');
+                rows.forEach((cb) => { cb.checked = t.checked; });
+            }
+
+            this.syncSelectedFromDom();
+        },
+        syncSelectedFromDom() {
+            const rows = Array.from(this.$refs.bulkForm.querySelectorAll('input[data-bulk=\"row\"]'));
+            this.selectedIds = rows.filter((cb) => cb.checked).map((cb) => cb.value);
+
+            const selectAll = this.$refs.bulkForm.querySelector('input[data-bulk=\"select-all\"]');
+            if (!selectAll) return;
+
+            if (rows.length === 0) {
+                selectAll.checked = false;
+                selectAll.indeterminate = false;
+                return;
+            }
+
+            const checkedCount = rows.filter((cb) => cb.checked).length;
+            selectAll.checked = checkedCount === rows.length;
+            selectAll.indeterminate = checkedCount > 0 && checkedCount < rows.length;
+        },
+    }" x-init="tableHtml = $refs.initial.innerHTML; $nextTick(() => syncSelectedFromDom())">
         <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
             <div class="relative w-full sm:max-w-md">
                 <input type="text"
@@ -57,7 +86,25 @@
             </a>
         </div>
 
-        <div x-html="tableHtml"></div>
+        <form x-ref="bulkForm" method="POST" action="{{ route('admin.dosen.bulk-delete') }}" @change="onBulkChange($event)"
+              data-confirm="Apakah kamu yakin ingin menghapus dosen yang dipilih?">
+            @csrf
+            @method('DELETE')
+
+            <div class="flex items-center justify-between gap-3 mb-3">
+                <button type="submit"
+                        :disabled="selectedIds.length === 0"
+                        class="h-10 px-4 inline-flex items-center gap-2 rounded-xl border transition"
+                        :class="selectedIds.length === 0
+                            ? 'bg-white/5 border-white/10 text-white/40 cursor-not-allowed'
+                            : 'bg-red-500/15 hover:bg-red-500/25 border-red-500/20 text-red-100'">
+                    <i class="fa-solid fa-trash"></i>
+                    <span class="text-sm font-medium" x-text="`Hapus Terpilih (${selectedIds.length})`"></span>
+                </button>
+            </div>
+
+            <div x-html="tableHtml"></div>
+        </form>
         <div x-ref="initial" class="hidden">
             @include('admin.dosen.partials.table', ['dosen' => $dosen])
         </div>

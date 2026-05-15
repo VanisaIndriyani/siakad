@@ -197,6 +197,40 @@ class MahasiswaController extends Controller
         return redirect()->route('admin.mahasiswa.index')->with('success', 'Mahasiswa berhasil dihapus.');
     }
 
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer'],
+        ]);
+
+        $ids = array_values(array_unique(array_map('intval', (array) $validated['ids'])));
+        if (count($ids) === 0) {
+            return back()->with('error', 'Tidak ada data yang dipilih.');
+        }
+
+        $rows = Mahasiswa::query()->with('user')->whereIn('id', $ids)->get();
+        if ($rows->isEmpty()) {
+            return back()->with('error', 'Tidak ada data yang cocok untuk dihapus.');
+        }
+
+        foreach ($rows as $mahasiswa) {
+            $user = $mahasiswa->user;
+
+            if ($mahasiswa->foto_path) {
+                Storage::disk('public')->delete($mahasiswa->foto_path);
+            }
+
+            if ($user) {
+                $user->delete();
+            } else {
+                $mahasiswa->delete();
+            }
+        }
+
+        return redirect()->route('admin.mahasiswa.index')->with('success', 'Mahasiswa terpilih berhasil dihapus.');
+    }
+
     public function exportPdf(Request $request)
     {
         $q = trim((string) $request->get('q', ''));
