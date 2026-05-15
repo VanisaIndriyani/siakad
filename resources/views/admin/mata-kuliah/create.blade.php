@@ -39,7 +39,7 @@
             </div>
             <div>
                 <label class="text-sm text-emerald-100/80">SKS</label>
-                <input type="number" name="sks" value="{{ old('sks', 3) }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" required />
+                <input type="number" name="sks" min="0" value="{{ old('sks', 3) }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" required />
                 @error('sks') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
             </div>
             <div>

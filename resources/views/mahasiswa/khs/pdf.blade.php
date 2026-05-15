@@ -5,16 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>KHS</title>
     <style>
-        @page { margin: 18mm 14mm; }
+        @page { margin: 16mm 14mm; }
         body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #111827; }
         table { width: 100%; border-collapse: collapse; }
         .kop-title-1 { color: #111827; font-size: 18px; font-weight: 800; margin: 0; line-height: 1.15; }
         .kop-title-2 { color: #111827; font-size: 26px; font-weight: 900; margin: 2px 0 0; letter-spacing: 0.6px; line-height: 1.1; }
         .kop-title-3 { color: #111827; font-size: 18px; font-weight: 900; margin: 1px 0 0; line-height: 1.15; }
-        .kop-meta { color: #111827; font-size: 11px; margin-top: 6px; line-height: 1.2; }
-        .kop-line-1 { border-top: 3px solid #6b7280; margin-top: 10px; }
-        .kop-line-2 { border-top: 1px solid #6b7280; margin-top: 4px; }
-        .doc-title { text-align: center; font-size: 12px; font-weight: 900; margin: 14px 0 10px; }
+        .kop-meta { color: #111827; font-size: 11px; margin-top: 3px; line-height: 1.2; }
+        .kop-line-1 { border-top: 3px solid #6b7280; margin-top: 7px; }
+        .kop-line-2 { border-top: 1px solid #6b7280; margin-top: 3px; }
+        .doc-title { text-align: center; font-size: 14px; font-weight: 900; margin: 10px 0 6px; }
         .kv2 { width: 100%; border-collapse: collapse; }
         .kv2 td { padding: 2px 0; font-size: 11px; vertical-align: top; }
         .kv2 .label { width: 140px; }
@@ -58,7 +58,7 @@
         <tr>
             <td style="width: 120px; vertical-align: middle; padding-top: 2px;">
                 @if($logoBase64)
-                    <img src="{{ $logoBase64 }}" alt="Logo" style="display: block; width: 95px; height: auto;" />
+                    <img src="{{ $logoBase64 }}" alt="Logo" style="display: block; width: 115px; height: auto;" />
                 @endif
             </td>
             <td style="text-align: center;">
