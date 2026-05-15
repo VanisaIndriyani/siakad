@@ -20,6 +20,7 @@ class PembayaranController extends Controller
         'Herregistrasi',
         'Ujian Semester',
         'Pembangunan',
+        'HAKI',
         'PPL',
         'PPL Nasional',
         'PPL Internasional',
