@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Mahasiswa;
 use App\Http\Controllers\Controller;
 use App\Models\Absensi;
 use App\Models\AbsensiItem;
+use App\Models\Dosen;
 use App\Models\Krs;
 use App\Models\KrsItem;
 use App\Models\MataKuliah;
@@ -17,6 +18,31 @@ use Illuminate\View\View;
 
 class KrsController extends Controller
 {
+    private function resolveProdiSigners(?string $programStudi): array
+    {
+        $programStudi = trim((string) $programStudi);
+        if ($programStudi === '') {
+            return ['kaprodi' => null, 'sekprodi' => null];
+        }
+
+        $kaprodi = Dosen::query()
+            ->where('program_studi', $programStudi)
+            ->where('status_akademik', 'Ketua Prodi')
+            ->orderByDesc('id')
+            ->first();
+
+        $sekprodi = Dosen::query()
+            ->where('program_studi', $programStudi)
+            ->where('status_akademik', 'Sekretaris Prodi')
+            ->orderByDesc('id')
+            ->first();
+
+        return [
+            'kaprodi' => $kaprodi?->nama,
+            'sekprodi' => $sekprodi?->nama,
+        ];
+    }
+
     private function ensureAbsensiForMahasiswa(int $mahasiswaId, string $jurusan, int $semester, array $mataKuliahIds): void
     {
         $mataKuliahIds = array_values(array_unique(array_map('intval', $mataKuliahIds)));
@@ -165,8 +191,12 @@ class KrsController extends Controller
 
         $krs->load(['items.mataKuliah']);
 
+        $signers = $this->resolveProdiSigners($user->mahasiswa->program_studi ?? null);
+
         return view('mahasiswa.krs.show', [
             'krs' => $krs,
+            'kaprodiNama' => $signers['kaprodi'],
+            'sekprodiNama' => $signers['sekprodi'],
         ]);
     }
 
@@ -184,8 +214,12 @@ class KrsController extends Controller
 
         $krs->load(['items.mataKuliah']);
 
+        $signers = $this->resolveProdiSigners($user->mahasiswa->program_studi ?? null);
+
         $html = view('mahasiswa.krs.pdf', [
             'krs' => $krs,
+            'kaprodiNama' => $signers['kaprodi'],
+            'sekprodiNama' => $signers['sekprodi'],
         ])->render();
 
         $dompdf = new Dompdf(['isRemoteEnabled' => true]);

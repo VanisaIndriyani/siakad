@@ -17,12 +17,19 @@ class PembayaranController extends Controller
 {
     private const JENIS_TAGIHAN = [
         'SPP',
-        'Ujian Semester',
         'Herregistrasi',
+        'Ujian Semester',
+        'Pembangunan',
         'PPL',
+        'PPL Nasional',
+        'PPL Internasional',
         'KKN',
+        'KKN Bakti',
+        'KKN Nasional',
+        'KKN Internasional',
         'Ujian Munaqasah',
         'Jurnal',
+        'Wisuda',
         'Wisudah',
         'Ujian Komprehensif',
     ];
@@ -105,7 +112,7 @@ class PembayaranController extends Controller
             'angkatan' => ['nullable', 'integer', 'min:1900', 'max:2100'],
             'semester' => ['required', 'integer', 'min:1', 'max:14'],
             'tahun_ajaran' => ['required', 'string'],
-            'jenis_tagihan' => ['required', 'string', 'max:100'],
+            'jenis_tagihan' => ['required', 'string', 'max:100', Rule::in(self::JENIS_TAGIHAN)],
             'total_biaya' => ['required', 'numeric', 'min:0'],
             'catatan' => ['nullable', 'string'],
             'jumlah_bayar' => ['nullable', 'numeric', 'min:0'],
@@ -174,6 +181,9 @@ class PembayaranController extends Controller
                     'tanggal_bayar' => $validated['tanggal_bayar'] ?? now(),
                     'bukti_pembayaran' => $buktiPath,
                     'keterangan' => 'Pembayaran awal',
+                    'status_approval' => 'approved',
+                    'approved_at' => now(),
+                    'approved_by_user_id' => $request->user()?->id,
                 ]);
             }
 
@@ -214,11 +224,35 @@ class PembayaranController extends Controller
             'tanggal_bayar' => $validated['tanggal_bayar'] ?? now(),
             'bukti_pembayaran' => $buktiPath,
             'keterangan' => $validated['keterangan'],
+            'status_approval' => 'approved',
+            'approved_at' => now(),
+            'approved_by_user_id' => $request->user()?->id,
         ]);
 
         $pembayaran->updateStatus();
 
         return redirect()->back()->with('success', 'Pembayaran cicilan berhasil ditambahkan.');
+    }
+
+    public function updateDetailStatus(Request $request, Pembayaran $pembayaran, PembayaranDetail $detail): RedirectResponse
+    {
+        abort_unless((int) $detail->pembayaran_id === (int) $pembayaran->id, 404);
+
+        $validated = $request->validate([
+            'status_approval' => ['required', Rule::in(['approved', 'rejected'])],
+            'catatan_approval' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $detail->update([
+            'status_approval' => $validated['status_approval'],
+            'catatan_approval' => $validated['catatan_approval'] ?: null,
+            'approved_at' => now(),
+            'approved_by_user_id' => $request->user()?->id,
+        ]);
+
+        $pembayaran->updateStatus();
+
+        return back()->with('success', 'Status pembayaran berhasil diperbarui.');
     }
 
     public function destroy(Pembayaran $pembayaran): RedirectResponse

@@ -19,6 +19,9 @@
             .print-content .border,
             .print-content [class*="bg-"],
             .print-content [class*="border-"] { background: transparent !important; box-shadow: none !important; }
+            .print-content .rounded-2xl { border-radius: 0 !important; }
+            .print-content .overflow-hidden,
+            .print-content .overflow-x-auto { overflow: visible !important; }
             .print-content table { border-collapse: collapse !important; }
             .print-content th, .print-content td { border: 1px solid #111827 !important; }
             .print-content thead { background: transparent !important; }
@@ -31,6 +34,8 @@
         $mahasiswa = auth()->user()->mahasiswa;
         $items = $krs->items->sortBy(fn ($item) => (string) ($item->mataKuliah?->kode ?? ''));
         $totalSks = $items->sum(fn ($item) => (int) ($item->mataKuliah?->sks ?? 0));
+        $kaprodiNama = $kaprodiNama ?? null;
+        $sekprodiNama = $sekprodiNama ?? null;
 
         $logoPath = public_path('img/lo.jpeg');
         $logoBase64 = null;
@@ -55,54 +60,43 @@
                     @endif
                 </td>
                 <td style="text-align: center;">
-                    <div style="color: #0a8f3d; font-size: 18px; font-weight: 800; letter-spacing: 0.2px; line-height: 1.15;">{{ $kopLine1 }}</div>
-                    <div style="color: #0a8f3d; font-size: 26px; font-weight: 900; letter-spacing: 0.6px; margin-top: 2px; line-height: 1.1;">{{ $kopLine2 }}</div>
-                    <div style="color: #0a8f3d; font-size: 18px; font-weight: 900; letter-spacing: 0.2px; margin-top: 1px; line-height: 1.15;">{{ $kopLine3 }}</div>
-                    <div style="color: #0a8f3d; font-size: 11px; margin-top: 6px; font-weight: 800; line-height: 1.2;">{{ $kopLine4 }}</div>
-                    <div style="color: #0a8f3d; font-size: 11px; margin-top: 2px; line-height: 1.2;">{{ $kopLine5 }}</div>
-                    <div style="color: #0a8f3d; font-size: 11px; margin-top: 2px; line-height: 1.2;">{{ $kopLine6 }}</div>
+                    <div style="color: #111827; font-size: 18px; font-weight: 800; letter-spacing: 0.2px; line-height: 1.15;">{{ $kopLine1 }}</div>
+                    <div style="color: #111827; font-size: 26px; font-weight: 900; letter-spacing: 0.6px; margin-top: 2px; line-height: 1.1;">{{ $kopLine2 }}</div>
+                    <div style="color: #111827; font-size: 18px; font-weight: 900; letter-spacing: 0.2px; margin-top: 1px; line-height: 1.15;">{{ $kopLine3 }}</div>
+                    <div style="color: #111827; font-size: 11px; margin-top: 6px; font-weight: 800; line-height: 1.2;">{{ $kopLine4 }}</div>
+                    <div style="color: #111827; font-size: 11px; margin-top: 2px; line-height: 1.2;">{{ $kopLine5 }}</div>
+                    <div style="color: #111827; font-size: 11px; margin-top: 2px; line-height: 1.2;">{{ $kopLine6 }}</div>
                 </td>
                 <td style="width: 120px;"></td>
             </tr>
         </table>
         <div style="border-top: 3px solid #6b7280; margin-top: 10px;"></div>
         <div style="border-top: 1px solid #6b7280; margin-top: 4px;"></div>
-        <div style="text-align: center; margin-top: 14px; font-size: 12px; font-weight: 800;">Kartu Rencana Studi (KRS)</div>
-        <table style="width: 100%; border-collapse: collapse; margin-top: 14px;">
+        @php
+            $ps = strtoupper((string) ($mahasiswa?->program_studi ?? ''));
+            $jenjang = str_contains($ps, 'S2') ? 'S2' : (str_contains($ps, 'S3') ? 'S3' : ($ps !== '' ? 'S1' : '-'));
+            $semesterLabel = ((int) $krs->semester % 2 === 0) ? 'GENAP' : 'GANJIL';
+            $semesterHeader = $semesterLabel.($krs->tahun_ajaran ? '-'.$krs->tahun_ajaran : '');
+        @endphp
+
+        <div style="text-align: center; margin-top: 14px; font-size: 12px; font-weight: 800;">KARTU RENCANA STUDI</div>
+        <div style="text-align: center; margin-top: 2px; font-size: 12px; font-weight: 800;">SEMESTER : {{ $semesterHeader }}</div>
+
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px;">
             <tr>
-                <td style="border: 1px solid #111827; padding: 10px 12px; width: 50%; vertical-align: top;">
-                    <div style="display: flex; justify-content: space-between; gap: 10px; font-size: 11px;">
-                        <div>Jenjang/Program</div>
-                        <div style="font-weight: 700;">
-                            @php
-                                $ps = strtoupper((string) ($mahasiswa?->program_studi ?? ''));
-                                $jenjang = str_contains($ps, 'S2') ? 'S2' : (str_contains($ps, 'S3') ? 'S3' : ($ps !== '' ? 'S1' : '-'));
-                            @endphp
-                            {{ $jenjang }}
-                        </div>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; gap: 10px; font-size: 11px; margin-top: 6px;">
-                        <div>Prodi</div>
-                        <div style="font-weight: 700;">{{ $mahasiswa?->program_studi ?? '-' }}</div>
-                    </div>
+                <td style="width: 50%; vertical-align: top;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr><td style="width: 140px;">Jenjang/Program</td><td style="width: 10px; text-align: center;">:</td><td>{{ $jenjang }}</td></tr>
+                        <tr><td>Fakultas</td><td style="text-align: center;">:</td><td>-</td></tr>
+                        <tr><td>Program Studi</td><td style="text-align: center;">:</td><td>{{ $mahasiswa?->program_studi ?? '-' }}</td></tr>
+                    </table>
                 </td>
-                <td style="border: 1px solid #111827; padding: 10px 12px; width: 50%; vertical-align: top;">
-                    <div style="display: flex; justify-content: space-between; gap: 10px; font-size: 11px;">
-                        <div>Nama</div>
-                        <div style="font-weight: 700;">{{ $mahasiswa?->nama_lengkap ?? auth()->user()->name }}</div>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; gap: 10px; font-size: 11px; margin-top: 6px;">
-                        <div>NPM</div>
-                        <div style="font-weight: 700;">{{ $mahasiswa?->npm ?? '-' }}</div>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; gap: 10px; font-size: 11px; margin-top: 6px;">
-                        <div>Tahun Akademik</div>
-                        <div style="font-weight: 700;">{{ $krs->tahun_ajaran ?? '-' }}</div>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; gap: 10px; font-size: 11px; margin-top: 6px;">
-                        <div>Semester</div>
-                        <div style="font-weight: 700;">{{ $krs->semester }}</div>
-                    </div>
+                <td style="width: 50%; vertical-align: top;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr><td style="width: 140px;">Nama</td><td style="width: 10px; text-align: center;">:</td><td style="font-weight: 700;">{{ $mahasiswa?->nama_lengkap ?? auth()->user()->name }}</td></tr>
+                        <tr><td>NIM</td><td style="text-align: center;">:</td><td style="font-weight: 700;">{{ $mahasiswa?->npm ?? '-' }}</td></tr>
+                        <tr><td>Semester</td><td style="text-align: center;">:</td><td style="font-weight: 700;">{{ $semesterHeader }}</td></tr>
+                    </table>
                 </td>
             </tr>
         </table>
@@ -127,10 +121,11 @@
                 </a>
             @endif
            
-            <button type="button" onclick="window.print()" class="no-print h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
-                <i class="fa-solid fa-print"></i>
-                Cetak
-            </button>
+       
+            <a href="{{ route('mahasiswa.krs.pdf', $krs) }}" class="no-print h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/20 border border-emerald-500/20 transition">
+                <i class="fa-solid fa-file-pdf"></i>
+                PDF
+            </a>
             <a href="{{ route('mahasiswa.krs.index') }}" class="no-print h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                 <i class="fa-solid fa-arrow-left"></i>
                 Kembali
@@ -210,26 +205,23 @@
             </div>
         </div>
 
-        <div class="print-only" style="margin-top: 28mm;">
+        <div class="print-only" style="margin-top: 22mm;">
             <table style="width: 100%; border-collapse: collapse;">
                 <tr>
-                    <td style="border: 1px solid #111827; width: 33.33%; text-align: center; padding: 10px 8px;">
+                    <td style="width: 33.33%; text-align: center; vertical-align: top;">
                         <div style="font-size: 11px; font-weight: 700;">Ketua Prodi</div>
-                        <div style="height: 60px;"></div>
-                        <div style="font-size: 10px; font-weight: 700;">TTD</div>
-                        <div style="margin-top: 10px; font-size: 11px;">Nama</div>
+                        <div style="height: 64px;"></div>
+                        <div style="font-size: 11px; font-weight: 800;">{{ $kaprodiNama ?: '-' }}</div>
                     </td>
-                    <td style="border: 1px solid #111827; width: 33.33%; text-align: center; padding: 10px 8px;">
+                    <td style="width: 33.33%; text-align: center; vertical-align: top;">
                         <div style="font-size: 11px; font-weight: 700;">Sekretaris Prodi</div>
-                        <div style="height: 60px;"></div>
-                        <div style="font-size: 10px; font-weight: 700;">TTD</div>
-                        <div style="margin-top: 10px; font-size: 11px;">Nama</div>
+                        <div style="height: 64px;"></div>
+                        <div style="font-size: 11px; font-weight: 800;">{{ $sekprodiNama ?: '-' }}</div>
                     </td>
-                    <td style="border: 1px solid #111827; width: 33.33%; text-align: center; padding: 10px 8px;">
+                    <td style="width: 33.33%; text-align: center; vertical-align: top;">
                         <div style="font-size: 11px; font-weight: 700;">Mahasiswa</div>
-                        <div style="height: 60px;"></div>
-                        <div style="font-size: 10px; font-weight: 700;">TTD</div>
-                        <div style="margin-top: 10px; font-size: 11px;">{{ $mahasiswa?->nama_lengkap ?? auth()->user()->name }}</div>
+                        <div style="height: 64px;"></div>
+                        <div style="font-size: 11px; font-weight: 800;">{{ $mahasiswa?->nama_lengkap ?? auth()->user()->name }}</div>
                     </td>
                 </tr>
             </table>

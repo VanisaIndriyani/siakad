@@ -11,12 +11,19 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class DosenController extends Controller
 {
+    private const STATUS_AKADEMIK = [
+        'Dosen',
+        'Ketua Prodi',
+        'Sekretaris Prodi',
+    ];
+
     public function index(Request $request): View
     {
         $q = trim((string) $request->get('q', ''));
@@ -60,6 +67,8 @@ class DosenController extends Controller
             'nik' => ['required', 'string', 'max:50', 'unique:dosen,nik'],
             'nuptk' => ['nullable', 'string', 'max:50', 'unique:dosen,nuptk'],
             'nomor_sk' => ['nullable', 'string', 'max:255'],
+            'program_studi' => ['nullable', 'string', 'max:255'],
+            'status_akademik' => ['nullable', 'string', Rule::in(self::STATUS_AKADEMIK)],
             'foto' => ['nullable', 'image', 'max:2048'],
         ]);
 
@@ -91,6 +100,8 @@ class DosenController extends Controller
             'nidn' => $validated['nidn'] ?? null,
             'nuptk' => $validated['nuptk'] ?? null,
             'nomor_sk' => $validated['nomor_sk'] ?? null,
+            'program_studi' => $validated['program_studi'] ?? null,
+            'status_akademik' => $validated['status_akademik'] ?? 'Dosen',
             'alamat' => $validated['alamat'] ?? null,
             'nomor_hp' => $validated['nomor_hp'] ?? null,
             'mata_kuliah' => $validated['mata_kuliah'] ?? null,
@@ -124,6 +135,8 @@ class DosenController extends Controller
             'nik' => ['required', 'string', 'max:50', 'unique:dosen,nik,'.$dosen->id],
             'nuptk' => ['nullable', 'string', 'max:50', 'unique:dosen,nuptk,'.$dosen->id],
             'nomor_sk' => ['nullable', 'string', 'max:255'],
+            'program_studi' => ['nullable', 'string', 'max:255'],
+            'status_akademik' => ['nullable', 'string', Rule::in(self::STATUS_AKADEMIK)],
             'foto' => ['nullable', 'image', 'max:2048'],
         ]);
 
@@ -140,6 +153,8 @@ class DosenController extends Controller
             'nidn' => $validated['nidn'] ?? $dosen->nidn,
             'nuptk' => $validated['nuptk'] ?? $dosen->nuptk,
             'nomor_sk' => $validated['nomor_sk'] ?? $dosen->nomor_sk,
+            'program_studi' => $validated['program_studi'] ?? $dosen->program_studi,
+            'status_akademik' => $validated['status_akademik'] ?? ($dosen->status_akademik ?: 'Dosen'),
         ])->save();
 
         $dosen->user?->update(['name' => $validated['nama']]);

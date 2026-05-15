@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\KrsController as AdminKrsController;
 use App\Http\Controllers\Admin\MahasiswaController as AdminMahasiswaController;
 use App\Http\Controllers\Admin\MataKuliahController as AdminMataKuliahController;
 use App\Http\Controllers\Dosen\DashboardController as DosenDashboardController;
+use App\Http\Controllers\Dosen\KrsApprovalController as DosenKrsApprovalController;
 use App\Http\Controllers\Dosen\MahasiswaController as DosenMahasiswaController;
 use App\Http\Controllers\Dosen\NilaiController as DosenNilaiController;
 use App\Http\Controllers\Dosen\ProfilController as DosenProfilController;
@@ -118,6 +119,10 @@ Route::prefix('dosen')
         Route::get('/absensi/{absensi}/export/pdf', [AdminAbsensiController::class, 'exportPdf'])->name('absensi.export.pdf');
         Route::get('/absensi/{absensi}/export/excel', [AdminAbsensiController::class, 'exportExcel'])->name('absensi.export.excel');
 
+        Route::get('/krs/approval', [DosenKrsApprovalController::class, 'index'])->name('krs.approval');
+        Route::get('/krs/{krs}', [DosenKrsApprovalController::class, 'show'])->name('krs.show');
+        Route::patch('/krs/{krs}', [DosenKrsApprovalController::class, 'updateStatus'])->name('krs.update');
+
         Route::get('/profil', [DosenProfilController::class, 'show'])->name('profil');
         Route::post('/profil', [DosenProfilController::class, 'update'])->name('profil.update');
     });
@@ -129,6 +134,7 @@ Route::prefix('keuangan')
         Route::get('/dashboard', [AdminDashboardController::class, '__invoke'])->name('dashboard');
         Route::get('pembayaran/export/pdf', [KeuanganPembayaranController::class, 'exportPdf'])->name('pembayaran.export.pdf');
         Route::get('pembayaran/{pembayaran}/pdf', [KeuanganPembayaranController::class, 'downloadPdf'])->name('pembayaran.pdf');
+        Route::patch('pembayaran/{pembayaran}/detail/{detail}/status', [KeuanganPembayaranController::class, 'updateDetailStatus'])->name('pembayaran.detail.status');
         Route::resource('pembayaran', KeuanganPembayaranController::class);
         Route::post('pembayaran/{pembayaran}/cicilan', [KeuanganPembayaranController::class, 'addCicilan'])->name('pembayaran.cicilan');
     });

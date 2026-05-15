@@ -13,10 +13,15 @@ class PembayaranDetail extends Model
         'tanggal_bayar',
         'bukti_pembayaran',
         'keterangan',
+        'status_approval',
+        'catatan_approval',
+        'approved_at',
+        'approved_by_user_id',
     ];
 
     protected $casts = [
         'tanggal_bayar' => 'date',
+        'approved_at' => 'datetime',
     ];
 
     public function pembayaran(): BelongsTo

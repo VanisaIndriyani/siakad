@@ -8,22 +8,18 @@
         @page { margin: 18mm 14mm; }
         body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #111827; }
         table { width: 100%; border-collapse: collapse; }
-        .kop-green { color: #0a8f3d; }
-        .kop-title-1 { color: #0a8f3d; font-size: 18px; font-weight: 800; margin: 0; line-height: 1.15; }
-        .kop-title-2 { color: #0a8f3d; font-size: 26px; font-weight: 900; margin: 2px 0 0; letter-spacing: 0.6px; line-height: 1.1; }
-        .kop-title-3 { color: #0a8f3d; font-size: 18px; font-weight: 900; margin: 1px 0 0; line-height: 1.15; }
-        .kop-meta { color: #0a8f3d; font-size: 11px; margin-top: 6px; line-height: 1.2; }
+        .kop-title-1 { color: #111827; font-size: 18px; font-weight: 800; margin: 0; line-height: 1.15; }
+        .kop-title-2 { color: #111827; font-size: 26px; font-weight: 900; margin: 2px 0 0; letter-spacing: 0.6px; line-height: 1.1; }
+        .kop-title-3 { color: #111827; font-size: 18px; font-weight: 900; margin: 1px 0 0; line-height: 1.15; }
+        .kop-meta { color: #111827; font-size: 11px; margin-top: 6px; line-height: 1.2; }
         .kop-line-1 { border-top: 3px solid #6b7280; margin-top: 10px; }
         .kop-line-2 { border-top: 1px solid #6b7280; margin-top: 4px; }
         .doc-title { text-align: center; font-size: 12px; font-weight: 900; margin: 14px 0 10px; }
-        .box { border: 1px solid #111827; }
-        .box td { border: 1px solid #111827; padding: 10px 12px; vertical-align: top; }
-        .kv { width: 100%; border-collapse: collapse; }
-        .kv td { border: 0; padding: 0; }
-        .kv .row { display: flex; justify-content: space-between; gap: 10px; font-size: 11px; margin-top: 6px; }
-        .kv .row:first-child { margin-top: 0; }
-        .kv .label { width: 45%; }
-        .kv .value { width: 55%; text-align: right; font-weight: 700; }
+        .kv2 { width: 100%; border-collapse: collapse; }
+        .kv2 td { padding: 2px 0; font-size: 11px; vertical-align: top; }
+        .kv2 .label { width: 140px; }
+        .kv2 .colon { width: 10px; text-align: center; }
+        .kv2 .value { font-weight: 700; }
         .tbl th, .tbl td { border: 1px solid #111827; padding: 8px 10px; }
         .tbl th { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
         .center { text-align: center; }
@@ -52,6 +48,10 @@
 
         $ps = strtoupper((string) ($mahasiswa?->program_studi ?? ''));
         $jenjang = str_contains($ps, 'S2') ? 'S2' : (str_contains($ps, 'S3') ? 'S3' : ($ps !== '' ? 'S1' : '-'));
+
+        $kaprodiNama = $kaprodiNama ?? null;
+        $kotaTtd = env('KAMPUS_KOTA') ?: 'Majelling Watang';
+        $tanggalTtd = now()->format('d-m-Y');
     @endphp
 
     <table>
@@ -75,26 +75,46 @@
     <div class="kop-line-1"></div>
     <div class="kop-line-2"></div>
 
-    <div class="doc-title">Kartu Hasil Studi (KHS)</div>
+    <div class="doc-title">KARTU HASIL STUDI (KHS)</div>
 
-    <table class="box" style="margin-bottom: 16px;">
+    <table style="margin-bottom: 14px;">
         <tr>
-            <td style="width: 50%;">
-                <table class="kv">
-                    <tr><td>
-                        <div class="row"><div class="label">Jenjang/Program</div><div class="value">{{ $jenjang }}</div></div>
-                        <div class="row"><div class="label">Prodi</div><div class="value">{{ $mahasiswa?->program_studi ?? '-' }}</div></div>
-                    </td></tr>
+            <td style="width: 50%; vertical-align: top;">
+                <table class="kv2">
+                    <tr>
+                        <td class="label">Jenjang/Program</td>
+                        <td class="colon">:</td>
+                        <td class="value">{{ $jenjang }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Program Studi</td>
+                        <td class="colon">:</td>
+                        <td class="value">{{ $mahasiswa?->program_studi ?? '-' }}</td>
+                    </tr>
                 </table>
             </td>
-            <td style="width: 50%;">
-                <table class="kv">
-                    <tr><td>
-                        <div class="row"><div class="label">Nama</div><div class="value">{{ $mahasiswa?->nama_lengkap ?? auth()->user()->name }}</div></div>
-                        <div class="row"><div class="label">NPM</div><div class="value">{{ $mahasiswa?->npm ?? '-' }}</div></div>
-                        <div class="row"><div class="label">Tahun Akademik</div><div class="value">{{ $khs->tahun_ajaran ?? '-' }}</div></div>
-                        <div class="row"><div class="label">Semester</div><div class="value">{{ $khs->semester }}</div></div>
-                    </td></tr>
+            <td style="width: 50%; vertical-align: top;">
+                <table class="kv2">
+                    <tr>
+                        <td class="label">Nama</td>
+                        <td class="colon">:</td>
+                        <td class="value">{{ $mahasiswa?->nama_lengkap ?? auth()->user()->name }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">NPM</td>
+                        <td class="colon">:</td>
+                        <td class="value">{{ $mahasiswa?->npm ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Tahun Akademik</td>
+                        <td class="colon">:</td>
+                        <td class="value">{{ $khs->tahun_ajaran ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Semester</td>
+                        <td class="colon">:</td>
+                        <td class="value">{{ $khs->semester }}</td>
+                    </tr>
                 </table>
             </td>
         </tr>
@@ -130,17 +150,11 @@
         </tbody>
     </table>
 
-    <table style="margin-top: 28mm;">
-        <tr>
-            <td style="width: 55%;"></td>
-            <td class="box" style="width: 45%; padding: 12px 12px; text-align: center;">
-                <div style="font-size: 11px; font-weight: 700;">Majelling Watang, Tanggal, Bulan, Tahun</div>
-                <div style="font-size: 11px; font-weight: 700; margin-top: 2px;">Ketua Prodi</div>
-                <div style="font-size: 11px; font-weight: 700;">{{ $mahasiswa?->program_studi ?? 'Pendidikan Agama Islam' }}</div>
-                <div style="height: 70px;"></div>
-                <div style="font-size: 11px; font-weight: 700;">Dosen</div>
-            </td>
-        </tr>
-    </table>
+    <div style="margin-top: 18mm;">
+        <div style="font-size: 11px;">{{ $kotaTtd }}, {{ $tanggalTtd }}</div>
+        <div style="font-size: 11px; font-weight: 700; margin-top: 2px;">Ketua Prodi {{ $mahasiswa?->program_studi ?? '-' }}</div>
+        <div style="height: 70px;"></div>
+        <div style="font-size: 11px; font-weight: 800;">{{ $kaprodiNama ?: '-' }}</div>
+    </div>
 </body>
 </html>

@@ -51,6 +51,14 @@
                     <div class="mt-1 font-medium">{{ $dosen->nomor_sk ?? '-' }}</div>
                 </div>
                 <div class="rounded-xl bg-white/5 border border-white/10 p-4">
+                    <div class="text-emerald-100/70">Program Studi</div>
+                    <div class="mt-1 font-medium">{{ $dosen->program_studi ?? '-' }}</div>
+                </div>
+                <div class="rounded-xl bg-white/5 border border-white/10 p-4">
+                    <div class="text-emerald-100/70">Status Akademik</div>
+                    <div class="mt-1 font-medium">{{ $dosen->status_akademik ?? 'Dosen' }}</div>
+                </div>
+                <div class="rounded-xl bg-white/5 border border-white/10 p-4">
                     <div class="text-emerald-100/70">Email</div>
                     <div class="mt-1 font-medium">{{ $dosen->email ?? '-' }}</div>
                 </div>

@@ -11,14 +11,37 @@ use Illuminate\View\View;
 
 class KrsApprovalController extends Controller
 {
+    private function resolveApprover(Request $request): array
+    {
+        /** @var User $user */
+        $user = $request->user();
+        $dosen = $user->dosen;
+
+        abort_unless($dosen, 403);
+
+        $allowed = in_array((string) $dosen->status_akademik, ['Ketua Prodi', 'Sekretaris Prodi'], true);
+        abort_unless($allowed, 403);
+
+        $programStudi = trim((string) ($dosen->program_studi ?? ''));
+        abort_unless($programStudi !== '', 403);
+
+        return [$dosen, $programStudi];
+    }
+
     public function index(Request $request): View
     {
+        [, $programStudi] = $this->resolveApprover($request);
+
         $q = trim((string) $request->get('q', ''));
 
         $query = Krs::query()
             ->with(['mahasiswa', 'mahasiswa.user'])
             ->withCount('items')
             ->where('status_approval', 'pending');
+
+        $query->whereHas('mahasiswa', function ($sub) use ($programStudi) {
+            $sub->where('program_studi', $programStudi);
+        });
 
         if ($q !== '') {
             $query->whereHas('mahasiswa', function ($sub) use ($q) {
@@ -37,9 +60,12 @@ class KrsApprovalController extends Controller
 
     public function show(Request $request, Krs $krs): View
     {
+        [, $programStudi] = $this->resolveApprover($request);
+
         abort_unless($krs->status_approval === 'pending', 404);
 
         $krs->load(['mahasiswa', 'items.mataKuliah', 'mahasiswa.user']);
+        abort_unless((string) ($krs->mahasiswa?->program_studi ?? '') === $programStudi, 403);
 
         return view('dosen.krs.show', [
             'krs' => $krs,
@@ -48,13 +74,11 @@ class KrsApprovalController extends Controller
 
     public function updateStatus(Request $request, Krs $krs): RedirectResponse
     {
-        /** @var User $user */
-        $user = $request->user();
-        $dosen = $user->dosen;
+        [$dosen, $programStudi] = $this->resolveApprover($request);
+        abort_unless($krs->status_approval === 'pending', 404);
 
-        if (! $dosen) {
-            return back()->with('error', 'Profil dosen belum tersedia.');
-        }
+        $krs->loadMissing('mahasiswa');
+        abort_unless((string) ($krs->mahasiswa?->program_studi ?? '') === $programStudi, 403);
 
         $validated = $request->validate([
             'status_approval' => ['required', 'in:approved,rejected'],

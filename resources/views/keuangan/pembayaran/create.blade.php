@@ -107,20 +107,27 @@
                         <!-- Total Biaya -->
                         <div style="display: flex; flex-direction: column; gap: 8px;">
                             <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Total Biaya Semester (Rp)*</label>
-                            <div style="position: relative;">
-                                <input type="number" name="total_biaya" value="{{ old('total_biaya') }}" 
-                                    style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: #34d399 !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px 0 45px; font-weight: 800; outline: none; font-size: 1.1rem;" placeholder="0" required />
-                                <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.2); font-weight: 800;">Rp</span>
+                            <div style="display: flex; align-items: stretch;">
+                                <div style="width: 48px; height: 50px; display: flex; align-items: center; justify-content: center; background-color: #0a1f1a !important; color: rgba(255,255,255,0.2); font-weight: 800; border: 1px solid rgba(255,255,255,0.1) !important; border-right: 0 !important; border-radius: 12px 0 0 12px;">
+                                    Rp
+                                </div>
+                                <input type="hidden" name="total_biaya" id="total_biaya" value="{{ old('total_biaya') }}" />
+                                <input type="text" inputmode="numeric" autocomplete="off" data-currency-target="total_biaya" value="{{ old('total_biaya') }}"
+                                    style="flex: 1; width: 100%; height: 50px; background-color: #0a1f1a !important; color: #34d399 !important; border-radius: 0 12px 12px 0; border: 1px solid rgba(255,255,255,0.1) !important; border-left: 0 !important; padding: 0 15px; font-weight: 800; outline: none; font-size: 1.1rem;" placeholder="0" required />
                             </div>
                         </div>
+                    </div>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
                         <!-- Jumlah Bayar Awal -->
                         <div style="display: flex; flex-direction: column; gap: 8px;">
                             <label style="color: rgba(52,211,153,0.8); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Bayar Awal (Opsional)</label>
-                            <div style="position: relative;">
-                                <input type="number" name="jumlah_bayar" value="{{ old('jumlah_bayar', 0) }}" 
-                                    style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px 0 45px; font-weight: 700; outline: none;" placeholder="0" />
-                                <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.2); font-weight: 800;">Rp</span>
+                            <div style="display: flex; align-items: stretch;">
+                                <div style="width: 48px; height: 50px; display: flex; align-items: center; justify-content: center; background-color: #0a1f1a !important; color: rgba(255,255,255,0.2); font-weight: 800; border: 1px solid rgba(255,255,255,0.1) !important; border-right: 0 !important; border-radius: 12px 0 0 12px;">
+                                    Rp
+                                </div>
+                                <input type="hidden" name="jumlah_bayar" id="jumlah_bayar" value="{{ old('jumlah_bayar', 0) }}" />
+                                <input type="text" inputmode="numeric" autocomplete="off" data-currency-target="jumlah_bayar" value="{{ old('jumlah_bayar', 0) }}"
+                                    style="flex: 1; width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 0 12px 12px 0; border: 1px solid rgba(255,255,255,0.1) !important; border-left: 0 !important; padding: 0 15px; font-weight: 700; outline: none;" placeholder="0" />
                             </div>
                         </div>
                         <!-- Tanggal Bayar -->
@@ -176,6 +183,43 @@
 
             if (modeEl) modeEl.addEventListener('change', sync);
             sync();
+        })();
+
+        (function () {
+            const onlyDigits = (value) => String(value || '').replace(/[^\d]/g, '');
+            const formatRibuan = (digits) => String(digits || '').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+            function bindCurrencyInput(displayEl) {
+                const targetId = displayEl.getAttribute('data-currency-target');
+                if (!targetId) return;
+
+                const hiddenEl = document.getElementById(targetId);
+                if (!hiddenEl) return;
+
+                const sync = () => {
+                    const digits = onlyDigits(displayEl.value);
+                    hiddenEl.value = digits;
+                    displayEl.value = formatRibuan(digits);
+                };
+
+                displayEl.addEventListener('input', sync);
+                displayEl.addEventListener('blur', sync);
+                sync();
+            }
+
+            document.querySelectorAll('input[data-currency-target]').forEach(bindCurrencyInput);
+
+            document.querySelectorAll('form').forEach((form) => {
+                form.addEventListener('submit', () => {
+                    document.querySelectorAll('input[data-currency-target]').forEach((displayEl) => {
+                        const targetId = displayEl.getAttribute('data-currency-target');
+                        const hiddenEl = targetId ? document.getElementById(targetId) : null;
+                        if (hiddenEl) {
+                            hiddenEl.value = onlyDigits(displayEl.value);
+                        }
+                    });
+                });
+            });
         })();
     </script>
 </x-portal-layout>

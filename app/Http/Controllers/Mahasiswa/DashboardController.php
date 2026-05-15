@@ -109,10 +109,11 @@ class DashboardController extends Controller
             'tanggal_bayar' => $validated['tanggal_bayar'] ?? now(),
             'bukti_pembayaran' => $buktiPath,
             'keterangan' => $validated['keterangan'] ?: 'Upload mahasiswa',
+            'status_approval' => 'pending',
         ]);
 
         $pembayaran->updateStatus();
 
-        return back()->with('success', 'Bukti pembayaran berhasil diupload.');
+        return back()->with('success', 'Bukti pembayaran berhasil diupload dan menunggu verifikasi.');
     }
 }

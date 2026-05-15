@@ -118,6 +118,18 @@
 
                     <div style="padding: 30px; display: flex; flex-direction: column; gap: 15px;">
                         @forelse($pembayaran->details as $detail)
+                            @php
+                                $approvalStyle = match((string) ($detail->status_approval ?? 'approved')) {
+                                    'pending' => 'background-color: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.25);',
+                                    'rejected' => 'background-color: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.25);',
+                                    default => 'background-color: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.25);',
+                                };
+                                $approvalLabel = match((string) ($detail->status_approval ?? 'approved')) {
+                                    'pending' => 'MENUNGGU',
+                                    'rejected' => 'DITOLAK',
+                                    default => 'DITERIMA',
+                                };
+                            @endphp
                             <div style="background-color: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; padding: 20px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
                                 <div style="display: flex; align-items: center; gap: 20px;">
                                     <div style="height: 50px; width: 50px; background-color: rgba(16,185,129,0.1); border-radius: 15px; display: flex; align-items: center; justify-content: center;">
@@ -126,6 +138,16 @@
                                     <div>
                                         <div style="color: white; font-weight: 800; font-size: 1.1rem;">Rp {{ number_format($detail->jumlah_bayar, 0, ',', '.') }}</div>
                                         <div style="color: rgba(255,255,255,0.3); font-size: 12px; margin-top: 3px; font-weight: 600;">{{ $detail->tanggal_bayar->format('d F Y') }}</div>
+                                        <div style="margin-top: 10px;">
+                                            <span style="{{ $approvalStyle }} padding: 6px 12px; border-radius: 10px; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;">
+                                                {{ $approvalLabel }}
+                                            </span>
+                                        </div>
+                                        @if($detail->status_approval === 'rejected' && $detail->catatan_approval)
+                                            <div style="margin-top: 10px; color: rgba(255,255,255,0.55); font-size: 12px; font-weight: 600;">
+                                                Catatan: {{ $detail->catatan_approval }}
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
 
@@ -147,6 +169,36 @@
                                     </div>
                                 </div>
                             </div>
+                            @if(($detail->status_approval ?? 'approved') === 'pending')
+                                <div style="margin-top: -6px; margin-bottom: 6px; padding: 16px 18px; border-radius: 16px; border: 1px solid rgba(245,158,11,0.18); background: rgba(245,158,11,0.06); display: flex; flex-wrap: wrap; gap: 10px; align-items: end; justify-content: space-between;">
+                                    <form method="POST" action="{{ route('keuangan.pembayaran.detail.status', [$pembayaran, $detail]) }}" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: end;">
+                                        @csrf
+                                        @method('PATCH')
+                                        <input type="hidden" name="status_approval" value="approved" />
+                                        <div style="display: flex; flex-direction: column; gap: 6px; min-width: 260px;">
+                                            <label style="color: rgba(255,255,255,0.45); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Catatan (Opsional)</label>
+                                            <input type="text" name="catatan_approval" maxlength="255" placeholder="Contoh: Bukti jelas, diterima"
+                                                   style="width: 100%; height: 44px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 14px; outline: none; font-weight: 600;" />
+                                        </div>
+                                        <button type="submit" style="height: 44px; padding: 0 18px; border-radius: 12px; background: rgba(16,185,129,0.18); border: 1px solid rgba(16,185,129,0.25); color: #10b981; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; cursor: pointer;">
+                                            Setujui
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{{ route('keuangan.pembayaran.detail.status', [$pembayaran, $detail]) }}" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: end;">
+                                        @csrf
+                                        @method('PATCH')
+                                        <input type="hidden" name="status_approval" value="rejected" />
+                                        <div style="display: flex; flex-direction: column; gap: 6px; min-width: 260px;">
+                                            <label style="color: rgba(255,255,255,0.45); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Catatan (Wajib)</label>
+                                            <input type="text" name="catatan_approval" maxlength="255" placeholder="Contoh: Bukti buram / nominal tidak sesuai"
+                                                   style="width: 100%; height: 44px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 14px; outline: none; font-weight: 600;" required />
+                                        </div>
+                                        <button type="submit" style="height: 44px; padding: 0 18px; border-radius: 12px; background: rgba(239,68,68,0.16); border: 1px solid rgba(239,68,68,0.24); color: #f87171; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; cursor: pointer;">
+                                            Tolak
+                                        </button>
+                                    </form>
+                                </div>
+                            @endif
                         @empty
                             <div style="text-align: center; padding: 60px 0; color: rgba(255,255,255,0.1);">
                                 <i class="fa-solid fa-receipt" style="font-size: 3rem; margin-bottom: 15px; display: block;"></i>

@@ -35,6 +35,8 @@ class Dosen extends Model
         'ikatan_kerja',
         'tanggal_pengangkatan',
         'mata_kuliah',
+        'program_studi',
+        'status_akademik',
         'foto_path',
     ];
 

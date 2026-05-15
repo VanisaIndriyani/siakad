@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Mahasiswa;
 
 use App\Http\Controllers\Controller;
+use App\Models\Dosen;
 use App\Models\Khs;
 use App\Models\User;
 use Dompdf\Dompdf;
@@ -11,6 +12,20 @@ use Illuminate\View\View;
 
 class KhsController extends Controller
 {
+    private function resolveKaprodiName(?string $programStudi): ?string
+    {
+        $programStudi = trim((string) $programStudi);
+        if ($programStudi === '') {
+            return null;
+        }
+
+        return Dosen::query()
+            ->where('program_studi', $programStudi)
+            ->where('status_akademik', 'Ketua Prodi')
+            ->orderByDesc('id')
+            ->value('nama');
+    }
+
     public function index(Request $request): View
     {
         /** @var User $user */
@@ -61,8 +76,11 @@ class KhsController extends Controller
 
         $khs->load(['items.mataKuliah.dosen', 'mahasiswa']);
 
+        $kaprodiNama = $this->resolveKaprodiName($user->mahasiswa->program_studi ?? null);
+
         return view('mahasiswa.khs.show', [
             'khs' => $khs,
+            'kaprodiNama' => $kaprodiNama,
         ]);
     }
 
@@ -79,8 +97,11 @@ class KhsController extends Controller
 
         $khs->load(['items.mataKuliah.dosen', 'mahasiswa']);
 
+        $kaprodiNama = $this->resolveKaprodiName($user->mahasiswa->program_studi ?? null);
+
         $html = view('mahasiswa.khs.pdf', [
             'khs' => $khs,
+            'kaprodiNama' => $kaprodiNama,
         ])->render();
 
         $dompdf = new Dompdf(['isRemoteEnabled' => true]);

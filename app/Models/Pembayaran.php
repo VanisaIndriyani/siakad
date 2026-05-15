@@ -31,7 +31,7 @@ class Pembayaran extends Model
 
     public function updateStatus(): void
     {
-        $totalDibayar = $this->details()->sum('jumlah_bayar');
+        $totalDibayar = $this->details()->where('status_approval', 'approved')->sum('jumlah_bayar');
         $this->total_dibayar = $totalDibayar;
 
         if ($totalDibayar >= $this->total_biaya) {

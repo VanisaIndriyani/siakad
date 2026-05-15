@@ -138,6 +138,17 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
+                        <label class="text-sm text-emerald-100/80">Program Studi</label>
+                        <input value="{{ $dosen?->program_studi ?? '-' }}" readonly class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 opacity-80" />
+                    </div>
+                    <div>
+                        <label class="text-sm text-emerald-100/80">Status Akademik</label>
+                        <input value="{{ $dosen?->status_akademik ?? 'Dosen' }}" readonly class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 opacity-80" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
                         <label class="text-sm text-emerald-100/80">Tempat Lahir</label>
                         <input name="tempat_lahir" value="{{ old('tempat_lahir', $dosen?->tempat_lahir ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
                         @error('tempat_lahir') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror

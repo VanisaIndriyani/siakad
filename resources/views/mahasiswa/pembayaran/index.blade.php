@@ -44,6 +44,14 @@
                             <span style="{{ $statusStyle }} padding: 6px 16px; border-radius: 10px; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;">
                                 {{ $p->status_pembayaran }}
                             </span>
+                            @php
+                                $pendingCount = $p->details->where('status_approval', 'pending')->count();
+                            @endphp
+                            @if($pendingCount > 0)
+                                <span style="margin-left: 10px; background-color: rgba(245,158,11,0.18); color: #f59e0b; border: 1px solid rgba(245,158,11,0.25); padding: 6px 12px; border-radius: 10px; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;">
+                                    Menunggu {{ $pendingCount }}
+                                </span>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -65,6 +73,18 @@
 
                     <div style="display: flex; flex-direction: column; gap: 12px;">
                         @forelse($p->details as $detail)
+                        @php
+                            $approvalStyle = match((string) ($detail->status_approval ?? 'approved')) {
+                                'pending' => 'background-color: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.25);',
+                                'rejected' => 'background-color: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.25);',
+                                default => 'background-color: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.25);',
+                            };
+                            $approvalLabel = match((string) ($detail->status_approval ?? 'approved')) {
+                                'pending' => 'MENUNGGU',
+                                'rejected' => 'DITOLAK',
+                                default => 'DITERIMA',
+                            };
+                        @endphp
                         <div style="background-color: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: 16px; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; gap: 15px;">
                             <div style="display: flex; align-items: center; gap: 20px;">
                                 <div style="height: 40px; width: 40px; background-color: rgba(16,185,129,0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
@@ -73,6 +93,16 @@
                                 <div>
                                     <div style="color: white; font-weight: 700; font-size: 14px;">Rp {{ number_format($detail->jumlah_bayar, 0, ',', '.') }}</div>
                                     <div style="color: rgba(255,255,255,0.3); font-size: 11px; margin-top: 2px;">{{ $detail->tanggal_bayar->format('d F Y') }}</div>
+                                    <div style="margin-top: 8px;">
+                                        <span style="{{ $approvalStyle }} padding: 5px 10px; border-radius: 10px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;">
+                                            {{ $approvalLabel }}
+                                        </span>
+                                    </div>
+                                    @if($detail->status_approval === 'rejected' && $detail->catatan_approval)
+                                        <div style="margin-top: 8px; color: rgba(255,255,255,0.55); font-size: 11px; font-weight: 600;">
+                                            Catatan: {{ $detail->catatan_approval }}
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                             
@@ -117,7 +147,9 @@
                                 @csrf
                                 <div style="display: flex; flex-direction: column; gap: 8px;">
                                     <label style="color: rgba(255,255,255,0.45); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Jumlah Bayar (Rp)*</label>
-                                    <input type="number" name="jumlah_bayar" min="1" placeholder="0" required
+                                    <input type="hidden" name="jumlah_bayar" id="jumlah_bayar_{{ $p->id }}" />
+                                    <input type="text" inputmode="numeric" autocomplete="off" placeholder="0" required
+                                           data-currency-target="jumlah_bayar_{{ $p->id }}"
                                            style="width: 100%; height: 46px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 14px; outline: none; font-weight: 700;" />
                                 </div>
                                 <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -159,4 +191,32 @@
             @endforelse
         </div>
     </div>
+
+    <script>
+        (function () {
+            const formatRupiah = (digits) => {
+                const cleaned = String(digits || '').replace(/[^\d]/g, '');
+                if (!cleaned) return '';
+                return cleaned.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            };
+
+            const syncCurrencyInput = (displayInput) => {
+                const targetId = displayInput.getAttribute('data-currency-target');
+                const hiddenInput = targetId ? document.getElementById(targetId) : null;
+                const digits = String(displayInput.value || '').replace(/[^\d]/g, '');
+                displayInput.value = formatRupiah(digits);
+                if (hiddenInput) hiddenInput.value = digits;
+            };
+
+            document.querySelectorAll('input[data-currency-target]').forEach((el) => {
+                el.addEventListener('input', () => syncCurrencyInput(el));
+                el.addEventListener('blur', () => syncCurrencyInput(el));
+                syncCurrencyInput(el);
+                const form = el.closest('form');
+                if (form) {
+                    form.addEventListener('submit', () => syncCurrencyInput(el));
+                }
+            });
+        })();
+    </script>
 </x-portal-layout>
