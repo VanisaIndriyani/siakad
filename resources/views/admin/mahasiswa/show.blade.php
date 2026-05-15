@@ -248,6 +248,23 @@
                     </div>
                 </div>
 
+                <div style="background-color: #0d2a23 !important; border-radius: 24px; border: 1px solid rgba(255,255,255,0.08); padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+                        <i class="fa-solid fa-user-shield" style="color: #10b981; font-size: 1.1rem;"></i>
+                        <h3 style="color: white; font-size: 14px; font-weight: 800; margin: 0; text-transform: uppercase; letter-spacing: 1px;">Akun Login</h3>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 14px; font-size: 13px;">
+                        <div style="display: flex; justify-content: space-between; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.08);">
+                            <span style="color: rgba(255,255,255,0.55); font-weight: 700;">Email</span>
+                            <span style="color: white; font-weight: 800;">{{ $mahasiswa->user?->email ?? '-' }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; gap: 12px;">
+                            <span style="color: rgba(255,255,255,0.55); font-weight: 700;">Password Default</span>
+                            <span style="color: white; font-weight: 800;">password</span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Section: Danger Zone -->
                 <div style="background-color: rgba(239,68,68,0.05); border-radius: 24px; border: 1px solid rgba(239,68,68,0.15); padding: 25px;">
                     <h3 style="color: #f87171; font-size: 12px; font-weight: 800; margin: 0 0 15px 0; text-transform: uppercase; letter-spacing: 1px;">Zona Berbahaya</h3>

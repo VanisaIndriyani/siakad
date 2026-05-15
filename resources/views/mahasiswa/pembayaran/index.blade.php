@@ -154,7 +154,10 @@
                                 </div>
                                 <div style="display: flex; flex-direction: column; gap: 8px;">
                                     <label style="color: rgba(255,255,255,0.45); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Tanggal Bayar</label>
-                                    <input type="date" name="tanggal_bayar" value="{{ date('Y-m-d') }}"
+                                    <input type="hidden" name="tanggal_bayar" id="tanggal_bayar_{{ $p->id }}" value="{{ date('Y-m-d') }}" />
+                                    <input type="text" inputmode="numeric" autocomplete="off" placeholder="dd/mm/yyyy"
+                                           value="{{ now()->format('d/m/Y') }}"
+                                           data-date-target="tanggal_bayar_{{ $p->id }}"
                                            style="width: 100%; height: 46px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 14px; outline: none; font-weight: 700;" />
                                 </div>
                                 <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -215,6 +218,48 @@
                 const form = el.closest('form');
                 if (form) {
                     form.addEventListener('submit', () => syncCurrencyInput(el));
+                }
+            });
+
+            const formatTanggal = (digits) => {
+                const cleaned = String(digits || '').replace(/[^\d]/g, '').slice(0, 8);
+                if (!cleaned) return '';
+                if (cleaned.length <= 2) return cleaned;
+                if (cleaned.length <= 4) return `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
+                return `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4)}`;
+            };
+
+            const toIsoDate = (ddmmyyyyDigits) => {
+                const cleaned = String(ddmmyyyyDigits || '').replace(/[^\d]/g, '');
+                if (cleaned.length !== 8) return '';
+                const d = parseInt(cleaned.slice(0, 2), 10);
+                const m = parseInt(cleaned.slice(2, 4), 10);
+                const y = parseInt(cleaned.slice(4, 8), 10);
+                if (!y || m < 1 || m > 12 || d < 1 || d > 31) return '';
+                const dt = new Date(y, m - 1, d);
+                if (dt.getFullYear() !== y || dt.getMonth() !== (m - 1) || dt.getDate() !== d) return '';
+                const mm = String(m).padStart(2, '0');
+                const dd = String(d).padStart(2, '0');
+                return `${y}-${mm}-${dd}`;
+            };
+
+            const syncTanggalInput = (displayInput) => {
+                const targetId = displayInput.getAttribute('data-date-target');
+                const hiddenInput = targetId ? document.getElementById(targetId) : null;
+                const digits = String(displayInput.value || '').replace(/[^\d]/g, '').slice(0, 8);
+                displayInput.value = formatTanggal(digits);
+                if (hiddenInput) {
+                    hiddenInput.value = toIsoDate(digits);
+                }
+            };
+
+            document.querySelectorAll('input[data-date-target]').forEach((el) => {
+                el.addEventListener('input', () => syncTanggalInput(el));
+                el.addEventListener('blur', () => syncTanggalInput(el));
+                syncTanggalInput(el);
+                const form = el.closest('form');
+                if (form) {
+                    form.addEventListener('submit', () => syncTanggalInput(el));
                 }
             });
         })();

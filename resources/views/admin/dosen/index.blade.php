@@ -43,17 +43,17 @@
             if (!(t instanceof HTMLInputElement)) return;
 
             if (t.dataset.bulk === 'select-all') {
-                const rows = this.$refs.bulkForm.querySelectorAll('input[data-bulk=\"row\"]');
+                const rows = this.$refs.bulkForm.querySelectorAll('input[data-bulk=row]');
                 rows.forEach((cb) => { cb.checked = t.checked; });
             }
 
             this.syncSelectedFromDom();
         },
         syncSelectedFromDom() {
-            const rows = Array.from(this.$refs.bulkForm.querySelectorAll('input[data-bulk=\"row\"]'));
+            const rows = Array.from(this.$refs.bulkForm.querySelectorAll('input[data-bulk=row]'));
             this.selectedIds = rows.filter((cb) => cb.checked).map((cb) => cb.value);
 
-            const selectAll = this.$refs.bulkForm.querySelector('input[data-bulk=\"select-all\"]');
+            const selectAll = this.$refs.bulkForm.querySelector('input[data-bulk=select-all]');
             if (!selectAll) return;
 
             if (rows.length === 0) {

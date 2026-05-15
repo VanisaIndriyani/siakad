@@ -209,12 +209,12 @@
             <table style="width: 100%; border-collapse: collapse;">
                 <tr>
                     <td style="width: 33.33%; text-align: center; vertical-align: top;">
-                        <div style="font-size: 11px; font-weight: 700;">Ketua Prodi</div>
+                        <div style="font-size: 11px; font-weight: 700;">Ketua Prodi {{ $mahasiswa?->program_studi ?? '-' }}</div>
                         <div style="height: 64px;"></div>
                         <div style="font-size: 11px; font-weight: 800;">{{ $kaprodiNama ?: '-' }}</div>
                     </td>
                     <td style="width: 33.33%; text-align: center; vertical-align: top;">
-                        <div style="font-size: 11px; font-weight: 700;">Sekretaris Prodi</div>
+                        <div style="font-size: 11px; font-weight: 700;">Sekretaris Prodi {{ $mahasiswa?->program_studi ?? '-' }}</div>
                         <div style="height: 64px;"></div>
                         <div style="font-size: 11px; font-weight: 800;">{{ $sekprodiNama ?: '-' }}</div>
                     </td>

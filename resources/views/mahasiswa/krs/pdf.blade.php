@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>KRS</title>
     <style>
-        @page { margin: 16mm 14mm; }
+        @page { margin: 16mm 14mm 16mm 17mm; }
         body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #111827; }
         table { width: 100%; border-collapse: collapse; }
         .kop-title-1 { color: #111827; font-size: 19px; font-weight: 800; margin: 0; line-height: 1.12; }
@@ -153,12 +153,12 @@
     <table style="margin-top: 16mm;">
         <tr>
             <td style="width: 33.33%; text-align: center; vertical-align: top;">
-                <div style="font-size: 11px; font-weight: 700;">Ketua Prodi</div>
+                <div style="font-size: 11px; font-weight: 700;">Ketua Prodi {{ $mahasiswa?->program_studi ?? '-' }}</div>
                 <div style="height: 64px;"></div>
                 <div style="font-size: 11px; font-weight: 800;">{{ $kaprodiNama ?: '-' }}</div>
             </td>
             <td style="width: 33.33%; text-align: center; vertical-align: top;">
-                <div style="font-size: 11px; font-weight: 700;">Sekretaris Prodi</div>
+                <div style="font-size: 11px; font-weight: 700;">Sekretaris Prodi {{ $mahasiswa?->program_studi ?? '-' }}</div>
                 <div style="height: 64px;"></div>
                 <div style="font-size: 11px; font-weight: 800;">{{ $sekprodiNama ?: '-' }}</div>
             </td>

@@ -13,7 +13,9 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME') && env('APP_NAME') !== 'SIAKAD Kampus'
+        ? env('APP_NAME')
+        : 'SIAKAD IAI DDI SIDRAP',
 
     /*
     |--------------------------------------------------------------------------

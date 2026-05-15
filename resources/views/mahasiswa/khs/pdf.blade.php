@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>KHS</title>
     <style>
-        @page { margin: 16mm 14mm; }
+        @page { margin: 16mm 14mm 16mm 17mm; }
         body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #111827; }
         table { width: 100%; border-collapse: collapse; }
         .kop-title-1 { color: #111827; font-size: 19px; font-weight: 800; margin: 0; line-height: 1.12; }

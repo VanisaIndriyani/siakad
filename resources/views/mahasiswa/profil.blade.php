@@ -377,8 +377,8 @@
         </div>
 
         <!-- Sidebar Info -->
-        <div style="width: 320px; display: flex; flex-direction: column; gap: 30px;">
-            <div style="background-color: #0d2a23 !important; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); padding: 35px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); position: sticky; top: 30px;">
+        <div style="width: 320px; display: flex; flex-direction: column; gap: 30px; position: sticky; top: 30px; align-self: flex-start;">
+            <div style="background-color: #0d2a23 !important; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); padding: 35px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
                 <div style="display: flex; flex-direction: column; align-items: center; text-align: center;">
                     <div style="position: relative; margin-bottom: 25px;">
                         <div style="position: absolute; inset: -10px; background-color: rgba(16,185,129,0.2); filter: blur(20px); border-radius: 50%;"></div>
@@ -415,6 +415,20 @@
                         <div style="margin-top: 8px;">
                             <span style="padding: 4px 12px; background-color: rgba(16,185,129,0.2); color: #34d399; font-size: 10px; font-weight: 800; text-transform: uppercase; border-radius: 8px; border: 1px solid rgba(16,185,129,0.3);">{{ $mahasiswa?->status_mahasiswa ?? 'Aktif' }}</span>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background-color: #0d2a23 !important; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); padding: 22px 22px; box-shadow: 0 10px 30px rgba(0,0,0,0.25);">
+                <div style="color: white; font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;">Akun Login</div>
+                <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.08);">
+                        <span style="color: rgba(255,255,255,0.55); font-weight: 700;">Email</span>
+                        <span style="color: white; font-weight: 800; text-align: right; word-break: break-all; max-width: 180px;">{{ auth()->user()->email }}</span>
+                    </div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                        <span style="color: rgba(255,255,255,0.55); font-weight: 700;">Password Default</span>
+                        <span style="color: white; font-weight: 800;">password</span>
                     </div>
                 </div>
             </div>
