@@ -19,6 +19,7 @@
             .footer { margin-top: 10px; font-size: 10px; color: #64748b; }
             .muted { color: #64748b; }
             .sign { margin-top: 14px; }
+            .sign table { width: 86%; margin: 0 auto; }
             .sign td { width: 50%; vertical-align: top; padding-top: 2px; }
             .sign .label { font-weight: 700; font-size: 10.5px; }
             .sign .sub { font-size: 10px; color: #334155; margin-top: 2px; }

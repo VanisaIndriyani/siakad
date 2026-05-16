@@ -18,10 +18,20 @@
     <i class="fa-solid fa-graduation-cap text-emerald-300"></i>
     <span class="text-sm font-medium">Skripsi</span>
 </a>
+<a href="{{ route('mahasiswa.skripsi-files.index') }}"
+   class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('mahasiswa.skripsi-files.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+    <i class="fa-solid fa-upload text-emerald-300"></i>
+    <span class="text-sm font-medium">Upload File Skripsi</span>
+</a>
 <a href="{{ route('mahasiswa.ppl.index') }}"
    class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('mahasiswa.ppl.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
     <i class="fa-solid fa-briefcase text-emerald-300"></i>
     <span class="text-sm font-medium">PPL</span>
+</a>
+<a href="{{ route('mahasiswa.ppl-files.index') }}"
+   class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('mahasiswa.ppl-files.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+    <i class="fa-solid fa-upload text-emerald-300"></i>
+    <span class="text-sm font-medium">Upload Laporan PPL</span>
 </a>
 <a href="{{ route('mahasiswa.krs.index') }}"
    class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('mahasiswa.krs.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">

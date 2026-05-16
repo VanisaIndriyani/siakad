@@ -25,6 +25,7 @@
             .w-t { width: 36px; }
             .muted { color: #64748b; }
             .sign { margin-top: 12px; }
+            .sign table { width: 78%; margin: 0 auto; }
             .sign td { width: 50%; vertical-align: top; padding-top: 2px; }
             .sign .label { font-weight: 700; font-size: 10px; }
             .sign .sub { font-size: 9.5px; color: #334155; margin-top: 2px; }
@@ -136,4 +137,3 @@
         <div class="footer">Dokumen ini dihasilkan otomatis oleh {{ config('app.name') }}.</div>
     </body>
 </html>
-

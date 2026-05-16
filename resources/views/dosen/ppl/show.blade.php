@@ -30,10 +30,16 @@
                     <div class="title">Bimbingan PPL</div>
                     <div class="sub">{{ $ppl->mahasiswa?->nama_lengkap ?: '-' }} ({{ $ppl->mahasiswa?->npm ?: '-' }}) • {{ $ppl->instansi_nama }}</div>
                 </div>
-                <a href="{{ route('dosen.ppl.bimbingan.index') }}" class="chat-back">
-                    <i class="fa-solid fa-arrow-left"></i>
-                    Kembali
-                </a>
+                <div style="display:flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <a href="{{ route('dosen.ppl.bimbingan.pdf', $ppl) }}" class="chat-back">
+                        <i class="fa-solid fa-print"></i>
+                        Print
+                    </a>
+                    <a href="{{ route('dosen.ppl.bimbingan.index') }}" class="chat-back">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        Kembali
+                    </a>
+                </div>
             </div>
 
             <div id="chatStream" class="chat-stream">
@@ -79,4 +85,3 @@
         })();
     </script>
 </x-portal-layout>
-

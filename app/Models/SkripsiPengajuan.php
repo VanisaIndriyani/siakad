@@ -70,4 +70,19 @@ class SkripsiPengajuan extends Model
     {
         return $this->hasOne(SkripsiBimbinganMessage::class, 'skripsi_pengajuan_id')->latestOfMany();
     }
+
+    public function revisis(): HasMany
+    {
+        return $this->hasMany(SkripsiRevisi::class, 'skripsi_pengajuan_id');
+    }
+
+    public function latestRevisi(): HasOne
+    {
+        return $this->hasOne(SkripsiRevisi::class, 'skripsi_pengajuan_id')->latestOfMany();
+    }
+
+    public function files(): HasMany
+    {
+        return $this->hasMany(SkripsiFile::class, 'skripsi_pengajuan_id');
+    }
 }

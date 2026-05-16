@@ -58,6 +58,15 @@
                         @endforeach
                     </select>
                 </div>
+                <div style="min-width: 220px;">
+                    <select name="jurusan" style="width: 100%; height: 50px; background-color: #0a1f1a !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px; font-weight: 600; outline: none;">
+                        <option value="" style="background-color: #0d2a23;">Semua Jurusan</option>
+                        @foreach (($jurusanList ?? []) as $j)
+                            <option value="{{ $j }}" @selected((string) ($jurusan ?? '') === (string) $j) style="background-color: #0d2a23;">{{ $j }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <input type="hidden" name="per_page" value="{{ $per_page ?? '10' }}" />
                 <button type="submit" style="height: 50px; padding: 0 30px; background-color: rgba(255,255,255,0.05); color: white; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); font-weight: 700; cursor: pointer;">
                     CARI DATA
                 </button>
@@ -175,7 +184,28 @@
 
         @if($pembayarans->hasPages())
             <div style="margin-top: 15px;">
-                {{ $pembayarans->links() }}
+                <div style="display:flex; align-items:center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+                    <div>
+                        {{ $pembayarans->links() }}
+                    </div>
+                    @php
+                        $baseQuery = request()->except(['page', 'per_page']);
+                        $isAll = (string) ($per_page ?? '10') === 'all';
+                    @endphp
+                    @if (! $isAll)
+                        <a href="{{ route('keuangan.pembayaran.index', array_merge($baseQuery, ['per_page' => 'all'])) }}"
+                           style="text-decoration:none; height: 40px; padding: 0 14px; background-color: rgba(255,255,255,0.05); color: white; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); font-weight: 800; font-size: 12px; display:inline-flex; align-items:center; gap: 8px;">
+                            <i class="fa-solid fa-expand"></i>
+                            Buka Semua
+                        </a>
+                    @else
+                        <a href="{{ route('keuangan.pembayaran.index', array_merge($baseQuery, ['per_page' => '10'])) }}"
+                           style="text-decoration:none; height: 40px; padding: 0 14px; background-color: rgba(255,255,255,0.05); color: white; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); font-weight: 800; font-size: 12px; display:inline-flex; align-items:center; gap: 8px;">
+                            <i class="fa-solid fa-compress"></i>
+                            Per Halaman
+                        </a>
+                    @endif
+                </div>
             </div>
         @endif
     </div>

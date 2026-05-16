@@ -39,10 +39,16 @@
                         @endif
                     </div>
                 </div>
-                <a href="{{ route('mahasiswa.skripsi.show', $skripsi) }}" class="chat-back">
-                    <i class="fa-solid fa-arrow-left"></i>
-                    Kembali
-                </a>
+                <div style="display:flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <a href="{{ route('mahasiswa.skripsi.revisi', $skripsi) }}" class="chat-back">
+                        <i class="fa-solid fa-list-check"></i>
+                        Revisi
+                    </a>
+                    <a href="{{ route('mahasiswa.skripsi.show', $skripsi) }}" class="chat-back">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        Kembali
+                    </a>
+                </div>
             </div>
 
             @if (! $skripsi->dosen_pembimbing_id && ! $skripsi->dosen_pembimbing_id_2)

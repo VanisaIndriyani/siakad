@@ -71,5 +71,9 @@ class PplPengajuan extends Model
     {
         return $this->hasOne(PplBimbinganMessage::class, 'ppl_pengajuan_id')->latestOfMany();
     }
-}
 
+    public function files(): HasMany
+    {
+        return $this->hasMany(PplFile::class, 'ppl_pengajuan_id');
+    }
+}

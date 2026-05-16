@@ -62,7 +62,7 @@
 
     <div class="doc-title">REKAP PEMBAYARAN</div>
     <div class="meta">
-        <div>Filter: {{ $q ? 'q='.$q : '-' }} | Semester: {{ $semester ?? '-' }} | Angkatan: {{ $angkatan ?? '-' }} | Tagihan: {{ $jenis_tagihan ?? '-' }}</div>
+        <div>Filter: {{ $q ? 'q='.$q : '-' }} | Semester: {{ $semester ?? '-' }} | Angkatan: {{ $angkatan ?? '-' }} | Jurusan: {{ $jurusan ?? '-' }} | Tagihan: {{ $jenis_tagihan ?? '-' }}</div>
         <div>Dicetak: {{ now()->format('d/m/Y H:i') }}</div>
     </div>
 

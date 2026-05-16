@@ -150,6 +150,44 @@ class SkripsiController extends Controller
         return back()->with('success', 'Dosen pembimbing berhasil ditetapkan.');
     }
 
+    public function destroySkPembimbing(Request $request, SkripsiPengajuan $skripsi): RedirectResponse
+    {
+        abort_unless($request->user()?->isAdmin(), 403);
+
+        if ($skripsi->sk_pembimbing_path) {
+            Storage::disk('public')->delete($skripsi->sk_pembimbing_path);
+        }
+
+        $skripsi->update([
+            'sk_pembimbing_path' => null,
+            'sk_pembimbing_name' => null,
+        ]);
+
+        return back()->with('success', 'File SK pembimbing berhasil dihapus.');
+    }
+
+    public function resetPembimbing(Request $request, SkripsiPengajuan $skripsi): RedirectResponse
+    {
+        abort_unless($request->user()?->isAdmin(), 403);
+
+        if ($skripsi->sk_pembimbing_path) {
+            Storage::disk('public')->delete($skripsi->sk_pembimbing_path);
+        }
+
+        $skripsi->update([
+            'status' => $skripsi->approved_at ? 'approved' : 'pending',
+            'dosen_pembimbing_id' => null,
+            'dosen_pembimbing_id_2' => null,
+            'nomor_sk' => null,
+            'tanggal_sk' => null,
+            'sk_pembimbing_path' => null,
+            'sk_pembimbing_name' => null,
+            'assigned_at' => null,
+        ]);
+
+        return back()->with('success', 'Pembimbing berhasil dihapus/reset.');
+    }
+
     public function destroy(Request $request, SkripsiPengajuan $skripsi): RedirectResponse
     {
         abort_unless($request->user()?->isAdmin(), 403);

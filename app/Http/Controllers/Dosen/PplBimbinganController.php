@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dosen;
 
 use App\Http\Controllers\Controller;
 use App\Models\PplPengajuan;
+use Dompdf\Dompdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -64,5 +65,33 @@ class PplBimbinganController extends Controller
 
         return back()->with('success', 'Pesan bimbingan terkirim.');
     }
-}
 
+    public function pdf(Request $request, PplPengajuan $ppl)
+    {
+        $dosen = $request->user()?->dosen;
+        abort_unless($dosen, 403);
+
+        $allowed = in_array((int) $dosen->id, [(int) $ppl->dosen_pembimbing_id, (int) $ppl->dosen_pembimbing_id_2], true);
+        abort_unless($allowed, 404);
+
+        $ppl->load(['mahasiswa', 'dosenPembimbing', 'dosenPembimbing2', 'messages.sender']);
+
+        $html = view('ppl.bimbingan-pdf', [
+            'ppl' => $ppl,
+            'messages' => $ppl->messages->sortBy('id')->values(),
+            'printedBy' => $request->user()?->name,
+        ])->render();
+
+        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $filename = 'bimbingan-ppl-'.$ppl->id.'.pdf';
+
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ]);
+    }
+}

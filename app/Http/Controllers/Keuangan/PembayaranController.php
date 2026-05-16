@@ -9,6 +9,7 @@ use App\Models\PembayaranDetail;
 use Dompdf\Dompdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -40,6 +41,12 @@ class PembayaranController extends Controller
         $semester = (int) $request->get('semester', 0);
         $angkatan = (int) $request->get('angkatan', 0);
         $jenisTagihan = trim((string) $request->get('jenis_tagihan', ''));
+        $jurusan = trim((string) $request->get('jurusan', ''));
+        $perPageRaw = trim((string) $request->get('per_page', '10'));
+        $allowedPerPage = ['10', '25', '50', '100', 'all'];
+        if (! in_array($perPageRaw, $allowedPerPage, true)) {
+            $perPageRaw = '10';
+        }
 
         $query = Pembayaran::query()->with('mahasiswa');
 
@@ -60,8 +67,39 @@ class PembayaranController extends Controller
                 $sub->where('angkatan', $angkatan);
             });
         }
+        if ($jurusan !== '') {
+            $query->whereHas('mahasiswa', function ($sub) use ($jurusan) {
+                $sub->where('program_studi', $jurusan);
+            });
+        }
 
-        $pembayarans = $query->orderByDesc('id')->paginate(10)->withQueryString();
+        if ($perPageRaw === 'all') {
+            $rows = $query->orderByDesc('id')->get();
+            $perPage = max((int) $rows->count(), 1);
+            $pembayarans = new LengthAwarePaginator(
+                $rows,
+                $rows->count(),
+                $perPage,
+                1,
+                [
+                    'path' => $request->url(),
+                    'query' => $request->query(),
+                ]
+            );
+        } else {
+            $pembayarans = $query->orderByDesc('id')->paginate((int) $perPageRaw)->withQueryString();
+        }
+
+        $jurusanList = Mahasiswa::query()
+            ->selectRaw('program_studi')
+            ->whereNotNull('program_studi')
+            ->where('program_studi', '<>', '')
+            ->distinct()
+            ->orderBy('program_studi')
+            ->pluck('program_studi')
+            ->map(fn ($v) => (string) $v)
+            ->values()
+            ->all();
 
         $angkatanList = Mahasiswa::query()
             ->selectRaw('angkatan')
@@ -78,9 +116,12 @@ class PembayaranController extends Controller
             'q' => $q,
             'semester' => $semester ?: null,
             'angkatan' => $angkatan ?: null,
+            'jurusan' => $jurusan ?: null,
             'jenis_tagihan' => $jenisTagihan ?: null,
             'jenisTagihanList' => self::JENIS_TAGIHAN,
             'angkatanList' => $angkatanList,
+            'jurusanList' => $jurusanList,
+            'per_page' => $perPageRaw,
         ]);
     }
 
@@ -305,6 +346,7 @@ class PembayaranController extends Controller
         $semester = (int) $request->get('semester', 0);
         $angkatan = (int) $request->get('angkatan', 0);
         $jenisTagihan = trim((string) $request->get('jenis_tagihan', ''));
+        $jurusan = trim((string) $request->get('jurusan', ''));
 
         $query = Pembayaran::query()->with('mahasiswa')->orderByDesc('id');
         if ($q !== '') {
@@ -324,6 +366,11 @@ class PembayaranController extends Controller
                 $sub->where('angkatan', $angkatan);
             });
         }
+        if ($jurusan !== '') {
+            $query->whereHas('mahasiswa', function ($sub) use ($jurusan) {
+                $sub->where('program_studi', $jurusan);
+            });
+        }
 
         $rows = $query->get();
         $html = view('keuangan.pembayaran.export-pdf', [
@@ -331,6 +378,7 @@ class PembayaranController extends Controller
             'q' => $q,
             'semester' => $semester ?: null,
             'angkatan' => $angkatan ?: null,
+            'jurusan' => $jurusan ?: null,
             'jenis_tagihan' => $jenisTagihan ?: null,
         ])->render();
 

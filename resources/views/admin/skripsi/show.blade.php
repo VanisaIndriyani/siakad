@@ -160,6 +160,28 @@
                         <span class="font-medium">{{ $skripsi->tanggal_sk->format('d/m/Y') }}</span>
                     @endif
                 </div>
+                @if ($prefix === 'admin' && ($skripsi->dosen_pembimbing_id || $skripsi->dosen_pembimbing_id_2 || $skripsi->nomor_sk || $skripsi->tanggal_sk || $skripsi->sk_pembimbing_path))
+                    <div class="mt-3 flex items-center gap-2 flex-wrap">
+                        @if ($skripsi->sk_pembimbing_path)
+                            <form method="POST" action="{{ route('admin.skripsi.sk.destroy', $skripsi) }}" onsubmit="return confirm('Hapus file SK pembimbing?');">
+                                @csrf
+                                @method('DELETE')
+                                <button class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/25 transition">
+                                    <i class="fa-solid fa-trash"></i>
+                                    <span class="text-sm font-medium">Hapus SK</span>
+                                </button>
+                            </form>
+                        @endif
+                        <form method="POST" action="{{ route('admin.skripsi.pembimbing.reset', $skripsi) }}" onsubmit="return confirm('Reset pembimbing & SK untuk skripsi ini?');">
+                            @csrf
+                            @method('DELETE')
+                            <button class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/25 transition">
+                                <i class="fa-solid fa-user-xmark"></i>
+                                <span class="text-sm font-medium">Reset Pembimbing</span>
+                            </button>
+                        </form>
+                    </div>
+                @endif
                 @if ($skripsi->sk_pembimbing_path)
                     <div class="mt-3 flex items-center gap-2 flex-wrap">
                         <a href="{{ $skPreviewUrl }}" target="_blank"

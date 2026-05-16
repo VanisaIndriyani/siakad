@@ -20,8 +20,15 @@
                 <div style="font-size: 18px; font-weight: 700;">Profil Dosen</div>
                 <div style="margin-top: 4px; font-size: 12px; color: #4b5563;">{{ config('app.name') }}</div>
             </div>
-            <div style="font-size: 12px; color: #4b5563; text-align: right;">
-                <div>{{ now()->format('d/m/Y H:i') }}</div>
+            <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <div style="font-size: 12px; color: #4b5563; text-align: right;">
+                    <div>{{ now()->format('d/m/Y H:i') }}</div>
+                </div>
+                <div style="width: 64px; height: 80px; border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; background: #f8fafc;">
+                    @if ($dosen?->foto_path)
+                        <img src="{{ public_path('storage/'.$dosen->foto_path) }}" style="width: 100%; height: 100%; object-fit: cover;" alt="Foto" />
+                    @endif
+                </div>
             </div>
         </div>
 
@@ -113,64 +120,80 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div class="lg:col-span-2 rounded-2xl bg-white/5 border border-white/10 p-5">
-            <div class="text-xl font-semibold">Profil</div>
-            <div class="text-sm text-emerald-100/70 mt-1">Perbarui data profil dosen.</div>
+    <div class="no-print rounded-2xl bg-white/5 border border-white/10 p-5">
+        <div class="flex items-start justify-between gap-4">
+            <div>
+                <div class="text-xl font-semibold">Profil</div>
+                <div class="text-sm text-emerald-100/70 mt-1">Perbarui data profil dosen.</div>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="text-right">
+                    <div class="text-sm font-semibold text-white">{{ $dosen?->nama ?? auth()->user()->name }}</div>
+                    <div class="text-xs text-emerald-100/60">{{ $dosen?->nidn ?? '-' }}</div>
+                </div>
+                @if ($dosen?->foto_path)
+                    <img src="{{ asset('storage/'.$dosen->foto_path) }}" class="h-16 w-16 rounded-2xl object-cover ring-1 ring-white/10" alt="Foto" />
+                @else
+                    <div class="h-16 w-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/20 flex items-center justify-center text-2xl font-semibold">
+                        {{ mb_substr($dosen?->nama ?? auth()->user()->name, 0, 1) }}
+                    </div>
+                @endif
+            </div>
+        </div>
 
-            <div class="no-print mt-4 flex items-center justify-end">
-                <button type="button" onclick="window.print()" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
-                    <i class="fa-solid fa-print"></i>
-                    <span class="text-sm font-medium">Print</span>
-                </button>
+        <div class="mt-4 flex items-center justify-end">
+            <button type="button" onclick="window.print()" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                <i class="fa-solid fa-print"></i>
+                <span class="text-sm font-medium">Print</span>
+            </button>
+        </div>
+
+        <form method="POST" action="{{ route('dosen.profil.update') }}" enctype="multipart/form-data" class="mt-5 space-y-4">
+            @csrf
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="text-sm text-emerald-100/80">Nama Lengkap</label>
+                    <input value="{{ $dosen?->nama ?? auth()->user()->name }}" readonly class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 opacity-80" />
+                </div>
+                <div>
+                    <label class="text-sm text-emerald-100/80">NIDN</label>
+                    <input name="nidn" value="{{ old('nidn', $dosen?->nidn ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
+                    @error('nidn') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
+                </div>
             </div>
 
-            <form method="POST" action="{{ route('dosen.profil.update') }}" enctype="multipart/form-data" class="mt-5 space-y-4 no-print">
-                @csrf
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-sm text-emerald-100/80">Nama Lengkap</label>
-                        <input value="{{ $dosen?->nama ?? auth()->user()->name }}" readonly class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 opacity-80" />
-                    </div>
-                    <div>
-                        <label class="text-sm text-emerald-100/80">NIDN</label>
-                        <input name="nidn" value="{{ old('nidn', $dosen?->nidn ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
-                        @error('nidn') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
-                    </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="text-sm text-emerald-100/80">Program Studi</label>
+                    <input value="{{ $dosen?->program_studi ?? '-' }}" readonly class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 opacity-80" />
                 </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-sm text-emerald-100/80">Program Studi</label>
-                        <input value="{{ $dosen?->program_studi ?? '-' }}" readonly class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 opacity-80" />
-                    </div>
-                    <div>
-                        <label class="text-sm text-emerald-100/80">Status Akademik</label>
-                        <input value="{{ $dosen?->status_akademik ?? 'Dosen' }}" readonly class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 opacity-80" />
-                    </div>
+                <div>
+                    <label class="text-sm text-emerald-100/80">Status Akademik</label>
+                    <input value="{{ $dosen?->status_akademik ?? 'Dosen' }}" readonly class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 opacity-80" />
                 </div>
+            </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-sm text-emerald-100/80">Status Dosen</label>
-                        <input value="{{ ($dosen?->status_dosen ?? 'aktif') === 'tidak aktif' ? 'Tidak Aktif' : 'Aktif' }}" readonly class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 opacity-80" />
-                    </div>
-                    <div></div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="text-sm text-emerald-100/80">Status Dosen</label>
+                    <input value="{{ ($dosen?->status_dosen ?? 'aktif') === 'tidak aktif' ? 'Tidak Aktif' : 'Aktif' }}" readonly class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 opacity-80" />
                 </div>
+                <div></div>
+            </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-sm text-emerald-100/80">Tempat Lahir</label>
-                        <input name="tempat_lahir" value="{{ old('tempat_lahir', $dosen?->tempat_lahir ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
-                        @error('tempat_lahir') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
-                    </div>
-                    <div>
-                        <label class="text-sm text-emerald-100/80">Tanggal Lahir</label>
-                        <input type="date" name="tanggal_lahir" value="{{ old('tanggal_lahir', $dosen?->tanggal_lahir ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
-                        @error('tanggal_lahir') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
-                    </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="text-sm text-emerald-100/80">Tempat Lahir</label>
+                    <input name="tempat_lahir" value="{{ old('tempat_lahir', $dosen?->tempat_lahir ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
+                    @error('tempat_lahir') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
                 </div>
+                <div>
+                    <label class="text-sm text-emerald-100/80">Tanggal Lahir</label>
+                    <input type="date" name="tanggal_lahir" value="{{ old('tanggal_lahir', $dosen?->tanggal_lahir ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
+                    @error('tanggal_lahir') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
+                </div>
+            </div>
 
                 <div>
                     <label class="text-sm text-emerald-100/80">Email</label>
@@ -280,43 +303,11 @@
                     @error('foto') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
                 </div>
 
-                <div class="flex items-center justify-end">
-                    <button class="h-11 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition font-medium">
-                        Simpan
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
-            <div class="flex items-center gap-4">
-                @if ($dosen?->foto_path)
-                    <img src="{{ asset('storage/'.$dosen->foto_path) }}" class="h-16 w-16 rounded-2xl object-cover ring-1 ring-white/10" alt="Foto" />
-                @else
-                    <div class="h-16 w-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/20 flex items-center justify-center text-2xl font-semibold">
-                        {{ mb_substr($dosen?->nama ?? auth()->user()->name, 0, 1) }}
-                    </div>
-                @endif
-                <div>
-                    <div class="text-lg font-semibold">{{ $dosen?->nama ?? auth()->user()->name }}</div>
-                    <div class="text-sm text-emerald-100/70">{{ $dosen?->nidn ?? '-' }}</div>
-                </div>
+            <div class="flex items-center justify-end">
+                <button class="h-11 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition font-medium">
+                    Simpan
+                </button>
             </div>
-
-            <div class="mt-5 space-y-3 text-sm text-emerald-100/75">
-                <div class="flex items-center justify-between">
-                    <span>Email</span>
-                    <span class="font-medium text-white">{{ $dosen?->email ?? auth()->user()->email }}</span>
-                </div>
-                <div class="flex items-center justify-between">
-                    <span>NIK</span>
-                    <span class="font-medium text-white">{{ $dosen?->nik ?? '-' }}</span>
-                </div>
-                <div class="flex items-center justify-between">
-                    <span>Nomor SK</span>
-                    <span class="font-medium text-white">{{ $dosen?->nomor_sk ?? '-' }}</span>
-                </div>
-            </div>
-        </div>
+        </form>
     </div>
 </x-portal-layout>
