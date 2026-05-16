@@ -1,6 +1,6 @@
-<x-portal-layout :title="'Bimbingan Skripsi - '.config('app.name')" subtitle="Skripsi">
+<x-portal-layout :title="'Bimbingan PPL - '.config('app.name')" subtitle="PPL">
     <x-slot:sidebar>
-        @include('mahasiswa.partials.sidebar')
+        @include('dosen.partials.sidebar')
     </x-slot:sidebar>
 
     <style>
@@ -19,10 +19,7 @@
         .chat-text { font-size: 13px; font-weight: 700; color: rgba(17, 24, 39, 0.88); white-space: pre-line; }
         .chat-form { margin-top: 12px; display: flex; gap: 10px; align-items: flex-end; }
         .chat-input { flex: 1; min-height: 44px; max-height: 120px; resize: vertical; border-radius: 14px; border: 1px solid rgba(17, 24, 39, 0.12); background: #fff; padding: 12px 12px; font-size: 13px; font-weight: 700; color: #111827; outline: none; }
-        .chat-input:disabled { background: #f3f4f6; color: rgba(17, 24, 39, 0.45); }
         .chat-send { height: 44px; padding: 0 16px; border-radius: 14px; border: 1px solid rgba(16, 185, 129, 0.25); background: linear-gradient(to right, #059669, #10b981); color: #fff; font-weight: 900; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
-        .chat-send:disabled { opacity: 0.55; cursor: not-allowed; }
-        .chat-warn { margin-top: 14px; border-radius: 14px; border: 1px solid rgba(245, 158, 11, 0.25); background: rgba(245, 158, 11, 0.10); padding: 12px 14px; font-weight: 800; color: rgba(120, 53, 15, 0.95); }
         .chat-empty { padding: 18px; text-align: center; color: rgba(17, 24, 39, 0.55); font-weight: 900; }
     </style>
 
@@ -30,29 +27,17 @@
         <div class="chat-card">
             <div class="chat-head">
                 <div>
-                    <div class="title">Bimbingan Skripsi</div>
-                    <div class="sub">
-                        {{ $skripsi->judul }} • Pembimbing:
-                        {{ $skripsi->dosenPembimbing?->nama ?: '-' }}
-                        @if ($skripsi->dosenPembimbing2?->nama)
-                            , {{ $skripsi->dosenPembimbing2?->nama }}
-                        @endif
-                    </div>
+                    <div class="title">Bimbingan PPL</div>
+                    <div class="sub">{{ $ppl->mahasiswa?->nama_lengkap ?: '-' }} ({{ $ppl->mahasiswa?->npm ?: '-' }}) • {{ $ppl->instansi_nama }}</div>
                 </div>
-                <a href="{{ route('mahasiswa.skripsi.show', $skripsi) }}" class="chat-back">
+                <a href="{{ route('dosen.ppl.bimbingan.index') }}" class="chat-back">
                     <i class="fa-solid fa-arrow-left"></i>
                     Kembali
                 </a>
             </div>
 
-            @if (! $skripsi->dosen_pembimbing_id && ! $skripsi->dosen_pembimbing_id_2)
-                <div class="chat-warn">
-                    Bimbingan belum bisa dimulai karena pembimbing belum ditetapkan oleh Admin/Prodi.
-                </div>
-            @endif
-
             <div id="chatStream" class="chat-stream">
-                @forelse ($skripsi->messages->sortBy('id') as $msg)
+                @forelse ($ppl->messages->sortBy('id') as $msg)
                     @php
                         $isMe = (int) $msg->sender_user_id === (int) auth()->id();
                     @endphp
@@ -71,12 +56,10 @@
                 @endforelse
             </div>
 
-            <form method="POST" action="{{ route('mahasiswa.skripsi.bimbingan.store', $skripsi) }}" class="chat-form">
+            <form method="POST" action="{{ route('dosen.ppl.bimbingan.store', $ppl) }}" class="chat-form">
                 @csrf
-                <textarea name="pesan" rows="2" {{ ($skripsi->dosen_pembimbing_id || $skripsi->dosen_pembimbing_id_2) ? '' : 'disabled' }}
-                          class="chat-input"
-                          placeholder="Tulis pesan...">{{ old('pesan') }}</textarea>
-                <button {{ ($skripsi->dosen_pembimbing_id || $skripsi->dosen_pembimbing_id_2) ? '' : 'disabled' }} class="chat-send">
+                <textarea name="pesan" rows="2" class="chat-input" placeholder="Tulis pesan...">{{ old('pesan') }}</textarea>
+                <button class="chat-send">
                     <i class="fa-solid fa-paper-plane"></i>
                     Kirim
                 </button>
@@ -96,3 +79,4 @@
         })();
     </script>
 </x-portal-layout>
+

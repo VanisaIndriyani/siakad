@@ -8,16 +8,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-class SkripsiPengajuan extends Model
+class PplPengajuan extends Model
 {
     use HasFactory;
 
-    protected $table = 'skripsi_pengajuans';
+    protected $table = 'ppl_pengajuans';
 
     protected $fillable = [
         'mahasiswa_id',
-        'judul',
-        'deskripsi',
+        'instansi_nama',
+        'instansi_alamat',
+        'keterangan',
         'status',
         'catatan_admin',
         'dosen_pembimbing_id',
@@ -63,11 +64,12 @@ class SkripsiPengajuan extends Model
 
     public function messages(): HasMany
     {
-        return $this->hasMany(SkripsiBimbinganMessage::class, 'skripsi_pengajuan_id');
+        return $this->hasMany(PplBimbinganMessage::class, 'ppl_pengajuan_id');
     }
 
     public function latestMessage(): HasOne
     {
-        return $this->hasOne(SkripsiBimbinganMessage::class, 'skripsi_pengajuan_id')->latestOfMany();
+        return $this->hasOne(PplBimbinganMessage::class, 'ppl_pengajuan_id')->latestOfMany();
     }
 }
+

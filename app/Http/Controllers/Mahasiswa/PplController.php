@@ -3,25 +3,25 @@
 namespace App\Http\Controllers\Mahasiswa;
 
 use App\Http\Controllers\Controller;
-use App\Models\SkripsiPengajuan;
+use App\Models\PplPengajuan;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-class SkripsiController extends Controller
+class PplController extends Controller
 {
     public function index(Request $request): View
     {
         $mahasiswa = $request->user()?->mahasiswa;
         abort_unless($mahasiswa, 403);
 
-        $items = SkripsiPengajuan::query()
+        $items = PplPengajuan::query()
             ->with(['dosenPembimbing', 'dosenPembimbing2', 'latestMessage'])
             ->where('mahasiswa_id', $mahasiswa->id)
             ->orderByDesc('id')
             ->get();
 
-        return view('mahasiswa.skripsi.index', [
+        return view('mahasiswa.ppl.index', [
             'items' => $items,
         ]);
     }
@@ -31,7 +31,7 @@ class SkripsiController extends Controller
         $mahasiswa = $request->user()?->mahasiswa;
         abort_unless($mahasiswa, 403);
 
-        return view('mahasiswa.skripsi.create');
+        return view('mahasiswa.ppl.create');
     }
 
     public function store(Request $request): RedirectResponse
@@ -40,30 +40,33 @@ class SkripsiController extends Controller
         abort_unless($mahasiswa, 403);
 
         $validated = $request->validate([
-            'judul' => ['required', 'string', 'max:255'],
-            'deskripsi' => ['nullable', 'string'],
+            'instansi_nama' => ['required', 'string', 'max:255'],
+            'instansi_alamat' => ['nullable', 'string'],
+            'keterangan' => ['nullable', 'string'],
         ]);
 
-        SkripsiPengajuan::query()->create([
+        PplPengajuan::query()->create([
             'mahasiswa_id' => $mahasiswa->id,
-            'judul' => $validated['judul'],
-            'deskripsi' => $validated['deskripsi'] ?: null,
+            'instansi_nama' => $validated['instansi_nama'],
+            'instansi_alamat' => $validated['instansi_alamat'] ?: null,
+            'keterangan' => $validated['keterangan'] ?: null,
             'status' => 'pending',
         ]);
 
-        return redirect()->route('mahasiswa.skripsi.index')->with('success', 'Pengajuan judul skripsi berhasil dikirim ke Admin/Prodi.');
+        return redirect()->route('mahasiswa.ppl.index')->with('success', 'Pengajuan instansi/sekolah PPL berhasil dikirim ke Admin/Prodi.');
     }
 
-    public function show(Request $request, SkripsiPengajuan $skripsi): View
+    public function show(Request $request, PplPengajuan $ppl): View
     {
         $mahasiswa = $request->user()?->mahasiswa;
         abort_unless($mahasiswa, 403);
-        abort_unless((int) $skripsi->mahasiswa_id === (int) $mahasiswa->id, 404);
+        abort_unless((int) $ppl->mahasiswa_id === (int) $mahasiswa->id, 404);
 
-        $skripsi->load(['dosenPembimbing', 'dosenPembimbing2', 'messages.sender', 'mahasiswa']);
+        $ppl->load(['dosenPembimbing', 'dosenPembimbing2', 'messages.sender', 'mahasiswa']);
 
-        return view('mahasiswa.skripsi.show', [
-            'skripsi' => $skripsi,
+        return view('mahasiswa.ppl.show', [
+            'ppl' => $ppl,
         ]);
     }
 }
+

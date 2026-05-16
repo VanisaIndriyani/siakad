@@ -40,7 +40,7 @@ class SkripsiController extends Controller
         $q = trim((string) $request->get('q', ''));
         $status = trim((string) $request->get('status', ''));
 
-        $query = SkripsiPengajuan::query()->with(['mahasiswa', 'dosenPembimbing']);
+        $query = SkripsiPengajuan::query()->with(['mahasiswa', 'dosenPembimbing', 'dosenPembimbing2']);
 
         if ($q !== '') {
             $query->where('judul', 'like', "%{$q}%")
@@ -68,7 +68,7 @@ class SkripsiController extends Controller
     public function show(Request $request, SkripsiPengajuan $skripsi): View
     {
         $context = $this->resolveContext($request);
-        $skripsi->load(['mahasiswa', 'dosenPembimbing', 'messages.sender', 'approvedBy']);
+        $skripsi->load(['mahasiswa', 'dosenPembimbing', 'dosenPembimbing2', 'messages.sender', 'approvedBy']);
 
         $dosenList = $context['canAssign']
             ? Dosen::query()->orderBy('nama')->get()
@@ -110,6 +110,7 @@ class SkripsiController extends Controller
 
         $validated = $request->validate([
             'dosen_pembimbing_id' => ['required', 'exists:dosen,id'],
+            'dosen_pembimbing_id_2' => ['nullable', 'exists:dosen,id', 'different:dosen_pembimbing_id'],
             'nomor_sk' => ['nullable', 'string', 'max:255'],
             'tanggal_sk' => ['nullable', 'date'],
             'sk_pembimbing_file' => ['nullable', 'file', 'max:10240', 'mimes:pdf'],
@@ -136,6 +137,7 @@ class SkripsiController extends Controller
         $skripsi->update([
             'status' => 'assigned',
             'dosen_pembimbing_id' => (int) $validated['dosen_pembimbing_id'],
+            'dosen_pembimbing_id_2' => $validated['dosen_pembimbing_id_2'] ? (int) $validated['dosen_pembimbing_id_2'] : null,
             'nomor_sk' => $validated['nomor_sk'] ?: null,
             'tanggal_sk' => $validated['tanggal_sk'] ?: null,
             'sk_pembimbing_path' => $skPath,
@@ -146,6 +148,54 @@ class SkripsiController extends Controller
         ]);
 
         return back()->with('success', 'Dosen pembimbing berhasil ditetapkan.');
+    }
+
+    public function destroy(Request $request, SkripsiPengajuan $skripsi): RedirectResponse
+    {
+        abort_unless($request->user()?->isAdmin(), 403);
+
+        if ($skripsi->sk_pembimbing_path) {
+            Storage::disk('public')->delete($skripsi->sk_pembimbing_path);
+        }
+
+        $skripsi->delete();
+
+        return redirect()->route('admin.skripsi.index')->with('success', 'Data skripsi berhasil dihapus.');
+    }
+
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        abort_unless($request->user()?->isAdmin(), 403);
+
+        $validated = $request->validate([
+            'ids' => ['required'],
+        ]);
+
+        $raw = $validated['ids'];
+        $ids = is_array($raw)
+            ? $raw
+            : preg_split('/\s*,\s*/', (string) $raw, -1, PREG_SPLIT_NO_EMPTY);
+
+        $ids = collect($ids)
+            ->map(fn ($v) => (int) $v)
+            ->filter(fn ($v) => $v > 0)
+            ->unique()
+            ->values()
+            ->all();
+
+        if (count($ids) === 0) {
+            return back()->with('error', 'Pilih minimal 1 data skripsi.');
+        }
+
+        $items = SkripsiPengajuan::query()->whereIn('id', $ids)->get();
+        foreach ($items as $it) {
+            if ($it->sk_pembimbing_path) {
+                Storage::disk('public')->delete($it->sk_pembimbing_path);
+            }
+            $it->delete();
+        }
+
+        return back()->with('success', 'Data skripsi terpilih berhasil dihapus.');
     }
 
     public function downloadSkPembimbing(Request $request, SkripsiPengajuan $skripsi): BinaryFileResponse

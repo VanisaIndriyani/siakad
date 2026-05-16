@@ -3,19 +3,19 @@
 namespace App\Http\Controllers\Dosen;
 
 use App\Http\Controllers\Controller;
-use App\Models\SkripsiPengajuan;
+use App\Models\PplPengajuan;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-class SkripsiBimbinganController extends Controller
+class PplBimbinganController extends Controller
 {
     public function index(Request $request): View
     {
         $dosen = $request->user()?->dosen;
         abort_unless($dosen, 403);
 
-        $items = SkripsiPengajuan::query()
+        $items = PplPengajuan::query()
             ->with(['mahasiswa', 'latestMessage'])
             ->where(function ($q) use ($dosen) {
                 $q->where('dosen_pembimbing_id', $dosen->id)
@@ -24,38 +24,40 @@ class SkripsiBimbinganController extends Controller
             ->orderByDesc('id')
             ->get();
 
-        return view('dosen.skripsi.index', [
+        return view('dosen.ppl.index', [
             'items' => $items,
         ]);
     }
 
-    public function show(Request $request, SkripsiPengajuan $skripsi): View
+    public function show(Request $request, PplPengajuan $ppl): View
     {
         $dosen = $request->user()?->dosen;
         abort_unless($dosen, 403);
-        $allowed = in_array((int) $dosen->id, [(int) $skripsi->dosen_pembimbing_id, (int) $skripsi->dosen_pembimbing_id_2], true);
+
+        $allowed = in_array((int) $dosen->id, [(int) $ppl->dosen_pembimbing_id, (int) $ppl->dosen_pembimbing_id_2], true);
         abort_unless($allowed, 404);
 
-        $skripsi->load(['mahasiswa', 'dosenPembimbing', 'dosenPembimbing2', 'messages.sender']);
-        $skripsi->update(['dosen_last_read_at' => now()]);
+        $ppl->load(['mahasiswa', 'dosenPembimbing', 'dosenPembimbing2', 'messages.sender']);
+        $ppl->update(['dosen_last_read_at' => now()]);
 
-        return view('dosen.skripsi.show', [
-            'skripsi' => $skripsi,
+        return view('dosen.ppl.show', [
+            'ppl' => $ppl,
         ]);
     }
 
-    public function store(Request $request, SkripsiPengajuan $skripsi): RedirectResponse
+    public function store(Request $request, PplPengajuan $ppl): RedirectResponse
     {
         $dosen = $request->user()?->dosen;
         abort_unless($dosen, 403);
-        $allowed = in_array((int) $dosen->id, [(int) $skripsi->dosen_pembimbing_id, (int) $skripsi->dosen_pembimbing_id_2], true);
+
+        $allowed = in_array((int) $dosen->id, [(int) $ppl->dosen_pembimbing_id, (int) $ppl->dosen_pembimbing_id_2], true);
         abort_unless($allowed, 404);
 
         $validated = $request->validate([
             'pesan' => ['required', 'string'],
         ]);
 
-        $skripsi->messages()->create([
+        $ppl->messages()->create([
             'sender_user_id' => $request->user()?->id,
             'pesan' => $validated['pesan'],
         ]);
@@ -63,3 +65,4 @@ class SkripsiBimbinganController extends Controller
         return back()->with('success', 'Pesan bimbingan terkirim.');
     }
 }
+

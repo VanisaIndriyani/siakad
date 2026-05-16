@@ -38,6 +38,11 @@
     <i class="fa-solid fa-graduation-cap text-emerald-300"></i>
     <span class="text-sm font-medium">Bimbingan Skripsi</span>
 </a>
+<a href="{{ route('dosen.ppl.bimbingan.index') }}"
+   class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('dosen.ppl.bimbingan.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+    <i class="fa-solid fa-briefcase text-emerald-300"></i>
+    <span class="text-sm font-medium">Bimbingan PPL</span>
+</a>
 @php
     $dosen = auth()->user()?->dosen;
     $isProdiApprover = in_array((string) ($dosen?->status_akademik ?? ''), ['Ketua Prodi', 'Sekretaris Prodi'], true);
@@ -52,5 +57,10 @@
        class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('dosen.skripsi-pengajuan.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
         <i class="fa-solid fa-file-signature text-emerald-300"></i>
         <span class="text-sm font-medium">Acc Judul Skripsi</span>
+    </a>
+    <a href="{{ route('dosen.ppl-pengajuan.index') }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('dosen.ppl-pengajuan.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+        <i class="fa-solid fa-building-columns text-emerald-300"></i>
+        <span class="text-sm font-medium">Acc PPL</span>
     </a>
 @endif

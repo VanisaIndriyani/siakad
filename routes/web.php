@@ -9,12 +9,14 @@ use App\Http\Controllers\Admin\KhsController as AdminKhsController;
 use App\Http\Controllers\Admin\KrsController as AdminKrsController;
 use App\Http\Controllers\Admin\MahasiswaController as AdminMahasiswaController;
 use App\Http\Controllers\Admin\MataKuliahController as AdminMataKuliahController;
+use App\Http\Controllers\Admin\PplController as AdminPplController;
 use App\Http\Controllers\Admin\SkripsiController as AdminSkripsiController;
 use App\Http\Controllers\Dosen\AcademicCalendarController as DosenAcademicCalendarController;
 use App\Http\Controllers\Dosen\DashboardController as DosenDashboardController;
 use App\Http\Controllers\Dosen\KrsApprovalController as DosenKrsApprovalController;
 use App\Http\Controllers\Dosen\MahasiswaController as DosenMahasiswaController;
 use App\Http\Controllers\Dosen\NilaiController as DosenNilaiController;
+use App\Http\Controllers\Dosen\PplBimbinganController as DosenPplBimbinganController;
 use App\Http\Controllers\Dosen\ProfilController as DosenProfilController;
 use App\Http\Controllers\Dosen\SkripsiBimbinganController as DosenSkripsiBimbinganController;
 use App\Http\Controllers\Mahasiswa\AcademicCalendarController as MahasiswaAcademicCalendarController;
@@ -23,6 +25,8 @@ use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboardCont
 use App\Http\Controllers\Mahasiswa\BiodataPdfController;
 use App\Http\Controllers\Mahasiswa\KhsController as MahasiswaKhsController;
 use App\Http\Controllers\Mahasiswa\KrsController as MahasiswaKrsController;
+use App\Http\Controllers\Mahasiswa\PplBimbinganController as MahasiswaPplBimbinganController;
+use App\Http\Controllers\Mahasiswa\PplController as MahasiswaPplController;
 use App\Http\Controllers\Mahasiswa\ProfilController as MahasiswaProfilController;
 use App\Http\Controllers\Mahasiswa\SkripsiBimbinganController as MahasiswaSkripsiBimbinganController;
 use App\Http\Controllers\Mahasiswa\SkripsiController as MahasiswaSkripsiController;
@@ -97,6 +101,17 @@ Route::prefix('admin')
         Route::patch('/skripsi/{skripsi}/assign', [AdminSkripsiController::class, 'assign'])->name('skripsi.assign');
         Route::get('/skripsi/{skripsi}/sk-pembimbing', [AdminSkripsiController::class, 'downloadSkPembimbing'])->name('skripsi.sk.download');
         Route::get('/skripsi/{skripsi}/sk-pembimbing/preview', [AdminSkripsiController::class, 'previewSkPembimbing'])->name('skripsi.sk.preview');
+        Route::delete('/skripsi/{skripsi}', [AdminSkripsiController::class, 'destroy'])->name('skripsi.destroy');
+        Route::delete('/skripsi/bulk-delete', [AdminSkripsiController::class, 'bulkDestroy'])->name('skripsi.bulk-delete');
+
+        Route::get('/ppl', [AdminPplController::class, 'index'])->name('ppl.index');
+        Route::get('/ppl/{ppl}', [AdminPplController::class, 'show'])->name('ppl.show');
+        Route::patch('/ppl/{ppl}/status', [AdminPplController::class, 'updateStatus'])->name('ppl.status');
+        Route::patch('/ppl/{ppl}/assign', [AdminPplController::class, 'assign'])->name('ppl.assign');
+        Route::get('/ppl/{ppl}/sk-pembimbing', [AdminPplController::class, 'downloadSkPembimbing'])->name('ppl.sk.download');
+        Route::get('/ppl/{ppl}/sk-pembimbing/preview', [AdminPplController::class, 'previewSkPembimbing'])->name('ppl.sk.preview');
+        Route::delete('/ppl/{ppl}', [AdminPplController::class, 'destroy'])->name('ppl.destroy');
+        Route::delete('/ppl/bulk-delete', [AdminPplController::class, 'bulkDestroy'])->name('ppl.bulk-delete');
     });
 
 Route::prefix('mahasiswa')
@@ -137,6 +152,15 @@ Route::prefix('mahasiswa')
         Route::get('/skripsi/{skripsi}/sk-pembimbing/preview', [AdminSkripsiController::class, 'previewSkPembimbing'])->name('skripsi.sk.preview');
         Route::get('/skripsi/{skripsi}/bimbingan', [MahasiswaSkripsiBimbinganController::class, 'show'])->name('skripsi.bimbingan');
         Route::post('/skripsi/{skripsi}/bimbingan', [MahasiswaSkripsiBimbinganController::class, 'store'])->name('skripsi.bimbingan.store');
+
+        Route::get('/ppl', [MahasiswaPplController::class, 'index'])->name('ppl.index');
+        Route::get('/ppl/create', [MahasiswaPplController::class, 'create'])->name('ppl.create');
+        Route::post('/ppl', [MahasiswaPplController::class, 'store'])->name('ppl.store');
+        Route::get('/ppl/{ppl}', [MahasiswaPplController::class, 'show'])->name('ppl.show');
+        Route::get('/ppl/{ppl}/sk-pembimbing', [AdminPplController::class, 'downloadSkPembimbing'])->name('ppl.sk.download');
+        Route::get('/ppl/{ppl}/sk-pembimbing/preview', [AdminPplController::class, 'previewSkPembimbing'])->name('ppl.sk.preview');
+        Route::get('/ppl/{ppl}/bimbingan', [MahasiswaPplBimbinganController::class, 'show'])->name('ppl.bimbingan');
+        Route::post('/ppl/{ppl}/bimbingan', [MahasiswaPplBimbinganController::class, 'store'])->name('ppl.bimbingan.store');
 
         Route::get('/biodata/pdf', BiodataPdfController::class)->name('biodata.pdf');
     });
@@ -186,6 +210,16 @@ Route::prefix('dosen')
         Route::patch('/skripsi/pengajuan/{skripsi}/status', [AdminSkripsiController::class, 'updateStatus'])->name('skripsi-pengajuan.status');
         Route::get('/skripsi/pengajuan/{skripsi}/sk-pembimbing', [AdminSkripsiController::class, 'downloadSkPembimbing'])->name('skripsi-pengajuan.sk.download');
         Route::get('/skripsi/pengajuan/{skripsi}/sk-pembimbing/preview', [AdminSkripsiController::class, 'previewSkPembimbing'])->name('skripsi-pengajuan.sk.preview');
+
+        Route::get('/ppl/bimbingan', [DosenPplBimbinganController::class, 'index'])->name('ppl.bimbingan.index');
+        Route::get('/ppl/{ppl}/bimbingan', [DosenPplBimbinganController::class, 'show'])->name('ppl.bimbingan.show');
+        Route::post('/ppl/{ppl}/bimbingan', [DosenPplBimbinganController::class, 'store'])->name('ppl.bimbingan.store');
+
+        Route::get('/ppl/pengajuan', [AdminPplController::class, 'index'])->name('ppl-pengajuan.index');
+        Route::get('/ppl/pengajuan/{ppl}', [AdminPplController::class, 'show'])->name('ppl-pengajuan.show');
+        Route::patch('/ppl/pengajuan/{ppl}/status', [AdminPplController::class, 'updateStatus'])->name('ppl-pengajuan.status');
+        Route::get('/ppl/pengajuan/{ppl}/sk-pembimbing', [AdminPplController::class, 'downloadSkPembimbing'])->name('ppl-pengajuan.sk.download');
+        Route::get('/ppl/pengajuan/{ppl}/sk-pembimbing/preview', [AdminPplController::class, 'previewSkPembimbing'])->name('ppl-pengajuan.sk.preview');
     });
 
 Route::prefix('keuangan')

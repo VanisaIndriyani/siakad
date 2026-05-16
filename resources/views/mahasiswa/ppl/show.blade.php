@@ -1,10 +1,10 @@
-<x-portal-layout :title="'Detail Skripsi - '.config('app.name')" subtitle="Skripsi">
+<x-portal-layout :title="'Detail PPL - '.config('app.name')" subtitle="PPL">
     <x-slot:sidebar>
         @include('mahasiswa.partials.sidebar')
     </x-slot:sidebar>
 
     @php
-        $badge = match ($skripsi->status) {
+        $badge = match ($ppl->status) {
             'assigned' => ['bg' => 'rgba(16,185,129,0.12)', 'bd' => 'rgba(16,185,129,0.25)', 'tx' => '#065f46'],
             'approved' => ['bg' => 'rgba(59,130,246,0.12)', 'bd' => 'rgba(59,130,246,0.25)', 'tx' => '#1e40af'],
             'rejected' => ['bg' => 'rgba(239,68,68,0.12)', 'bd' => 'rgba(239,68,68,0.25)', 'tx' => '#7f1d1d'],
@@ -37,20 +37,20 @@
         <div class="detail-card">
             <div class="detail-head">
                 <div>
-                    <div class="detail-title">Detail Skripsi</div>
-                    <div class="detail-sub">Pantau status pengajuan, pembimbing, dan SK.</div>
+                    <div class="detail-title">Detail PPL</div>
+                    <div class="detail-sub">Pantau status, pembimbing, dan SK.</div>
                 </div>
                 <div style="display:flex; align-items:center; gap: 10px; flex-wrap: wrap;">
                     <span class="pill" style="background: {{ $badge['bg'] }}; border-color: {{ $badge['bd'] }}; color: {{ $badge['tx'] }};">
-                        {{ strtoupper($skripsi->status) }}
+                        {{ strtoupper($ppl->status) }}
                     </span>
-                    @if ($skripsi->dosen_pembimbing_id || $skripsi->dosen_pembimbing_id_2)
-                        <a href="{{ route('mahasiswa.skripsi.bimbingan', $skripsi) }}" class="btn btn-primary">
+                    @if ($ppl->dosen_pembimbing_id || $ppl->dosen_pembimbing_id_2)
+                        <a href="{{ route('mahasiswa.ppl.bimbingan', $ppl) }}" class="btn btn-primary">
                             <i class="fa-solid fa-comments"></i>
                             Bimbingan
                         </a>
                     @endif
-                    <a href="{{ route('mahasiswa.skripsi.index') }}" class="btn">
+                    <a href="{{ route('mahasiswa.ppl.index') }}" class="btn">
                         <i class="fa-solid fa-arrow-left"></i>
                         Kembali
                     </a>
@@ -59,10 +59,13 @@
 
             <div class="grid2">
                 <div class="box">
-                    <div class="label">Judul</div>
-                    <div class="value">{{ $skripsi->judul }}</div>
-                    @if ($skripsi->deskripsi)
-                        <div class="text">{{ $skripsi->deskripsi }}</div>
+                    <div class="label">Instansi / Sekolah</div>
+                    <div class="value">{{ $ppl->instansi_nama }}</div>
+                    @if ($ppl->instansi_alamat)
+                        <div class="text">{{ $ppl->instansi_alamat }}</div>
+                    @endif
+                    @if ($ppl->keterangan)
+                        <div class="text">{{ $ppl->keterangan }}</div>
                     @endif
                 </div>
 
@@ -72,29 +75,29 @@
                         <div style="display:flex; gap: 10px; align-items:flex-start;">
                             <div style="width: 140px; color: rgba(17, 24, 39, 0.60); font-weight: 900;">Pembimbing</div>
                             <div style="flex: 1; font-weight: 900;">
-                                <div>{{ $skripsi->dosenPembimbing?->nama ?: '-' }}</div>
-                                @if ($skripsi->dosenPembimbing2?->nama)
-                                    <div style="margin-top: 6px;">{{ $skripsi->dosenPembimbing2?->nama }}</div>
+                                <div>{{ $ppl->dosenPembimbing?->nama ?: '-' }}</div>
+                                @if ($ppl->dosenPembimbing2?->nama)
+                                    <div style="margin-top: 6px;">{{ $ppl->dosenPembimbing2?->nama }}</div>
                                 @endif
                             </div>
                         </div>
                         <div style="display:flex; gap: 10px; align-items:flex-start; margin-top: 8px;">
                             <div style="width: 140px; color: rgba(17, 24, 39, 0.60); font-weight: 900;">Nomor SK</div>
-                            <div style="flex: 1; font-weight: 900;">{{ $skripsi->nomor_sk ?: '-' }}</div>
+                            <div style="flex: 1; font-weight: 900;">{{ $ppl->nomor_sk ?: '-' }}</div>
                         </div>
                         <div style="display:flex; gap: 10px; align-items:flex-start; margin-top: 8px;">
                             <div style="width: 140px; color: rgba(17, 24, 39, 0.60); font-weight: 900;">Tanggal SK</div>
-                            <div style="flex: 1; font-weight: 900;">{{ $skripsi->tanggal_sk ? $skripsi->tanggal_sk->format('d/m/Y') : '-' }}</div>
+                            <div style="flex: 1; font-weight: 900;">{{ $ppl->tanggal_sk ? $ppl->tanggal_sk->format('d/m/Y') : '-' }}</div>
                         </div>
                         <div style="display:flex; gap: 10px; align-items:flex-start; margin-top: 8px;">
                             <div style="width: 140px; color: rgba(17, 24, 39, 0.60); font-weight: 900;">File SK</div>
                             <div style="flex: 1; font-weight: 900;">
-                                @if ($skripsi->sk_pembimbing_path)
-                                    <a href="{{ route('mahasiswa.skripsi.sk.preview', $skripsi) }}" target="_blank" class="btn" style="height: 34px; padding: 0 12px; font-size: 12px;">
+                                @if ($ppl->sk_pembimbing_path)
+                                    <a href="{{ route('mahasiswa.ppl.sk.preview', $ppl) }}" target="_blank" class="btn" style="height: 34px; padding: 0 12px; font-size: 12px;">
                                         <i class="fa-solid fa-eye"></i>
                                         Preview
                                     </a>
-                                    <a href="{{ route('mahasiswa.skripsi.sk.download', $skripsi) }}" class="btn" style="height: 34px; padding: 0 12px; font-size: 12px;">
+                                    <a href="{{ route('mahasiswa.ppl.sk.download', $ppl) }}" class="btn" style="height: 34px; padding: 0 12px; font-size: 12px;">
                                         <i class="fa-solid fa-download"></i>
                                         Download
                                     </a>
@@ -105,15 +108,15 @@
                         </div>
                         <div style="display:flex; gap: 10px; align-items:flex-start; margin-top: 8px;">
                             <div style="width: 140px; color: rgba(17, 24, 39, 0.60); font-weight: 900;">Diajukan</div>
-                            <div style="flex: 1; font-weight: 900;">{{ $skripsi->created_at?->format('d/m/Y H:i') }}</div>
+                            <div style="flex: 1; font-weight: 900;">{{ $ppl->created_at?->format('d/m/Y H:i') }}</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            @if ($skripsi->catatan_admin)
+            @if ($ppl->catatan_admin)
                 @php
-                    $noteClass = match ($skripsi->status) {
+                    $noteClass = match ($ppl->status) {
                         'rejected' => 'danger',
                         'assigned' => 'success',
                         default => 'warn',
@@ -121,9 +124,10 @@
                 @endphp
                 <div class="note {{ $noteClass }}" style="margin-top: 12px;">
                     <div class="label">Catatan Admin/Prodi</div>
-                    <div class="text" style="margin-top: 8px;">{{ $skripsi->catatan_admin }}</div>
+                    <div class="text" style="margin-top: 8px;">{{ $ppl->catatan_admin }}</div>
                 </div>
             @endif
         </div>
     </div>
 </x-portal-layout>
+

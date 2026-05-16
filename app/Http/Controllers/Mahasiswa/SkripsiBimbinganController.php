@@ -16,7 +16,7 @@ class SkripsiBimbinganController extends Controller
         abort_unless($mahasiswa, 403);
         abort_unless((int) $skripsi->mahasiswa_id === (int) $mahasiswa->id, 404);
 
-        $skripsi->load(['mahasiswa', 'dosenPembimbing', 'messages.sender']);
+        $skripsi->load(['mahasiswa', 'dosenPembimbing', 'dosenPembimbing2', 'messages.sender']);
         $skripsi->update(['mahasiswa_last_read_at' => now()]);
 
         return view('mahasiswa.skripsi.bimbingan', [
@@ -29,7 +29,7 @@ class SkripsiBimbinganController extends Controller
         $mahasiswa = $request->user()?->mahasiswa;
         abort_unless($mahasiswa, 403);
         abort_unless((int) $skripsi->mahasiswa_id === (int) $mahasiswa->id, 404);
-        abort_unless($skripsi->dosen_pembimbing_id, 403);
+        abort_unless($skripsi->dosen_pembimbing_id || $skripsi->dosen_pembimbing_id_2, 403);
 
         $validated = $request->validate([
             'pesan' => ['required', 'string'],

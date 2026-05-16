@@ -1,16 +1,16 @@
-<x-portal-layout :title="'Skripsi - '.config('app.name')" subtitle="Skripsi">
+<x-portal-layout :title="'PPL - '.config('app.name')" subtitle="PPL">
     <x-slot:sidebar>
         @include('mahasiswa.partials.sidebar')
     </x-slot:sidebar>
 
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-            <div class="text-xl font-semibold">Skripsi</div>
-            <div class="text-sm text-emerald-100/70">Pengajuan judul ke Admin/Prodi dan bimbingan online.</div>
+            <div class="text-xl font-semibold">PPL</div>
+            <div class="text-sm text-emerald-100/70">Pengajuan instansi/sekolah ke Admin/Prodi dan bimbingan online.</div>
         </div>
-        <a href="{{ route('mahasiswa.skripsi.create') }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition">
+        <a href="{{ route('mahasiswa.ppl.create') }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition">
             <i class="fa-solid fa-plus"></i>
-            <span class="text-sm font-medium">Ajukan Judul</span>
+            <span class="text-sm font-medium">Ajukan Instansi</span>
         </a>
     </div>
 
@@ -33,7 +33,7 @@
             <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
                 <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                     <div class="min-w-0">
-                        <div class="text-base font-semibold">{{ $row->judul }}</div>
+                        <div class="text-base font-semibold">{{ $row->instansi_nama }}</div>
                         <div class="mt-1 text-sm text-emerald-100/70">
                             Status:
                             <span class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold {{ $badge }}">
@@ -50,12 +50,12 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
-                        <a href="{{ route('mahasiswa.skripsi.show', $row) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                        <a href="{{ route('mahasiswa.ppl.show', $row) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                             <i class="fa-solid fa-eye"></i>
                             <span class="text-sm font-medium">Detail</span>
                         </a>
                         @if ($row->dosen_pembimbing_id || $row->dosen_pembimbing_id_2)
-                            <a href="{{ route('mahasiswa.skripsi.bimbingan', $row) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/20 border border-emerald-500/20 transition">
+                            <a href="{{ route('mahasiswa.ppl.bimbingan', $row) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/20 border border-emerald-500/20 transition">
                                 <span style="position: relative; display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px;">
                                     <i class="fa-solid fa-comments"></i>
                                     @if ($hasUnread)
@@ -70,8 +70,9 @@
             </div>
         @empty
             <div class="rounded-2xl bg-white/5 border border-white/10 p-10 text-center text-emerald-100/70">
-                Belum ada pengajuan skripsi.
+                Belum ada pengajuan PPL.
             </div>
         @endforelse
     </div>
 </x-portal-layout>
+

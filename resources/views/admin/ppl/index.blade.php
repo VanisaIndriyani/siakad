@@ -1,4 +1,4 @@
-<x-portal-layout :title="'Skripsi - '.config('app.name')" subtitle="Skripsi">
+<x-portal-layout :title="'PPL - '.config('app.name')" subtitle="PPL">
     <x-slot:sidebar>
         @include(($routePrefix ?? 'admin') === 'admin' ? 'admin.partials.sidebar' : 'dosen.partials.sidebar')
     </x-slot:sidebar>
@@ -9,14 +9,14 @@
 
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-            <div class="text-xl font-semibold">{{ ($routePrefix ?? 'admin') === 'admin' ? 'Skripsi' : 'Pengajuan Judul Skripsi' }}</div>
-            <div class="text-sm text-emerald-100/70">{{ ($routePrefix ?? 'admin') === 'admin' ? 'Review pengajuan judul dan tetapkan pembimbing.' : 'ACC pengajuan judul skripsi.' }}</div>
+            <div class="text-xl font-semibold">{{ $isAdminView ? 'PPL' : 'Pengajuan PPL' }}</div>
+            <div class="text-sm text-emerald-100/70">{{ $isAdminView ? 'Review pengajuan instansi/sekolah dan tetapkan pembimbing.' : 'ACC pengajuan instansi/sekolah PPL.' }}</div>
         </div>
         @if ($isAdminView)
-            <form method="POST" action="{{ route('admin.skripsi.bulk-delete') }}" onsubmit="return confirm('Hapus data skripsi yang dicentang?')">
+            <form method="POST" action="{{ route('admin.ppl.bulk-delete') }}" onsubmit="return confirm('Hapus data PPL yang dicentang?')">
                 @csrf
                 @method('DELETE')
-                <input type="hidden" name="ids" id="bulkDeleteIds" value="" />
+                <input type="hidden" name="ids" id="bulkDeletePplIds" value="" />
                 <button type="submit" class="h-10 px-4 rounded-xl bg-red-500/15 hover:bg-red-500/20 border border-red-500/25 transition text-sm font-medium inline-flex items-center gap-2">
                     <i class="fa-solid fa-trash"></i>
                     Hapus Terpilih
@@ -26,8 +26,8 @@
     </div>
 
     <div class="mt-5 rounded-2xl bg-white/5 border border-white/10 p-5">
-        <form method="GET" action="{{ ($routePrefix ?? 'admin') === 'admin' ? route('admin.skripsi.index') : route('dosen.skripsi-pengajuan.index') }}" class="flex flex-col lg:flex-row gap-3">
-            <input name="q" value="{{ $q }}" placeholder="Cari judul / nama / NPM..."
+        <form method="GET" action="{{ $isAdminView ? route('admin.ppl.index') : route('dosen.ppl-pengajuan.index') }}" class="flex flex-col lg:flex-row gap-3">
+            <input name="q" value="{{ $q }}" placeholder="Cari instansi / nama / NPM..."
                    class="h-11 w-full rounded-xl bg-white/5 border border-white/10 px-4 text-sm text-white placeholder:text-emerald-100/40 focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
             <select name="status" class="h-11 w-full lg:w-56 rounded-xl bg-white/5 border border-white/10 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
                 <option value="" style="background-color: #0d2a23; color: #fff;">Semua Status</option>
@@ -37,7 +37,7 @@
             </select>
             <div class="flex items-center gap-2">
                 <button class="h-11 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-sm font-medium">Cari</button>
-                <a href="{{ ($routePrefix ?? 'admin') === 'admin' ? route('admin.skripsi.index') : route('dosen.skripsi-pengajuan.index') }}" class="h-11 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-sm font-medium inline-flex items-center">Reset</a>
+                <a href="{{ $isAdminView ? route('admin.ppl.index') : route('dosen.ppl-pengajuan.index') }}" class="h-11 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-sm font-medium inline-flex items-center">Reset</a>
             </div>
         </form>
     </div>
@@ -49,11 +49,11 @@
                     <tr>
                         @if ($isAdminView)
                             <th class="text-left font-medium px-4 py-3 w-12">
-                                <input id="checkAllSkripsi" type="checkbox" class="h-4 w-4 rounded border-white/10 bg-white/5" />
+                                <input id="checkAllPpl" type="checkbox" class="h-4 w-4 rounded border-white/10 bg-white/5" />
                             </th>
                         @endif
                         <th class="text-left font-medium px-4 py-3">Mahasiswa</th>
-                        <th class="text-left font-medium px-4 py-3">Judul</th>
+                        <th class="text-left font-medium px-4 py-3">Instansi/Sekolah</th>
                         <th class="text-left font-medium px-4 py-3">Status</th>
                         <th class="text-left font-medium px-4 py-3">Pembimbing</th>
                         <th class="text-right font-medium px-4 py-3 w-40">Aksi</th>
@@ -72,14 +72,19 @@
                         <tr class="hover:bg-white/5">
                             @if ($isAdminView)
                                 <td class="px-4 py-3">
-                                    <input type="checkbox" class="skripsi-check h-4 w-4 rounded border-white/10 bg-white/5" value="{{ $row->id }}" />
+                                    <input type="checkbox" class="ppl-check h-4 w-4 rounded border-white/10 bg-white/5" value="{{ $row->id }}" />
                                 </td>
                             @endif
                             <td class="px-4 py-3">
                                 <div class="font-medium">{{ $row->mahasiswa?->nama_lengkap ?: '-' }}</div>
                                 <div class="text-xs text-emerald-100/60">{{ $row->mahasiswa?->npm ?: '-' }}</div>
                             </td>
-                            <td class="px-4 py-3 text-emerald-100/90">{{ $row->judul }}</td>
+                            <td class="px-4 py-3 text-emerald-100/90">
+                                <div class="font-medium text-white">{{ $row->instansi_nama }}</div>
+                                @if ($row->instansi_alamat)
+                                    <div class="text-xs text-emerald-100/60 mt-1">{{ \Illuminate\Support\Str::limit($row->instansi_alamat, 80) }}</div>
+                                @endif
+                            </td>
                             <td class="px-4 py-3">
                                 <span class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold {{ $badge }}">
                                     {{ strtoupper($row->status) }}
@@ -93,12 +98,12 @@
                             </td>
                             <td class="px-4 py-3 text-right">
                                 <div class="flex items-center justify-end gap-2">
-                                    <a href="{{ ($routePrefix ?? 'admin') === 'admin' ? route('admin.skripsi.show', $row) : route('dosen.skripsi-pengajuan.show', $row) }}" class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                                    <a href="{{ $isAdminView ? route('admin.ppl.show', $row) : route('dosen.ppl-pengajuan.show', $row) }}" class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                                         <i class="fa-solid fa-eye"></i>
                                         <span class="text-sm font-medium">Detail</span>
                                     </a>
                                     @if ($isAdminView)
-                                        <form method="POST" action="{{ route('admin.skripsi.destroy', $row) }}" onsubmit="return confirm('Hapus data skripsi ini?')">
+                                        <form method="POST" action="{{ route('admin.ppl.destroy', $row) }}" onsubmit="return confirm('Hapus data PPL ini?')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-red-500/15 hover:bg-red-500/20 border border-red-500/25 transition text-red-100">
@@ -112,7 +117,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="{{ $isAdminView ? 6 : 5 }}" class="px-4 py-10 text-center text-emerald-100/70">Belum ada pengajuan skripsi.</td>
+                            <td colspan="{{ $isAdminView ? 6 : 5 }}" class="px-4 py-10 text-center text-emerald-100/70">Belum ada pengajuan PPL.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -127,9 +132,9 @@
     @if ($isAdminView)
         <script>
             (function () {
-                const checkAll = document.getElementById('checkAllSkripsi');
-                const checks = Array.from(document.querySelectorAll('.skripsi-check'));
-                const hidden = document.getElementById('bulkDeleteIds');
+                const checkAll = document.getElementById('checkAllPpl');
+                const checks = Array.from(document.querySelectorAll('.ppl-check'));
+                const hidden = document.getElementById('bulkDeletePplIds');
                 if (!hidden) return;
 
                 const sync = () => {
@@ -150,10 +155,11 @@
                 hidden.form?.addEventListener('submit', (e) => {
                     if (!hidden.value) {
                         e.preventDefault();
-                        alert('Pilih minimal 1 data skripsi.');
+                        alert('Pilih minimal 1 data PPL.');
                     }
                 });
             })();
         </script>
     @endif
 </x-portal-layout>
+

@@ -1,4 +1,4 @@
-<x-portal-layout :title="'Bimbingan Skripsi - '.config('app.name')" subtitle="Skripsi">
+<x-portal-layout :title="'Bimbingan PPL - '.config('app.name')" subtitle="PPL">
     <x-slot:sidebar>
         @include('mahasiswa.partials.sidebar')
     </x-slot:sidebar>
@@ -30,29 +30,29 @@
         <div class="chat-card">
             <div class="chat-head">
                 <div>
-                    <div class="title">Bimbingan Skripsi</div>
+                    <div class="title">Bimbingan PPL</div>
                     <div class="sub">
-                        {{ $skripsi->judul }} • Pembimbing:
-                        {{ $skripsi->dosenPembimbing?->nama ?: '-' }}
-                        @if ($skripsi->dosenPembimbing2?->nama)
-                            , {{ $skripsi->dosenPembimbing2?->nama }}
+                        {{ $ppl->instansi_nama }} • Pembimbing:
+                        {{ $ppl->dosenPembimbing?->nama ?: '-' }}
+                        @if ($ppl->dosenPembimbing2?->nama)
+                            , {{ $ppl->dosenPembimbing2?->nama }}
                         @endif
                     </div>
                 </div>
-                <a href="{{ route('mahasiswa.skripsi.show', $skripsi) }}" class="chat-back">
+                <a href="{{ route('mahasiswa.ppl.show', $ppl) }}" class="chat-back">
                     <i class="fa-solid fa-arrow-left"></i>
                     Kembali
                 </a>
             </div>
 
-            @if (! $skripsi->dosen_pembimbing_id && ! $skripsi->dosen_pembimbing_id_2)
+            @if (! $ppl->dosen_pembimbing_id && ! $ppl->dosen_pembimbing_id_2)
                 <div class="chat-warn">
                     Bimbingan belum bisa dimulai karena pembimbing belum ditetapkan oleh Admin/Prodi.
                 </div>
             @endif
 
             <div id="chatStream" class="chat-stream">
-                @forelse ($skripsi->messages->sortBy('id') as $msg)
+                @forelse ($ppl->messages->sortBy('id') as $msg)
                     @php
                         $isMe = (int) $msg->sender_user_id === (int) auth()->id();
                     @endphp
@@ -71,12 +71,12 @@
                 @endforelse
             </div>
 
-            <form method="POST" action="{{ route('mahasiswa.skripsi.bimbingan.store', $skripsi) }}" class="chat-form">
+            <form method="POST" action="{{ route('mahasiswa.ppl.bimbingan.store', $ppl) }}" class="chat-form">
                 @csrf
-                <textarea name="pesan" rows="2" {{ ($skripsi->dosen_pembimbing_id || $skripsi->dosen_pembimbing_id_2) ? '' : 'disabled' }}
+                <textarea name="pesan" rows="2" {{ ($ppl->dosen_pembimbing_id || $ppl->dosen_pembimbing_id_2) ? '' : 'disabled' }}
                           class="chat-input"
                           placeholder="Tulis pesan...">{{ old('pesan') }}</textarea>
-                <button {{ ($skripsi->dosen_pembimbing_id || $skripsi->dosen_pembimbing_id_2) ? '' : 'disabled' }} class="chat-send">
+                <button {{ ($ppl->dosen_pembimbing_id || $ppl->dosen_pembimbing_id_2) ? '' : 'disabled' }} class="chat-send">
                     <i class="fa-solid fa-paper-plane"></i>
                     Kirim
                 </button>
@@ -96,3 +96,4 @@
         })();
     </script>
 </x-portal-layout>
+
