@@ -13,6 +13,11 @@
     <i class="fa-solid fa-pen-to-square text-emerald-300"></i>
     <span class="text-sm font-medium">Input Nilai</span>
 </a>
+<a href="{{ route('dosen.mata-kuliah.index') }}"
+   class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('dosen.mata-kuliah.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+    <i class="fa-solid fa-book-open text-emerald-300"></i>
+    <span class="text-sm font-medium">Mata Kuliah</span>
+</a>
 <a href="{{ route('dosen.absensi.index') }}"
    class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('dosen.absensi.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
     <i class="fa-solid fa-calendar-check text-emerald-300"></i>

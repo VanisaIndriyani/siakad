@@ -61,6 +61,9 @@ Route::prefix('admin')
         Route::resource('dosen', AdminDosenController::class);
 
         Route::resource('mata-kuliah', AdminMataKuliahController::class)->except(['show']);
+        Route::post('/mata-kuliah/{mataKuliah}/rps-admin', [AdminMataKuliahController::class, 'uploadRpsAdmin'])->name('mata-kuliah.rps-admin.upload');
+        Route::get('/mata-kuliah/{mataKuliah}/rps-admin', [AdminMataKuliahController::class, 'downloadRpsAdmin'])->name('mata-kuliah.rps-admin.download');
+        Route::get('/mata-kuliah/{mataKuliah}/rps-dosen', [AdminMataKuliahController::class, 'downloadRpsDosen'])->name('mata-kuliah.rps-dosen.download');
 
         Route::get('/krs', [AdminKrsController::class, 'index'])->name('krs.index');
         Route::get('/krs/{krs}', [AdminKrsController::class, 'show'])->name('krs.show');
@@ -141,6 +144,11 @@ Route::prefix('dosen')
         Route::get('/nilai', [DosenNilaiController::class, 'index'])->name('nilai.index');
         Route::get('/nilai/{krs}', [DosenNilaiController::class, 'edit'])->name('nilai.edit');
         Route::put('/nilai/{krs}', [DosenNilaiController::class, 'update'])->name('nilai.update');
+
+        Route::get('/mata-kuliah', [\App\Http\Controllers\Dosen\MataKuliahController::class, 'index'])->name('mata-kuliah.index');
+        Route::post('/mata-kuliah/{mataKuliah}/rps', [\App\Http\Controllers\Dosen\MataKuliahController::class, 'uploadRps'])->name('mata-kuliah.rps.upload');
+        Route::get('/mata-kuliah/{mataKuliah}/rps-admin', [\App\Http\Controllers\Dosen\MataKuliahController::class, 'downloadRpsAdmin'])->name('mata-kuliah.rps-admin.download');
+        Route::get('/mata-kuliah/{mataKuliah}/rps-dosen', [\App\Http\Controllers\Dosen\MataKuliahController::class, 'downloadRpsDosen'])->name('mata-kuliah.rps-dosen.download');
 
         Route::get('/absensi', [AdminAbsensiController::class, 'index'])->name('absensi.index');
         Route::get('/absensi/entry', [AdminAbsensiController::class, 'entry'])->name('absensi.entry');

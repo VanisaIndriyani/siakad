@@ -21,6 +21,10 @@ class MataKuliah extends Model
         'semester',
         'dosen_id',
         'dosen_id_2',
+        'rps_admin_path',
+        'rps_admin_name',
+        'rps_dosen_path',
+        'rps_dosen_name',
     ];
 
     public function dosen(): BelongsTo

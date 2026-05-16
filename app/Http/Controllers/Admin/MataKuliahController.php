@@ -7,8 +7,11 @@ use App\Models\Dosen;
 use App\Models\MataKuliah;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class MataKuliahController extends Controller
 {
@@ -88,6 +91,48 @@ class MataKuliahController extends Controller
             'dosen' => Dosen::query()->orderBy('nama')->get(),
             'jurusanList' => self::JURUSAN,
         ]);
+    }
+
+    public function uploadRpsAdmin(Request $request, MataKuliah $mataKuliah): RedirectResponse
+    {
+        $validated = $request->validate([
+            'rps_admin' => ['required', 'file', 'max:10240', 'mimes:pdf,doc,docx'],
+        ]);
+
+        $file = $validated['rps_admin'];
+        $originalName = (string) $file->getClientOriginalName();
+        $ext = (string) $file->getClientOriginalExtension();
+        $filename = 'rps-admin-'.now()->format('YmdHis').'-'.Str::random(8).($ext !== '' ? '.'.$ext : '');
+        $path = $file->storeAs('rps/admin/'.$mataKuliah->id, $filename, 'public');
+
+        if ($mataKuliah->rps_admin_path) {
+            Storage::disk('public')->delete($mataKuliah->rps_admin_path);
+        }
+
+        $mataKuliah->update([
+            'rps_admin_path' => $path,
+            'rps_admin_name' => $originalName,
+        ]);
+
+        return back()->with('success', 'Contoh RPS (Admin) berhasil diupload.');
+    }
+
+    public function downloadRpsAdmin(Request $request, MataKuliah $mataKuliah): BinaryFileResponse
+    {
+        abort_unless($mataKuliah->rps_admin_path, 404);
+        abort_unless(Storage::disk('public')->exists($mataKuliah->rps_admin_path), 404);
+
+        $downloadName = $mataKuliah->rps_admin_name ?: basename($mataKuliah->rps_admin_path);
+        return response()->download(storage_path('app/public/'.$mataKuliah->rps_admin_path), $downloadName);
+    }
+
+    public function downloadRpsDosen(Request $request, MataKuliah $mataKuliah): BinaryFileResponse
+    {
+        abort_unless($mataKuliah->rps_dosen_path, 404);
+        abort_unless(Storage::disk('public')->exists($mataKuliah->rps_dosen_path), 404);
+
+        $downloadName = $mataKuliah->rps_dosen_name ?: basename($mataKuliah->rps_dosen_path);
+        return response()->download(storage_path('app/public/'.$mataKuliah->rps_dosen_path), $downloadName);
     }
 
     public function update(Request $request, MataKuliah $mataKuliah): RedirectResponse
