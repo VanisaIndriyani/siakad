@@ -155,6 +155,7 @@ Route::prefix('dosen')
         Route::post('/absensi/{absensi}', [AdminAbsensiController::class, 'update'])->name('absensi.update');
         Route::get('/absensi/{absensi}/export/pdf', [AdminAbsensiController::class, 'exportPdf'])->name('absensi.export.pdf');
         Route::get('/absensi/{absensi}/export/excel', [AdminAbsensiController::class, 'exportExcel'])->name('absensi.export.excel');
+        Route::get('/absensi/rekap/pdf', [AdminAbsensiController::class, 'exportRekapPdf'])->name('absensi.rekap.pdf');
 
         Route::get('/krs/approval', [DosenKrsApprovalController::class, 'index'])->name('krs.approval');
         Route::get('/krs/{krs}', [DosenKrsApprovalController::class, 'show'])->name('krs.show');
