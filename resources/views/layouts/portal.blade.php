@@ -16,7 +16,7 @@
                 <div class="absolute inset-0 bg-black/60" @click="sidebarOpen = false"></div>
             </div>
 
-            <aside class="fixed inset-y-0 left-0 z-50 w-72 bg-white/5 border-r border-white/10 backdrop-blur-xl transform transition lg:translate-x-0"
+            <aside class="fixed inset-y-0 left-0 z-50 w-72 bg-white/5 border-r border-white/10 backdrop-blur-xl transform transition lg:translate-x-0 overflow-y-auto"
                    :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
                 <div class="px-5 py-5 flex flex-col items-center text-center gap-3 border-b border-white/10">
                     <img src="{{ asset('img/lo.jpeg') }}" alt="Logo Kampus" class="h-16 w-auto max-w-[240px] rounded-2xl object-contain bg-white px-5 py-4 shadow-lg ring-1 ring-black/10" />
