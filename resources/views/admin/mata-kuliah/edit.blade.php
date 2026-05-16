@@ -88,11 +88,25 @@
                 <div class="text-sm font-medium">1) Contoh RPS (Admin)</div>
                 <div class="mt-2 flex items-center gap-2">
                     @if ($mataKuliah->rps_admin_path)
+                        <a href="{{ route('admin.mata-kuliah.rps-admin.preview', $mataKuliah) }}" target="_blank"
+                           class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                            <i class="fa-solid fa-eye"></i>
+                            Preview
+                        </a>
                         <a href="{{ route('admin.mata-kuliah.rps-admin.download', $mataKuliah) }}"
                            class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                             <i class="fa-solid fa-download"></i>
                             Download
                         </a>
+                        <form method="POST" action="{{ route('admin.mata-kuliah.rps-admin.destroy', $mataKuliah) }}" onsubmit="return confirm('Hapus file RPS Admin ini?')" class="inline">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit"
+                                    class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-red-500/15 hover:bg-red-500/20 border border-red-400/25 transition text-red-100">
+                                <i class="fa-solid fa-trash"></i>
+                                Hapus
+                            </button>
+                        </form>
                         <div class="text-sm text-emerald-100/70 truncate">
                             {{ $mataKuliah->rps_admin_name ?: basename($mataKuliah->rps_admin_path) }}
                         </div>
@@ -116,11 +130,25 @@
                 <div class="text-sm font-medium">2) RPS Dosen</div>
                 <div class="mt-2 flex items-center gap-2">
                     @if ($mataKuliah->rps_dosen_path)
+                        <a href="{{ route('admin.mata-kuliah.rps-dosen.preview', $mataKuliah) }}" target="_blank"
+                           class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                            <i class="fa-solid fa-eye"></i>
+                            Preview
+                        </a>
                         <a href="{{ route('admin.mata-kuliah.rps-dosen.download', $mataKuliah) }}"
                            class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/20 border border-emerald-400/25 transition">
                             <i class="fa-solid fa-download"></i>
                             Download
                         </a>
+                        <form method="POST" action="{{ route('admin.mata-kuliah.rps-dosen.destroy', $mataKuliah) }}" onsubmit="return confirm('Hapus file RPS Dosen ini?')" class="inline">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit"
+                                    class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-red-500/15 hover:bg-red-500/20 border border-red-400/25 transition text-red-100">
+                                <i class="fa-solid fa-trash"></i>
+                                Hapus
+                            </button>
+                        </form>
                         <div class="text-sm text-emerald-100/70 truncate">
                             {{ $mataKuliah->rps_dosen_name ?: basename($mataKuliah->rps_dosen_path) }}
                         </div>

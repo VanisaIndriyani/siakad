@@ -1,9 +1,20 @@
 <x-portal-layout :title="'Detail Skripsi - '.config('app.name')" subtitle="Skripsi">
     <x-slot:sidebar>
-        @include('admin.partials.sidebar')
+        @include(($routePrefix ?? 'admin') === 'admin' ? 'admin.partials.sidebar' : 'dosen.partials.sidebar')
     </x-slot:sidebar>
 
     @php
+        $prefix = $routePrefix ?? 'admin';
+        $canAssign = (bool) ($canAssign ?? false);
+        $indexUrl = $prefix === 'admin' ? route('admin.skripsi.index') : route('dosen.skripsi-pengajuan.index');
+        $statusAction = $prefix === 'admin' ? route('admin.skripsi.status', $skripsi) : route('dosen.skripsi-pengajuan.status', $skripsi);
+        $skPreviewUrl = $prefix === 'admin'
+            ? route('admin.skripsi.sk.preview', $skripsi)
+            : route('dosen.skripsi-pengajuan.sk.preview', $skripsi);
+        $skDownloadUrl = $prefix === 'admin'
+            ? route('admin.skripsi.sk.download', $skripsi)
+            : route('dosen.skripsi-pengajuan.sk.download', $skripsi);
+
         $badge = match ($skripsi->status) {
             'assigned' => 'bg-emerald-500/15 border-emerald-500/20 text-emerald-100',
             'approved' => 'bg-blue-500/15 border-blue-500/20 text-blue-100',
@@ -24,7 +35,7 @@
                 <span>({{ $skripsi->mahasiswa?->npm ?: '-' }})</span>
             </div>
         </div>
-        <a href="{{ route('admin.skripsi.index') }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+        <a href="{{ $indexUrl }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
             <i class="fa-solid fa-arrow-left"></i>
             <span class="text-sm font-medium">Kembali</span>
         </a>
@@ -61,7 +72,7 @@
             <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
                 <div class="text-sm font-semibold">Status Pengajuan</div>
 
-                <form method="POST" action="{{ route('admin.skripsi.status', $skripsi) }}" class="mt-4 space-y-3">
+                <form method="POST" action="{{ $statusAction }}" class="mt-4 space-y-3">
                     @csrf
                     @method('PATCH')
 
@@ -80,40 +91,49 @@
                 </form>
             </div>
 
-            <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
-                <div class="text-sm font-semibold">Tetapkan Pembimbing (SK)</div>
+            @if ($canAssign)
+                <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
+                    <div class="text-sm font-semibold">Tetapkan Pembimbing (SK)</div>
 
-                <form method="POST" action="{{ route('admin.skripsi.assign', $skripsi) }}" class="mt-4 space-y-3">
-                    @csrf
-                    @method('PATCH')
+                    <form method="POST" action="{{ route('admin.skripsi.assign', $skripsi) }}" enctype="multipart/form-data" class="mt-4 space-y-3">
+                        @csrf
+                        @method('PATCH')
 
-                    <div>
-                        <label class="block text-xs font-semibold text-emerald-100/70 mb-1">Dosen Pembimbing</label>
-                        <select name="dosen_pembimbing_id" class="h-11 w-full rounded-xl bg-white/5 border border-white/10 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30" required>
-                            <option value="" disabled @selected(! old('dosen_pembimbing_id', $skripsi->dosen_pembimbing_id)) style="background-color: #0d2a23; color: #fff;">Pilih dosen</option>
-                            @foreach ($dosenList as $d)
-                                <option value="{{ $d->id }}" @selected((string) old('dosen_pembimbing_id', $skripsi->dosen_pembimbing_id) === (string) $d->id) style="background-color: #0d2a23; color: #fff;">{{ $d->nama }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-emerald-100/70 mb-1">Dosen Pembimbing</label>
+                            <select name="dosen_pembimbing_id" class="h-11 w-full rounded-xl bg-white/5 border border-white/10 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30" required>
+                                <option value="" disabled @selected(! old('dosen_pembimbing_id', $skripsi->dosen_pembimbing_id)) style="background-color: #0d2a23; color: #fff;">Pilih dosen</option>
+                                @foreach ($dosenList as $d)
+                                    <option value="{{ $d->id }}" @selected((string) old('dosen_pembimbing_id', $skripsi->dosen_pembimbing_id) === (string) $d->id) style="background-color: #0d2a23; color: #fff;">{{ $d->nama }}</option>
+                                @endforeach
+                            </select>
+                        </div>
 
-                    <div>
-                        <label class="block text-xs font-semibold text-emerald-100/70 mb-1">Nomor SK (Opsional)</label>
-                        <input name="nomor_sk" value="{{ old('nomor_sk', $skripsi->nomor_sk) }}"
-                               class="h-11 w-full rounded-xl bg-white/5 border border-white/10 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
-                    </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-emerald-100/70 mb-1">Nomor SK (Opsional)</label>
+                            <input name="nomor_sk" value="{{ old('nomor_sk', $skripsi->nomor_sk) }}"
+                                   class="h-11 w-full rounded-xl bg-white/5 border border-white/10 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
+                        </div>
 
-                    <div>
-                        <label class="block text-xs font-semibold text-emerald-100/70 mb-1">Tanggal SK (Opsional)</label>
-                        <input type="date" name="tanggal_sk" value="{{ old('tanggal_sk', optional($skripsi->tanggal_sk)->format('Y-m-d')) }}"
-                               class="h-11 w-full rounded-xl bg-white/5 border border-white/10 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
-                    </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-emerald-100/70 mb-1">Tanggal SK (Opsional)</label>
+                            <input type="date" name="tanggal_sk" value="{{ old('tanggal_sk', optional($skripsi->tanggal_sk)->format('Y-m-d')) }}"
+                                   class="h-11 w-full rounded-xl bg-white/5 border border-white/10 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
+                        </div>
 
-                    <button class="h-11 w-full rounded-xl bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/25 transition text-sm font-medium">
-                        Simpan Pembimbing
-                    </button>
-                </form>
-            </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-emerald-100/70 mb-1">Upload SK Pembimbing (PDF, Opsional)</label>
+                            <input type="file" name="sk_pembimbing_file" accept=".pdf"
+                                   class="w-full h-11 rounded-xl bg-white/5 border border-white/10 text-emerald-100/80 file:mr-3 file:h-11 file:border-0 file:bg-white/10 file:text-white file:px-3 file:cursor-pointer" />
+                            @error('sk_pembimbing_file') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
+                        </div>
+
+                        <button class="h-11 w-full rounded-xl bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/25 transition text-sm font-medium">
+                            Simpan Pembimbing
+                        </button>
+                    </form>
+                </div>
+            @endif
 
             <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
                 <div class="text-sm text-emerald-100/70">Pembimbing Saat Ini</div>
@@ -126,6 +146,23 @@
                         <span class="font-medium">{{ $skripsi->tanggal_sk->format('d/m/Y') }}</span>
                     @endif
                 </div>
+                @if ($skripsi->sk_pembimbing_path)
+                    <div class="mt-3 flex items-center gap-2 flex-wrap">
+                        <a href="{{ $skPreviewUrl }}" target="_blank"
+                           class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                            <i class="fa-solid fa-eye"></i>
+                            <span class="text-sm font-medium">Preview SK</span>
+                        </a>
+                        <a href="{{ $skDownloadUrl }}"
+                           class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                            <i class="fa-solid fa-download"></i>
+                            <span class="text-sm font-medium">Download</span>
+                        </a>
+                        <div class="text-sm text-emerald-100/70 truncate">
+                            {{ $skripsi->sk_pembimbing_name ?: basename($skripsi->sk_pembimbing_path) }}
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
     </div>

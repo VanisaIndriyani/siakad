@@ -63,7 +63,11 @@ Route::prefix('admin')
         Route::resource('mata-kuliah', AdminMataKuliahController::class)->except(['show']);
         Route::post('/mata-kuliah/{mataKuliah}/rps-admin', [AdminMataKuliahController::class, 'uploadRpsAdmin'])->name('mata-kuliah.rps-admin.upload');
         Route::get('/mata-kuliah/{mataKuliah}/rps-admin', [AdminMataKuliahController::class, 'downloadRpsAdmin'])->name('mata-kuliah.rps-admin.download');
+        Route::get('/mata-kuliah/{mataKuliah}/rps-admin/preview', [AdminMataKuliahController::class, 'previewRpsAdmin'])->name('mata-kuliah.rps-admin.preview');
+        Route::delete('/mata-kuliah/{mataKuliah}/rps-admin', [AdminMataKuliahController::class, 'destroyRpsAdmin'])->name('mata-kuliah.rps-admin.destroy');
         Route::get('/mata-kuliah/{mataKuliah}/rps-dosen', [AdminMataKuliahController::class, 'downloadRpsDosen'])->name('mata-kuliah.rps-dosen.download');
+        Route::get('/mata-kuliah/{mataKuliah}/rps-dosen/preview', [AdminMataKuliahController::class, 'previewRpsDosen'])->name('mata-kuliah.rps-dosen.preview');
+        Route::delete('/mata-kuliah/{mataKuliah}/rps-dosen', [AdminMataKuliahController::class, 'destroyRpsDosen'])->name('mata-kuliah.rps-dosen.destroy');
 
         Route::get('/krs', [AdminKrsController::class, 'index'])->name('krs.index');
         Route::get('/krs/{krs}', [AdminKrsController::class, 'show'])->name('krs.show');
@@ -91,6 +95,8 @@ Route::prefix('admin')
         Route::get('/skripsi/{skripsi}', [AdminSkripsiController::class, 'show'])->name('skripsi.show');
         Route::patch('/skripsi/{skripsi}/status', [AdminSkripsiController::class, 'updateStatus'])->name('skripsi.status');
         Route::patch('/skripsi/{skripsi}/assign', [AdminSkripsiController::class, 'assign'])->name('skripsi.assign');
+        Route::get('/skripsi/{skripsi}/sk-pembimbing', [AdminSkripsiController::class, 'downloadSkPembimbing'])->name('skripsi.sk.download');
+        Route::get('/skripsi/{skripsi}/sk-pembimbing/preview', [AdminSkripsiController::class, 'previewSkPembimbing'])->name('skripsi.sk.preview');
     });
 
 Route::prefix('mahasiswa')
@@ -127,6 +133,8 @@ Route::prefix('mahasiswa')
         Route::get('/skripsi/create', [MahasiswaSkripsiController::class, 'create'])->name('skripsi.create');
         Route::post('/skripsi', [MahasiswaSkripsiController::class, 'store'])->name('skripsi.store');
         Route::get('/skripsi/{skripsi}', [MahasiswaSkripsiController::class, 'show'])->name('skripsi.show');
+        Route::get('/skripsi/{skripsi}/sk-pembimbing', [AdminSkripsiController::class, 'downloadSkPembimbing'])->name('skripsi.sk.download');
+        Route::get('/skripsi/{skripsi}/sk-pembimbing/preview', [AdminSkripsiController::class, 'previewSkPembimbing'])->name('skripsi.sk.preview');
         Route::get('/skripsi/{skripsi}/bimbingan', [MahasiswaSkripsiBimbinganController::class, 'show'])->name('skripsi.bimbingan');
         Route::post('/skripsi/{skripsi}/bimbingan', [MahasiswaSkripsiBimbinganController::class, 'store'])->name('skripsi.bimbingan.store');
 
@@ -148,7 +156,10 @@ Route::prefix('dosen')
         Route::get('/mata-kuliah', [\App\Http\Controllers\Dosen\MataKuliahController::class, 'index'])->name('mata-kuliah.index');
         Route::post('/mata-kuliah/{mataKuliah}/rps', [\App\Http\Controllers\Dosen\MataKuliahController::class, 'uploadRps'])->name('mata-kuliah.rps.upload');
         Route::get('/mata-kuliah/{mataKuliah}/rps-admin', [\App\Http\Controllers\Dosen\MataKuliahController::class, 'downloadRpsAdmin'])->name('mata-kuliah.rps-admin.download');
+        Route::get('/mata-kuliah/{mataKuliah}/rps-admin/preview', [\App\Http\Controllers\Dosen\MataKuliahController::class, 'previewRpsAdmin'])->name('mata-kuliah.rps-admin.preview');
         Route::get('/mata-kuliah/{mataKuliah}/rps-dosen', [\App\Http\Controllers\Dosen\MataKuliahController::class, 'downloadRpsDosen'])->name('mata-kuliah.rps-dosen.download');
+        Route::get('/mata-kuliah/{mataKuliah}/rps-dosen/preview', [\App\Http\Controllers\Dosen\MataKuliahController::class, 'previewRpsDosen'])->name('mata-kuliah.rps-dosen.preview');
+        Route::delete('/mata-kuliah/{mataKuliah}/rps', [\App\Http\Controllers\Dosen\MataKuliahController::class, 'destroyRps'])->name('mata-kuliah.rps.destroy');
 
         Route::get('/absensi', [AdminAbsensiController::class, 'index'])->name('absensi.index');
         Route::get('/absensi/entry', [AdminAbsensiController::class, 'entry'])->name('absensi.entry');
@@ -169,6 +180,12 @@ Route::prefix('dosen')
         Route::get('/skripsi/bimbingan', [DosenSkripsiBimbinganController::class, 'index'])->name('skripsi.bimbingan.index');
         Route::get('/skripsi/{skripsi}/bimbingan', [DosenSkripsiBimbinganController::class, 'show'])->name('skripsi.bimbingan.show');
         Route::post('/skripsi/{skripsi}/bimbingan', [DosenSkripsiBimbinganController::class, 'store'])->name('skripsi.bimbingan.store');
+
+        Route::get('/skripsi/pengajuan', [AdminSkripsiController::class, 'index'])->name('skripsi-pengajuan.index');
+        Route::get('/skripsi/pengajuan/{skripsi}', [AdminSkripsiController::class, 'show'])->name('skripsi-pengajuan.show');
+        Route::patch('/skripsi/pengajuan/{skripsi}/status', [AdminSkripsiController::class, 'updateStatus'])->name('skripsi-pengajuan.status');
+        Route::get('/skripsi/pengajuan/{skripsi}/sk-pembimbing', [AdminSkripsiController::class, 'downloadSkPembimbing'])->name('skripsi-pengajuan.sk.download');
+        Route::get('/skripsi/pengajuan/{skripsi}/sk-pembimbing/preview', [AdminSkripsiController::class, 'previewSkPembimbing'])->name('skripsi-pengajuan.sk.preview');
     });
 
 Route::prefix('keuangan')

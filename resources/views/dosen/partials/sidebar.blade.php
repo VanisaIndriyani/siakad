@@ -48,4 +48,9 @@
         <i class="fa-solid fa-circle-check text-emerald-300"></i>
         <span class="text-sm font-medium">Approve KRS</span>
     </a>
+    <a href="{{ route('dosen.skripsi-pengajuan.index') }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('dosen.skripsi-pengajuan.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+        <i class="fa-solid fa-file-signature text-emerald-300"></i>
+        <span class="text-sm font-medium">Acc Judul Skripsi</span>
+    </a>
 @endif

@@ -33,11 +33,13 @@ class KrsApprovalController extends Controller
         [, $programStudi] = $this->resolveApprover($request);
 
         $q = trim((string) $request->get('q', ''));
+        $statusParam = $request->get('status');
+        $status = $statusParam === null ? 'pending' : trim((string) $statusParam);
 
         $query = Krs::query()
             ->with(['mahasiswa', 'mahasiswa.user'])
             ->withCount('items')
-            ->where('status_approval', 'pending');
+            ->when($status !== '', fn ($q2) => $q2->where('status_approval', $status));
 
         $query->whereHas('mahasiswa', function ($sub) use ($programStudi) {
             $sub->where('program_studi', $programStudi);
@@ -55,14 +57,13 @@ class KrsApprovalController extends Controller
         return view('dosen.krs.approval', [
             'krs' => $krs,
             'q' => $q,
+            'status' => $status,
         ]);
     }
 
     public function show(Request $request, Krs $krs): View
     {
         [, $programStudi] = $this->resolveApprover($request);
-
-        abort_unless($krs->status_approval === 'pending', 404);
 
         $krs->load(['mahasiswa', 'items.mataKuliah', 'mahasiswa.user']);
         abort_unless((string) ($krs->mahasiswa?->program_studi ?? '') === $programStudi, 403);
@@ -75,20 +76,28 @@ class KrsApprovalController extends Controller
     public function updateStatus(Request $request, Krs $krs): RedirectResponse
     {
         [$dosen, $programStudi] = $this->resolveApprover($request);
-        abort_unless($krs->status_approval === 'pending', 404);
 
         $krs->loadMissing('mahasiswa');
         abort_unless((string) ($krs->mahasiswa?->program_studi ?? '') === $programStudi, 403);
 
         $validated = $request->validate([
-            'status_approval' => ['required', 'in:approved,rejected'],
+            'status_approval' => ['required', 'in:pending,approved,rejected'],
+            'catatan_approval' => ['nullable', 'string'],
         ]);
+
+        $approvedByDosenId = $krs->approved_by_dosen_id;
+        if ($validated['status_approval'] === 'pending') {
+            $approvedByDosenId = null;
+        } else {
+            $approvedByDosenId = $dosen->id;
+        }
 
         $krs->update([
             'status_approval' => $validated['status_approval'],
-            'approved_by_dosen_id' => $dosen->id,
+            'catatan_approval' => $validated['catatan_approval'] ?: null,
+            'approved_by_dosen_id' => $approvedByDosenId,
         ]);
 
-        return redirect()->route('dosen.krs.approval')->with('success', 'Status KRS berhasil diperbarui.');
+        return redirect()->route('dosen.krs.approval', ['status' => $validated['status_approval']])->with('success', 'Status KRS berhasil diperbarui.');
     }
 }

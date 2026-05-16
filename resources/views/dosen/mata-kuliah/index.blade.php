@@ -36,22 +36,45 @@
                             <td class="px-4 py-3 text-emerald-100/80">S{{ $row->semester }}</td>
                             <td class="px-4 py-3">
                                 @if ($row->rps_admin_path)
-                                    <a href="{{ route('dosen.mata-kuliah.rps-admin.download', $row) }}"
-                                       class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
-                                        <i class="fa-solid fa-download"></i>
-                                        <span class="text-sm font-medium">Download</span>
-                                    </a>
+                                    <div class="flex items-center gap-2">
+                                        <a href="{{ route('dosen.mata-kuliah.rps-admin.preview', $row) }}" target="_blank"
+                                           class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                                            <i class="fa-solid fa-eye"></i>
+                                            <span class="text-sm font-medium">Preview</span>
+                                        </a>
+                                        <a href="{{ route('dosen.mata-kuliah.rps-admin.download', $row) }}"
+                                           class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                                            <i class="fa-solid fa-download"></i>
+                                            <span class="text-sm font-medium">Download</span>
+                                        </a>
+                                    </div>
                                 @else
                                     <span class="text-emerald-100/60">-</span>
                                 @endif
                             </td>
                             <td class="px-4 py-3">
                                 @if ($row->rps_dosen_path)
-                                    <a href="{{ route('dosen.mata-kuliah.rps-dosen.download', $row) }}"
-                                       class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/20 border border-emerald-400/25 transition">
-                                        <i class="fa-solid fa-download"></i>
-                                        <span class="text-sm font-medium">Download</span>
-                                    </a>
+                                    <div class="flex items-center gap-2">
+                                        <a href="{{ route('dosen.mata-kuliah.rps-dosen.preview', $row) }}" target="_blank"
+                                           class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                                            <i class="fa-solid fa-eye"></i>
+                                            <span class="text-sm font-medium">Preview</span>
+                                        </a>
+                                        <a href="{{ route('dosen.mata-kuliah.rps-dosen.download', $row) }}"
+                                           class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/20 border border-emerald-400/25 transition">
+                                            <i class="fa-solid fa-download"></i>
+                                            <span class="text-sm font-medium">Download</span>
+                                        </a>
+                                        <form method="POST" action="{{ route('dosen.mata-kuliah.rps.destroy', $row) }}" onsubmit="return confirm('Hapus file RPS Dosen ini?')" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                    class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-red-500/15 hover:bg-red-500/20 border border-red-400/25 transition text-red-100">
+                                                <i class="fa-solid fa-trash"></i>
+                                                <span class="text-sm font-medium">Hapus</span>
+                                            </button>
+                                        </form>
+                                    </div>
                                 @else
                                     <span class="text-emerald-100/60">Belum upload</span>
                                 @endif
@@ -80,4 +103,3 @@
         </div>
     </div>
 </x-portal-layout>
-

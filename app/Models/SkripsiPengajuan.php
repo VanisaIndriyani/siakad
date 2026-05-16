@@ -23,6 +23,8 @@ class SkripsiPengajuan extends Model
         'dosen_pembimbing_id',
         'nomor_sk',
         'tanggal_sk',
+        'sk_pembimbing_path',
+        'sk_pembimbing_name',
         'approved_at',
         'approved_by_user_id',
         'assigned_at',

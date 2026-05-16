@@ -64,6 +64,22 @@ class MataKuliahController extends Controller
         return back()->with('success', 'RPS dosen berhasil diupload.');
     }
 
+    public function destroyRps(Request $request, MataKuliah $mataKuliah): RedirectResponse
+    {
+        $this->authorizeMataKuliah($request, $mataKuliah);
+
+        if ($mataKuliah->rps_dosen_path) {
+            Storage::disk('public')->delete($mataKuliah->rps_dosen_path);
+        }
+
+        $mataKuliah->update([
+            'rps_dosen_path' => null,
+            'rps_dosen_name' => null,
+        ]);
+
+        return back()->with('success', 'RPS dosen berhasil dihapus.');
+    }
+
     public function downloadRpsAdmin(Request $request, MataKuliah $mataKuliah): BinaryFileResponse
     {
         $this->authorizeMataKuliah($request, $mataKuliah);
@@ -72,6 +88,18 @@ class MataKuliahController extends Controller
 
         $downloadName = $mataKuliah->rps_admin_name ?: basename($mataKuliah->rps_admin_path);
         return response()->download(storage_path('app/public/'.$mataKuliah->rps_admin_path), $downloadName);
+    }
+
+    public function previewRpsAdmin(Request $request, MataKuliah $mataKuliah): BinaryFileResponse
+    {
+        $this->authorizeMataKuliah($request, $mataKuliah);
+        abort_unless($mataKuliah->rps_admin_path, 404);
+        abort_unless(Storage::disk('public')->exists($mataKuliah->rps_admin_path), 404);
+
+        $downloadName = $mataKuliah->rps_admin_name ?: basename($mataKuliah->rps_admin_path);
+        return response()->file(storage_path('app/public/'.$mataKuliah->rps_admin_path), [
+            'Content-Disposition' => 'inline; filename="'.$downloadName.'"',
+        ]);
     }
 
     public function downloadRpsDosen(Request $request, MataKuliah $mataKuliah): BinaryFileResponse
@@ -83,5 +111,16 @@ class MataKuliahController extends Controller
         $downloadName = $mataKuliah->rps_dosen_name ?: basename($mataKuliah->rps_dosen_path);
         return response()->download(storage_path('app/public/'.$mataKuliah->rps_dosen_path), $downloadName);
     }
-}
 
+    public function previewRpsDosen(Request $request, MataKuliah $mataKuliah): BinaryFileResponse
+    {
+        $this->authorizeMataKuliah($request, $mataKuliah);
+        abort_unless($mataKuliah->rps_dosen_path, 404);
+        abort_unless(Storage::disk('public')->exists($mataKuliah->rps_dosen_path), 404);
+
+        $downloadName = $mataKuliah->rps_dosen_name ?: basename($mataKuliah->rps_dosen_path);
+        return response()->file(storage_path('app/public/'.$mataKuliah->rps_dosen_path), [
+            'Content-Disposition' => 'inline; filename="'.$downloadName.'"',
+        ]);
+    }
+}

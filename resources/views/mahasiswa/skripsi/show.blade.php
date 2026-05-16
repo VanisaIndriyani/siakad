@@ -82,6 +82,23 @@
                             <div style="flex: 1; font-weight: 900;">{{ $skripsi->tanggal_sk ? $skripsi->tanggal_sk->format('d/m/Y') : '-' }}</div>
                         </div>
                         <div style="display:flex; gap: 10px; align-items:flex-start; margin-top: 8px;">
+                            <div style="width: 140px; color: rgba(17, 24, 39, 0.60); font-weight: 900;">File SK</div>
+                            <div style="flex: 1; font-weight: 900;">
+                                @if ($skripsi->sk_pembimbing_path)
+                                    <a href="{{ route('mahasiswa.skripsi.sk.preview', $skripsi) }}" target="_blank" class="btn" style="height: 34px; padding: 0 12px; font-size: 12px;">
+                                        <i class="fa-solid fa-eye"></i>
+                                        Preview
+                                    </a>
+                                    <a href="{{ route('mahasiswa.skripsi.sk.download', $skripsi) }}" class="btn" style="height: 34px; padding: 0 12px; font-size: 12px;">
+                                        <i class="fa-solid fa-download"></i>
+                                        Download
+                                    </a>
+                                @else
+                                    -
+                                @endif
+                            </div>
+                        </div>
+                        <div style="display:flex; gap: 10px; align-items:flex-start; margin-top: 8px;">
                             <div style="width: 140px; color: rgba(17, 24, 39, 0.60); font-weight: 900;">Diajukan</div>
                             <div style="flex: 1; font-weight: 900;">{{ $skripsi->created_at?->format('d/m/Y H:i') }}</div>
                         </div>
