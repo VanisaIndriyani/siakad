@@ -22,7 +22,7 @@
         .cal-day--selected { background: rgba(59, 130, 246, 0.10); border-color: rgba(59, 130, 246, 0.35); }
         .cal-mark { position: absolute; left: 6px; right: 6px; bottom: 4px; height: 4px; border-radius: 999px; background: #2563eb; opacity: 0.9; }
         .cal-section { margin-top: 18px; }
-        .cal-section h2 { font-size: 20px; font-weight: 900; margin: 0; color: #111827; }
+        .cal-section h2 { font-size: 20px; font-weight: 900; margin: 0; color: rgba(255, 255, 255, 0.92); }
         .cal-reset { height: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid rgba(17, 24, 39, 0.12); background: #fff; font-weight: 800; cursor: pointer; }
         .cal-list { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 12px; }
         .cal-item { background: #fff; border: 1px solid rgba(17, 24, 39, 0.12); border-radius: 14px; padding: 14px; display: flex; gap: 12px; align-items: flex-start; }
