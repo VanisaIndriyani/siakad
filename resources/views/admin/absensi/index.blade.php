@@ -60,6 +60,13 @@
                     <div class="text-lg font-semibold">Pilih Pertemuan</div>
                     <div class="text-sm text-emerald-100/70">Buka pertemuan untuk mengisi daftar hadir.</div>
                 </div>
+                @if (($routePrefix ?? 'admin') === 'dosen')
+                    <a href="{{ route('dosen.absensi.rekap.pdf', ['jurusan' => $jurusan, 'semester' => $semester, 'mata_kuliah_id' => $mataKuliahId]) }}"
+                       class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                        <i class="fa-solid fa-file-pdf text-red-300"></i>
+                        Rekap PDF
+                    </a>
+                @endif
             </div>
 
             <div class="mt-4 flex flex-wrap gap-2">

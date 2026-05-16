@@ -78,6 +78,7 @@ Route::prefix('admin')
         Route::post('/absensi/{absensi}', [AdminAbsensiController::class, 'update'])->name('absensi.update');
         Route::get('/absensi/{absensi}/export/pdf', [AdminAbsensiController::class, 'exportPdf'])->name('absensi.export.pdf');
         Route::get('/absensi/{absensi}/export/excel', [AdminAbsensiController::class, 'exportExcel'])->name('absensi.export.excel');
+        Route::get('/absensi/rekap/pdf', [AdminAbsensiController::class, 'exportRekapPdf'])->name('absensi.rekap.pdf');
 
         Route::resource('kalender-akademik', AdminAcademicCalendarController::class)
             ->parameters(['kalender-akademik' => 'kalender_akademik'])

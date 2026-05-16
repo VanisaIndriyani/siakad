@@ -18,6 +18,12 @@
             tbody tr:nth-child(even) td { background: #fafafa; }
             .footer { margin-top: 10px; font-size: 10px; color: #64748b; }
             .muted { color: #64748b; }
+            .sign { margin-top: 14px; }
+            .sign td { width: 50%; vertical-align: top; padding-top: 2px; }
+            .sign .label { font-weight: 700; font-size: 10.5px; }
+            .sign .sub { font-size: 10px; color: #334155; margin-top: 2px; }
+            .sign .space { height: 54px; }
+            .sign .name { font-weight: 700; font-size: 10.5px; }
         </style>
     </head>
     <body>
@@ -71,16 +77,44 @@
                 </thead>
                 <tbody>
                     @foreach ($items as $i => $item)
+                        @php
+                            $statusText = match ($item->status) {
+                                'hadir' => 'Hadir',
+                                'izin' => 'Izin',
+                                'sakit' => 'Sakit',
+                                'alpha' => 'Alpha',
+                                default => '',
+                            };
+                        @endphp
                         <tr>
                             <td>{{ $i + 1 }}</td>
                             <td>{{ $item->mahasiswa?->npm }}</td>
                             <td>{{ $item->mahasiswa?->nama_lengkap }}</td>
-                            <td></td>
-                            <td></td>
+                            <td>{{ $statusText }}</td>
+                            <td>{{ $item->keterangan }}</td>
                             <td></td>
                         </tr>
                     @endforeach
                 </tbody>
+            </table>
+        </div>
+
+        <div class="sign">
+            <table>
+                <tr>
+                    <td>
+                        <div class="label">Ketua Prodi</div>
+                        <div class="sub">{{ $absensi->jurusan }}</div>
+                        <div class="space"></div>
+                        <div class="name">{{ $kaprodiNama ?: '________________' }}</div>
+                    </td>
+                    <td style="text-align: right;">
+                        <div class="label">Dosen Pengampu</div>
+                        <div class="sub">{{ $mk?->kode }} - {{ $mk?->nama }}</div>
+                        <div class="space"></div>
+                        <div class="name">{{ $dosenNama ?: '________________' }}</div>
+                    </td>
+                </tr>
             </table>
         </div>
 

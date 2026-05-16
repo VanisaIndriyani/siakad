@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Absensi;
 use App\Models\AbsensiItem;
+use App\Models\Dosen;
 use App\Models\Mahasiswa;
 use App\Models\MataKuliah;
 use Dompdf\Dompdf;
@@ -87,6 +88,20 @@ class AbsensiController extends Controller
             'routePrefix' => $routePrefix,
             'sidebarView' => $sidebarView,
         ]);
+    }
+
+    private function resolveKaprodiNama(?string $programStudi): ?string
+    {
+        $programStudi = trim((string) $programStudi);
+        if ($programStudi === '') {
+            return null;
+        }
+
+        return Dosen::query()
+            ->where('program_studi', $programStudi)
+            ->where('status_akademik', 'Ketua Prodi')
+            ->orderByDesc('id')
+            ->value('nama');
     }
 
     public function entry(Request $request): View
@@ -223,13 +238,20 @@ class AbsensiController extends Controller
             abort_unless(in_array((int) $dosen->id, [(int) ($absensi->mataKuliah?->dosen_id ?? 0), (int) ($absensi->mataKuliah?->dosen_id_2 ?? 0)], true), 403);
         }
 
-        $absensi->load(['mataKuliah', 'items.mahasiswa']);
+        $absensi->load(['mataKuliah.dosen', 'mataKuliah.dosen2', 'items.mahasiswa']);
         $items = $absensi->items->sortBy(fn ($i) => (string) ($i->mahasiswa?->npm ?? ''))->values();
+
+        $kaprodiNama = $this->resolveKaprodiNama($absensi->jurusan);
+        $dosenNama = $request->user()?->isDosen()
+            ? ($request->user()?->dosen?->nama ?? null)
+            : ($absensi->mataKuliah?->dosen?->nama ?? null);
 
         $html = view('admin.absensi.export-pdf', [
             'absensi' => $absensi,
             'items' => $items,
             'role' => $routePrefix,
+            'kaprodiNama' => $kaprodiNama,
+            'dosenNama' => $dosenNama,
         ])->render();
 
         $dompdf = new Dompdf(['isRemoteEnabled' => true]);
@@ -240,6 +262,147 @@ class AbsensiController extends Controller
         $mk = $absensi->mataKuliah;
         $safeKode = preg_replace('/[^A-Za-z0-9._-]+/', '-', (string) ($mk?->kode ?? 'MK'));
         $filename = 'absensi-'.$safeKode.'-P'.$absensi->pertemuan.'.pdf';
+
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ]);
+    }
+
+    public function exportRekapPdf(Request $request)
+    {
+        $dosen = $request->user()?->dosen;
+        abort_unless($request->user()?->isDosen() && $dosen, 403);
+
+        $validated = $request->validate([
+            'jurusan' => ['required', 'string'],
+            'semester' => ['required', 'integer', 'min:1', 'max:8'],
+            'mata_kuliah_id' => [
+                'required',
+                'integer',
+                Rule::exists('mata_kuliah', 'id')
+                    ->where('semester', (int) $request->input('semester'))
+                    ->where('jurusan', (string) $request->input('jurusan'))
+                    ->where(function ($q) use ($dosen) {
+                        $q->where('dosen_id', $dosen->id)->orWhere('dosen_id_2', $dosen->id);
+                    }),
+            ],
+        ]);
+
+        $jurusan = (string) $validated['jurusan'];
+        $semester = (int) $validated['semester'];
+        $mataKuliahId = (int) $validated['mata_kuliah_id'];
+
+        $mk = MataKuliah::query()
+            ->with(['dosen', 'dosen2'])
+            ->where('id', $mataKuliahId)
+            ->firstOrFail();
+
+        $mahasiswaIds = Mahasiswa::query()
+            ->where('program_studi', $jurusan)
+            ->whereHas('krs', function ($q) use ($semester, $mataKuliahId) {
+                $q->where('semester', $semester)
+                    ->where('status_approval', 'approved')
+                    ->whereHas('items', function ($qi) use ($mataKuliahId) {
+                        $qi->where('mata_kuliah_id', $mataKuliahId);
+                    });
+            })
+            ->pluck('id')
+            ->all();
+
+        foreach (range(1, 16) as $pertemuan) {
+            $absensi = Absensi::query()->firstOrCreate(
+                [
+                    'jurusan' => $jurusan,
+                    'semester' => $semester,
+                    'mata_kuliah_id' => $mataKuliahId,
+                    'pertemuan' => $pertemuan,
+                ],
+                [
+                    'created_by_user_id' => $request->user()?->id,
+                ]
+            );
+
+            foreach ($mahasiswaIds as $mahasiswaId) {
+                AbsensiItem::query()->firstOrCreate(
+                    [
+                        'absensi_id' => $absensi->id,
+                        'mahasiswa_id' => (int) $mahasiswaId,
+                    ],
+                    [
+                        'status' => null,
+                    ]
+                );
+            }
+        }
+
+        $mahasiswaList = Mahasiswa::query()
+            ->whereIn('id', $mahasiswaIds)
+            ->orderBy('npm')
+            ->get()
+            ->keyBy('id');
+
+        $items = collect();
+        foreach ($mahasiswaList as $mhs) {
+            $items->push([
+                'id' => (int) $mhs->id,
+                'npm' => (string) ($mhs->npm ?? ''),
+                'nama' => (string) ($mhs->nama_lengkap ?? ''),
+                'pertemuan' => array_fill(1, 16, null),
+                'totals' => ['hadir' => 0, 'izin' => 0, 'sakit' => 0, 'alpha' => 0],
+            ]);
+        }
+
+        $itemByMahasiswaId = $items->keyBy('id');
+
+        $absensiItems = AbsensiItem::query()
+            ->with('absensi')
+            ->whereIn('mahasiswa_id', $mahasiswaIds)
+            ->whereHas('absensi', function ($q) use ($jurusan, $semester, $mataKuliahId) {
+                $q->where('jurusan', $jurusan)
+                    ->where('semester', $semester)
+                    ->where('mata_kuliah_id', $mataKuliahId);
+            })
+            ->get();
+
+        foreach ($absensiItems as $ai) {
+            $p = (int) ($ai->absensi?->pertemuan ?? 0);
+            if ($p < 1 || $p > 16) {
+                continue;
+            }
+            $entry = $itemByMahasiswaId->get((int) $ai->mahasiswa_id);
+            if (! $entry) {
+                continue;
+            }
+            $status = $ai->status ?: null;
+            $entry['pertemuan'][$p] = $status;
+            if ($status && isset($entry['totals'][$status])) {
+                $entry['totals'][$status]++;
+            }
+            $itemByMahasiswaId->put((int) $ai->mahasiswa_id, $entry);
+        }
+
+        $finalItems = $itemByMahasiswaId->values();
+
+        $kaprodiNama = $this->resolveKaprodiNama($jurusan);
+        $dosenNama = $dosen->nama;
+
+        $html = view('dosen.absensi.rekap-pdf', [
+            'jurusan' => $jurusan,
+            'semester' => $semester,
+            'mk' => $mk,
+            'items' => $finalItems,
+            'kaprodiNama' => $kaprodiNama,
+            'dosenNama' => $dosenNama,
+        ])->render();
+
+        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->render();
+
+        $safeKode = preg_replace('/[^A-Za-z0-9._-]+/', '-', (string) ($mk?->kode ?? 'MK'));
+        $filename = 'rekap-absensi-'.$safeKode.'-S'.$semester.'.pdf';
 
         return response($dompdf->output(), 200, [
             'Content-Type' => 'application/pdf',
