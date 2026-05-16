@@ -5,68 +5,103 @@
 
     @php
         $badge = match ($skripsi->status) {
-            'assigned' => 'bg-emerald-500/15 border-emerald-500/20 text-emerald-100',
-            'approved' => 'bg-blue-500/15 border-blue-500/20 text-blue-100',
-            'rejected' => 'bg-red-500/15 border-red-500/20 text-red-100',
-            default => 'bg-yellow-500/15 border-yellow-500/20 text-yellow-100',
+            'assigned' => ['bg' => 'rgba(16,185,129,0.12)', 'bd' => 'rgba(16,185,129,0.25)', 'tx' => '#065f46'],
+            'approved' => ['bg' => 'rgba(59,130,246,0.12)', 'bd' => 'rgba(59,130,246,0.25)', 'tx' => '#1e40af'],
+            'rejected' => ['bg' => 'rgba(239,68,68,0.12)', 'bd' => 'rgba(239,68,68,0.25)', 'tx' => '#7f1d1d'],
+            default => ['bg' => 'rgba(245,158,11,0.14)', 'bd' => 'rgba(245,158,11,0.28)', 'tx' => '#78350f'],
         };
     @endphp
 
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-            <div class="text-xl font-semibold">Detail Skripsi</div>
-            <div class="mt-1 text-sm text-emerald-100/70">
-                <span class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold {{ $badge }}">
-                    {{ strtoupper($skripsi->status) }}
-                </span>
-            </div>
-        </div>
-        <div class="flex items-center gap-2">
-            @if ($skripsi->dosen_pembimbing_id)
-                <a href="{{ route('mahasiswa.skripsi.bimbingan', $skripsi) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/20 border border-emerald-500/20 transition">
-                    <i class="fa-solid fa-comments"></i>
-                    <span class="text-sm font-medium">Bimbingan</span>
-                </a>
-            @endif
-            <a href="{{ route('mahasiswa.skripsi.index') }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
-                <i class="fa-solid fa-arrow-left"></i>
-                <span class="text-sm font-medium">Kembali</span>
-            </a>
-        </div>
-    </div>
+    <style>
+        .detail-wrap { max-width: 920px; margin: 0 auto; }
+        .detail-card { background: #ffffff; border: 1px solid rgba(17, 24, 39, 0.12); border-radius: 18px; padding: 16px; color: #111827; }
+        .detail-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+        .detail-title { font-size: 20px; font-weight: 900; margin: 0; }
+        .detail-sub { margin-top: 6px; font-size: 13px; font-weight: 700; color: rgba(17, 24, 39, 0.55); }
+        .pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; border: 1px solid; font-weight: 900; font-size: 12px; letter-spacing: 0.6px; }
+        .btn { height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid rgba(17, 24, 39, 0.12); background: #fff; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: #111827; font-weight: 900; font-size: 13px; }
+        .btn-primary { border-color: rgba(16, 185, 129, 0.25); background: linear-gradient(to right, #059669, #10b981); color: #fff; }
+        .grid2 { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 12px; }
+        @media (min-width: 768px) { .grid2 { grid-template-columns: 1.4fr 1fr; } }
+        .box { background: #ffffff; border: 1px solid rgba(17, 24, 39, 0.12); border-radius: 16px; padding: 14px; }
+        .label { font-size: 12px; font-weight: 900; color: rgba(17, 24, 39, 0.55); text-transform: uppercase; letter-spacing: 0.8px; }
+        .value { margin-top: 6px; font-size: 14px; font-weight: 900; color: #111827; }
+        .text { margin-top: 10px; font-size: 13px; font-weight: 700; color: rgba(17, 24, 39, 0.80); white-space: pre-line; }
+        .note { border-radius: 16px; padding: 14px; border: 1px solid rgba(17, 24, 39, 0.12); background: #fff; }
+        .note.warn { border-color: rgba(245, 158, 11, 0.28); background: rgba(245, 158, 11, 0.10); }
+        .note.danger { border-color: rgba(239, 68, 68, 0.25); background: rgba(239, 68, 68, 0.10); }
+        .note.success { border-color: rgba(16, 185, 129, 0.25); background: rgba(16, 185, 129, 0.10); }
+    </style>
 
-    <div class="mt-5 grid grid-cols-1 gap-3 max-w-3xl">
-        <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
-            <div class="text-sm text-emerald-100/70">Judul</div>
-            <div class="mt-1 text-base font-semibold">{{ $skripsi->judul }}</div>
-            @if ($skripsi->deskripsi)
-                <div class="mt-3 text-sm text-emerald-100/80 whitespace-pre-line">{{ $skripsi->deskripsi }}</div>
-            @endif
-        </div>
-
-        <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+    <div class="detail-wrap">
+        <div class="detail-card">
+            <div class="detail-head">
                 <div>
-                    <div class="text-emerald-100/70">Pembimbing</div>
-                    <div class="mt-1 font-medium">{{ $skripsi->dosenPembimbing?->nama ?: '-' }}</div>
+                    <div class="detail-title">Detail Skripsi</div>
+                    <div class="detail-sub">Pantau status pengajuan, pembimbing, dan SK.</div>
                 </div>
-                <div>
-                    <div class="text-emerald-100/70">SK Pembimbing</div>
-                    <div class="mt-1 font-medium">
-                        {{ $skripsi->nomor_sk ?: '-' }}
-                        @if ($skripsi->tanggal_sk)
-                            • {{ $skripsi->tanggal_sk->format('d/m/Y') }}
-                        @endif
+                <div style="display:flex; align-items:center; gap: 10px; flex-wrap: wrap;">
+                    <span class="pill" style="background: {{ $badge['bg'] }}; border-color: {{ $badge['bd'] }}; color: {{ $badge['tx'] }};">
+                        {{ strtoupper($skripsi->status) }}
+                    </span>
+                    @if ($skripsi->dosen_pembimbing_id)
+                        <a href="{{ route('mahasiswa.skripsi.bimbingan', $skripsi) }}" class="btn btn-primary">
+                            <i class="fa-solid fa-comments"></i>
+                            Bimbingan
+                        </a>
+                    @endif
+                    <a href="{{ route('mahasiswa.skripsi.index') }}" class="btn">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        Kembali
+                    </a>
+                </div>
+            </div>
+
+            <div class="grid2">
+                <div class="box">
+                    <div class="label">Judul</div>
+                    <div class="value">{{ $skripsi->judul }}</div>
+                    @if ($skripsi->deskripsi)
+                        <div class="text">{{ $skripsi->deskripsi }}</div>
+                    @endif
+                </div>
+
+                <div class="box">
+                    <div class="label">Info</div>
+                    <div class="text" style="margin-top: 10px;">
+                        <div style="display:flex; gap: 10px; align-items:flex-start;">
+                            <div style="width: 140px; color: rgba(17, 24, 39, 0.60); font-weight: 900;">Pembimbing</div>
+                            <div style="flex: 1; font-weight: 900;">{{ $skripsi->dosenPembimbing?->nama ?: '-' }}</div>
+                        </div>
+                        <div style="display:flex; gap: 10px; align-items:flex-start; margin-top: 8px;">
+                            <div style="width: 140px; color: rgba(17, 24, 39, 0.60); font-weight: 900;">Nomor SK</div>
+                            <div style="flex: 1; font-weight: 900;">{{ $skripsi->nomor_sk ?: '-' }}</div>
+                        </div>
+                        <div style="display:flex; gap: 10px; align-items:flex-start; margin-top: 8px;">
+                            <div style="width: 140px; color: rgba(17, 24, 39, 0.60); font-weight: 900;">Tanggal SK</div>
+                            <div style="flex: 1; font-weight: 900;">{{ $skripsi->tanggal_sk ? $skripsi->tanggal_sk->format('d/m/Y') : '-' }}</div>
+                        </div>
+                        <div style="display:flex; gap: 10px; align-items:flex-start; margin-top: 8px;">
+                            <div style="width: 140px; color: rgba(17, 24, 39, 0.60); font-weight: 900;">Diajukan</div>
+                            <div style="flex: 1; font-weight: 900;">{{ $skripsi->created_at?->format('d/m/Y H:i') }}</div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        @if ($skripsi->catatan_admin)
-            <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
-                <div class="text-sm text-emerald-100/70">Catatan Admin/Prodi</div>
-                <div class="mt-2 text-sm text-emerald-100/85 whitespace-pre-line">{{ $skripsi->catatan_admin }}</div>
-            </div>
-        @endif
+            @if ($skripsi->catatan_admin)
+                @php
+                    $noteClass = match ($skripsi->status) {
+                        'rejected' => 'danger',
+                        'assigned' => 'success',
+                        default => 'warn',
+                    };
+                @endphp
+                <div class="note {{ $noteClass }}" style="margin-top: 12px;">
+                    <div class="label">Catatan Admin/Prodi</div>
+                    <div class="text" style="margin-top: 8px;">{{ $skripsi->catatan_admin }}</div>
+                </div>
+            @endif
+        </div>
     </div>
 </x-portal-layout>
