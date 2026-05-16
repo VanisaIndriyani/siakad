@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Dosen;
+use App\Models\PplFile;
 use App\Models\PplPengajuan;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -96,7 +97,7 @@ class PplController extends Controller
             abort_unless((string) ($ppl->mahasiswa?->program_studi ?? '') === $context['programStudi'], 403);
         }
 
-        $ppl->load(['mahasiswa', 'dosenPembimbing', 'dosenPembimbing2', 'messages.sender', 'approvedBy']);
+        $ppl->load(['mahasiswa', 'dosenPembimbing', 'dosenPembimbing2', 'messages.sender', 'approvedBy', 'files']);
 
         $dosenList = $context['canAssign']
             ? Dosen::query()->orderBy('nama')->get()
@@ -236,6 +237,67 @@ class PplController extends Controller
         ]);
     }
 
+    private function authorizePplFileAccess(Request $request, PplFile $file): void
+    {
+        $user = $request->user();
+        abort_unless($user, 403);
+
+        $ppl = $file->ppl;
+        abort_unless($ppl, 404);
+
+        if ($user->isAdmin()) {
+            return;
+        }
+
+        if ($user->isMahasiswa()) {
+            abort_unless((int) $ppl->mahasiswa_id === (int) ($user->mahasiswa?->id ?? 0), 404);
+            return;
+        }
+
+        if ($user->isDosen()) {
+            $dosenId = (int) ($user->dosen?->id ?? 0);
+            $statusAkademik = (string) ($user->dosen?->status_akademik ?? '');
+            $allowed = in_array($dosenId, [(int) $ppl->dosen_pembimbing_id, (int) $ppl->dosen_pembimbing_id_2], true)
+                || in_array($statusAkademik, self::PRODI_APPROVER_STATUS, true);
+            abort_unless($allowed, 403);
+            return;
+        }
+
+        abort(403);
+    }
+
+    public function previewFile(Request $request, PplFile $file): BinaryFileResponse
+    {
+        $this->authorizePplFileAccess($request, $file);
+        abort_unless($file->file_path && Storage::disk('public')->exists($file->file_path), 404);
+
+        $name = $file->file_name ?: basename($file->file_path);
+        return response()->file(storage_path('app/public/'.$file->file_path), [
+            'Content-Disposition' => 'inline; filename="'.$name.'"',
+        ]);
+    }
+
+    public function downloadFile(Request $request, PplFile $file): BinaryFileResponse
+    {
+        $this->authorizePplFileAccess($request, $file);
+        abort_unless($file->file_path && Storage::disk('public')->exists($file->file_path), 404);
+
+        $name = $file->file_name ?: basename($file->file_path);
+        return response()->download(storage_path('app/public/'.$file->file_path), $name);
+    }
+
+    public function destroyFile(Request $request, PplFile $file): RedirectResponse
+    {
+        abort_unless($request->user()?->isAdmin(), 403);
+
+        if ($file->file_path) {
+            Storage::disk('public')->delete($file->file_path);
+        }
+        $file->delete();
+
+        return back()->with('success', 'Laporan PPL berhasil dihapus.');
+    }
+
     public function destroy(Request $request, PplPengajuan $ppl): RedirectResponse
     {
         abort_unless($request->user()?->isAdmin(), 403);
@@ -284,4 +346,3 @@ class PplController extends Controller
         return back()->with('success', 'Data PPL terpilih berhasil dihapus.');
     }
 }
-

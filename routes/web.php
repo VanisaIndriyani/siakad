@@ -109,6 +109,7 @@ Route::prefix('admin')
         Route::delete('/skripsi/{skripsi}/pembimbing', [AdminSkripsiController::class, 'resetPembimbing'])->name('skripsi.pembimbing.reset');
         Route::delete('/skripsi/{skripsi}', [AdminSkripsiController::class, 'destroy'])->name('skripsi.destroy');
         Route::delete('/skripsi/bulk-delete', [AdminSkripsiController::class, 'bulkDestroy'])->name('skripsi.bulk-delete');
+        Route::delete('/skripsi-files/{file}', [AdminSkripsiController::class, 'destroyFile'])->name('skripsi-files.destroy');
 
         Route::get('/ppl', [AdminPplController::class, 'index'])->name('ppl.index');
         Route::get('/ppl/{ppl}', [AdminPplController::class, 'show'])->name('ppl.show');
@@ -118,6 +119,7 @@ Route::prefix('admin')
         Route::get('/ppl/{ppl}/sk-pembimbing/preview', [AdminPplController::class, 'previewSkPembimbing'])->name('ppl.sk.preview');
         Route::delete('/ppl/{ppl}', [AdminPplController::class, 'destroy'])->name('ppl.destroy');
         Route::delete('/ppl/bulk-delete', [AdminPplController::class, 'bulkDestroy'])->name('ppl.bulk-delete');
+        Route::delete('/ppl-files/{file}', [AdminPplController::class, 'destroyFile'])->name('ppl-files.destroy');
     });
 
 Route::prefix('mahasiswa')
@@ -258,3 +260,10 @@ Route::prefix('keuangan')
     });
 
 require __DIR__.'/auth.php';
+
+Route::middleware(['auth', 'role:admin,dosen,mahasiswa'])->group(function () {
+    Route::get('/files/skripsi/{file}/preview', [AdminSkripsiController::class, 'previewFile'])->name('files.skripsi.preview');
+    Route::get('/files/skripsi/{file}/download', [AdminSkripsiController::class, 'downloadFile'])->name('files.skripsi.download');
+    Route::get('/files/ppl/{file}/preview', [AdminPplController::class, 'previewFile'])->name('files.ppl.preview');
+    Route::get('/files/ppl/{file}/download', [AdminPplController::class, 'downloadFile'])->name('files.ppl.download');
+});

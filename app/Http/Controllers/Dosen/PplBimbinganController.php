@@ -38,7 +38,7 @@ class PplBimbinganController extends Controller
         $allowed = in_array((int) $dosen->id, [(int) $ppl->dosen_pembimbing_id, (int) $ppl->dosen_pembimbing_id_2], true);
         abort_unless($allowed, 404);
 
-        $ppl->load(['mahasiswa', 'dosenPembimbing', 'dosenPembimbing2', 'messages.sender']);
+        $ppl->load(['mahasiswa', 'dosenPembimbing', 'dosenPembimbing2', 'messages.sender', 'files']);
         $ppl->update(['dosen_last_read_at' => now()]);
 
         return view('dosen.ppl.show', [

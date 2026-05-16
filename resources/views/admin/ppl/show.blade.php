@@ -69,6 +69,63 @@
                     @endforelse
                 </div>
             </div>
+
+            <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
+                <div class="text-sm font-semibold">Upload Laporan PPL</div>
+                <div class="mt-3 overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead class="bg-white/5 text-emerald-100/80">
+                            <tr>
+                                <th class="text-left font-medium px-4 py-3 w-14">No</th>
+                                <th class="text-left font-medium px-4 py-3">Nama File</th>
+                                <th class="text-left font-medium px-4 py-3">Keterangan</th>
+                                <th class="text-left font-medium px-4 py-3 w-44">Tanggal</th>
+                                <th class="text-right font-medium px-4 py-3 w-56">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/10">
+                            @forelse ($ppl->files->sortByDesc('id') as $i => $f)
+                                <tr class="hover:bg-white/5">
+                                    <td class="px-4 py-3">{{ $i + 1 }}</td>
+                                    <td class="px-4 py-3 text-emerald-100/90">
+                                        <div class="font-semibold">{{ $f->file_name }}</div>
+                                    </td>
+                                    <td class="px-4 py-3 text-emerald-100/80 whitespace-pre-line">{{ $f->keterangan ?: '-' }}</td>
+                                    <td class="px-4 py-3 text-emerald-100/70">{{ $f->created_at?->format('d/m/Y H:i') }}</td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center justify-end gap-2 flex-wrap">
+                                            <a href="{{ route('files.ppl.preview', $f) }}" target="_blank"
+                                               class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                                                <i class="fa-solid fa-eye"></i>
+                                                Preview
+                                            </a>
+                                            <a href="{{ route('files.ppl.download', $f) }}"
+                                               class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                                                <i class="fa-solid fa-download"></i>
+                                                Download
+                                            </a>
+                                            @if ($prefix === 'admin')
+                                                <form method="POST" action="{{ route('admin.ppl-files.destroy', $f) }}" onsubmit="return confirm('Hapus file ini?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/25 transition">
+                                                        <i class="fa-solid fa-trash"></i>
+                                                        Hapus
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="px-4 py-10 text-center text-emerald-100/70">Belum ada file diupload.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
 
         <div class="space-y-4">
@@ -184,4 +241,3 @@
         </div>
     </div>
 </x-portal-layout>
-

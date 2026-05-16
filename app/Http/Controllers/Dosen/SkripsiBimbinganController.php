@@ -36,7 +36,7 @@ class SkripsiBimbinganController extends Controller
         $allowed = in_array((int) $dosen->id, [(int) $skripsi->dosen_pembimbing_id, (int) $skripsi->dosen_pembimbing_id_2], true);
         abort_unless($allowed, 404);
 
-        $skripsi->load(['mahasiswa', 'dosenPembimbing', 'dosenPembimbing2', 'messages.sender']);
+        $skripsi->load(['mahasiswa', 'dosenPembimbing', 'dosenPembimbing2', 'messages.sender', 'files']);
         $skripsi->update(['dosen_last_read_at' => now()]);
 
         return view('dosen.skripsi.show', [

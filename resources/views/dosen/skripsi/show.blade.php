@@ -74,6 +74,53 @@
             @error('pesan')
                 <div style="margin-top: 8px; color: #dc2626; font-size: 12px; font-weight: 800;">{{ $message }}</div>
             @enderror
+
+            <div style="margin-top: 14px; border-top: 1px solid rgba(17, 24, 39, 0.10); padding-top: 14px;">
+                <div style="display:flex; align-items:center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+                    <div style="font-size: 13px; font-weight: 900;">Upload File Skripsi</div>
+                    <div style="font-size: 12px; color: rgba(17, 24, 39, 0.55); font-weight: 800;">File diupload oleh mahasiswa.</div>
+                </div>
+
+                <div style="margin-top: 10px; overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; min-width: 720px;">
+                        <thead>
+                            <tr style="background: #f3f4f6; border: 1px solid rgba(17, 24, 39, 0.10);">
+                                <th style="text-align:left; padding: 10px 12px; font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase; color: rgba(17, 24, 39, 0.60); width: 44px;">No</th>
+                                <th style="text-align:left; padding: 10px 12px; font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase; color: rgba(17, 24, 39, 0.60);">Nama File</th>
+                                <th style="text-align:left; padding: 10px 12px; font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase; color: rgba(17, 24, 39, 0.60);">Keterangan</th>
+                                <th style="text-align:left; padding: 10px 12px; font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase; color: rgba(17, 24, 39, 0.60); width: 140px;">Tanggal</th>
+                                <th style="text-align:right; padding: 10px 12px; font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase; color: rgba(17, 24, 39, 0.60); width: 210px;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($skripsi->files->sortByDesc('id') as $i => $f)
+                                <tr style="border-bottom: 1px solid rgba(17, 24, 39, 0.08);">
+                                    <td style="padding: 10px 12px; font-weight: 900; color: rgba(17, 24, 39, 0.70);">{{ $i + 1 }}</td>
+                                    <td style="padding: 10px 12px; font-weight: 900; color: rgba(17, 24, 39, 0.90);">{{ $f->file_name }}</td>
+                                    <td style="padding: 10px 12px; font-weight: 700; color: rgba(17, 24, 39, 0.80); white-space: pre-line;">{{ $f->keterangan ?: '-' }}</td>
+                                    <td style="padding: 10px 12px; font-weight: 800; color: rgba(17, 24, 39, 0.60);">{{ $f->created_at?->format('d/m/Y H:i') }}</td>
+                                    <td style="padding: 10px 12px;">
+                                        <div style="display:flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap;">
+                                            <a href="{{ route('files.skripsi.preview', $f) }}" target="_blank" class="chat-back" style="height: 34px; padding: 0 12px;">
+                                                <i class="fa-solid fa-eye"></i>
+                                                Preview
+                                            </a>
+                                            <a href="{{ route('files.skripsi.download', $f) }}" class="chat-back" style="height: 34px; padding: 0 12px;">
+                                                <i class="fa-solid fa-download"></i>
+                                                Download
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" style="padding: 14px; text-align:center; color: rgba(17, 24, 39, 0.55); font-weight: 900;">Belum ada file diupload.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
