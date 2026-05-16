@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Admin\AcademicCalendarController as AdminAcademicCalendarController;
 use App\Http\Controllers\Admin\AbsensiController as AdminAbsensiController;
 use App\Http\Controllers\Admin\DosenController as AdminDosenController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
@@ -8,17 +9,23 @@ use App\Http\Controllers\Admin\KhsController as AdminKhsController;
 use App\Http\Controllers\Admin\KrsController as AdminKrsController;
 use App\Http\Controllers\Admin\MahasiswaController as AdminMahasiswaController;
 use App\Http\Controllers\Admin\MataKuliahController as AdminMataKuliahController;
+use App\Http\Controllers\Admin\SkripsiController as AdminSkripsiController;
+use App\Http\Controllers\Dosen\AcademicCalendarController as DosenAcademicCalendarController;
 use App\Http\Controllers\Dosen\DashboardController as DosenDashboardController;
 use App\Http\Controllers\Dosen\KrsApprovalController as DosenKrsApprovalController;
 use App\Http\Controllers\Dosen\MahasiswaController as DosenMahasiswaController;
 use App\Http\Controllers\Dosen\NilaiController as DosenNilaiController;
 use App\Http\Controllers\Dosen\ProfilController as DosenProfilController;
+use App\Http\Controllers\Dosen\SkripsiBimbinganController as DosenSkripsiBimbinganController;
+use App\Http\Controllers\Mahasiswa\AcademicCalendarController as MahasiswaAcademicCalendarController;
 use App\Http\Controllers\Mahasiswa\AbsensiController as MahasiswaAbsensiController;
 use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboardController;
 use App\Http\Controllers\Mahasiswa\BiodataPdfController;
 use App\Http\Controllers\Mahasiswa\KhsController as MahasiswaKhsController;
 use App\Http\Controllers\Mahasiswa\KrsController as MahasiswaKrsController;
 use App\Http\Controllers\Mahasiswa\ProfilController as MahasiswaProfilController;
+use App\Http\Controllers\Mahasiswa\SkripsiBimbinganController as MahasiswaSkripsiBimbinganController;
+use App\Http\Controllers\Mahasiswa\SkripsiController as MahasiswaSkripsiController;
 use App\Http\Controllers\Keuangan\PembayaranController as KeuanganPembayaranController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -71,6 +78,15 @@ Route::prefix('admin')
         Route::post('/absensi/{absensi}', [AdminAbsensiController::class, 'update'])->name('absensi.update');
         Route::get('/absensi/{absensi}/export/pdf', [AdminAbsensiController::class, 'exportPdf'])->name('absensi.export.pdf');
         Route::get('/absensi/{absensi}/export/excel', [AdminAbsensiController::class, 'exportExcel'])->name('absensi.export.excel');
+
+        Route::resource('kalender-akademik', AdminAcademicCalendarController::class)
+            ->parameters(['kalender-akademik' => 'kalender_akademik'])
+            ->except(['show']);
+
+        Route::get('/skripsi', [AdminSkripsiController::class, 'index'])->name('skripsi.index');
+        Route::get('/skripsi/{skripsi}', [AdminSkripsiController::class, 'show'])->name('skripsi.show');
+        Route::patch('/skripsi/{skripsi}/status', [AdminSkripsiController::class, 'updateStatus'])->name('skripsi.status');
+        Route::patch('/skripsi/{skripsi}/assign', [AdminSkripsiController::class, 'assign'])->name('skripsi.assign');
     });
 
 Route::prefix('mahasiswa')
@@ -101,6 +117,15 @@ Route::prefix('mahasiswa')
         Route::get('/pembayaran', [MahasiswaDashboardController::class, 'pembayaran'])->name('pembayaran.index');
         Route::post('/pembayaran/{pembayaran}/upload', [MahasiswaDashboardController::class, 'uploadPembayaran'])->name('pembayaran.upload');
 
+        Route::get('/kalender-akademik', [MahasiswaAcademicCalendarController::class, 'index'])->name('kalender.index');
+
+        Route::get('/skripsi', [MahasiswaSkripsiController::class, 'index'])->name('skripsi.index');
+        Route::get('/skripsi/create', [MahasiswaSkripsiController::class, 'create'])->name('skripsi.create');
+        Route::post('/skripsi', [MahasiswaSkripsiController::class, 'store'])->name('skripsi.store');
+        Route::get('/skripsi/{skripsi}', [MahasiswaSkripsiController::class, 'show'])->name('skripsi.show');
+        Route::get('/skripsi/{skripsi}/bimbingan', [MahasiswaSkripsiBimbinganController::class, 'show'])->name('skripsi.bimbingan');
+        Route::post('/skripsi/{skripsi}/bimbingan', [MahasiswaSkripsiBimbinganController::class, 'store'])->name('skripsi.bimbingan.store');
+
         Route::get('/biodata/pdf', BiodataPdfController::class)->name('biodata.pdf');
     });
 
@@ -128,6 +153,12 @@ Route::prefix('dosen')
 
         Route::get('/profil', [DosenProfilController::class, 'show'])->name('profil');
         Route::post('/profil', [DosenProfilController::class, 'update'])->name('profil.update');
+
+        Route::get('/kalender-akademik', [DosenAcademicCalendarController::class, 'index'])->name('kalender.index');
+
+        Route::get('/skripsi/bimbingan', [DosenSkripsiBimbinganController::class, 'index'])->name('skripsi.bimbingan.index');
+        Route::get('/skripsi/{skripsi}/bimbingan', [DosenSkripsiBimbinganController::class, 'show'])->name('skripsi.bimbingan.show');
+        Route::post('/skripsi/{skripsi}/bimbingan', [DosenSkripsiBimbinganController::class, 'store'])->name('skripsi.bimbingan.store');
     });
 
 Route::prefix('keuangan')

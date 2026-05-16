@@ -8,6 +8,16 @@
     <i class="fa-solid fa-id-card text-emerald-300"></i>
     <span class="text-sm font-medium">Profil</span>
 </a>
+<a href="{{ route('mahasiswa.kalender.index') }}"
+   class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('mahasiswa.kalender.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+    <i class="fa-solid fa-calendar-days text-emerald-300"></i>
+    <span class="text-sm font-medium">Kalender Akademik</span>
+</a>
+<a href="{{ route('mahasiswa.skripsi.index') }}"
+   class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('mahasiswa.skripsi.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+    <i class="fa-solid fa-graduation-cap text-emerald-300"></i>
+    <span class="text-sm font-medium">Skripsi</span>
+</a>
 <a href="{{ route('mahasiswa.krs.index') }}"
    class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('mahasiswa.krs.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
     <i class="fa-solid fa-clipboard-list text-emerald-300"></i>

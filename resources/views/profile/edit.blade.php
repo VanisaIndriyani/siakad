@@ -87,8 +87,14 @@
 
                     <div>
                         <label for="current_password" style="display: block; margin-bottom: 6px; font-size: 12px; font-weight: 800; color: rgba(255,255,255,0.85); letter-spacing: 0.6px; text-transform: uppercase;">Password Lama</label>
-                        <input id="current_password" name="current_password" type="password" autocomplete="current-password"
-                               style="width: 100%; height: 48px; background-color: #0a1f1a; color: white; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); padding: 0 14px; font-weight: 600; outline: none;" />
+                        <div style="position: relative;">
+                            <input id="current_password" name="current_password" type="password" autocomplete="current-password"
+                                   style="width: 100%; height: 48px; background-color: #0a1f1a; color: white; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); padding: 0 44px 0 14px; font-weight: 600; outline: none;" />
+                            <button type="button" onclick="togglePassword('current_password', this)" aria-label="Tampilkan password lama" title="Tampilkan"
+                                    style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); height: 34px; width: 34px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.10); background-color: rgba(255,255,255,0.04); color: rgba(255,255,255,0.75); cursor: pointer;">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
                         @if ($errors->updatePassword->has('current_password'))
                             <div style="margin-top: 6px; color: #fca5a5; font-size: 12px; font-weight: 700;">
                                 {{ $errors->updatePassword->first('current_password') }}
@@ -99,8 +105,14 @@
                     <div style="display: grid; grid-template-columns: 1fr; gap: 12px;">
                         <div>
                             <label for="password" style="display: block; margin-bottom: 6px; font-size: 12px; font-weight: 800; color: rgba(255,255,255,0.85); letter-spacing: 0.6px; text-transform: uppercase;">Password Baru</label>
-                            <input id="password" name="password" type="password" autocomplete="new-password"
-                                   style="width: 100%; height: 48px; background-color: #0a1f1a; color: white; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); padding: 0 14px; font-weight: 600; outline: none;" />
+                            <div style="position: relative;">
+                                <input id="password" name="password" type="password" autocomplete="new-password"
+                                       style="width: 100%; height: 48px; background-color: #0a1f1a; color: white; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); padding: 0 44px 0 14px; font-weight: 600; outline: none;" />
+                                <button type="button" onclick="togglePassword('password', this)" aria-label="Tampilkan password baru" title="Tampilkan"
+                                        style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); height: 34px; width: 34px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.10); background-color: rgba(255,255,255,0.04); color: rgba(255,255,255,0.75); cursor: pointer;">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </div>
                             @if ($errors->updatePassword->has('password'))
                                 <div style="margin-top: 6px; color: #fca5a5; font-size: 12px; font-weight: 700;">
                                     {{ $errors->updatePassword->first('password') }}
@@ -110,8 +122,14 @@
 
                         <div>
                             <label for="password_confirmation" style="display: block; margin-bottom: 6px; font-size: 12px; font-weight: 800; color: rgba(255,255,255,0.85); letter-spacing: 0.6px; text-transform: uppercase;">Konfirmasi Password</label>
-                            <input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password"
-                                   style="width: 100%; height: 48px; background-color: #0a1f1a; color: white; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); padding: 0 14px; font-weight: 600; outline: none;" />
+                            <div style="position: relative;">
+                                <input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password"
+                                       style="width: 100%; height: 48px; background-color: #0a1f1a; color: white; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); padding: 0 44px 0 14px; font-weight: 600; outline: none;" />
+                                <button type="button" onclick="togglePassword('password_confirmation', this)" aria-label="Tampilkan konfirmasi password" title="Tampilkan"
+                                        style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); height: 34px; width: 34px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.10); background-color: rgba(255,255,255,0.04); color: rgba(255,255,255,0.75); cursor: pointer;">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </div>
                             @if ($errors->updatePassword->has('password_confirmation'))
                                 <div style="margin-top: 6px; color: #fca5a5; font-size: 12px; font-weight: 700;">
                                     {{ $errors->updatePassword->first('password_confirmation') }}
@@ -130,4 +148,24 @@
             </div>
         </div>
     </div>
+
+    <script>
+        (function () {
+            window.togglePassword = function (inputId, buttonEl) {
+                const input = document.getElementById(inputId);
+                if (!input) return;
+                const isPassword = input.type === 'password';
+                input.type = isPassword ? 'text' : 'password';
+
+                if (!(buttonEl instanceof HTMLElement)) return;
+                const icon = buttonEl.querySelector('i');
+                if (icon) {
+                    icon.classList.remove(isPassword ? 'fa-eye' : 'fa-eye-slash');
+                    icon.classList.add(isPassword ? 'fa-eye-slash' : 'fa-eye');
+                }
+                buttonEl.title = isPassword ? 'Sembunyikan' : 'Tampilkan';
+                buttonEl.setAttribute('aria-label', isPassword ? 'Sembunyikan password' : 'Tampilkan password');
+            };
+        })();
+    </script>
 </x-portal-layout>
