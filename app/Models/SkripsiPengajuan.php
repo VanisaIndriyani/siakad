@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class SkripsiPengajuan extends Model
 {
@@ -25,12 +26,16 @@ class SkripsiPengajuan extends Model
         'approved_at',
         'approved_by_user_id',
         'assigned_at',
+        'mahasiswa_last_read_at',
+        'dosen_last_read_at',
     ];
 
     protected $casts = [
         'tanggal_sk' => 'date',
         'approved_at' => 'datetime',
         'assigned_at' => 'datetime',
+        'mahasiswa_last_read_at' => 'datetime',
+        'dosen_last_read_at' => 'datetime',
     ];
 
     public function mahasiswa(): BelongsTo
@@ -52,5 +57,9 @@ class SkripsiPengajuan extends Model
     {
         return $this->hasMany(SkripsiBimbinganMessage::class, 'skripsi_pengajuan_id');
     }
-}
 
+    public function latestMessage(): HasOne
+    {
+        return $this->hasOne(SkripsiBimbinganMessage::class, 'skripsi_pengajuan_id')->latestOfMany();
+    }
+}

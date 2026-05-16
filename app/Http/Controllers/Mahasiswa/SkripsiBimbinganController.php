@@ -17,6 +17,7 @@ class SkripsiBimbinganController extends Controller
         abort_unless((int) $skripsi->mahasiswa_id === (int) $mahasiswa->id, 404);
 
         $skripsi->load(['mahasiswa', 'dosenPembimbing', 'messages.sender']);
+        $skripsi->update(['mahasiswa_last_read_at' => now()]);
 
         return view('mahasiswa.skripsi.bimbingan', [
             'skripsi' => $skripsi,
@@ -42,4 +43,3 @@ class SkripsiBimbinganController extends Controller
         return back()->with('success', 'Pesan bimbingan terkirim.');
     }
 }
-

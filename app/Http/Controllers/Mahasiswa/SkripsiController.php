@@ -16,7 +16,7 @@ class SkripsiController extends Controller
         abort_unless($mahasiswa, 403);
 
         $items = SkripsiPengajuan::query()
-            ->with('dosenPembimbing')
+            ->with(['dosenPembimbing', 'latestMessage'])
             ->where('mahasiswa_id', $mahasiswa->id)
             ->orderByDesc('id')
             ->get();
@@ -67,4 +67,3 @@ class SkripsiController extends Controller
         ]);
     }
 }
-

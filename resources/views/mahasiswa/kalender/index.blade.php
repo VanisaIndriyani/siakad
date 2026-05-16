@@ -3,6 +3,40 @@
         @include('mahasiswa.partials.sidebar')
     </x-slot:sidebar>
 
+    <style>
+        .cal-wrap { max-width: 520px; margin: 0 auto; }
+        .cal-card { background: #ffffff; border: 1px solid rgba(17, 24, 39, 0.12); border-radius: 18px; padding: 16px; color: #111827; }
+        .cal-titlebar { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+        .cal-back { height: 44px; width: 44px; border-radius: 999px; border: 1px solid rgba(17, 24, 39, 0.12); background: #fff; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; color: #111827; }
+        .cal-title { flex: 1; text-align: center; font-size: 22px; font-weight: 900; letter-spacing: -0.2px; }
+        .cal-spacer { height: 44px; width: 44px; }
+        .cal-monthbar { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+        .cal-monthbtn { height: 40px; width: 40px; border-radius: 999px; border: 1px solid rgba(17, 24, 39, 0.12); background: #fff; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; color: #111827; }
+        .cal-monthtitle { font-size: 18px; font-weight: 900; }
+        .cal-dow { display: grid; grid-template-columns: repeat(7, 1fr); margin-top: 14px; gap: 6px; }
+        .cal-dow div { text-align: center; font-size: 12px; font-weight: 800; color: rgba(17, 24, 39, 0.45); padding: 4px 0; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 8px; }
+        .cal-day { position: relative; height: 40px; border-radius: 10px; border: 1px solid rgba(17, 24, 39, 0.10); background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; color: #111827; user-select: none; }
+        .cal-day--muted { background: #f3f4f6; color: rgba(17, 24, 39, 0.35); border-color: rgba(17, 24, 39, 0.06); cursor: default; }
+        .cal-day--today { outline: 2px solid rgba(16, 185, 129, 0.30); outline-offset: 2px; }
+        .cal-day--selected { background: rgba(59, 130, 246, 0.10); border-color: rgba(59, 130, 246, 0.35); }
+        .cal-mark { position: absolute; left: 6px; right: 6px; bottom: 4px; height: 4px; border-radius: 999px; background: #2563eb; opacity: 0.9; }
+        .cal-section { margin-top: 18px; }
+        .cal-section h2 { font-size: 20px; font-weight: 900; margin: 0; color: #111827; }
+        .cal-reset { height: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid rgba(17, 24, 39, 0.12); background: #fff; font-weight: 800; cursor: pointer; }
+        .cal-list { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 12px; }
+        .cal-item { background: #fff; border: 1px solid rgba(17, 24, 39, 0.12); border-radius: 14px; padding: 14px; display: flex; gap: 12px; align-items: flex-start; }
+        .cal-icon { height: 44px; width: 44px; border-radius: 12px; background: rgba(59, 130, 246, 0.10); border: 1px solid rgba(59, 130, 246, 0.18); display: flex; align-items: center; justify-content: center; color: #2563eb; flex: 0 0 auto; }
+        .cal-item-title { font-size: 16px; font-weight: 900; margin: 0; color: #111827; }
+        .cal-item-meta { margin-top: 4px; font-size: 13px; font-weight: 700; color: rgba(17, 24, 39, 0.55); }
+        .cal-empty { background: #fff; border: 1px solid rgba(17, 24, 39, 0.12); border-radius: 14px; padding: 24px; text-align: center; color: rgba(17, 24, 39, 0.60); font-weight: 800; }
+        @media (max-width: 420px) {
+            .cal-card { padding: 14px; }
+            .cal-title { font-size: 20px; }
+            .cal-monthtitle { font-size: 17px; }
+        }
+    </style>
+
     @php
         $eventsPayload = $events->map(function ($event) {
             $start = $event->tanggal_mulai?->format('Y-m-d');
@@ -18,42 +52,38 @@
         })->values()->all();
     @endphp
 
-    <div class="max-w-3xl mx-auto">
-        <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
-            <div class="flex items-center justify-between gap-3">
-                <button id="calPrev" type="button" class="h-10 w-10 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+    <div class="cal-wrap">
+        <div class="cal-card">
+            <div class="cal-titlebar">
+                <a href="{{ route('mahasiswa.dashboard') }}" class="cal-back" aria-label="Kembali">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+                <div class="cal-title">Kalender Akademik</div>
+                <div class="cal-spacer"></div>
+            </div>
+
+            <div class="cal-monthbar">
+                <button id="calPrev" type="button" class="cal-monthbtn" aria-label="Bulan sebelumnya">
                     <i class="fa-solid fa-chevron-left"></i>
                 </button>
-                <div class="text-center">
-                    <div id="calTitle" class="text-lg font-semibold"></div>
-                    <div id="calSubtitle" class="text-xs text-emerald-100/60 mt-1"></div>
-                </div>
-                <button id="calNext" type="button" class="h-10 w-10 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                <div id="calTitle" class="cal-monthtitle"></div>
+                <button id="calNext" type="button" class="cal-monthbtn" aria-label="Bulan berikutnya">
                     <i class="fa-solid fa-chevron-right"></i>
                 </button>
             </div>
 
-            <div class="mt-4 grid grid-cols-7 gap-1 text-xs text-emerald-100/70 font-semibold">
-                <div class="text-center py-2">M</div>
-                <div class="text-center py-2">S</div>
-                <div class="text-center py-2">S</div>
-                <div class="text-center py-2">R</div>
-                <div class="text-center py-2">K</div>
-                <div class="text-center py-2">J</div>
-                <div class="text-center py-2">S</div>
+            <div class="cal-dow">
+                <div>M</div><div>S</div><div>S</div><div>R</div><div>K</div><div>J</div><div>S</div>
             </div>
-
-            <div id="calGrid" class="grid grid-cols-7 gap-1"></div>
+            <div id="calGrid" class="cal-grid"></div>
         </div>
 
-        <div class="mt-6">
-            <div class="flex items-center justify-between gap-3">
-                <div class="text-lg font-semibold">Semua Kegiatan</div>
-                <button id="calReset" type="button" class="hidden h-10 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-sm font-medium">
-                    Reset Tanggal
-                </button>
+        <div class="cal-section">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap: 12px;">
+                <h2>Semua Kegiatan</h2>
+                <button id="calReset" type="button" class="cal-reset" style="display:none;">Reset</button>
             </div>
-            <div id="calList" class="mt-3 grid grid-cols-1 gap-3"></div>
+            <div id="calList" class="cal-list"></div>
         </div>
     </div>
 
@@ -117,7 +147,6 @@
 
             const $grid = document.getElementById('calGrid');
             const $title = document.getElementById('calTitle');
-            const $subtitle = document.getElementById('calSubtitle');
             const $list = document.getElementById('calList');
             const $btnPrev = document.getElementById('calPrev');
             const $btnNext = document.getElementById('calNext');
@@ -142,7 +171,9 @@
 
             function setSelectedDay(dayDate) {
                 selectedDay = dayDate;
-                $btnReset.classList.toggle('hidden', !selectedDay);
+                if ($btnReset) {
+                    $btnReset.style.display = selectedDay ? 'inline-flex' : 'none';
+                }
                 render();
             }
 
@@ -182,21 +213,7 @@
 
                     const btn = document.createElement('button');
                     btn.type = 'button';
-                    btn.className = [
-                        'relative',
-                        'h-11',
-                        'rounded-xl',
-                        'border',
-                        'transition',
-                        'text-sm',
-                        'font-semibold',
-                        'flex',
-                        'items-center',
-                        'justify-center',
-                        isCurrentMonth ? 'bg-white/0 border-white/10 text-white hover:bg-white/5' : 'bg-white/0 border-white/0 text-emerald-100/30',
-                        isToday ? 'ring-2 ring-emerald-500/30' : '',
-                        isSelected ? 'bg-emerald-500/15 border-emerald-500/25' : '',
-                    ].filter(Boolean).join(' ');
+                    btn.className = 'cal-day';
                     btn.textContent = String(d.getDate());
 
                     if (isCurrentMonth) {
@@ -205,11 +222,15 @@
                         });
                     } else {
                         btn.disabled = true;
+                        btn.classList.add('cal-day--muted');
                     }
+
+                    if (isToday && isCurrentMonth) btn.classList.add('cal-day--today');
+                    if (isSelected && isCurrentMonth) btn.classList.add('cal-day--selected');
 
                     if (hasEvents && isCurrentMonth) {
                         const mark = document.createElement('div');
-                        mark.className = 'absolute left-2 right-2 bottom-1 h-[3px] rounded-full bg-emerald-400/70';
+                        mark.className = 'cal-mark';
                         btn.appendChild(mark);
                     }
 
@@ -217,13 +238,6 @@
                 }
 
                 $title.textContent = `${monthNames[current.getMonth()]} ${current.getFullYear()}`;
-
-                if (selectedDay) {
-                    $subtitle.textContent = `Filter tanggal: ${formatDMY(selectedDay)}`;
-                } else {
-                    const total = monthEvents.length;
-                    $subtitle.textContent = total > 0 ? `${total} kegiatan bulan ini` : 'Belum ada kegiatan bulan ini';
-                }
             }
 
             function renderList() {
@@ -233,7 +247,7 @@
 
                 if (!items.length) {
                     const empty = document.createElement('div');
-                    empty.className = 'rounded-2xl bg-white/5 border border-white/10 p-10 text-center text-emerald-100/70';
+                    empty.className = 'cal-empty';
                     empty.textContent = selectedDay ? 'Tidak ada kegiatan di tanggal ini.' : 'Belum ada kegiatan di bulan ini.';
                     $list.appendChild(empty);
                     return;
@@ -241,14 +255,18 @@
 
                 for (const ev of items) {
                     const card = document.createElement('div');
-                    card.className = 'rounded-2xl bg-white/5 border border-white/10 p-5';
+                    card.className = 'cal-item';
+
+                    const iconWrap = document.createElement('div');
+                    iconWrap.className = 'cal-icon';
+                    iconWrap.innerHTML = '<i class="fa-solid fa-calendar-days"></i>';
 
                     const title = document.createElement('div');
-                    title.className = 'text-base font-semibold';
+                    title.className = 'cal-item-title';
                     title.textContent = ev.judul;
 
                     const meta = document.createElement('div');
-                    meta.className = 'mt-1 text-sm text-emerald-100/70';
+                    meta.className = 'cal-item-meta';
 
                     const s = ev.startDate;
                     const e = ev.endDate || ev.startDate;
@@ -257,14 +275,23 @@
 
                     meta.textContent = dateText + (ev.kategori ? ` • ${ev.kategori}` : '');
 
-                    card.appendChild(title);
-                    card.appendChild(meta);
+                    const content = document.createElement('div');
+                    content.style.flex = '1';
+                    content.appendChild(title);
+                    content.appendChild(meta);
+
+                    card.appendChild(iconWrap);
+                    card.appendChild(content);
 
                     if (ev.deskripsi) {
                         const desc = document.createElement('div');
-                        desc.className = 'mt-3 text-sm text-emerald-100/80 whitespace-pre-line';
+                        desc.style.marginTop = '10px';
+                        desc.style.fontSize = '13px';
+                        desc.style.fontWeight = '700';
+                        desc.style.color = 'rgba(17, 24, 39, 0.70)';
+                        desc.style.whiteSpace = 'pre-line';
                         desc.textContent = ev.deskripsi;
-                        card.appendChild(desc);
+                        content.appendChild(desc);
                     }
 
                     $list.appendChild(card);

@@ -15,9 +15,9 @@
             <input name="q" value="{{ $q }}" placeholder="Cari judul / nama / NPM..."
                    class="h-11 w-full rounded-xl bg-white/5 border border-white/10 px-4 text-sm text-white placeholder:text-emerald-100/40 focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
             <select name="status" class="h-11 w-full lg:w-56 rounded-xl bg-white/5 border border-white/10 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
-                <option value="">Semua Status</option>
+                <option value="" style="background-color: #0d2a23; color: #fff;">Semua Status</option>
                 @foreach (['pending' => 'Pending', 'approved' => 'Approved', 'rejected' => 'Rejected', 'assigned' => 'Assigned'] as $k => $v)
-                    <option value="{{ $k }}" @selected($status === $k)>{{ $v }}</option>
+                    <option value="{{ $k }}" @selected($status === $k) style="background-color: #0d2a23; color: #fff;">{{ $v }}</option>
                 @endforeach
             </select>
             <div class="flex items-center gap-2">
@@ -60,7 +60,7 @@
                                     {{ strtoupper($row->status) }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3 text-emerald-100/80">{{ $row->dosenPembimbing?->nama_lengkap ?: '-' }}</td>
+                            <td class="px-4 py-3 text-emerald-100/80">{{ $row->dosenPembimbing?->nama ?: '-' }}</td>
                             <td class="px-4 py-3 text-right">
                                 <a href="{{ route('admin.skripsi.show', $row) }}" class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                                     <i class="fa-solid fa-eye"></i>
@@ -82,4 +82,3 @@
         {{ $items->links() }}
     </div>
 </x-portal-layout>
-

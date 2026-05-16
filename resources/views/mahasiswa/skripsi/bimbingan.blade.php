@@ -3,61 +3,90 @@
         @include('mahasiswa.partials.sidebar')
     </x-slot:sidebar>
 
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div class="min-w-0">
-            <div class="text-xl font-semibold">Bimbingan Skripsi</div>
-            <div class="mt-1 text-sm text-emerald-100/70 truncate">
-                {{ $skripsi->judul }} • Pembimbing: {{ $skripsi->dosenPembimbing?->nama_lengkap ?: '-' }}
-            </div>
-        </div>
-        <div class="flex items-center gap-2">
-            <a href="{{ route('mahasiswa.skripsi.show', $skripsi) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
-                <i class="fa-solid fa-arrow-left"></i>
-                <span class="text-sm font-medium">Kembali</span>
-            </a>
-        </div>
-    </div>
+    <style>
+        .chat-wrap { max-width: 920px; margin: 0 auto; }
+        .chat-card { background: #ffffff; border: 1px solid rgba(17, 24, 39, 0.12); border-radius: 18px; padding: 16px; color: #111827; }
+        .chat-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        .chat-head .title { font-size: 18px; font-weight: 900; margin: 0; }
+        .chat-head .sub { margin-top: 4px; font-size: 13px; font-weight: 700; color: rgba(17, 24, 39, 0.55); }
+        .chat-back { height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid rgba(17, 24, 39, 0.12); background: #fff; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: #111827; font-weight: 900; font-size: 13px; }
+        .chat-stream { margin-top: 14px; border-radius: 14px; border: 1px solid rgba(17, 24, 39, 0.10); background: #f9fafb; padding: 12px; max-height: 58vh; overflow: auto; }
+        .chat-row { display: flex; margin: 8px 0; }
+        .chat-row.me { justify-content: flex-end; }
+        .chat-bubble { max-width: 78%; border-radius: 14px; padding: 10px 12px; border: 1px solid rgba(17, 24, 39, 0.12); background: #ffffff; }
+        .chat-row.me .chat-bubble { background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.25); }
+        .chat-meta { font-size: 11px; font-weight: 800; color: rgba(17, 24, 39, 0.55); margin-bottom: 6px; display: flex; gap: 8px; flex-wrap: wrap; }
+        .chat-text { font-size: 13px; font-weight: 700; color: rgba(17, 24, 39, 0.88); white-space: pre-line; }
+        .chat-form { margin-top: 12px; display: flex; gap: 10px; align-items: flex-end; }
+        .chat-input { flex: 1; min-height: 44px; max-height: 120px; resize: vertical; border-radius: 14px; border: 1px solid rgba(17, 24, 39, 0.12); background: #fff; padding: 12px 12px; font-size: 13px; font-weight: 700; color: #111827; outline: none; }
+        .chat-input:disabled { background: #f3f4f6; color: rgba(17, 24, 39, 0.45); }
+        .chat-send { height: 44px; padding: 0 16px; border-radius: 14px; border: 1px solid rgba(16, 185, 129, 0.25); background: linear-gradient(to right, #059669, #10b981); color: #fff; font-weight: 900; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+        .chat-send:disabled { opacity: 0.55; cursor: not-allowed; }
+        .chat-warn { margin-top: 14px; border-radius: 14px; border: 1px solid rgba(245, 158, 11, 0.25); background: rgba(245, 158, 11, 0.10); padding: 12px 14px; font-weight: 800; color: rgba(120, 53, 15, 0.95); }
+        .chat-empty { padding: 18px; text-align: center; color: rgba(17, 24, 39, 0.55); font-weight: 900; }
+    </style>
 
-    @if (! $skripsi->dosen_pembimbing_id)
-        <div class="mt-5 rounded-2xl bg-yellow-500/10 border border-yellow-500/20 p-5 text-yellow-100">
-            Bimbingan belum bisa dimulai karena pembimbing belum ditetapkan oleh Admin/Prodi.
-        </div>
-    @endif
-
-    <div class="mt-5 rounded-2xl bg-white/5 border border-white/10 p-5">
-        <div class="space-y-3">
-            @forelse ($skripsi->messages->sortBy('id') as $msg)
-                @php
-                    $isMe = (int) $msg->sender_user_id === (int) auth()->id();
-                @endphp
-                <div class="flex {{ $isMe ? 'justify-end' : 'justify-start' }}">
-                    <div class="max-w-[80%] rounded-2xl border px-4 py-3 text-sm whitespace-pre-line {{ $isMe ? 'bg-emerald-500/15 border-emerald-500/20 text-emerald-50' : 'bg-white/5 border-white/10 text-emerald-100/90' }}">
-                        <div class="text-xs font-semibold mb-1 {{ $isMe ? 'text-emerald-100/80' : 'text-emerald-100/60' }}">
-                            {{ $msg->sender?->name ?: 'User' }} • {{ $msg->created_at?->format('d/m/Y H:i') }}
-                        </div>
-                        {{ $msg->pesan }}
-                    </div>
+    <div class="chat-wrap">
+        <div class="chat-card">
+            <div class="chat-head">
+                <div>
+                    <div class="title">Bimbingan Skripsi</div>
+                    <div class="sub">{{ $skripsi->judul }} • Pembimbing: {{ $skripsi->dosenPembimbing?->nama ?: '-' }}</div>
                 </div>
-            @empty
-                <div class="text-center text-emerald-100/70 py-8">Belum ada pesan bimbingan.</div>
-            @endforelse
+                <a href="{{ route('mahasiswa.skripsi.show', $skripsi) }}" class="chat-back">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    Kembali
+                </a>
+            </div>
+
+            @if (! $skripsi->dosen_pembimbing_id)
+                <div class="chat-warn">
+                    Bimbingan belum bisa dimulai karena pembimbing belum ditetapkan oleh Admin/Prodi.
+                </div>
+            @endif
+
+            <div id="chatStream" class="chat-stream">
+                @forelse ($skripsi->messages->sortBy('id') as $msg)
+                    @php
+                        $isMe = (int) $msg->sender_user_id === (int) auth()->id();
+                    @endphp
+                    <div class="chat-row {{ $isMe ? 'me' : '' }}">
+                        <div class="chat-bubble">
+                            <div class="chat-meta">
+                                <span>{{ $msg->sender?->name ?: 'User' }}</span>
+                                <span>•</span>
+                                <span>{{ $msg->created_at?->format('d/m/Y H:i') }}</span>
+                            </div>
+                            <div class="chat-text">{{ $msg->pesan }}</div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="chat-empty">Belum ada pesan bimbingan.</div>
+                @endforelse
+            </div>
+
+            <form method="POST" action="{{ route('mahasiswa.skripsi.bimbingan.store', $skripsi) }}" class="chat-form">
+                @csrf
+                <textarea name="pesan" rows="2" {{ $skripsi->dosen_pembimbing_id ? '' : 'disabled' }}
+                          class="chat-input"
+                          placeholder="Tulis pesan...">{{ old('pesan') }}</textarea>
+                <button {{ $skripsi->dosen_pembimbing_id ? '' : 'disabled' }} class="chat-send">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    Kirim
+                </button>
+            </form>
+
+            @error('pesan')
+                <div style="margin-top: 8px; color: #dc2626; font-size: 12px; font-weight: 800;">{{ $message }}</div>
+            @enderror
         </div>
     </div>
 
-    <div class="mt-4 rounded-2xl bg-white/5 border border-white/10 p-5">
-        <form method="POST" action="{{ route('mahasiswa.skripsi.bimbingan.store', $skripsi) }}" class="flex flex-col sm:flex-row gap-3">
-            @csrf
-            <textarea name="pesan" rows="3" {{ $skripsi->dosen_pembimbing_id ? '' : 'disabled' }}
-                      class="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white placeholder:text-emerald-100/40 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
-                      placeholder="Tulis pesan...">{{ old('pesan') }}</textarea>
-            <button {{ $skripsi->dosen_pembimbing_id ? '' : 'disabled' }}
-                    class="h-11 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed">
-                Kirim
-            </button>
-        </form>
-        @error('pesan')
-            <div class="mt-2 text-sm text-red-200">{{ $message }}</div>
-        @enderror
-    </div>
+    <script>
+        (function () {
+            const el = document.getElementById('chatStream');
+            if (!el) return;
+            el.scrollTop = el.scrollHeight;
+        })();
+    </script>
 </x-portal-layout>
-

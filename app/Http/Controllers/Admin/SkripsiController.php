@@ -44,7 +44,7 @@ class SkripsiController extends Controller
     {
         $skripsi->load(['mahasiswa', 'dosenPembimbing', 'messages.sender', 'approvedBy']);
 
-        $dosenList = Dosen::query()->orderBy('nama_lengkap')->get();
+        $dosenList = Dosen::query()->orderBy('nama')->get();
 
         return view('admin.skripsi.show', [
             'skripsi' => $skripsi,
@@ -94,4 +94,3 @@ class SkripsiController extends Controller
         return back()->with('success', 'Dosen pembimbing berhasil ditetapkan.');
     }
 }
-

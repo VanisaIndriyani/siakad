@@ -16,7 +16,7 @@ class SkripsiBimbinganController extends Controller
         abort_unless($dosen, 403);
 
         $items = SkripsiPengajuan::query()
-            ->with('mahasiswa')
+            ->with(['mahasiswa', 'latestMessage'])
             ->where('dosen_pembimbing_id', $dosen->id)
             ->orderByDesc('id')
             ->get();
@@ -33,6 +33,7 @@ class SkripsiBimbinganController extends Controller
         abort_unless((int) $skripsi->dosen_pembimbing_id === (int) $dosen->id, 404);
 
         $skripsi->load(['mahasiswa', 'dosenPembimbing', 'messages.sender']);
+        $skripsi->update(['dosen_last_read_at' => now()]);
 
         return view('dosen.skripsi.show', [
             'skripsi' => $skripsi,
@@ -57,4 +58,3 @@ class SkripsiBimbinganController extends Controller
         return back()->with('success', 'Pesan bimbingan terkirim.');
     }
 }
-

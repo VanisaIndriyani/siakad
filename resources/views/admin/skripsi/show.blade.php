@@ -67,8 +67,8 @@
 
                     <div class="grid grid-cols-1 gap-3">
                         <select name="status" class="h-11 w-full rounded-xl bg-white/5 border border-white/10 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
-                            <option value="approved" @selected(old('status', $skripsi->status) === 'approved')>Setujui</option>
-                            <option value="rejected" @selected(old('status', $skripsi->status) === 'rejected')>Tolak</option>
+                            <option value="approved" @selected(old('status', $skripsi->status) === 'approved') style="background-color: #0d2a23; color: #fff;">Setujui</option>
+                            <option value="rejected" @selected(old('status', $skripsi->status) === 'rejected') style="background-color: #0d2a23; color: #fff;">Tolak</option>
                         </select>
                         <textarea name="catatan_admin" rows="4" placeholder="Catatan (opsional)"
                                   class="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white placeholder:text-emerald-100/40 focus:outline-none focus:ring-2 focus:ring-emerald-500/30">{{ old('catatan_admin', $skripsi->catatan_admin) }}</textarea>
@@ -90,9 +90,9 @@
                     <div>
                         <label class="block text-xs font-semibold text-emerald-100/70 mb-1">Dosen Pembimbing</label>
                         <select name="dosen_pembimbing_id" class="h-11 w-full rounded-xl bg-white/5 border border-white/10 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30" required>
-                            <option value="" disabled @selected(! old('dosen_pembimbing_id', $skripsi->dosen_pembimbing_id))>Pilih dosen</option>
+                            <option value="" disabled @selected(! old('dosen_pembimbing_id', $skripsi->dosen_pembimbing_id)) style="background-color: #0d2a23; color: #fff;">Pilih dosen</option>
                             @foreach ($dosenList as $d)
-                                <option value="{{ $d->id }}" @selected((string) old('dosen_pembimbing_id', $skripsi->dosen_pembimbing_id) === (string) $d->id)>{{ $d->nama_lengkap }}</option>
+                                <option value="{{ $d->id }}" @selected((string) old('dosen_pembimbing_id', $skripsi->dosen_pembimbing_id) === (string) $d->id) style="background-color: #0d2a23; color: #fff;">{{ $d->nama }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -117,7 +117,7 @@
 
             <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
                 <div class="text-sm text-emerald-100/70">Pembimbing Saat Ini</div>
-                <div class="mt-1 font-medium">{{ $skripsi->dosenPembimbing?->nama_lengkap ?: '-' }}</div>
+                <div class="mt-1 font-medium">{{ $skripsi->dosenPembimbing?->nama ?: '-' }}</div>
                 <div class="mt-2 text-sm text-emerald-100/70">
                     SK:
                     <span class="font-medium">{{ $skripsi->nomor_sk ?: '-' }}</span>
@@ -130,4 +130,3 @@
         </div>
     </div>
 </x-portal-layout>
-

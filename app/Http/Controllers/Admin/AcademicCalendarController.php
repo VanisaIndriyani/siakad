@@ -20,10 +20,12 @@ class AcademicCalendarController extends Controller
                 ->orWhere('kategori', 'like', "%{$q}%");
         }
 
+        $eventsAll = (clone $query)->orderBy('tanggal_mulai')->get();
         $events = $query->orderByDesc('tanggal_mulai')->paginate(10)->withQueryString();
 
         return view('admin.kalender.index', [
             'events' => $events,
+            'eventsAll' => $eventsAll,
             'q' => $q,
         ]);
     }
@@ -80,4 +82,3 @@ class AcademicCalendarController extends Controller
         return back()->with('success', 'Kegiatan kalender akademik berhasil dihapus.');
     }
 }
-

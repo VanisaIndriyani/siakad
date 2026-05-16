@@ -48,7 +48,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <div>
                     <div class="text-emerald-100/70">Pembimbing</div>
-                    <div class="mt-1 font-medium">{{ $skripsi->dosenPembimbing?->nama_lengkap ?: '-' }}</div>
+                    <div class="mt-1 font-medium">{{ $skripsi->dosenPembimbing?->nama ?: '-' }}</div>
                 </div>
                 <div>
                     <div class="text-emerald-100/70">SK Pembimbing</div>
@@ -70,4 +70,3 @@
         @endif
     </div>
 </x-portal-layout>
-
