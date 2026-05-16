@@ -142,8 +142,8 @@ Route::prefix('dosen')
         Route::get('/mahasiswa', [DosenMahasiswaController::class, 'index'])->name('mahasiswa.index');
 
         Route::get('/nilai', [DosenNilaiController::class, 'index'])->name('nilai.index');
-        Route::get('/nilai/{krs}', [DosenNilaiController::class, 'edit'])->name('nilai.edit');
-        Route::put('/nilai/{krs}', [DosenNilaiController::class, 'update'])->name('nilai.update');
+        Route::get('/nilai/{mataKuliah}/{semester}', [DosenNilaiController::class, 'edit'])->name('nilai.edit');
+        Route::put('/nilai/{mataKuliah}/{semester}', [DosenNilaiController::class, 'update'])->name('nilai.update');
 
         Route::get('/mata-kuliah', [\App\Http\Controllers\Dosen\MataKuliahController::class, 'index'])->name('mata-kuliah.index');
         Route::post('/mata-kuliah/{mataKuliah}/rps', [\App\Http\Controllers\Dosen\MataKuliahController::class, 'uploadRps'])->name('mata-kuliah.rps.upload');

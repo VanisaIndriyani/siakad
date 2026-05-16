@@ -6,7 +6,7 @@
     <div class="flex items-center justify-between gap-3 mb-5">
         <div>
             <div class="text-xl font-semibold">Input Nilai</div>
-            <div class="text-sm text-emerald-100/70">{{ $krs->mahasiswa?->nama_lengkap }} • Semester {{ $krs->semester }}</div>
+            <div class="text-sm text-emerald-100/70">{{ $mataKuliah->kode }} - {{ $mataKuliah->nama }} • Semester {{ $semester }}</div>
         </div>
         <a href="{{ route('dosen.nilai.index') }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
             <i class="fa-solid fa-arrow-left"></i>
@@ -14,13 +14,19 @@
         </a>
     </div>
 
-    <form method="POST" action="{{ route('dosen.nilai.update', $krs) }}" class="rounded-2xl bg-white/5 border border-white/10 p-5">
+    <form method="GET" action="{{ route('dosen.nilai.edit', [$mataKuliah, $semester]) }}" class="mb-4 flex flex-col sm:flex-row gap-3">
+        <input name="q" value="{{ $q ?? '' }}" class="w-full sm:max-w-md h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" placeholder="Cari nama / NPM..." />
+        <button class="h-11 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">Cari</button>
+        <a href="{{ route('dosen.nilai.edit', [$mataKuliah, $semester]) }}" class="h-11 px-4 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">Reset</a>
+    </form>
+
+    <form method="POST" action="{{ route('dosen.nilai.update', [$mataKuliah, $semester]) }}" class="rounded-2xl bg-white/5 border border-white/10 p-5">
         @csrf
         @method('PUT')
 
         <div>
-            <div class="text-lg font-semibold">Nilai per Mata Kuliah</div>
-            <div class="text-sm text-emerald-100/70">Yang ditampilkan hanya mata kuliah yang kamu ampu.</div>
+            <div class="text-lg font-semibold">Nilai per Mahasiswa</div>
+            <div class="text-sm text-emerald-100/70">Nilai diambil dari KRS approved pada semester ini.</div>
         </div>
 
         <div class="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
@@ -28,43 +34,47 @@
                 <table class="min-w-full text-sm">
                     <thead class="bg-white/5 text-emerald-100/80">
                         <tr>
-                            <th class="text-left font-medium px-4 py-3">Mata Kuliah</th>
-                            <th class="text-left font-medium px-4 py-3">SKS</th>
+                            <th class="text-left font-medium px-4 py-3">Mahasiswa</th>
                             <th class="text-left font-medium px-4 py-3">Nilai Angka</th>
                             <th class="text-left font-medium px-4 py-3">Nilai Huruf</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-white/10">
-                        @foreach (($items ?? $krs->items) as $item)
+                        @foreach ($krs as $row)
                             @php
-                                $mk = $item->mataKuliah;
-                                $existingItem = $existing->get($item->mata_kuliah_id);
+                                $mhs = $row->mahasiswa;
+                                $existingItem = $existing->get($row->mahasiswa_id);
+                                $isReady = (bool) $existingItem;
                             @endphp
                             <tr class="hover:bg-white/5">
                                 <td class="px-4 py-3">
-                                    <div class="font-medium">{{ $mk?->kode }} - {{ $mk?->nama }}</div>
+                                    <div class="font-medium">{{ $mhs?->nama_lengkap }}</div>
+                                    <div class="text-xs text-emerald-100/60">{{ $mhs?->npm }}</div>
+                                    @if (! $isReady)
+                                        <div class="text-xs text-red-200/90 mt-1">KHS belum disiapkan Admin.</div>
+                                    @endif
                                 </td>
-                                <td class="px-4 py-3 text-emerald-100/80">{{ $mk?->sks }}</td>
                                 <td class="px-4 py-3">
                                     <input type="number" step="0.01" min="0" max="100"
-                                           id="nilaiAngka{{ $item->mata_kuliah_id }}"
-                                           name="nilai_angka[{{ $item->mata_kuliah_id }}]"
-                                           value="{{ old('nilai_angka.'.$item->mata_kuliah_id, $existingItem?->nilai_angka) }}"
+                                           id="nilaiAngka{{ $row->mahasiswa_id }}"
+                                           name="nilai_angka[{{ $row->mahasiswa_id }}]"
+                                           value="{{ old('nilai_angka.'.$row->mahasiswa_id, $existingItem?->nilai_angka) }}"
                                            class="w-28 h-10 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400"
-                                           data-huruf-target="nilaiHuruf{{ $item->mata_kuliah_id }}" />
+                                           data-huruf-target="nilaiHuruf{{ $row->mahasiswa_id }}"
+                                           @disabled(! $isReady) />
                                 </td>
                                 <td class="px-4 py-3">
-                                    <input id="nilaiHuruf{{ $item->mata_kuliah_id }}"
-                                           name="nilai_huruf[{{ $item->mata_kuliah_id }}]"
-                                           value="{{ old('nilai_huruf.'.$item->mata_kuliah_id, $existingItem?->nilai_huruf) }}"
+                                    <input id="nilaiHuruf{{ $row->mahasiswa_id }}"
+                                           name="nilai_huruf[{{ $row->mahasiswa_id }}]"
+                                           value="{{ old('nilai_huruf.'.$row->mahasiswa_id, $existingItem?->nilai_huruf) }}"
                                            class="w-28 h-10 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400"
                                            readonly />
                                 </td>
                             </tr>
                         @endforeach
-                        @if (($items ?? $krs->items)->count() === 0)
+                        @if ($krs->count() === 0)
                             <tr>
-                                <td colspan="4" class="px-4 py-10 text-center text-emerald-100/70">Tidak ada mata kuliah yang bisa kamu nilai pada KRS ini.</td>
+                                <td colspan="3" class="px-4 py-10 text-center text-emerald-100/70">Tidak ada mahasiswa pada mata kuliah ini (KRS approved).</td>
                             </tr>
                         @endif
                     </tbody>
@@ -78,6 +88,10 @@
             </button>
         </div>
     </form>
+
+    <div class="mt-4">
+        {{ $krs->links() }}
+    </div>
 
     <script>
         (function () {

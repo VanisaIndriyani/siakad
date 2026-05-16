@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Dosen;
 use App\Http\Controllers\Controller;
 use App\Models\Khs;
 use App\Models\Krs;
+use App\Models\MataKuliah;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -18,98 +19,99 @@ class NilaiController extends Controller
 
         $dosen = $request->user()?->dosen;
 
-        $query = Krs::query()
-            ->with(['mahasiswa', 'mahasiswa.user'])
-            ->where('status_approval', 'approved');
-
+        $query = MataKuliah::query();
         if ($dosen) {
-            $query->whereHas('items.mataKuliah', function ($sub) use ($dosen) {
-                $sub->where(function ($q) use ($dosen) {
-                    $q->where('dosen_id', $dosen->id)->orWhere('dosen_id_2', $dosen->id);
-                });
+            $query->where(function ($sub) use ($dosen) {
+                $sub->where('dosen_id', $dosen->id)->orWhere('dosen_id_2', $dosen->id);
             });
-
-            $query->withCount(['items as items_count' => function ($sub) use ($dosen) {
-                $sub->whereHas('mataKuliah', function ($q) use ($dosen) {
-                    $q->where(function ($qq) use ($dosen) {
-                        $qq->where('dosen_id', $dosen->id)->orWhere('dosen_id_2', $dosen->id);
-                    });
-                });
-            }]);
         } else {
-            $query->withCount('items');
+            $query->whereRaw('1 = 0');
         }
 
         if ($q !== '') {
-            $query->whereHas('mahasiswa', function ($sub) use ($q) {
+            $query->where(function ($sub) use ($q) {
+                $sub->where('kode', 'like', "%{$q}%")
+                    ->orWhere('nama', 'like', "%{$q}%")
+                    ->orWhere('jurusan', 'like', "%{$q}%");
+            });
+        }
+
+        $query->withCount(['krsItems as peserta_count' => function ($sub) {
+            $sub->whereHas('krs', function ($q) {
+                $q->where('status_approval', 'approved');
+            });
+        }]);
+
+        $mataKuliah = $query
+            ->orderBy('semester')
+            ->orderBy('kode')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('dosen.nilai.index', [
+            'mataKuliah' => $mataKuliah,
+            'q' => $q,
+        ]);
+    }
+
+    public function edit(Request $request, MataKuliah $mataKuliah, int $semester): View
+    {
+        $q = trim((string) $request->get('q', ''));
+
+        $dosen = $request->user()?->dosen;
+        abort_unless($dosen && in_array((int) $dosen->id, [(int) $mataKuliah->dosen_id, (int) $mataKuliah->dosen_id_2], true), 403);
+
+        $krsQuery = Krs::query()
+            ->with(['mahasiswa', 'mahasiswa.user'])
+            ->where('status_approval', 'approved')
+            ->where('semester', $semester)
+            ->whereHas('items', function ($sub) use ($mataKuliah) {
+                $sub->where('mata_kuliah_id', $mataKuliah->id);
+            });
+
+        if ($q !== '') {
+            $krsQuery->whereHas('mahasiswa', function ($sub) use ($q) {
                 $sub->where('nama_lengkap', 'like', "%{$q}%")
                     ->orWhere('npm', 'like', "%{$q}%");
             });
         }
 
-        $krs = $query->orderByDesc('id')->paginate(10)->withQueryString();
+        $krs = $krsQuery->orderBy('mahasiswa_id')->paginate(15)->withQueryString();
 
-        return view('dosen.nilai.index', [
+        $mahasiswaIds = $krs
+            ->getCollection()
+            ->pluck('mahasiswa_id')
+            ->map(fn ($v) => (int) $v)
+            ->unique()
+            ->values()
+            ->all();
+
+        $khsList = Khs::query()
+            ->with(['items' => function ($sub) use ($mataKuliah) {
+                $sub->where('mata_kuliah_id', $mataKuliah->id);
+            }])
+            ->where('semester', $semester)
+            ->whereIn('mahasiswa_id', $mahasiswaIds)
+            ->get();
+
+        $existing = $khsList->mapWithKeys(function ($khs) {
+            $item = $khs->items->first();
+            return [(int) $khs->mahasiswa_id => $item];
+        });
+
+        return view('dosen.nilai.edit', [
+            'mataKuliah' => $mataKuliah,
+            'semester' => $semester,
             'krs' => $krs,
+            'existing' => $existing,
             'q' => $q,
         ]);
     }
 
-    public function edit(Krs $krs): View
+    public function update(Request $request, MataKuliah $mataKuliah, int $semester): RedirectResponse
     {
-        abort_unless($krs->status_approval === 'approved', 404);
-
-        $dosen = request()->user()?->dosen;
-        if ($dosen) {
-            $allowed = $krs->items()->whereHas('mataKuliah', function ($q) use ($dosen) {
-                $q->where(function ($qq) use ($dosen) {
-                    $qq->where('dosen_id', $dosen->id)->orWhere('dosen_id_2', $dosen->id);
-                });
-            })->exists();
-
-            abort_unless($allowed, 403);
-        }
-
-        $krs->load(['mahasiswa', 'items.mataKuliah']);
-        $items = $dosen
-            ? $krs->items->filter(fn ($it) => in_array((int) $dosen->id, [(int) ($it->mataKuliah?->dosen_id ?? 0), (int) ($it->mataKuliah?->dosen_id_2 ?? 0)], true))->values()
-            : $krs->items;
-
-        $khs = Khs::query()
-            ->where('mahasiswa_id', $krs->mahasiswa_id)
-            ->where('semester', $krs->semester)
-            ->first();
-
-        if (! $khs) {
-            abort(403, 'KHS belum disiapkan Admin.');
-        }
-
-        $khs->load(['items']);
-
-        $existing = $khs->items->keyBy('mata_kuliah_id');
-
-        return view('dosen.nilai.edit', [
-            'krs' => $krs,
-            'khs' => $khs,
-            'existing' => $existing,
-            'items' => $items,
-        ]);
-    }
-
-    public function update(Request $request, Krs $krs): RedirectResponse
-    {
-        abort_unless($krs->status_approval === 'approved', 404);
-
         $dosen = $request->user()?->dosen;
-        if ($dosen) {
-            $allowed = $krs->items()->whereHas('mataKuliah', function ($q) use ($dosen) {
-                $q->where(function ($qq) use ($dosen) {
-                    $qq->where('dosen_id', $dosen->id)->orWhere('dosen_id_2', $dosen->id);
-                });
-            })->exists();
-
-            abort_unless($allowed, 403);
-        }
+        abort_unless($dosen && in_array((int) $dosen->id, [(int) $mataKuliah->dosen_id, (int) $mataKuliah->dosen_id_2], true), 403);
 
         $validated = $request->validate([
             'nilai_angka' => ['nullable', 'array'],
@@ -118,45 +120,94 @@ class NilaiController extends Controller
             'nilai_huruf.*' => ['nullable', 'string', Rule::in(self::hurufChoices())],
         ]);
 
-        $khs = Khs::query()
-            ->where('mahasiswa_id', $krs->mahasiswa_id)
-            ->where('semester', $krs->semester)
-            ->first();
+        $nilaiAngka = collect($validated['nilai_angka'] ?? [])
+            ->mapWithKeys(fn ($v, $k) => [(int) $k => $v])
+            ->all();
 
-        if (! $khs) {
-            return redirect()->route('dosen.nilai.index')->with('error', 'KHS belum disiapkan Admin.');
+        $requestedMahasiswaIds = collect(array_keys($nilaiAngka))
+            ->map(fn ($v) => (int) $v)
+            ->filter(fn ($v) => $v > 0)
+            ->unique()
+            ->values()
+            ->all();
+
+        if (count($requestedMahasiswaIds) === 0) {
+            return redirect()
+                ->route('dosen.nilai.edit', [$mataKuliah, $semester])
+                ->with('success', 'Tidak ada perubahan nilai.');
         }
 
-        $krs->load(['items.mataKuliah']);
-        $mkIds = $dosen
-            ? $krs->items
-                ->filter(fn ($it) => in_array((int) $dosen->id, [(int) ($it->mataKuliah?->dosen_id ?? 0), (int) ($it->mataKuliah?->dosen_id_2 ?? 0)], true))
-                ->pluck('mata_kuliah_id')
-                ->map(fn ($v) => (int) $v)
-                ->values()
-                ->all()
-            : $krs->items->pluck('mata_kuliah_id')->map(fn ($v) => (int) $v)->values()->all();
+        $allowedMahasiswaIds = Krs::query()
+            ->where('status_approval', 'approved')
+            ->where('semester', $semester)
+            ->whereHas('items', function ($sub) use ($mataKuliah) {
+                $sub->where('mata_kuliah_id', $mataKuliah->id);
+            })
+            ->pluck('mahasiswa_id')
+            ->map(fn ($v) => (int) $v)
+            ->unique()
+            ->values()
+            ->all();
 
-        $khsItems = $khs->items()->whereIn('mata_kuliah_id', $mkIds)->get()->keyBy('mata_kuliah_id');
-        if ($khsItems->count() !== count($mkIds)) {
-            return redirect()->route('dosen.nilai.index')->with('error', 'KHS belum lengkap disiapkan Admin untuk mata kuliah pada KRS ini.');
-        }
+        $allowedSet = array_fill_keys($allowedMahasiswaIds, true);
+        $targetMahasiswaIds = array_values(array_filter($requestedMahasiswaIds, fn ($id) => isset($allowedSet[$id])));
 
-        foreach ($mkIds as $mkId) {
-            $angka = $validated['nilai_angka'][$mkId] ?? null;
+        $khsList = Khs::query()
+            ->with(['items' => function ($sub) use ($mataKuliah) {
+                $sub->where('mata_kuliah_id', $mataKuliah->id);
+            }])
+            ->where('semester', $semester)
+            ->whereIn('mahasiswa_id', $targetMahasiswaIds)
+            ->get()
+            ->keyBy(fn ($khs) => (int) $khs->mahasiswa_id);
+
+        $updatedMahasiswaIds = [];
+        $missingMahasiswaIds = [];
+
+        foreach ($targetMahasiswaIds as $mahasiswaId) {
+            $khs = $khsList->get((int) $mahasiswaId);
+            if (! $khs) {
+                $missingMahasiswaIds[] = (int) $mahasiswaId;
+                continue;
+            }
+
+            $khsItem = $khs->items->first();
+            if (! $khsItem) {
+                $missingMahasiswaIds[] = (int) $mahasiswaId;
+                continue;
+            }
+
+            $angka = $nilaiAngka[(int) $mahasiswaId] ?? null;
             $angka = $angka !== '' ? $angka : null;
             $angka = $angka !== null ? (float) $angka : null;
             $huruf = $angka !== null ? self::hurufFromAngka($angka) : null;
 
-            $khsItems[$mkId]->update([
+            $khsItem->update([
                 'nilai_angka' => $angka,
                 'nilai_huruf' => $huruf,
             ]);
+
+            $updatedMahasiswaIds[] = (int) $mahasiswaId;
         }
 
-        $this->recalculateIpsIpk($krs->mahasiswa_id, (int) $krs->semester);
+        foreach ($updatedMahasiswaIds as $mahasiswaId) {
+            $this->recalculateIpsIpk((int) $mahasiswaId, (int) $semester);
+        }
 
-        return redirect()->route('dosen.nilai.index')->with('success', 'Nilai berhasil disimpan.');
+        if (count($updatedMahasiswaIds) === 0) {
+            return redirect()
+                ->route('dosen.nilai.edit', [$mataKuliah, $semester])
+                ->with('error', 'Nilai tidak tersimpan. KHS belum disiapkan Admin untuk mahasiswa pada mata kuliah ini.');
+        }
+
+        $message = 'Nilai berhasil disimpan.';
+        if (count($missingMahasiswaIds) > 0) {
+            $message .= ' Ada '.count($missingMahasiswaIds).' mahasiswa yang belum punya KHS/KHS item untuk mata kuliah ini.';
+        }
+
+        return redirect()
+            ->route('dosen.nilai.edit', [$mataKuliah, $semester])
+            ->with('success', $message);
     }
 
     private static function hurufChoices(): array
