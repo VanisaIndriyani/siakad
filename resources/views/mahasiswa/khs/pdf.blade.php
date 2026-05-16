@@ -24,6 +24,7 @@
         .tbl th { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
         .center { text-align: center; }
         .right { text-align: right; }
+        .nowrap { white-space: nowrap; }
     </style>
 </head>
 <body>
@@ -89,7 +90,7 @@
                     <tr>
                         <td class="label">Fakultas</td>
                         <td class="colon">:</td>
-                        <td class="value">{{ $mahasiswa?->fakultas ?? '-' }}</td>
+                        <td class="value nowrap" style="font-size: 10.5px;">{{ $mahasiswa?->fakultas ?? '-' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Program Studi</td>
@@ -98,7 +99,7 @@
                     </tr>
                 </table>
             </td>
-            <td style="width: 50%; vertical-align: top;">
+            <td style="width: 50%; vertical-align: top; padding-left: 16px;">
                 <table class="kv2">
                     <tr>
                         <td class="label">Nama</td>

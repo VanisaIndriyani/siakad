@@ -87,11 +87,11 @@
                 <td style="width: 50%; vertical-align: top;">
                     <table style="width: 100%; border-collapse: collapse;">
                         <tr><td style="width: 140px;">Jenjang/Program</td><td style="width: 10px; text-align: center;">:</td><td>{{ $jenjang }}</td></tr>
-                        <tr><td>Fakultas</td><td style="text-align: center;">:</td><td>{{ $mahasiswa?->fakultas ?? '-' }}</td></tr>
+                        <tr><td>Fakultas</td><td style="text-align: center;">:</td><td style="white-space: nowrap; font-size: 10.5px;">{{ $mahasiswa?->fakultas ?? '-' }}</td></tr>
                         <tr><td>Program Studi</td><td style="text-align: center;">:</td><td>{{ $mahasiswa?->program_studi ?? '-' }}</td></tr>
                     </table>
                 </td>
-                <td style="width: 50%; vertical-align: top;">
+                <td style="width: 50%; vertical-align: top; padding-left: 16px;">
                     <table style="width: 100%; border-collapse: collapse;">
                         <tr><td style="width: 140px;">Nama</td><td style="width: 10px; text-align: center;">:</td><td style="font-weight: 700;">{{ $mahasiswa?->nama_lengkap ?? auth()->user()->name }}</td></tr>
                         <tr><td>NIM</td><td style="text-align: center;">:</td><td style="font-weight: 700;">{{ $mahasiswa?->npm ?? '-' }}</td></tr>
@@ -209,12 +209,14 @@
             <table style="width: 100%; border-collapse: collapse;">
                 <tr>
                     <td style="width: 33.33%; text-align: center; vertical-align: top;">
-                        <div style="font-size: 11px; font-weight: 700;">Ketua Prodi {{ $mahasiswa?->program_studi ?? '-' }}</div>
+                        <div style="font-size: 11px; font-weight: 700;">Ketua Prodi</div>
+                        <div style="font-size: 11px; font-weight: 700;">{{ $mahasiswa?->program_studi ?? '-' }}</div>
                         <div style="height: 64px;"></div>
                         <div style="font-size: 11px; font-weight: 800;">{{ $kaprodiNama ?: '-' }}</div>
                     </td>
                     <td style="width: 33.33%; text-align: center; vertical-align: top;">
-                        <div style="font-size: 11px; font-weight: 700;">Sekretaris Prodi {{ $mahasiswa?->program_studi ?? '-' }}</div>
+                        <div style="font-size: 11px; font-weight: 700;">Sekretaris Prodi</div>
+                        <div style="font-size: 11px; font-weight: 700;">{{ $mahasiswa?->program_studi ?? '-' }}</div>
                         <div style="height: 64px;"></div>
                         <div style="font-size: 11px; font-weight: 800;">{{ $sekprodiNama ?: '-' }}</div>
                     </td>

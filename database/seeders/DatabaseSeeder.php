@@ -37,17 +37,17 @@ class DatabaseSeeder extends Seeder
 
         User::factory()->create([
             'name' => 'Staf Keuangan',
-            'email' => 'keuangan@kampus.ac.id',
+            'email' => 'keuangan@iaiddisidrap.ac.id',
             'password' => Hash::make('password'),
             'role' => User::ROLE_KEUANGAN,
         ]);
 
         $dosenRows = [
             ['email' => 'dosen@gmail.com', 'nama' => 'Dosen Demo', 'nidn' => '1234567890', 'mata_kuliah' => 'Pemrograman Web'],
-            ['email' => 'andi@kampus.ac.id', 'nama' => 'Dr. Andi', 'nidn' => '1987000001', 'mata_kuliah' => 'Manajemen Pendidikan'],
-            ['email' => 'siti@kampus.ac.id', 'nama' => 'Siti, M.Pd', 'nidn' => '1987000002', 'mata_kuliah' => 'Metodologi Penelitian'],
-            ['email' => 'budi@kampus.ac.id', 'nama' => 'Budi, M.H', 'nidn' => '1987000003', 'mata_kuliah' => 'Hukum Islam'],
-            ['email' => 'rina@kampus.ac.id', 'nama' => 'Rina, M.E', 'nidn' => '1987000004', 'mata_kuliah' => 'Ekonomi Syariah'],
+            ['email' => 'andi@iaiddisidrap.ac.id', 'nama' => 'Dr. Andi', 'nidn' => '1987000001', 'mata_kuliah' => 'Manajemen Pendidikan'],
+            ['email' => 'siti@iaiddisidrap.ac.id', 'nama' => 'Siti, M.Pd', 'nidn' => '1987000002', 'mata_kuliah' => 'Metodologi Penelitian'],
+            ['email' => 'budi@iaiddisidrap.ac.id', 'nama' => 'Budi, M.H', 'nidn' => '1987000003', 'mata_kuliah' => 'Hukum Islam'],
+            ['email' => 'rina@iaiddisidrap.ac.id', 'nama' => 'Rina, M.E', 'nidn' => '1987000004', 'mata_kuliah' => 'Ekonomi Syariah'],
         ];
 
         $dosens = collect($dosenRows)->map(function (array $row) {
@@ -83,28 +83,28 @@ class DatabaseSeeder extends Seeder
                 'program_studi' => 'Pendidikan Agama Islam',
             ],
             [
-                'email' => 'mhs20260002@kampus.ac.id',
+                'email' => 'mhs20260002@iaiddisidrap.ac.id',
                 'nama_lengkap' => 'Mahasiswa 20260002',
                 'npm' => '20260002',
                 'angkatan' => 2026,
                 'program_studi' => 'Pendidikan Islam Anak Usia Dini',
             ],
             [
-                'email' => 'mhs20260003@kampus.ac.id',
+                'email' => 'mhs20260003@iaiddisidrap.ac.id',
                 'nama_lengkap' => 'Mahasiswa 20260003',
                 'npm' => '20260003',
                 'angkatan' => 2026,
                 'program_studi' => 'Hukum Keluarga Islam',
             ],
             [
-                'email' => 'mhs20260004@kampus.ac.id',
+                'email' => 'mhs20260004@iaiddisidrap.ac.id',
                 'nama_lengkap' => 'Mahasiswa 20260004',
                 'npm' => '20260004',
                 'angkatan' => 2026,
                 'program_studi' => 'Hukum Tata Negara',
             ],
             [
-                'email' => 'mhs20260005@kampus.ac.id',
+                'email' => 'mhs20260005@iaiddisidrap.ac.id',
                 'nama_lengkap' => 'Mahasiswa 20260005',
                 'npm' => '20260005',
                 'angkatan' => 2026,

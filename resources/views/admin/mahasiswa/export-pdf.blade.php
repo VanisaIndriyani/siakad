@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <style>
             @page { margin: 22px 22px 26px 22px; }
-            body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #0f172a; }
+            body { font-family: DejaVu Sans, sans-serif; font-size: 10px; color: #0f172a; }
             .header { border: 1px solid #d1fae5; background: #064e3b; color: #ecfdf5; padding: 14px 16px; border-radius: 10px; }
             .title { font-size: 16px; font-weight: 700; margin: 0; }
             .subtitle { font-size: 11px; margin-top: 4px; color: #a7f3d0; }
@@ -58,6 +58,8 @@
                         <th>NPM</th>
                         <th>NIK</th>
                         <th>Angkatan</th>
+                        <th>Email Login</th>
+                        <th>Fakultas</th>
                         <th>Program Studi</th>
                         <th>Nomor Telp</th>
                         <th>Status</th>
@@ -70,6 +72,8 @@
                             <td>{{ $row->npm }}</td>
                             <td>{{ $row->nik }}</td>
                             <td>{{ $row->angkatan }}</td>
+                            <td>{{ $row->user?->email }}</td>
+                            <td>{{ $row->fakultas }}</td>
                             <td>{{ $row->program_studi }}</td>
                             <td>{{ $row->nomor_telp }}</td>
                             <td>{{ $row->status_mahasiswa }}</td>

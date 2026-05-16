@@ -17,6 +17,8 @@ return [
         ? env('APP_NAME')
         : 'SIAKAD IAI DDI SIDRAP',
 
+    'email_domain' => env('APP_EMAIL_DOMAIN', 'iaiddisidrap.ac.id'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

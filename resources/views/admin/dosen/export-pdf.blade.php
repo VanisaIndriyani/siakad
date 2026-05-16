@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <style>
             @page { margin: 22px 22px 26px 22px; }
-            body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #0f172a; }
+            body { font-family: DejaVu Sans, sans-serif; font-size: 10px; color: #0f172a; }
             .header { border: 1px solid #dbeafe; background: #0f172a; color: #eff6ff; padding: 14px 16px; border-radius: 10px; }
             .title { font-size: 16px; font-weight: 700; margin: 0; }
             .subtitle { font-size: 11px; margin-top: 4px; color: #bfdbfe; }
@@ -57,9 +57,10 @@
                         <th>Nama</th>
                         <th>NIK</th>
                         <th>NIDN</th>
-                        <th>NUPTK</th>
-                        <th>Nomor SK</th>
+                        <th>Email Login</th>
                         <th>Nomor HP</th>
+                        <th>Program Studi</th>
+                        <th>Status Akademik</th>
                         <th>Mata Kuliah</th>
                     </tr>
                 </thead>
@@ -69,9 +70,10 @@
                             <td>{{ $row->nama }}</td>
                             <td>{{ $row->nik }}</td>
                             <td>{{ $row->nidn }}</td>
-                            <td>{{ $row->nuptk }}</td>
-                            <td>{{ $row->nomor_sk }}</td>
+                            <td>{{ $row->user?->email }}</td>
                             <td>{{ $row->nomor_hp }}</td>
+                            <td>{{ $row->program_studi }}</td>
+                            <td>{{ $row->status_akademik }}</td>
                             <td>{{ $row->mata_kuliah }}</td>
                         </tr>
                     @endforeach

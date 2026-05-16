@@ -9,7 +9,7 @@
         body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #111827; }
         .kop { width: 100%; margin-bottom: 14px; }
         .kop-title-1 { color: #111827; font-size: 19px; font-weight: 800; margin: 0; line-height: 1.12; }
-        .kop-title-2 { color: #111827; font-size: 28px; font-weight: 900; margin: 1px 0 0; letter-spacing: 0.6px; line-height: 1.08; }
+        .kop-title-2 { color: #111827; font-size: 26px; font-weight: 900; margin: 1px 0 0; letter-spacing: 0.4px; line-height: 1.06; white-space: nowrap; }
         .kop-title-3 { color: #111827; font-size: 19px; font-weight: 900; margin: 1px 0 0; line-height: 1.12; }
         .kop-meta { color: #111827; font-size: 11px; margin-top: 3px; line-height: 1.2; }
         .kop-line-1 { border-top: 3px solid #6b7280; margin-top: 7px; }
@@ -18,13 +18,13 @@
 
         .muted { color: #6b7280; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
         .info-box { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
-        .info-box td { border: 1px solid #111827; padding: 12px 12px; vertical-align: top; }
+        .info-box td { border: 1px solid #111827; padding: 9px 10px; vertical-align: top; }
         .info-box .split { border-left: 0; }
-        .info-row { width: 100%; border-collapse: collapse; }
-        .info-row td { border: 0; padding: 0 0 7px 0; }
-        .info-row .k { width: 42%; font-size: 11px; }
-        .info-row .v { width: 58%; text-align: right; font-weight: 800; font-size: 11px; }
-        .info-row .v-left { text-align: left; font-weight: 800; }
+        .kv2 { width: 100%; border-collapse: collapse; }
+        .kv2 td { border: 0; padding: 2px 0; font-size: 11px; vertical-align: top; }
+        .kv2 .label { width: 118px; }
+        .kv2 .colon { width: 10px; text-align: center; }
+        .kv2 .value { font-weight: 800; }
 
         .summary { width: 100%; border-collapse: collapse; margin: 12px 0 14px; }
         .summary td { border: 1px solid #111827; padding: 10px 12px; vertical-align: top; }
@@ -71,9 +71,9 @@
     <div class="kop">
         <table style="width: 100%; border-collapse: collapse;">
             <tr>
-                <td style="width: 135px; vertical-align: middle; padding-top: 2px;">
+                <td style="width: 120px; vertical-align: middle; padding-top: 2px;">
                     @if($logoBase64)
-                        <img src="{{ $logoBase64 }}" alt="Logo" style="display: block; width: 125px; height: auto;" />
+                        <img src="{{ $logoBase64 }}" alt="Logo" style="display: block; width: 115px; height: auto;" />
                     @endif
                 </td>
                 <td style="text-align: center;">
@@ -84,7 +84,7 @@
                     <div class="kop-meta">{{ $kop5 }}</div>
                     <div class="kop-meta">{{ $kop6 }}</div>
                 </td>
-                <td style="width: 135px;"></td>
+                <td style="width: 90px;"></td>
             </tr>
         </table>
         <div class="kop-line-1"></div>
@@ -96,43 +96,19 @@
     <table class="info-box">
         <tr>
             <td style="width: 50%;">
-                <table class="info-row">
-                    <tr>
-                        <td class="k">Nama</td>
-                        <td class="v v-left">{{ $pembayaran->mahasiswa->nama_lengkap ?? '-' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="k">NPM</td>
-                        <td class="v v-left">{{ $pembayaran->mahasiswa->npm ?? '-' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="k">Angkatan</td>
-                        <td class="v v-left">{{ $pembayaran->mahasiswa->angkatan ?? '-' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="k">Jenis Tagihan</td>
-                        <td class="v v-left">{{ $pembayaran->jenis_tagihan ?? '-' }}</td>
-                    </tr>
+                <table class="kv2">
+                    <tr><td class="label">Nama</td><td class="colon">:</td><td class="value">{{ $pembayaran->mahasiswa->nama_lengkap ?? '-' }}</td></tr>
+                    <tr><td class="label">NPM</td><td class="colon">:</td><td class="value">{{ $pembayaran->mahasiswa->npm ?? '-' }}</td></tr>
+                    <tr><td class="label">Angkatan</td><td class="colon">:</td><td class="value">{{ $pembayaran->mahasiswa->angkatan ?? '-' }}</td></tr>
+                    <tr><td class="label">Jenis Tagihan</td><td class="colon">:</td><td class="value">{{ $pembayaran->jenis_tagihan ?? '-' }}</td></tr>
                 </table>
             </td>
             <td class="split" style="width: 50%;">
-                <table class="info-row">
-                    <tr>
-                        <td class="k">Semester / TA</td>
-                        <td class="v">Semester {{ $pembayaran->semester }} / {{ $pembayaran->tahun_ajaran }}</td>
-                    </tr>
-                    <tr>
-                        <td class="k">Status</td>
-                        <td class="v"><span class="{{ $badgeClass }}">{{ strtoupper((string) $pembayaran->status_pembayaran) }}</span></td>
-                    </tr>
-                    <tr>
-                        <td class="k">Dicetak</td>
-                        <td class="v">{{ now()->format('d/m/Y H:i') }}</td>
-                    </tr>
-                    <tr>
-                        <td class="k">Catatan</td>
-                        <td class="v">{{ $pembayaran->catatan ?? '-' }}</td>
-                    </tr>
+                <table class="kv2">
+                    <tr><td class="label">Semester / TA</td><td class="colon">:</td><td class="value">Semester {{ $pembayaran->semester }} / {{ $pembayaran->tahun_ajaran }}</td></tr>
+                    <tr><td class="label">Status</td><td class="colon">:</td><td class="value"><span class="{{ $badgeClass }}">{{ strtoupper((string) $pembayaran->status_pembayaran) }}</span></td></tr>
+                    <tr><td class="label">Dicetak</td><td class="colon">:</td><td class="value">{{ now()->format('d/m/Y H:i') }}</td></tr>
+                    <tr><td class="label">Catatan</td><td class="colon">:</td><td class="value">{{ $pembayaran->catatan ?? '-' }}</td></tr>
                 </table>
             </td>
         </tr>

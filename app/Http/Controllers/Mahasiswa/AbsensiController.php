@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AbsensiItem;
 use App\Models\MataKuliah;
 use App\Models\User;
+use Dompdf\Dompdf;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -106,5 +107,45 @@ class AbsensiController extends Controller
             'items' => $items,
         ]);
     }
-}
 
+    public function pdf(Request $request, MataKuliah $mataKuliah, int $semester)
+    {
+        /** @var User $user */
+        $user = $request->user();
+        $mahasiswa = $user->mahasiswa;
+
+        abort_unless($mahasiswa, 403);
+        abort_unless($semester >= 1 && $semester <= 8, 404);
+
+        $items = AbsensiItem::query()
+            ->with('absensi')
+            ->where('mahasiswa_id', $mahasiswa->id)
+            ->whereHas('absensi', function ($q) use ($mataKuliah, $semester) {
+                $q->where('semester', $semester)->where('mata_kuliah_id', $mataKuliah->id);
+            })
+            ->get()
+            ->sortBy(function (AbsensiItem $item) {
+                return $item->absensi->pertemuan;
+            })
+            ->values();
+
+        $html = view('mahasiswa.absensi.pdf', [
+            'mahasiswa' => $mahasiswa,
+            'mataKuliah' => $mataKuliah,
+            'semester' => $semester,
+            'items' => $items,
+        ])->render();
+
+        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $filename = 'absensi-'.$mahasiswa->npm.'-'.$mataKuliah->kode.'-semester-'.$semester.'.pdf';
+
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ]);
+    }
+}

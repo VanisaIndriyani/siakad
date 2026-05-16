@@ -24,7 +24,7 @@
         <!-- Email Address -->
         <div>
             <x-input-label class="text-emerald-100/90" for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-2 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" placeholder="nama@kampus.ac.id" />
+            <x-text-input id="email" class="block mt-2 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" placeholder="nama@iaiddisidrap.ac.id" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 

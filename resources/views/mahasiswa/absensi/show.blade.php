@@ -8,10 +8,16 @@
             <div class="text-xl font-semibold">Detail Absensi</div>
             <div class="text-sm text-emerald-100/70">{{ $mataKuliah->kode }} - {{ $mataKuliah->nama }} • Semester {{ $semester }}</div>
         </div>
-        <a href="{{ route('mahasiswa.absensi.index', ['semester' => $semester]) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
-            <i class="fa-solid fa-arrow-left"></i>
-            Kembali
-        </a>
+        <div class="flex items-center gap-2">
+            <a href="{{ route('mahasiswa.absensi.pdf', [$mataKuliah, $semester]) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/20 border border-emerald-500/20 transition">
+                <i class="fa-solid fa-file-pdf"></i>
+                PDF
+            </a>
+            <a href="{{ route('mahasiswa.absensi.index', ['semester' => $semester]) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                <i class="fa-solid fa-arrow-left"></i>
+                Kembali
+            </a>
+        </div>
     </div>
 
     <div class="overflow-hidden rounded-2xl border border-white/10 bg-white/5">
@@ -64,4 +70,3 @@
         </div>
     </div>
 </x-portal-layout>
-

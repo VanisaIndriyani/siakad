@@ -88,11 +88,12 @@ class MahasiswaController extends Controller
             'foto' => ['nullable', 'image', 'max:2048'],
         ]);
 
-        $emailBase = Str::lower(preg_replace('/\s+/', '', $validated['npm'])).'@kampus.ac.id';
+        $emailDomain = (string) config('app.email_domain');
+        $emailBase = Str::lower(preg_replace('/\s+/', '', $validated['npm'])).'@'.$emailDomain;
         $email = $emailBase;
         $i = 1;
         while (User::query()->where('email', $email)->exists()) {
-            $email = Str::before($emailBase, '@')."+{$i}@kampus.ac.id";
+            $email = Str::before($emailBase, '@')."+{$i}@".$emailDomain;
             $i++;
         }
 
