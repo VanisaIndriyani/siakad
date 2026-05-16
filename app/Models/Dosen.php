@@ -37,6 +37,7 @@ class Dosen extends Model
         'mata_kuliah',
         'program_studi',
         'status_akademik',
+        'status_dosen',
         'foto_path',
     ];
 

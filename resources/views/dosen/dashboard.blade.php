@@ -49,6 +49,10 @@
                     <span class="font-medium text-white">{{ $dosen?->nomor_sk ?? '-' }}</span>
                 </div>
                 <div class="flex items-center justify-between">
+                    <span>Status Dosen</span>
+                    <span class="font-medium text-white">{{ ($dosen?->status_dosen ?? 'aktif') === 'tidak aktif' ? 'Tidak Aktif' : 'Aktif' }}</span>
+                </div>
+                <div class="flex items-center justify-between">
                     <span>Mata Kuliah</span>
                     <span class="font-medium text-white">{{ $dosen?->mata_kuliah ?? '-' }}</span>
                 </div>

@@ -97,6 +97,10 @@
                         <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->nomor_sk ?? '-' }}</td>
                     </tr>
                     <tr>
+                        <td style="padding: 8px; border: 1px solid #e5e7eb;">Status Dosen</td>
+                        <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ ($dosen?->status_dosen ?? 'aktif') === 'tidak aktif' ? 'Tidak Aktif' : 'Aktif' }}</td>
+                    </tr>
+                    <tr>
                         <td style="padding: 8px; border: 1px solid #e5e7eb;">Mata Kuliah</td>
                         <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->mata_kuliah ?? '-' }}</td>
                     </tr>
@@ -145,6 +149,14 @@
                         <label class="text-sm text-emerald-100/80">Status Akademik</label>
                         <input value="{{ $dosen?->status_akademik ?? 'Dosen' }}" readonly class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 opacity-80" />
                     </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-sm text-emerald-100/80">Status Dosen</label>
+                        <input value="{{ ($dosen?->status_dosen ?? 'aktif') === 'tidak aktif' ? 'Tidak Aktif' : 'Aktif' }}" readonly class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 opacity-80" />
+                    </div>
+                    <div></div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

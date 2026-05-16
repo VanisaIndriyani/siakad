@@ -24,6 +24,11 @@ class DosenController extends Controller
         'Sekretaris Prodi',
     ];
 
+    private const STATUS_DOSEN = [
+        'aktif',
+        'tidak aktif',
+    ];
+
     public function index(Request $request): View
     {
         $q = trim((string) $request->get('q', ''));
@@ -69,6 +74,7 @@ class DosenController extends Controller
             'nomor_sk' => ['nullable', 'string', 'max:255'],
             'program_studi' => ['nullable', 'string', 'max:255'],
             'status_akademik' => ['nullable', 'string', Rule::in(self::STATUS_AKADEMIK)],
+            'status_dosen' => ['nullable', 'string', Rule::in(self::STATUS_DOSEN)],
             'foto' => ['nullable', 'image', 'max:2048'],
         ]);
 
@@ -103,6 +109,7 @@ class DosenController extends Controller
             'nomor_sk' => $validated['nomor_sk'] ?? null,
             'program_studi' => $validated['program_studi'] ?? null,
             'status_akademik' => $validated['status_akademik'] ?? 'Dosen',
+            'status_dosen' => $validated['status_dosen'] ?? 'aktif',
             'alamat' => $validated['alamat'] ?? null,
             'nomor_hp' => $validated['nomor_hp'] ?? null,
             'mata_kuliah' => $validated['mata_kuliah'] ?? null,
@@ -138,6 +145,7 @@ class DosenController extends Controller
             'nomor_sk' => ['nullable', 'string', 'max:255'],
             'program_studi' => ['nullable', 'string', 'max:255'],
             'status_akademik' => ['nullable', 'string', Rule::in(self::STATUS_AKADEMIK)],
+            'status_dosen' => ['nullable', 'string', Rule::in(self::STATUS_DOSEN)],
             'foto' => ['nullable', 'image', 'max:2048'],
         ]);
 
@@ -156,6 +164,7 @@ class DosenController extends Controller
             'nomor_sk' => $validated['nomor_sk'] ?? $dosen->nomor_sk,
             'program_studi' => $validated['program_studi'] ?? $dosen->program_studi,
             'status_akademik' => $validated['status_akademik'] ?? ($dosen->status_akademik ?: 'Dosen'),
+            'status_dosen' => $validated['status_dosen'] ?? ($dosen->status_dosen ?: 'aktif'),
         ])->save();
 
         $dosen->user?->update(['name' => $validated['nama']]);
