@@ -23,13 +23,59 @@
         .chat-empty { padding: 18px; text-align: center; color: rgba(17, 24, 39, 0.55); font-weight: 900; }
         @media print {
             .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white !important; color: black !important; }
             .chat-stream { max-height: none !important; overflow: visible !important; }
-            .chat-card { border: none !important; padding: 0 !important; }
+            .chat-card { border: none !important; background: transparent !important; padding: 0 !important; }
             .chat-wrap { max-width: none !important; margin: 0 !important; }
         }
+        .print-only { display: none; }
     </style>
 
     <div class="chat-wrap">
+        {{-- Print Only Kop Surat --}}
+        <div class="print-only mb-8">
+            <table style="width: 100%; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 2px;">
+                <tr>
+                    <td style="width: 110px; vertical-align: middle;">
+                        @php
+                            $logoPath = public_path('img/lo.jpeg');
+                            $logoBase64 = '';
+                            if (file_exists($logoPath)) {
+                                $logoData = file_get_contents($logoPath);
+                                $logoType = pathinfo($logoPath, PATHINFO_EXTENSION);
+                                $logoBase64 = 'data:image/' . $logoType . ';base64,' . base64_encode($logoData);
+                            }
+                        @endphp
+                        @if($logoBase64)
+                            <img src="{{ $logoBase64 }}" style="width: 100px; height: auto;">
+                        @endif
+                    </td>
+                    <td style="text-align: center; vertical-align: middle;">
+                        <div style="font-size: 18px; font-weight: 800; margin: 0; line-height: 1.1;">INSTITUT AGAMA ISLAM</div>
+                        <div style="font-size: 24px; font-weight: 900; margin: 2px 0; line-height: 1;">DARUD DA'WAH WAL IRSYAD</div>
+                        <div style="font-size: 18px; font-weight: 800; margin: 0; line-height: 1.1;">SIDENRENG RAPPANG</div>
+                        <div style="font-size: 10px; font-weight: 700; margin-top: 3px;">TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021</div>
+                        <div style="font-size: 10px; margin: 2px 0;">Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang</div>
+                        <div style="font-size: 10px; margin: 2px 0;">E-mail : iaiddisrapp@gmail.com Website : www.yppddisrapp.ac.id</div>
+                    </td>
+                    <td style="width: 90px;"></td>
+                </tr>
+            </table>
+            <div style="border-top: 1px solid #000; margin-top: 2px; margin-bottom: 20px;"></div>
+            <div style="text-align: center; font-size: 14px; font-weight: bold; text-decoration: underline; margin-bottom: 20px; text-transform: uppercase;">Riwayat Bimbingan Skripsi</div>
+            <table style="width: 100%; margin-bottom: 20px; border-collapse: collapse; font-size: 11px;">
+                <tr>
+                    <td style="width: 120px; font-weight: bold; padding: 4px 0;">Nama Mahasiswa</td>
+                    <td style="padding: 4px 0;">: {{ $skripsi->mahasiswa?->nama_lengkap }} ({{ $skripsi->mahasiswa?->npm }})</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold; padding: 4px 0;">Judul Skripsi</td>
+                    <td style="padding: 4px 0;">: {{ $skripsi->judul }}</td>
+                </tr>
+            </table>
+        </div>
+
         <div class="chat-card">
             <div class="chat-head">
                 <div>

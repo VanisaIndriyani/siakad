@@ -13,28 +13,47 @@
         }
         body {
             font-size: 11px;
-            color: #1f2937;
+            color: #111827;
             line-height: 1.5;
             margin: 0;
             padding: 0;
         }
-        .header-table {
+        .kop-surat {
             width: 100%;
-            border-bottom: 2px solid #10b981;
-            padding-bottom: 10px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 5px;
+            margin-bottom: 2px;
+        }
+        .kop-logo {
+            width: 110px;
+            text-align: left;
+            vertical-align: middle;
+        }
+        .kop-logo img {
+            width: 100px;
+            height: auto;
+        }
+        .kop-text {
+            text-align: center;
+            vertical-align: middle;
+        }
+        .kop-title-1 { font-size: 18px; font-weight: 800; margin: 0; line-height: 1.1; }
+        .kop-title-2 { font-size: 24px; font-weight: 900; margin: 2px 0; line-height: 1; }
+        .kop-title-3 { font-size: 18px; font-weight: 800; margin: 0; line-height: 1.1; }
+        .kop-meta { font-size: 10px; font-weight: 700; margin-top: 3px; }
+        .kop-alamat { font-size: 10px; margin: 2px 0; }
+        .kop-line-2 {
+            border-top: 1px solid #000;
+            margin-top: 2px;
             margin-bottom: 20px;
         }
-        .title {
-            font-size: 18px;
+        .doc-title {
+            text-align: center;
+            font-size: 14px;
             font-weight: bold;
-            color: #064e3b;
-            margin: 0;
+            text-decoration: underline;
+            margin-bottom: 20px;
             text-transform: uppercase;
-        }
-        .subtitle {
-            font-size: 12px;
-            color: #6b7280;
-            margin-top: 2px;
         }
         .info-table {
             width: 100%;
@@ -48,25 +67,24 @@
         .info-table .label {
             width: 120px;
             font-weight: bold;
-            color: #374151;
         }
         .chat-container {
             margin-top: 20px;
         }
         .chat-row {
-            margin-bottom: 15px;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
+            margin-bottom: 12px;
+            padding: 8px 10px;
+            border: 1px solid #d1d5db;
             background-color: #ffffff;
+            page-break-inside: avoid;
         }
         .chat-meta {
-            font-size: 10px;
+            font-size: 9px;
             font-weight: bold;
-            color: #6b7280;
-            margin-bottom: 5px;
+            color: #4b5563;
+            margin-bottom: 4px;
             border-bottom: 1px solid #f3f4f6;
-            padding-bottom: 3px;
+            padding-bottom: 2px;
         }
         .chat-text {
             font-size: 11px;
@@ -76,29 +94,44 @@
         .footer {
             margin-top: 30px;
             text-align: right;
-            font-size: 10px;
-            color: #9ca3af;
-            border-top: 1px solid #f3f4f6;
-            padding-top: 10px;
-        }
-        .me {
-            background-color: #f0fdf4;
-            border-color: #dcfce7;
+            font-size: 9px;
+            color: #6b7280;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 8px;
         }
     </style>
 </head>
 <body>
-    <table class="header-table">
+    <table class="kop-surat">
         <tr>
-            <td>
-                <div class="title">Riwayat Bimbingan Skripsi</div>
-                <div class="subtitle">SIAKAD {{ config('app.name') }}</div>
+            <td class="kop-logo">
+                @php
+                    $logoPath = public_path('img/lo.jpeg');
+                    $logoBase64 = '';
+                    if (file_exists($logoPath)) {
+                        $logoData = file_get_contents($logoPath);
+                        $logoType = pathinfo($logoPath, PATHINFO_EXTENSION);
+                        $logoBase64 = 'data:image/' . $logoType . ';base64,' . base64_encode($logoData);
+                    }
+                @endphp
+                @if($logoBase64)
+                    <img src="{{ $logoBase64 }}" alt="Logo">
+                @endif
             </td>
-            <td style="text-align: right; vertical-align: bottom;">
-                <div style="font-size: 10px; color: #6b7280;">Dicetak pada: {{ now()->format('d/m/Y H:i') }}</div>
+            <td class="kop-text">
+                <div class="kop-title-1">INSTITUT AGAMA ISLAM</div>
+                <div class="kop-title-2">DARUD DA'WAH WAL IRSYAD</div>
+                <div class="kop-title-3">SIDENRENG RAPPANG</div>
+                <div class="kop-meta">TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021</div>
+                <div class="kop-alamat">Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang</div>
+                <div class="kop-alamat">E-mail : iaiddisrapp@gmail.com Website : www.yppddisrapp.ac.id</div>
             </td>
+            <td style="width: 90px;"></td>
         </tr>
     </table>
+    <div class="kop-line-2"></div>
+
+    <div class="doc-title">Riwayat Bimbingan Skripsi</div>
 
     <table class="info-table">
         <tr>
@@ -120,7 +153,7 @@
     </table>
 
     <div class="chat-container">
-        <h3 style="color: #064e3b; border-bottom: 1px solid #10b981; padding-bottom: 5px; margin-bottom: 15px;">Daftar Konsultasi</h3>
+        <div style="font-weight: bold; border-bottom: 1px solid #000; padding-bottom: 4px; margin-bottom: 15px; font-size: 12px;">DAFTAR KONSULTASI</div>
         
         @forelse ($skripsi->messages->sortBy('id') as $msg)
             <div class="chat-row">
@@ -135,7 +168,7 @@
     </div>
 
     <div class="footer">
-        Dokumen ini dihasilkan secara otomatis oleh Sistem Informasi Akademik.
+        Dicetak pada: {{ now()->format('d/m/Y H:i') }} • Dokumen ini dihasilkan secara otomatis oleh Sistem Informasi Akademik.
     </div>
 </body>
 </html>
