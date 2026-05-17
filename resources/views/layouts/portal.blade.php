@@ -9,6 +9,13 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer" />
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <style>
+            @media print {
+                .no-print { display: none !important; }
+                body { background: white !important; color: black !important; }
+                .lg\:pl-72 { padding-left: 0 !important; }
+            }
+        </style>
     </head>
     <body class="font-sans antialiased bg-brand-950 text-white">
         <div x-data="{ sidebarOpen: false }" class="min-h-screen">
@@ -16,7 +23,7 @@
                 <div class="absolute inset-0 bg-black/60" @click="sidebarOpen = false"></div>
             </div>
 
-            <aside class="fixed inset-y-0 left-0 z-50 w-72 bg-white/5 border-r border-white/10 backdrop-blur-xl transform transition lg:translate-x-0 overflow-y-auto"
+            <aside class="no-print fixed inset-y-0 left-0 z-50 w-72 bg-white/5 border-r border-white/10 backdrop-blur-xl transform transition lg:translate-x-0 overflow-y-auto"
                    :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
                 <div class="px-5 py-5 flex flex-col items-center text-center gap-3 border-b border-white/10">
                     <img src="{{ asset('img/lo.jpeg') }}" alt="Logo Kampus" class="h-16 w-auto max-w-[240px] rounded-2xl object-contain bg-white px-5 py-4 shadow-lg ring-1 ring-black/10" />
@@ -32,7 +39,7 @@
             </aside>
 
             <div class="lg:pl-72">
-                <header class="sticky top-0 z-30 h-16 flex items-center justify-between px-4 sm:px-6 bg-brand-950/80 backdrop-blur border-b border-white/10">
+                <header class="no-print sticky top-0 z-30 h-16 flex items-center justify-between px-4 sm:px-6 bg-brand-950/80 backdrop-blur border-b border-white/10">
                     <div class="flex items-center gap-3">
                         <button type="button" class="lg:hidden inline-flex items-center justify-center h-10 w-10 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10"
                                 @click="sidebarOpen = true">
