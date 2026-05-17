@@ -27,7 +27,12 @@
     </style>
 
     @php
-        $jenisLabel = $laporan->jenis === 'skripsi' ? 'Skripsi' : 'PPL';
+        $jenisLabel = match($laporan->jenis) {
+            'skripsi' => 'Skripsi',
+            'ppl' => 'PPL',
+            'krs' => 'KRS',
+            default => strtoupper($laporan->jenis)
+        };
         $canSend = $laporan->status === 'open';
     @endphp
 

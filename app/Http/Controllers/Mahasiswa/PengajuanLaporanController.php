@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\PengajuanLaporan;
 use App\Models\PplPengajuan;
 use App\Models\SkripsiPengajuan;
+use App\Models\Krs;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -48,9 +49,16 @@ class PengajuanLaporanController extends Controller
             ->orderByDesc('id')
             ->get();
 
+        $pendingKrs = Krs::query()
+            ->where('mahasiswa_id', $mahasiswa->id)
+            ->where('status_approval', 'pending')
+            ->orderByDesc('id')
+            ->get();
+
         return view('mahasiswa.laporan.create', [
             'pendingSkripsi' => $pendingSkripsi,
             'pendingPpl' => $pendingPpl,
+            'pendingKrs' => $pendingKrs,
         ]);
     }
 
@@ -60,7 +68,7 @@ class PengajuanLaporanController extends Controller
         abort_unless($mahasiswa, 403);
 
         $validated = $request->validate([
-            'jenis' => ['required', 'string', Rule::in(['skripsi', 'ppl'])],
+            'jenis' => ['required', 'string', Rule::in(['skripsi', 'ppl', 'krs'])],
             'pengajuan_id' => ['required', 'integer', 'min:1'],
             'judul' => ['required', 'string', 'max:255'],
             'pesan' => ['required', 'string'],
@@ -72,11 +80,17 @@ class PengajuanLaporanController extends Controller
                 ->where('mahasiswa_id', $mahasiswa->id)
                 ->where('status', 'pending')
                 ->firstOrFail();
-        } else {
+        } elseif ($validated['jenis'] === 'ppl') {
             PplPengajuan::query()
                 ->where('id', (int) $validated['pengajuan_id'])
                 ->where('mahasiswa_id', $mahasiswa->id)
                 ->where('status', 'pending')
+                ->firstOrFail();
+        } else {
+            Krs::query()
+                ->where('id', (int) $validated['pengajuan_id'])
+                ->where('mahasiswa_id', $mahasiswa->id)
+                ->where('status_approval', 'pending')
                 ->firstOrFail();
         }
 

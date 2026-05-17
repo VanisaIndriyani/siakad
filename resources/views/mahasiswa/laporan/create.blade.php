@@ -18,8 +18,9 @@
     @php
         $hasSkripsi = $pendingSkripsi->count() > 0;
         $hasPpl = $pendingPpl->count() > 0;
-        $hasPending = $hasSkripsi || $hasPpl;
-        $defaultJenis = old('jenis') ?: ($hasSkripsi ? 'skripsi' : 'ppl');
+        $hasKrs = $pendingKrs->count() > 0;
+        $hasPending = $hasSkripsi || $hasPpl || $hasKrs;
+        $defaultJenis = old('jenis') ?: ($hasSkripsi ? 'skripsi' : ($hasPpl ? 'ppl' : 'krs'));
     @endphp
 
     @if (! $hasPending)
@@ -38,6 +39,7 @@
                                 class="h-11 w-full rounded-xl bg-white/5 border border-white/10 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
                             <option value="skripsi" @selected($defaultJenis === 'skripsi') {{ $hasSkripsi ? '' : 'disabled' }} style="background-color: #0d2a23; color: #fff;">Skripsi</option>
                             <option value="ppl" @selected($defaultJenis === 'ppl') {{ $hasPpl ? '' : 'disabled' }} style="background-color: #0d2a23; color: #fff;">PPL</option>
+                            <option value="krs" @selected($defaultJenis === 'krs') {{ $hasKrs ? '' : 'disabled' }} style="background-color: #0d2a23; color: #fff;">KRS</option>
                         </select>
                         @error('jenis') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
                     </div>
@@ -62,6 +64,17 @@
                                 @foreach ($pendingPpl as $p)
                                     <option value="{{ $p->id }}" @selected((string) old('pengajuan_id') === (string) $p->id) style="background-color: #0d2a23; color: #fff;">
                                         #{{ $p->id }} • {{ \Illuminate\Support\Str::limit($p->instansi_nama, 60) }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div id="pengajuanKrsWrap" style="display:none;">
+                            <select name="pengajuan_id"
+                                    class="h-11 w-full rounded-xl bg-white/5 border border-white/10 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+                                @foreach ($pendingKrs as $k)
+                                    <option value="{{ $k->id }}" @selected((string) old('pengajuan_id') === (string) $k->id) style="background-color: #0d2a23; color: #fff;">
+                                        #{{ $k->id }} • Semester {{ $k->semester }} ({{ $k->tahun_ajaran }})
                                     </option>
                                 @endforeach
                             </select>
@@ -100,17 +113,22 @@
             const jenisSelect = document.getElementById('jenisSelect');
             const skripsiWrap = document.getElementById('pengajuanSkripsiWrap');
             const pplWrap = document.getElementById('pengajuanPplWrap');
-            if (!jenisSelect || !skripsiWrap || !pplWrap) return;
+            const krsWrap = document.getElementById('pengajuanKrsWrap');
+            if (!jenisSelect || !skripsiWrap || !pplWrap || !krsWrap) return;
             const skripsiSelect = skripsiWrap.querySelector('select');
             const pplSelect = pplWrap.querySelector('select');
+            const krsSelect = krsWrap.querySelector('select');
 
             function render() {
                 const v = (jenisSelect.value || 'skripsi').toLowerCase();
-                const isPpl = v === 'ppl';
-                skripsiWrap.style.display = isPpl ? 'none' : '';
-                pplWrap.style.display = isPpl ? '' : 'none';
-                if (skripsiSelect) skripsiSelect.disabled = isPpl;
-                if (pplSelect) pplSelect.disabled = !isPpl;
+                
+                skripsiWrap.style.display = v === 'skripsi' ? '' : 'none';
+                pplWrap.style.display = v === 'ppl' ? '' : 'none';
+                krsWrap.style.display = v === 'krs' ? '' : 'none';
+
+                if (skripsiSelect) skripsiSelect.disabled = v !== 'skripsi';
+                if (pplSelect) pplSelect.disabled = v !== 'ppl';
+                if (krsSelect) krsSelect.disabled = v !== 'krs';
             }
 
             render();

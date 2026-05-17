@@ -46,7 +46,12 @@
                             $badge = $row->status === 'open'
                                 ? 'bg-emerald-500/15 border-emerald-500/20 text-emerald-100'
                                 : 'bg-zinc-500/15 border-zinc-500/20 text-zinc-100';
-                            $jenisLabel = $row->jenis === 'skripsi' ? 'Skripsi' : 'PPL';
+                            $jenisLabel = match($row->jenis) {
+                                'skripsi' => 'Skripsi',
+                                'ppl' => 'PPL',
+                                'krs' => 'KRS',
+                                default => strtoupper($row->jenis)
+                            };
                         @endphp
                         <tr class="hover:bg-white/5">
                             <td class="px-4 py-3">{{ $items->firstItem() + $i }}</td>
