@@ -19,35 +19,54 @@
         }
         .kop-surat {
             width: 100%;
-            border-bottom: 3px double #000;
-            padding-bottom: 10px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 5px;
             margin-bottom: 20px;
         }
         .kop-logo {
-            width: 80px;
-            text-align: center;
+            width: 110px;
+            text-align: left;
+            vertical-align: middle;
         }
         .kop-logo img {
-            width: 70px;
+            width: 100px;
+            height: auto;
         }
         .kop-text {
             text-align: center;
+            vertical-align: middle;
         }
         .kop-text .instansi {
-            font-size: 14px;
-            font-weight: bold;
+            font-size: 16px;
+            font-weight: 800;
             margin: 0;
+            line-height: 1.1;
         }
         .kop-text .nama-kampus {
-            font-size: 18px;
-            font-weight: bold;
+            font-size: 24px;
+            font-weight: 900;
+            margin: 2px 0;
+            line-height: 1;
+        }
+        .kop-text .lokasi {
+            font-size: 16px;
+            font-weight: 800;
             margin: 0;
-            color: #064e3b;
+            line-height: 1.1;
+        }
+        .kop-text .akreditasi {
+            font-size: 10px;
+            font-weight: 700;
+            margin-top: 3px;
         }
         .kop-text .alamat {
             font-size: 10px;
             margin: 2px 0;
-            color: #4b5563;
+        }
+        .kop-line-2 {
+            border-top: 1px solid #000;
+            margin-top: 2px;
+            margin-bottom: 20px;
         }
         .title-box {
             text-align: center;
@@ -100,7 +119,7 @@
         <tr>
             <td class="kop-logo">
                 @php
-                    $logoPath = public_path('img/logo.png');
+                    $logoPath = public_path('img/lo.jpeg');
                     $logoBase64 = '';
                     if (file_exists($logoPath)) {
                         $logoData = file_get_contents($logoPath);
@@ -113,13 +132,17 @@
                 @endif
             </td>
             <td class="kop-text">
-                <div class="instansi">YAYASAN PENDIDIKAN AS'ADIYAH</div>
-                <div class="nama-kampus">INSTITUT AGAMA ISLAM (IAI) DDI SIDRAP</div>
-                <div class="alamat">Jl. Poros Sidrap-Soppeng No. 12, Pangkajene, Kab. Sidenreng Rappang</div>
-                <div class="alamat">Email: info@iaiddisidrap.ac.id | Website: www.iaiddisidrap.ac.id</div>
+                <div class="instansi">INSTITUT AGAMA ISLAM</div>
+                <div class="nama-kampus">DARUD DA'WAH WAL IRSYAD</div>
+                <div class="lokasi">SIDENRENG RAPPANG</div>
+                <div class="akreditasi">TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021</div>
+                <div class="alamat">Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang</div>
+                <div class="alamat">E-mail : iaiddisrapp@gmail.com Website : www.yppddisrapp.ac.id</div>
             </td>
+            <td style="width: 90px;"></td>
         </tr>
     </table>
+    <div class="kop-line-2"></div>
 
     <div class="title-box">
         <h2>Lembar Revisi Skripsi</h2>

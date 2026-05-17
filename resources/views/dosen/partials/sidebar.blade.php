@@ -62,8 +62,10 @@
 @php
     $dosen = auth()->user()?->dosen;
     $hasProdi = !empty($dosen?->program_studi);
+    $statusAkademik = (string) ($dosen?->status_akademik ?? '');
+    $isProdiManager = in_array($statusAkademik, ['Ketua Prodi', 'Sekretaris Prodi'], true);
 @endphp
-@if ($hasProdi)
+@if ($isProdiManager)
     <a href="{{ route('dosen.krs.approval') }}"
        class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('dosen.krs.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
         <i class="fa-solid fa-circle-check text-emerald-300"></i>
