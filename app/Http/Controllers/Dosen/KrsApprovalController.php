@@ -20,7 +20,8 @@ class KrsApprovalController extends Controller
         abort_unless($dosen, 403);
 
         $programStudi = trim((string) ($dosen->program_studi ?? ''));
-        abort_unless($programStudi !== '', 403, 'Anda belum memiliki Program Studi yang terdaftar.');
+        // Jangan abort 403 jika prodi kosong, biarkan query menghasilkan kosong
+        // abort_unless($programStudi !== '', 403, 'Anda belum memiliki Program Studi yang terdaftar.');
 
         return [$dosen, $programStudi];
     }

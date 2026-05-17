@@ -102,6 +102,7 @@ class MahasiswaController extends Controller
             'email' => $email,
             'role' => User::ROLE_MAHASISWA,
             'password' => Hash::make('password'),
+            'password_plain' => 'password',
         ]);
 
         $fotoPath = null;

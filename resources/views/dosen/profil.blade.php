@@ -15,129 +15,154 @@
     </style>
 
     <div class="print-only">
-        <table style="width: 100%; border-bottom: 2px solid #10b981; padding-bottom: 10px; margin-bottom: 20px;">
+        <table style="width: 100%; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 2px;">
             <tr>
-                <td>
-                    <div style="font-size: 20px; font-weight: bold; color: #064e3b; text-transform: uppercase;">Profil Dosen</div>
-                    <div style="font-size: 12px; color: #6b7280; margin-top: 2px;">SIAKAD {{ config('app.name') }}</div>
+                <td style="width: 110px; vertical-align: middle;">
+                    @php
+                        $logoPath = public_path('img/lo.jpeg');
+                        $logoBase64 = '';
+                        if (file_exists($logoPath)) {
+                            $logoData = file_get_contents($logoPath);
+                            $logoType = pathinfo($logoPath, PATHINFO_EXTENSION);
+                            $logoBase64 = 'data:image/' . $logoType . ';base64,' . base64_encode($logoData);
+                        }
+                    @endphp
+                    @if($logoBase64)
+                        <img src="{{ $logoBase64 }}" style="width: 100px; height: auto;">
+                    @endif
                 </td>
-                <td style="text-align: right; vertical-align: bottom;">
-                    <div style="font-size: 10px; color: #6b7280;">Dicetak pada: {{ now()->format('d/m/Y H:i') }}</div>
+                <td style="text-align: center; vertical-align: middle;">
+                    <div style="font-size: 18px; font-weight: 800; margin: 0; line-height: 1.1;">INSTITUT AGAMA ISLAM</div>
+                    <div style="font-size: 24px; font-weight: 900; margin: 2px 0; line-height: 1;">DARUD DA'WAH WAL IRSYAD</div>
+                    <div style="font-size: 18px; font-weight: 800; margin: 0; line-height: 1.1;">SIDENRENG RAPPANG</div>
+                    <div style="font-size: 10px; font-weight: 700; margin-top: 3px;">TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021</div>
+                    <div style="font-size: 10px; margin: 2px 0;">Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang</div>
+                    <div style="font-size: 10px; margin: 2px 0;">E-mail : iaiddisrapp@gmail.com Website : www.yppddisrapp.ac.id</div>
                 </td>
+                <td style="width: 90px;"></td>
             </tr>
         </table>
+        <div style="border-top: 1px solid #000; margin-top: 2px; margin-bottom: 20px;"></div>
+        
+        <div style="text-align: center; font-size: 14px; font-weight: bold; text-decoration: underline; margin-bottom: 20px; text-transform: uppercase;">Profil Dosen</div>
 
-        <table style="width: 100%; margin-bottom: 20px;">
+        <table style="width: 100%; margin-bottom: 10px; border-collapse: collapse;">
             <tr>
-                <td style="vertical-align: top;">
+                <td style="vertical-align: top; border: none; padding: 0;">
                     <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
                         <tr>
-                            <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold; width: 30%;">Nama Lengkap</td>
-                            <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->nama ?? auth()->user()->name }}</td>
+                            <td style="padding: 8px; border: 1px solid #000; background: #f3f4f6; font-weight: bold; width: 30%;">Nama Lengkap</td>
+                            <td style="padding: 8px; border: 1px solid #000;">{{ $dosen?->nama ?? auth()->user()->name }}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">NIDN</td>
-                            <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->nidn ?? '-' }}</td>
+                            <td style="padding: 8px; border: 1px solid #000; background: #f3f4f6; font-weight: bold;">NIDN</td>
+                            <td style="padding: 8px; border: 1px solid #000;">{{ $dosen?->nidn ?? '-' }}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">NIK</td>
-                            <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->nik ?? '-' }}</td>
+                            <td style="padding: 8px; border: 1px solid #000; background: #f3f4f6; font-weight: bold;">NIK</td>
+                            <td style="padding: 8px; border: 1px solid #000;">{{ $dosen?->nik ?? '-' }}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Program Studi</td>
-                            <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->program_studi ?? '-' }}</td>
+                            <td style="padding: 8px; border: 1px solid #000; background: #f3f4f6; font-weight: bold;">Program Studi</td>
+                            <td style="padding: 8px; border: 1px solid #000;">{{ $dosen?->program_studi ?? '-' }}</td>
                         </tr>
                     </table>
                 </td>
-                <td style="width: 120px; text-align: right; vertical-align: top;">
-                    <div style="width: 100px; height: 125px; border: 1px solid #d1d5db; padding: 2px; background: white; display: inline-block;">
+                <td style="width: 120px; text-align: right; vertical-align: top; border: none; padding-left: 10px;">
+                    <div style="width: 100px; height: 125px; border: 1px solid #000; padding: 2px; background: white; display: inline-block;">
                         @if ($dosen?->foto_path)
-                            <img src="{{ asset('storage/'.$dosen->foto_path) }}" style="width: 100%; height: 100%; object-fit: cover;" alt="Foto" />
+                            @php
+                                $path = storage_path('app/public/'.$dosen->foto_path);
+                                $type = pathinfo($path, PATHINFO_EXTENSION);
+                                $data = @file_get_contents($path);
+                                $base64 = $data ? 'data:image/' . $type . ';base64,' . base64_encode($data) : asset('storage/'.$dosen->foto_path);
+                            @endphp
+                            <img src="{{ $base64 }}" style="width: 100%; height: 100%; object-fit: cover;" alt="Foto" />
                         @else
-                            <div style="width: 100%; height: 100%; background: #f3f4f6; color: #9ca3af; display: flex; align-items: center; justify-content: center; text-align: center; padding-top: 40px;">No Photo</div>
+                            <div style="width: 100%; height: 100%; background: #f3f4f6; color: #9ca3af; display: flex; align-items: center; justify-content: center; text-align: center; padding-top: 40px; font-size: 8px;">No Photo</div>
                         @endif
                     </div>
                 </td>
             </tr>
         </table>
 
-        <div style="background-color: #ecfdf5; color: #065f46; font-weight: bold; padding: 5px 10px; border: 1px solid #e5e7eb; border-bottom: none; margin-top: 15px; font-size: 12px;">Data Personal & Akademik</div>
+        <div style="background-color: #f3f4f6; font-weight: bold; padding: 5px 10px; border: 1px solid #000; border-bottom: none; margin-top: 15px; font-size: 12px; text-transform: uppercase;">Data Personal & Akademik</div>
         <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
             <tbody>
                 <tr>
-                    <td style="width: 30%; padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Tempat / Tanggal Lahir</td>
-                    <td style="padding: 8px; border: 1px solid #e5e7eb;">
+                    <td style="width: 30%; padding: 8px; border: 1px solid #000; background: #f3f4f6; font-weight: bold;">Tempat / Tanggal Lahir</td>
+                    <td style="padding: 8px; border: 1px solid #000;">
                         {{ $dosen?->tempat_lahir ?: '-' }} /
                         {{ $dosen?->tanggal_lahir ? \Illuminate\Support\Carbon::parse($dosen->tanggal_lahir)->format('d/m/Y') : '-' }}
                     </td>
                 </tr>
                 <tr>
-                    <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Email</td>
-                    <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->email ?? auth()->user()->email }}</td>
+                    <td style="padding: 8px; border: 1px solid #000; background: #f3f4f6; font-weight: bold;">Email</td>
+                    <td style="padding: 8px; border: 1px solid #000;">{{ $dosen?->email ?? auth()->user()->email }}</td>
                 </tr>
                 <tr>
-                    <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Nomor Telp</td>
-                    <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->nomor_hp ?? '-' }}</td>
+                    <td style="padding: 8px; border: 1px solid #000; background: #f3f4f6; font-weight: bold;">Nomor Telp</td>
+                    <td style="padding: 8px; border: 1px solid #000;">{{ $dosen?->nomor_hp ?? '-' }}</td>
                 </tr>
                 <tr>
-                    <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Alamat</td>
-                    <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->alamat ?? '-' }}</td>
+                    <td style="padding: 8px; border: 1px solid #000; background: #f3f4f6; font-weight: bold;">Alamat</td>
+                    <td style="padding: 8px; border: 1px solid #000;">{{ $dosen?->alamat ?? '-' }}</td>
                 </tr>
                 <tr>
-                    <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Status Dosen</td>
-                    <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ ($dosen?->status_dosen ?? 'aktif') === 'tidak aktif' ? 'Tidak Aktif' : 'Aktif' }}</td>
+                    <td style="padding: 8px; border: 1px solid #000; background: #f3f4f6; font-weight: bold;">Status Dosen</td>
+                    <td style="padding: 8px; border: 1px solid #000;">{{ ($dosen?->status_dosen ?? 'aktif') === 'tidak aktif' ? 'Tidak Aktif' : 'Aktif' }}</td>
                 </tr>
             </tbody>
         </table>
 
-        <div style="background-color: #ecfdf5; color: #065f46; font-weight: bold; padding: 5px 10px; border: 1px solid #e5e7eb; border-bottom: none; margin-top: 15px; font-size: 12px;">Data Kepegawaian</div>
+        <div style="background-color: #f3f4f6; font-weight: bold; padding: 5px 10px; border: 1px solid #000; border-bottom: none; margin-top: 15px; font-size: 12px; text-transform: uppercase;">Data Kepegawaian</div>
         <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
             <tbody>
                 <tr>
-                    <td style="width: 30%; padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">NUPTK</td>
-                    <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->nuptk ?? '-' }}</td>
+                    <td style="width: 30%; padding: 8px; border: 1px solid #000; background: #f3f4f6; font-weight: bold;">NUPTK</td>
+                    <td style="padding: 8px; border: 1px solid #000;">{{ $dosen?->nuptk ?? '-' }}</td>
                 </tr>
                 <tr>
-                    <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">NIP</td>
-                    <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->nip ?? '-' }}</td>
+                    <td style="padding: 8px; border: 1px solid #000; background: #f3f4f6; font-weight: bold;">NIP</td>
+                    <td style="padding: 8px; border: 1px solid #000;">{{ $dosen?->nip ?? '-' }}</td>
                 </tr>
                 <tr>
-                    <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Jabatan Fungsional</td>
-                    <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->jabatan_fungsional ?? '-' }}</td>
+                    <td style="padding: 8px; border: 1px solid #000; background: #f3f4f6; font-weight: bold;">Jabatan Fungsional</td>
+                    <td style="padding: 8px; border: 1px solid #000;">{{ $dosen?->jabatan_fungsional ?? '-' }}</td>
                 </tr>
                 <tr>
-                    <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Kepangkatan</td>
-                    <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->kepangkatan ?? '-' }}</td>
+                    <td style="padding: 8px; border: 1px solid #000; background: #f3f4f6; font-weight: bold;">Kepangkatan</td>
+                    <td style="padding: 8px; border: 1px solid #000;">{{ $dosen?->kepangkatan ?? '-' }}</td>
                 </tr>
                 <tr>
-                    <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Pendidikan Terakhir</td>
-                    <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->pendidikan_terakhir ?? '-' }}</td>
+                    <td style="padding: 8px; border: 1px solid #000; background: #f3f4f6; font-weight: bold;">Pendidikan Terakhir</td>
+                    <td style="padding: 8px; border: 1px solid #000;">{{ $dosen?->pendidikan_terakhir ?? '-' }}</td>
                 </tr>
                 <tr>
-                    <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Rumpun Ilmu</td>
-                    <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->rumpun_ilmu ?? '-' }}</td>
+                    <td style="padding: 8px; border: 1px solid #000; background: #f3f4f6; font-weight: bold;">Rumpun Ilmu</td>
+                    <td style="padding: 8px; border: 1px solid #000;">{{ $dosen?->rumpun_ilmu ?? '-' }}</td>
                 </tr>
                 <tr>
-                    <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Status Pegawai</td>
-                    <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->status_pegawai ?? '-' }}</td>
+                    <td style="padding: 8px; border: 1px solid #000; background: #f3f4f6; font-weight: bold;">Status Pegawai</td>
+                    <td style="padding: 8px; border: 1px solid #000;">{{ $dosen?->status_pegawai ?? '-' }}</td>
                 </tr>
                 <tr>
-                    <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Ikatan Kerja</td>
-                    <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->ikatan_kerja ?? '-' }}</td>
+                    <td style="padding: 8px; border: 1px solid #000; background: #f3f4f6; font-weight: bold;">Ikatan Kerja</td>
+                    <td style="padding: 8px; border: 1px solid #000;">{{ $dosen?->ikatan_kerja ?? '-' }}</td>
                 </tr>
                 <tr>
-                    <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Pengangkatan</td>
-                    <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->tanggal_pengangkatan ? \Illuminate\Support\Carbon::parse($dosen->tanggal_pengangkatan)->format('d/m/Y') : '-' }}</td>
+                    <td style="padding: 8px; border: 1px solid #000; background: #f3f4f6; font-weight: bold;">Pengangkatan</td>
+                    <td style="padding: 8px; border: 1px solid #000;">{{ $dosen?->tanggal_pengangkatan ? \Illuminate\Support\Carbon::parse($dosen->tanggal_pengangkatan)->format('d/m/Y') : '-' }}</td>
                 </tr>
                 <tr>
-                    <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Nomor SK</td>
-                    <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->nomor_sk ?? '-' }}</td>
+                    <td style="padding: 8px; border: 1px solid #000; background: #f3f4f6; font-weight: bold;">Nomor SK</td>
+                    <td style="padding: 8px; border: 1px solid #000;">{{ $dosen?->nomor_sk ?? '-' }}</td>
                 </tr>
             </tbody>
         </table>
 
-        <div style="margin-top: 30px; text-align: right; font-size: 10px; color: #9ca3af;">
-            Dokumen ini dihasilkan secara otomatis oleh Sistem Informasi Akademik.
+        <div style="margin-top: 30px; text-align: right; font-size: 10px; color: #6b7280;">
+            Dicetak pada: {{ now()->format('d/m/Y H:i') }} • Dokumen ini dihasilkan secara otomatis oleh Sistem Informasi Akademik.
         </div>
     </div>
 

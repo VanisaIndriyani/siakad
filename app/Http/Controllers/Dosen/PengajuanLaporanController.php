@@ -17,16 +17,16 @@ class PengajuanLaporanController extends Controller
         $user = $request->user();
         abort_unless($user?->isDosen(), 403);
 
-        $dosen = $user->dosen;
-        $programStudi = trim((string) ($dosen?->program_studi ?? ''));
-        abort_unless($programStudi !== '', 403, 'Anda belum memiliki Program Studi yang terdaftar.');
+        // $dosen = $user->dosen;
+        // $programStudi = trim((string) ($dosen?->program_studi ?? ''));
+        // abort_unless($programStudi !== '', 403, 'Anda belum memiliki Program Studi yang terdaftar.');
     }
 
     public function index(Request $request): View
     {
         $this->authorizeProdi($request);
         $dosen = $request->user()->dosen;
-        $programStudi = $dosen->program_studi;
+        $programStudi = $dosen?->program_studi ?: '---';
 
         $q = trim((string) $request->get('q', ''));
         $status = trim((string) $request->get('status', 'open'));

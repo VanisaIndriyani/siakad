@@ -4,108 +4,69 @@
     <meta charset="utf-8" />
     <title>Profil Dosen - {{ $dosen?->nama }}</title>
     <style>
-        @page {
-            margin: 1cm;
-        }
-        * {
-            font-family: 'Helvetica', 'Arial', sans-serif;
-            box-sizing: border-box;
-        }
-        body {
-            font-size: 11px;
-            color: #1f2937;
-            line-height: 1.5;
-            margin: 0;
-            padding: 0;
-        }
-        .header-table {
-            width: 100%;
-            border-bottom: 2px solid #10b981;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
-        .title {
-            font-size: 20px;
-            font-weight: bold;
-            color: #064e3b;
-            margin: 0;
-            text-transform: uppercase;
-        }
-        .subtitle {
-            font-size: 12px;
-            color: #6b7280;
-            margin-top: 2px;
-        }
-        .info-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .info-table td {
-            padding: 8px 10px;
-            border: 1px solid #e5e7eb;
-            vertical-align: top;
-        }
-        .label {
-            width: 30%;
-            background-color: #f9fafb;
-            font-weight: bold;
-            color: #374151;
-        }
-        .value {
-            width: 70%;
-            color: #111827;
-        }
-        .photo-container {
-            width: 120px;
-            text-align: right;
-            vertical-align: top;
-        }
-        .photo-box {
-            width: 100px;
-            height: 125px;
-            border: 1px solid #d1d5db;
-            padding: 2px;
-            background: white;
-            display: inline-block;
-        }
-        .photo-box img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .footer {
-            margin-top: 30px;
-            text-align: right;
-            font-size: 10px;
-            color: #9ca3af;
-        }
-        .section-title {
-            background-color: #ecfdf5;
-            color: #065f46;
-            font-weight: bold;
-            padding: 5px 10px;
-            border: 1px solid #e5e7eb;
-            border-bottom: none;
-            margin-top: 15px;
-        }
+        @page { margin: 1.5cm; }
+        * { font-family: 'Helvetica', 'Arial', sans-serif; box-sizing: border-box; }
+        body { font-size: 10px; color: #111827; line-height: 1.4; }
+        .kop-surat { width: 100%; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 2px; }
+        .kop-logo { width: 110px; text-align: left; vertical-align: middle; }
+        .kop-logo img { width: 100px; height: auto; }
+        .kop-text { text-align: center; vertical-align: middle; }
+        .kop-title-1 { font-size: 16px; font-weight: 800; margin: 0; line-height: 1.1; }
+        .kop-title-2 { font-size: 22px; font-weight: 900; margin: 2px 0; line-height: 1; }
+        .kop-title-3 { font-size: 16px; font-weight: 800; margin: 0; line-height: 1.1; }
+        .kop-meta { font-size: 9px; font-weight: 700; margin-top: 3px; }
+        .kop-alamat { font-size: 9px; margin: 2px 0; }
+        .kop-line-2 { border-top: 1px solid #000; margin-top: 2px; margin-bottom: 20px; }
+        .doc-title { text-align: center; font-size: 14px; font-weight: bold; text-decoration: underline; margin-bottom: 20px; text-transform: uppercase; }
+        
+        .info-table { width: 100%; border-collapse: collapse; }
+        .info-table td { padding: 6px 10px; border: 1px solid #000; vertical-align: top; }
+        .label { width: 30%; background-color: #f3f4f6; font-weight: bold; }
+        .value { width: 70%; }
+        
+        .photo-container { width: 120px; text-align: right; vertical-align: top; }
+        .photo-box { width: 100px; height: 125px; border: 1px solid #000; padding: 2px; background: white; display: inline-block; }
+        .photo-box img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .section-title { background-color: #f3f4f6; font-weight: bold; padding: 5px 10px; border: 1px solid #000; border-bottom: none; margin-top: 15px; text-transform: uppercase; font-size: 11px; }
+        .footer { margin-top: 30px; text-align: right; font-size: 9px; color: #6b7280; }
     </style>
 </head>
 <body>
-    <table class="header-table">
+    <table class="kop-surat">
         <tr>
-            <td>
-                <div class="title">Profil Dosen</div>
-                <div class="subtitle">SIAKAD {{ config('app.name') }}</div>
+            <td class="kop-logo">
+                @php
+                    $logoPath = public_path('img/lo.jpeg');
+                    $logoBase64 = '';
+                    if (file_exists($logoPath)) {
+                        $logoData = file_get_contents($logoPath);
+                        $logoType = pathinfo($logoPath, PATHINFO_EXTENSION);
+                        $logoBase64 = 'data:image/' . $logoType . ';base64,' . base64_encode($logoData);
+                    }
+                @endphp
+                @if($logoBase64)
+                    <img src="{{ $logoBase64 }}" alt="Logo">
+                @endif
             </td>
-            <td style="text-align: right; vertical-align: bottom;">
-                <div style="font-size: 10px; color: #6b7280;">Dicetak pada: {{ now()->format('d/m/Y H:i') }}</div>
+            <td class="kop-text">
+                <div class="kop-title-1">INSTITUT AGAMA ISLAM</div>
+                <div class="kop-title-2">DARUD DA'WAH WAL IRSYAD</div>
+                <div class="kop-title-3">SIDENRENG RAPPANG</div>
+                <div class="kop-meta">TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021</div>
+                <div class="kop-alamat">Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang</div>
+                <div class="kop-alamat">E-mail : iaiddisrapp@gmail.com Website : www.yppddisrapp.ac.id</div>
             </td>
+            <td style="width: 90px;"></td>
         </tr>
     </table>
+    <div class="kop-line-2"></div>
 
-    <table style="width: 100%; margin-bottom: 20px;">
+    <div class="doc-title">PROFIL DOSEN</div>
+
+    <table style="width: 100%; margin-bottom: 10px; border-collapse: collapse;">
         <tr>
-            <td style="vertical-align: top;">
+            <td style="vertical-align: top; border: none; padding: 0;">
                 <table class="info-table">
                     <tr>
                         <td class="label">Nama Lengkap</td>
@@ -125,7 +86,7 @@
                     </tr>
                 </table>
             </td>
-            <td class="photo-container">
+            <td class="photo-container" style="border: none; padding-left: 10px;">
                 <div class="photo-box">
                     @if ($dosen?->foto_path && file_exists(storage_path('app/public/'.$dosen->foto_path)))
                         @php
@@ -136,7 +97,7 @@
                         @endphp
                         <img src="{{ $base64 }}" alt="Foto" />
                     @else
-                        <div style="width: 100%; height: 100%; background: #f3f4f6; color: #9ca3af; display: flex; align-items: center; justify-content: center; text-align: center; padding-top: 40px;">
+                        <div style="width: 100%; height: 100%; background: #f3f4f6; color: #9ca3af; display: flex; align-items: center; justify-content: center; text-align: center; padding-top: 40px; font-size: 8px;">
                             No Photo
                         </div>
                     @endif
@@ -217,7 +178,7 @@
     </table>
 
     <div class="footer">
-        Dokumen ini dihasilkan secara otomatis oleh Sistem Informasi Akademik.
+        Dicetak pada: {{ now()->format('d/m/Y H:i') }} • Dokumen ini dihasilkan otomatis oleh Sistem Informasi Akademik.
     </div>
 </body>
 </html>

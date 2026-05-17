@@ -93,6 +93,7 @@ class DosenController extends Controller
             'email' => $email,
             'role' => User::ROLE_DOSEN,
             'password' => Hash::make('password'),
+            'password_plain' => 'password',
         ]);
 
         $fotoPath = null;

@@ -61,19 +61,28 @@
             <tr>
                 <th style="width: 30px;">No</th>
                 <th>Nama</th>
-                <th>Email / Username</th>
+                <th>Email</th>
                 <th style="width: 80px;">Role</th>
-                <th>Password (Hashed)</th>
+                <th>Password</th>
             </tr>
         </thead>
         <tbody>
             @foreach ($users as $i => $u)
+                @php
+                    $roleStyle = match($u->role) {
+                        'admin' => 'color: #e11d48; font-weight: bold;',
+                        'keuangan' => 'color: #d97706; font-weight: bold;',
+                        'dosen' => 'color: #2563eb; font-weight: bold;',
+                        'mahasiswa' => 'color: #059669; font-weight: bold;',
+                        default => 'color: #4b5563;',
+                    };
+                @endphp
                 <tr>
                     <td style="text-align: center;">{{ $i + 1 }}</td>
                     <td>{{ $u->name }}</td>
-                    <td>{{ $u->email }}<br><span style="color: #6b7280; font-size: 8px;">{{ $u->username }}</span></td>
-                    <td style="text-align: center;">{{ strtoupper($u->role) }}</td>
-                    <td style="font-family: monospace; font-size: 8px; word-break: break-all;">{{ $u->password }}</td>
+                    <td>{{ $u->email }}</td>
+                    <td style="text-align: center; font-size: 8px; {{ $roleStyle }}">{{ strtoupper($u->role) }}</td>
+                    <td style="font-family: monospace; font-size: 9px; word-break: break-all;">{{ $u->password_plain ?? '-' }}</td>
                 </tr>
             @endforeach
         </tbody>

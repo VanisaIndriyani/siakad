@@ -277,7 +277,7 @@ Route::prefix('keuangan')
     ->name('keuangan.')
     ->middleware(['auth', 'role:keuangan,admin'])
     ->group(function () {
-        Route::get('/dashboard', [AdminDashboardController::class, '__invoke'])->name('dashboard');
+        Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
         Route::get('pembayaran/export/pdf', [KeuanganPembayaranController::class, 'exportPdf'])->name('pembayaran.export.pdf');
         Route::get('pembayaran/{pembayaran}/pdf', [KeuanganPembayaranController::class, 'downloadPdf'])->name('pembayaran.pdf');
         Route::patch('pembayaran/{pembayaran}/detail/{detail}/status', [KeuanganPembayaranController::class, 'updateDetailStatus'])->name('pembayaran.detail.status');

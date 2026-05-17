@@ -1,13 +1,11 @@
-@extends('layouts.portal')
+<x-portal-layout title="Manajemen User" subtitle="Manajemen User">
+    <x-slot:sidebar>
+        @include('admin.partials.sidebar')
+    </x-slot:sidebar>
 
-@section('sidebar')
-    @include('admin.partials.sidebar')
-@endsection
-
-@section('content')
-<div x-data="{
-    showPassword: {}
-}">
+    <div x-data="{
+        showPassword: {}
+    }">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <div class="text-2xl font-bold text-white">Manajemen User</div>
@@ -52,7 +50,7 @@
                         <th class="text-left font-medium px-4 py-3">Nama</th>
                         <th class="text-left font-medium px-4 py-3">Email / Username</th>
                         <th class="text-left font-medium px-4 py-3">Role</th>
-                        <th class="text-left font-medium px-4 py-3">Password (Encrypted)</th>
+                        <th class="text-left font-medium px-4 py-3">Password</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-white/10 text-white">
@@ -65,17 +63,26 @@
                                 <div class="text-xs text-emerald-100/50 mt-0.5">{{ $u->username }}</div>
                             </td>
                             <td class="px-4 py-4">
-                                <span class="px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-[10px] font-bold uppercase tracking-wider">
+                                @php
+                                    $roleColor = match($u->role) {
+                                        'admin' => 'bg-rose-500/10 border-rose-500/20 text-rose-300',
+                                        'keuangan' => 'bg-amber-500/10 border-amber-500/20 text-amber-300',
+                                        'dosen' => 'bg-blue-500/10 border-blue-500/20 text-blue-300',
+                                        'mahasiswa' => 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300',
+                                        default => 'bg-slate-500/10 border-slate-500/20 text-slate-300',
+                                    };
+                                @endphp
+                                <span class="px-2 py-0.5 rounded-lg border text-[8px] font-bold uppercase tracking-tighter {{ $roleColor }}">
                                     {{ $u->role }}
                                 </span>
                             </td>
                             <td class="px-4 py-4">
                                 <div class="flex items-center gap-2">
                                     <code class="text-[10px] text-emerald-100/40 font-mono truncate max-w-[200px]" x-show="!showPassword['{{ $u->id }}']">
-                                        {{ substr($u->password, 0, 30) }}...
+                                        ••••••••
                                     </code>
                                     <code class="text-[10px] text-emerald-300 font-mono" x-show="showPassword['{{ $u->id }}']" x-cloak>
-                                        {{ $u->password }}
+                                        {{ $u->password_plain ?? '(Belum tercatat)' }}
                                     </code>
                                     <button @click="showPassword['{{ $u->id }}'] = !showPassword['{{ $u->id }}']" class="text-emerald-100/50 hover:text-emerald-400 transition no-print">
                                         <i class="fa-solid" :class="showPassword['{{ $u->id }}'] ? 'fa-eye-slash' : 'fa-eye'"></i>
@@ -97,9 +104,10 @@
             </div>
         @endif
     </div>
+</div>
 
-    {{-- Print Only Layout --}}
-    <div class="print-only fixed inset-0 bg-white text-black p-0 z-[9999]">
+{{-- Print Only Layout --}}
+<div class="print-only fixed inset-0 bg-white text-black p-0 z-[9999]">
         <table style="width: 100%; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 2px;">
             <tr>
                 <td style="width: 110px; vertical-align: middle;">
@@ -136,19 +144,28 @@
                 <tr style="background: #f3f4f6;">
                     <th style="border: 1px solid #000; padding: 6px;">No</th>
                     <th style="border: 1px solid #000; padding: 6px; text-align: left;">Nama</th>
-                    <th style="border: 1px solid #000; padding: 6px; text-align: left;">Email / Username</th>
+                    <th style="border: 1px solid #000; padding: 6px; text-align: left;">Email</th>
                     <th style="border: 1px solid #000; padding: 6px; text-align: left;">Role</th>
-                    <th style="border: 1px solid #000; padding: 6px; text-align: left;">Password (Hashed)</th>
+                    <th style="border: 1px solid #000; padding: 6px; text-align: left;">Password</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($users as $i => $u)
+                    @php
+                        $roleStyle = match($u->role) {
+                            'admin' => 'color: #e11d48; font-weight: bold;',
+                            'keuangan' => 'color: #d97706; font-weight: bold;',
+                            'dosen' => 'color: #2563eb; font-weight: bold;',
+                            'mahasiswa' => 'color: #059669; font-weight: bold;',
+                            default => 'color: #4b5563;',
+                        };
+                    @endphp
                     <tr>
                         <td style="border: 1px solid #000; padding: 6px; text-align: center;">{{ $i + 1 }}</td>
                         <td style="border: 1px solid #000; padding: 6px;">{{ $u->name }}</td>
-                        <td style="border: 1px solid #000; padding: 6px;">{{ $u->email }} / {{ $u->username }}</td>
-                        <td style="border: 1px solid #000; padding: 6px;">{{ strtoupper($u->role) }}</td>
-                        <td style="border: 1px solid #000; padding: 6px; font-family: monospace; font-size: 8px;">{{ $u->password }}</td>
+                        <td style="border: 1px solid #000; padding: 6px;">{{ $u->email }}</td>
+                        <td style="border: 1px solid #000; padding: 6px; font-size: 8px; {{ $roleStyle }}">{{ strtoupper($u->role) }}</td>
+                        <td style="border: 1px solid #000; padding: 6px; font-family: monospace; font-size: 8px;">{{ $u->password_plain ?? '-' }}</td>
                     </tr>
                 @endforeach
             </tbody>
@@ -157,14 +174,15 @@
             Dicetak pada: {{ now()->format('d/m/Y H:i') }}
         </div>
     </div>
-</div>
 
 <style>
     @media print {
-        .print-only { display: block !important; position: static !important; }
-        .no-print, header, aside, main > div:not(.print-only) { display: none !important; }
+        .print-only { display: block !important; position: static !important; width: 100% !important; height: auto !important; margin: 0 !important; padding: 0 !important; }
+        .no-print, header, aside, .lg\:pl-72 > header, .lg\:pl-72 > main > div:not(.print-only), #confirmModal { display: none !important; }
+        .lg\:pl-72 { padding: 0 !important; margin: 0 !important; }
+        main { padding: 0 !important; margin: 0 !important; }
         body { background: white !important; color: black !important; }
     }
     .print-only { display: none; }
 </style>
-@endsection
+</x-portal-layout>

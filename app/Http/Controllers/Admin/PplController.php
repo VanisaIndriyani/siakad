@@ -32,12 +32,13 @@ class PplController extends Controller
         if ($user?->isDosen()) {
             $dosen = $user->dosen;
             $programStudi = trim((string) ($dosen?->program_studi ?? ''));
-            abort_unless($programStudi !== '', 403, 'Anda belum memiliki Program Studi yang terdaftar.');
+            // Jangan abort 403 jika prodi kosong
+            // abort_unless($programStudi !== '', 403, 'Anda belum memiliki Program Studi yang terdaftar.');
 
             return [
                 'routePrefix' => 'dosen',
                 'canAssign' => false,
-                'programStudi' => $programStudi,
+                'programStudi' => $programStudi ?: '---',
             ];
         }
 
