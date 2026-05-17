@@ -36,11 +36,13 @@ class SkripsiRevisiController extends Controller
         $this->authorizeSkripsi($request, $skripsi);
 
         $validated = $request->validate([
+            'tanggal' => ['required', 'date'],
             'revisi' => ['required', 'string'],
         ]);
 
         $skripsi->revisis()->create([
             'created_by_user_id' => $request->user()?->id,
+            'tanggal' => $validated['tanggal'],
             'revisi' => $validated['revisi'],
         ]);
 

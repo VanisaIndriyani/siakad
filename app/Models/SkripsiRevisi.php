@@ -15,7 +15,12 @@ class SkripsiRevisi extends Model
     protected $fillable = [
         'skripsi_pengajuan_id',
         'created_by_user_id',
+        'tanggal',
         'revisi',
+    ];
+
+    protected $casts = [
+        'tanggal' => 'datetime',
     ];
 
     public function skripsi(): BelongsTo
