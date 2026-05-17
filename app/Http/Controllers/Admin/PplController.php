@@ -31,11 +31,8 @@ class PplController extends Controller
 
         if ($user?->isDosen()) {
             $dosen = $user->dosen;
-            $statusAkademik = (string) ($dosen?->status_akademik ?? '');
-            abort_unless(in_array($statusAkademik, self::PRODI_APPROVER_STATUS, true), 403);
-
             $programStudi = trim((string) ($dosen?->program_studi ?? ''));
-            abort_unless($programStudi !== '', 403);
+            abort_unless($programStudi !== '', 403, 'Anda belum memiliki Program Studi yang terdaftar.');
 
             return [
                 'routePrefix' => 'dosen',

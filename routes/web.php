@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\KhsController as AdminKhsController;
 use App\Http\Controllers\Admin\KrsController as AdminKrsController;
 use App\Http\Controllers\Admin\MahasiswaController as AdminMahasiswaController;
 use App\Http\Controllers\Admin\MataKuliahController as AdminMataKuliahController;
+use App\Http\Controllers\Admin\PengajuanLaporanController as AdminPengajuanLaporanController;
 use App\Http\Controllers\Admin\PplController as AdminPplController;
 use App\Http\Controllers\Admin\SkripsiController as AdminSkripsiController;
 use App\Http\Controllers\Dosen\AcademicCalendarController as DosenAcademicCalendarController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Dosen\DashboardController as DosenDashboardController;
 use App\Http\Controllers\Dosen\KrsApprovalController as DosenKrsApprovalController;
 use App\Http\Controllers\Dosen\MahasiswaController as DosenMahasiswaController;
 use App\Http\Controllers\Dosen\NilaiController as DosenNilaiController;
+use App\Http\Controllers\Dosen\PengajuanLaporanController as DosenPengajuanLaporanController;
 use App\Http\Controllers\Dosen\PplBimbinganController as DosenPplBimbinganController;
 use App\Http\Controllers\Dosen\ProfilController as DosenProfilController;
 use App\Http\Controllers\Dosen\SkripsiBimbinganController as DosenSkripsiBimbinganController;
@@ -26,6 +28,7 @@ use App\Http\Controllers\Mahasiswa\DashboardController as MahasiswaDashboardCont
 use App\Http\Controllers\Mahasiswa\BiodataPdfController;
 use App\Http\Controllers\Mahasiswa\KhsController as MahasiswaKhsController;
 use App\Http\Controllers\Mahasiswa\KrsController as MahasiswaKrsController;
+use App\Http\Controllers\Mahasiswa\PengajuanLaporanController as MahasiswaPengajuanLaporanController;
 use App\Http\Controllers\Mahasiswa\PplBimbinganController as MahasiswaPplBimbinganController;
 use App\Http\Controllers\Mahasiswa\PplController as MahasiswaPplController;
 use App\Http\Controllers\Mahasiswa\PplFileController as MahasiswaPplFileController;
@@ -120,6 +123,10 @@ Route::prefix('admin')
         Route::delete('/ppl/{ppl}', [AdminPplController::class, 'destroy'])->name('ppl.destroy');
         Route::delete('/ppl/bulk-delete', [AdminPplController::class, 'bulkDestroy'])->name('ppl.bulk-delete');
         Route::delete('/ppl-files/{file}', [AdminPplController::class, 'destroyFile'])->name('ppl-files.destroy');
+
+        Route::get('/laporan', [AdminPengajuanLaporanController::class, 'index'])->name('laporan.index');
+        Route::get('/laporan/{laporan}', [AdminPengajuanLaporanController::class, 'show'])->name('laporan.show');
+        Route::post('/laporan/{laporan}/pesan', [AdminPengajuanLaporanController::class, 'storeMessage'])->name('laporan.pesan.store');
     });
 
 Route::prefix('mahasiswa')
@@ -182,6 +189,12 @@ Route::prefix('mahasiswa')
         Route::get('/ppl-files/{file}/download', [MahasiswaPplFileController::class, 'download'])->name('ppl-files.download');
         Route::delete('/ppl-files/{file}', [MahasiswaPplFileController::class, 'destroy'])->name('ppl-files.destroy');
 
+        Route::get('/laporan', [MahasiswaPengajuanLaporanController::class, 'index'])->name('laporan.index');
+        Route::get('/laporan/create', [MahasiswaPengajuanLaporanController::class, 'create'])->name('laporan.create');
+        Route::post('/laporan', [MahasiswaPengajuanLaporanController::class, 'store'])->name('laporan.store');
+        Route::get('/laporan/{laporan}', [MahasiswaPengajuanLaporanController::class, 'show'])->name('laporan.show');
+        Route::post('/laporan/{laporan}/pesan', [MahasiswaPengajuanLaporanController::class, 'storeMessage'])->name('laporan.pesan.store');
+
         Route::get('/biodata/pdf', BiodataPdfController::class)->name('biodata.pdf');
     });
 
@@ -218,6 +231,7 @@ Route::prefix('dosen')
 
         Route::get('/profil', [DosenProfilController::class, 'show'])->name('profil');
         Route::post('/profil', [DosenProfilController::class, 'update'])->name('profil.update');
+        Route::get('/profil/pdf', [DosenProfilController::class, 'pdf'])->name('profil.pdf');
 
         Route::get('/kalender-akademik', [DosenAcademicCalendarController::class, 'index'])->name('kalender.index');
 
@@ -244,6 +258,10 @@ Route::prefix('dosen')
         Route::patch('/ppl/pengajuan/{ppl}/status', [AdminPplController::class, 'updateStatus'])->name('ppl-pengajuan.status');
         Route::get('/ppl/pengajuan/{ppl}/sk-pembimbing', [AdminPplController::class, 'downloadSkPembimbing'])->name('ppl-pengajuan.sk.download');
         Route::get('/ppl/pengajuan/{ppl}/sk-pembimbing/preview', [AdminPplController::class, 'previewSkPembimbing'])->name('ppl-pengajuan.sk.preview');
+
+        Route::get('/laporan', [DosenPengajuanLaporanController::class, 'index'])->name('laporan.index');
+        Route::get('/laporan/{laporan}', [DosenPengajuanLaporanController::class, 'show'])->name('laporan.show');
+        Route::post('/laporan/{laporan}/pesan', [DosenPengajuanLaporanController::class, 'storeMessage'])->name('laporan.pesan.store');
     });
 
 Route::prefix('keuangan')

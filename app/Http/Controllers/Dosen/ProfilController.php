@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dosen;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Dompdf\Dompdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -18,6 +19,32 @@ class ProfilController extends Controller
 
         return view('dosen.profil', [
             'dosen' => $user->dosen,
+        ]);
+    }
+
+    public function pdf(Request $request)
+    {
+        /** @var User $user */
+        $user = $request->user();
+        $dosen = $user->dosen;
+
+        if (! $dosen) {
+            return back()->with('error', 'Profil dosen belum tersedia.');
+        }
+
+        $html = view('dosen.profil-pdf', [
+            'user' => $user,
+            'dosen' => $dosen,
+        ])->render();
+
+        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="profil-dosen.pdf"',
         ]);
     }
 
@@ -61,6 +88,7 @@ class ProfilController extends Controller
             $dosen->foto_path = $request->file('foto')->store('photos/dosen', 'public');
         }
 
+        unset($validated['foto']);
         $dosen->fill($validated);
         $dosen->save();
 

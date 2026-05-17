@@ -22,14 +22,15 @@ class SkripsiController extends Controller
     {
         $user = $request->user();
         if ($user?->isAdmin()) {
-            return ['routePrefix' => 'admin', 'canAssign' => true];
+            return ['routePrefix' => 'admin', 'canAssign' => true, 'programStudi' => null];
         }
 
         if ($user?->isDosen()) {
-            $statusAkademik = (string) ($user->dosen?->status_akademik ?? '');
-            abort_unless(in_array($statusAkademik, self::PRODI_APPROVER_STATUS, true), 403);
+            $dosen = $user->dosen;
+            $programStudi = trim((string) ($dosen?->program_studi ?? ''));
+            abort_unless($programStudi !== '', 403, 'Anda belum memiliki Program Studi yang terdaftar.');
 
-            return ['routePrefix' => 'dosen', 'canAssign' => false];
+            return ['routePrefix' => 'dosen', 'canAssign' => false, 'programStudi' => $programStudi];
         }
 
         abort(403);
@@ -42,6 +43,13 @@ class SkripsiController extends Controller
         $status = trim((string) $request->get('status', ''));
 
         $query = SkripsiPengajuan::query()->with(['mahasiswa', 'dosenPembimbing', 'dosenPembimbing2']);
+
+        if ($context['programStudi']) {
+            $programStudi = $context['programStudi'];
+            $query->whereHas('mahasiswa', function ($sub) use ($programStudi) {
+                $sub->where('program_studi', $programStudi);
+            });
+        }
 
         if ($q !== '') {
             $query->where('judul', 'like', "%{$q}%")
@@ -69,6 +77,12 @@ class SkripsiController extends Controller
     public function show(Request $request, SkripsiPengajuan $skripsi): View
     {
         $context = $this->resolveContext($request);
+
+        if ($context['programStudi']) {
+            $skripsi->loadMissing('mahasiswa');
+            abort_unless((string) ($skripsi->mahasiswa?->program_studi ?? '') === $context['programStudi'], 403);
+        }
+
         $skripsi->load(['mahasiswa', 'dosenPembimbing', 'dosenPembimbing2', 'messages.sender', 'approvedBy', 'files']);
 
         $dosenList = $context['canAssign']
@@ -85,7 +99,13 @@ class SkripsiController extends Controller
 
     public function updateStatus(Request $request, SkripsiPengajuan $skripsi): RedirectResponse
     {
-        $this->resolveContext($request);
+        $context = $this->resolveContext($request);
+
+        if ($context['programStudi']) {
+            $skripsi->loadMissing('mahasiswa');
+            abort_unless((string) ($skripsi->mahasiswa?->program_studi ?? '') === $context['programStudi'], 403);
+        }
+
         $validated = $request->validate([
             'status' => ['required', Rule::in(['approved', 'rejected'])],
             'catatan_admin' => ['nullable', 'string'],

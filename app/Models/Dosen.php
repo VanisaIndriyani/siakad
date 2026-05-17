@@ -13,6 +13,11 @@ class Dosen extends Model
 
     protected $table = 'dosen';
 
+    protected $casts = [
+        'tanggal_lahir' => 'date',
+        'tanggal_pengangkatan' => 'date',
+    ];
+
     protected $fillable = [
         'user_id',
         'nama',

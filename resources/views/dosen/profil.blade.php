@@ -14,141 +14,175 @@
         }
     </style>
 
-    <div class="print-only" style="border: 1px solid #e5e7eb; border-radius: 14px; padding: 18px;">
-        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;">
+    <div class="print-only">
+        <table style="width: 100%; border-bottom: 2px solid #10b981; padding-bottom: 10px; margin-bottom: 20px;">
+            <tr>
+                <td>
+                    <div style="font-size: 20px; font-weight: bold; color: #064e3b; text-transform: uppercase;">Profil Dosen</div>
+                    <div style="font-size: 12px; color: #6b7280; margin-top: 2px;">SIAKAD {{ config('app.name') }}</div>
+                </td>
+                <td style="text-align: right; vertical-align: bottom;">
+                    <div style="font-size: 10px; color: #6b7280;">Dicetak pada: {{ now()->format('d/m/Y H:i') }}</div>
+                </td>
+            </tr>
+        </table>
+
+        <table style="width: 100%; margin-bottom: 20px;">
+            <tr>
+                <td style="vertical-align: top;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold; width: 30%;">Nama Lengkap</td>
+                            <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->nama ?? auth()->user()->name }}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">NIDN</td>
+                            <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->nidn ?? '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">NIK</td>
+                            <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->nik ?? '-' }}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Program Studi</td>
+                            <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->program_studi ?? '-' }}</td>
+                        </tr>
+                    </table>
+                </td>
+                <td style="width: 120px; text-align: right; vertical-align: top;">
+                    <div style="width: 100px; height: 125px; border: 1px solid #d1d5db; padding: 2px; background: white; display: inline-block;">
+                        @if ($dosen?->foto_path)
+                            <img src="{{ asset('storage/'.$dosen->foto_path) }}" style="width: 100%; height: 100%; object-fit: cover;" alt="Foto" />
+                        @else
+                            <div style="width: 100%; height: 100%; background: #f3f4f6; color: #9ca3af; display: flex; align-items: center; justify-content: center; text-align: center; padding-top: 40px;">No Photo</div>
+                        @endif
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <div style="background-color: #ecfdf5; color: #065f46; font-weight: bold; padding: 5px 10px; border: 1px solid #e5e7eb; border-bottom: none; margin-top: 15px; font-size: 12px;">Data Personal & Akademik</div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+            <tbody>
+                <tr>
+                    <td style="width: 30%; padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Tempat / Tanggal Lahir</td>
+                    <td style="padding: 8px; border: 1px solid #e5e7eb;">
+                        {{ $dosen?->tempat_lahir ?: '-' }} /
+                        {{ $dosen?->tanggal_lahir ? \Illuminate\Support\Carbon::parse($dosen->tanggal_lahir)->format('d/m/Y') : '-' }}
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Email</td>
+                    <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->email ?? auth()->user()->email }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Nomor Telp</td>
+                    <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->nomor_hp ?? '-' }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Alamat</td>
+                    <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->alamat ?? '-' }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Status Dosen</td>
+                    <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ ($dosen?->status_dosen ?? 'aktif') === 'tidak aktif' ? 'Tidak Aktif' : 'Aktif' }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div style="background-color: #ecfdf5; color: #065f46; font-weight: bold; padding: 5px 10px; border: 1px solid #e5e7eb; border-bottom: none; margin-top: 15px; font-size: 12px;">Data Kepegawaian</div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+            <tbody>
+                <tr>
+                    <td style="width: 30%; padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">NUPTK</td>
+                    <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->nuptk ?? '-' }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">NIP</td>
+                    <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->nip ?? '-' }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Jabatan Fungsional</td>
+                    <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->jabatan_fungsional ?? '-' }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Kepangkatan</td>
+                    <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->kepangkatan ?? '-' }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Pendidikan Terakhir</td>
+                    <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->pendidikan_terakhir ?? '-' }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Rumpun Ilmu</td>
+                    <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->rumpun_ilmu ?? '-' }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Status Pegawai</td>
+                    <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->status_pegawai ?? '-' }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Ikatan Kerja</td>
+                    <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->ikatan_kerja ?? '-' }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Pengangkatan</td>
+                    <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->tanggal_pengangkatan ? \Illuminate\Support\Carbon::parse($dosen->tanggal_pengangkatan)->format('d/m/Y') : '-' }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #e5e7eb; background: #f9fafb; font-weight: bold;">Nomor SK</td>
+                    <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->nomor_sk ?? '-' }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div style="margin-top: 30px; text-align: right; font-size: 10px; color: #9ca3af;">
+            Dokumen ini dihasilkan secara otomatis oleh Sistem Informasi Akademik.
+        </div>
+    </div>
+
+    <div class="no-print rounded-2xl bg-white/5 border border-white/10 p-5">
+        <div class="flex flex-col sm:flex-row items-start justify-between gap-6">
             <div>
-                <div style="font-size: 18px; font-weight: 700;">Profil Dosen</div>
-                <div style="margin-top: 4px; font-size: 12px; color: #4b5563;">{{ config('app.name') }}</div>
+                <div class="text-xl font-semibold">Profil</div>
+                <div class="text-sm text-emerald-100/70 mt-1">Perbarui data profil dosen.</div>
             </div>
-            <div style="display: flex; align-items: flex-start; gap: 12px;">
-                <div style="font-size: 12px; color: #4b5563; text-align: right;">
-                    <div>{{ now()->format('d/m/Y H:i') }}</div>
+            
+            <div class="flex flex-col items-end gap-4">
+                {{-- Tombol PDF & Print di atas Foto --}}
+                <div class="flex items-center gap-2">
+                    <a href="{{ route('dosen.profil.pdf') }}" class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                        <i class="fa-solid fa-file-pdf text-rose-400"></i>
+                        <span class="text-xs font-medium">PDF</span>
+                    </a>
+                    <button type="button" onclick="window.print()" class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                        <i class="fa-solid fa-print text-emerald-400"></i>
+                        <span class="text-xs font-medium">Print</span>
+                    </button>
                 </div>
-                <div style="width: 64px; height: 80px; border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; background: #f8fafc;">
+
+                <div class="flex items-center gap-3">
+                    <div class="text-right">
+                        <div class="text-sm font-semibold text-white">{{ $dosen?->nama ?? auth()->user()->name }}</div>
+                        <div class="text-xs text-emerald-100/60">{{ $dosen?->nidn ?? '-' }}</div>
+                        @if($dosen?->nomor_hp)
+                            <div class="text-[10px] text-emerald-100/40 mt-1">
+                                <i class="fa-solid fa-phone mr-1"></i>{{ $dosen->nomor_hp }}
+                            </div>
+                        @endif
+                    </div>
                     @if ($dosen?->foto_path)
-                        <img src="{{ public_path('storage/'.$dosen->foto_path) }}" style="width: 100%; height: 100%; object-fit: cover;" alt="Foto" />
+                        <img src="{{ asset('storage/'.$dosen->foto_path) }}" class="h-16 w-16 rounded-2xl object-cover ring-2 ring-emerald-500/20 shadow-lg shadow-emerald-900/20" alt="Foto" />
+                    @else
+                        <div class="h-16 w-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/20 flex items-center justify-center text-2xl font-semibold text-emerald-300">
+                            {{ mb_substr($dosen?->nama ?? auth()->user()->name, 0, 1) }}
+                        </div>
                     @endif
                 </div>
             </div>
         </div>
 
-        <div style="margin-top: 14px;">
-            <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
-                <tbody>
-                    <tr>
-                        <td style="width: 220px; padding: 8px; border: 1px solid #e5e7eb;">Nama Lengkap</td>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->nama ?? auth()->user()->name }}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">NIDN</td>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->nidn ?? '-' }}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">NIK</td>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->nik ?? '-' }}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">Tempat / Tanggal Lahir</td>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ trim(($dosen?->tempat_lahir ?? '').' / '.($dosen?->tanggal_lahir ?? '')) ?: '-' }}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">Email</td>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->email ?? auth()->user()->email }}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">Nomor Telp</td>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->nomor_hp ?? '-' }}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">NUPTK</td>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->nuptk ?? '-' }}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">NIP</td>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->nip ?? '-' }}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">Jabatan Fungsional</td>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->jabatan_fungsional ?? '-' }}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">Kepangkatan</td>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->kepangkatan ?? '-' }}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">Pendidikan Terakhir</td>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->pendidikan_terakhir ?? '-' }}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">Rumpun Ilmu</td>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->rumpun_ilmu ?? '-' }}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">Status Serdos</td>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->status_serdos ?? '-' }}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">Status Pegawai</td>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->status_pegawai ?? '-' }}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">Ikatan Kerja</td>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->ikatan_kerja ?? '-' }}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">Pengangkatan</td>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->tanggal_pengangkatan ?? '-' }}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">Nomor SK</td>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->nomor_sk ?? '-' }}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">Status Dosen</td>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ ($dosen?->status_dosen ?? 'aktif') === 'tidak aktif' ? 'Tidak Aktif' : 'Aktif' }}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">Mata Kuliah</td>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->mata_kuliah ?? '-' }}</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">Alamat</td>
-                        <td style="padding: 8px; border: 1px solid #e5e7eb;">{{ $dosen?->alamat ?? '-' }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div class="no-print rounded-2xl bg-white/5 border border-white/10 p-5">
-        <div class="flex items-start justify-between gap-4">
-            <div>
-                <div class="text-xl font-semibold">Profil</div>
-                <div class="text-sm text-emerald-100/70 mt-1">Perbarui data profil dosen.</div>
-            </div>
-            <div class="flex items-center gap-3">
-                <div class="text-right">
-                    <div class="text-sm font-semibold text-white">{{ $dosen?->nama ?? auth()->user()->name }}</div>
-                    <div class="text-xs text-emerald-100/60">{{ $dosen?->nidn ?? '-' }}</div>
-                </div>
-                @if ($dosen?->foto_path)
-                    <img src="{{ asset('storage/'.$dosen->foto_path) }}" class="h-16 w-16 rounded-2xl object-cover ring-1 ring-white/10" alt="Foto" />
-                @else
-                    <div class="h-16 w-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/20 flex items-center justify-center text-2xl font-semibold">
-                        {{ mb_substr($dosen?->nama ?? auth()->user()->name, 0, 1) }}
-                    </div>
-                @endif
-            </div>
-        </div>
-
-        <div class="mt-4 flex items-center justify-end">
-            <button type="button" onclick="window.print()" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
-                <i class="fa-solid fa-print"></i>
-                <span class="text-sm font-medium">Print</span>
-            </button>
-        </div>
-
-        <form method="POST" action="{{ route('dosen.profil.update') }}" enctype="multipart/form-data" class="mt-5 space-y-4">
+        <form method="POST" action="{{ route('dosen.profil.update') }}" enctype="multipart/form-data" class="mt-8 space-y-4">
             @csrf
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -190,7 +224,7 @@
                 </div>
                 <div>
                     <label class="text-sm text-emerald-100/80">Tanggal Lahir</label>
-                    <input type="date" name="tanggal_lahir" value="{{ old('tanggal_lahir', $dosen?->tanggal_lahir ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
+                    <input type="date" name="tanggal_lahir" value="{{ old('tanggal_lahir', $dosen?->tanggal_lahir ? \Illuminate\Support\Carbon::parse($dosen->tanggal_lahir)->format('Y-m-d') : '') }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
                     @error('tanggal_lahir') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
                 </div>
             </div>
@@ -286,7 +320,7 @@
                     </div>
                     <div>
                         <label class="text-sm text-emerald-100/80">Pengangkatan</label>
-                        <input type="date" name="tanggal_pengangkatan" value="{{ old('tanggal_pengangkatan', $dosen?->tanggal_pengangkatan ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
+                        <input type="date" name="tanggal_pengangkatan" value="{{ old('tanggal_pengangkatan', $dosen?->tanggal_pengangkatan ? \Illuminate\Support\Carbon::parse($dosen->tanggal_pengangkatan)->format('Y-m-d') : '') }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
                         @error('tanggal_pengangkatan') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
                     </div>
                 </div>

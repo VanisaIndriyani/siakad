@@ -59,11 +59,40 @@
        class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('admin.skripsi.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
         <i class="fa-solid fa-graduation-cap text-emerald-300"></i>
         <span class="text-sm font-medium">Skripsi</span>
+        @php
+            $unreadSkripsiCount = auth()->user()->unreadSkripsiCount();
+        @endphp
+        @if ($unreadSkripsiCount > 0)
+            <span class="ml-auto inline-flex items-center justify-center min-w-7 h-7 px-2 rounded-full text-xs font-semibold bg-rose-500/15 border border-rose-500/25 text-rose-100">
+                {{ $unreadSkripsiCount }}
+            </span>
+        @endif
     </a>
     <a href="{{ route('admin.ppl.index') }}"
        class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('admin.ppl.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
         <i class="fa-solid fa-briefcase text-emerald-300"></i>
         <span class="text-sm font-medium">PPL</span>
+        @php
+            $unreadPplCount = auth()->user()->unreadPplCount();
+        @endphp
+        @if ($unreadPplCount > 0)
+            <span class="ml-auto inline-flex items-center justify-center min-w-7 h-7 px-2 rounded-full text-xs font-semibold bg-rose-500/15 border border-rose-500/25 text-rose-100">
+                {{ $unreadPplCount }}
+            </span>
+        @endif
+    </a>
+    <a href="{{ route('admin.laporan.index') }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('admin.laporan.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+        <i class="fa-solid fa-comments text-emerald-300"></i>
+        <span class="text-sm font-medium">Laporan</span>
+        @php
+            $unreadLaporanCount = auth()->user()->unreadLaporanCount();
+        @endphp
+        @if ($unreadLaporanCount > 0)
+            <span class="ml-auto inline-flex items-center justify-center min-w-7 h-7 px-2 rounded-full text-xs font-semibold bg-rose-500/15 border border-rose-500/25 text-rose-100">
+                {{ $unreadLaporanCount }}
+            </span>
+        @endif
     </a>
     <a href="{{ route('keuangan.pembayaran.index') }}"
        class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('keuangan.pembayaran.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">

@@ -19,11 +19,8 @@ class KrsApprovalController extends Controller
 
         abort_unless($dosen, 403);
 
-        $allowed = in_array((string) $dosen->status_akademik, ['Ketua Prodi', 'Sekretaris Prodi'], true);
-        abort_unless($allowed, 403);
-
         $programStudi = trim((string) ($dosen->program_studi ?? ''));
-        abort_unless($programStudi !== '', 403);
+        abort_unless($programStudi !== '', 403, 'Anda belum memiliki Program Studi yang terdaftar.');
 
         return [$dosen, $programStudi];
     }

@@ -69,7 +69,7 @@
                 <div class="rounded-xl bg-white/5 border border-white/10 p-4">
                     <div class="text-emerald-100/70">Tempat / Tanggal Lahir</div>
                     <div class="mt-1 font-medium">
-                        {{ $dosen->tempat_lahir ?? '-' }} / {{ $dosen->tanggal_lahir?->format('d/m/Y') ?? '-' }}
+                        {{ $dosen->tempat_lahir ?? '-' }} / {{ $dosen->tanggal_lahir ? \Illuminate\Support\Carbon::parse($dosen->tanggal_lahir)->format('d/m/Y') : '-' }}
                     </div>
                 </div>
                 <div class="rounded-xl bg-white/5 border border-white/10 p-4">
@@ -106,7 +106,7 @@
                 </div>
                 <div class="rounded-xl bg-white/5 border border-white/10 p-4">
                     <div class="text-emerald-100/70">Pengangkatan</div>
-                    <div class="mt-1 font-medium">{{ $dosen->tanggal_pengangkatan?->format('d/m/Y') ?? '-' }}</div>
+                    <div class="mt-1 font-medium">{{ $dosen->tanggal_pengangkatan ? \Illuminate\Support\Carbon::parse($dosen->tanggal_pengangkatan)->format('d/m/Y') : '-' }}</div>
                 </div>
                 <div class="rounded-xl bg-white/5 border border-white/10 p-4">
                     <div class="text-emerald-100/70">Nomor HP</div>

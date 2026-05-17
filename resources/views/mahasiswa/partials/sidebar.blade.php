@@ -17,6 +17,14 @@
    class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('mahasiswa.skripsi.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
     <i class="fa-solid fa-graduation-cap text-emerald-300"></i>
     <span class="text-sm font-medium">Skripsi</span>
+    @php
+        $unreadSkripsiCount = auth()->user()->unreadSkripsiCount();
+    @endphp
+    @if ($unreadSkripsiCount > 0)
+        <span class="ml-auto inline-flex items-center justify-center min-w-7 h-7 px-2 rounded-full text-xs font-semibold bg-rose-500/15 border border-rose-500/25 text-rose-100">
+            {{ $unreadSkripsiCount }}
+        </span>
+    @endif
 </a>
 <a href="{{ route('mahasiswa.skripsi-files.index') }}"
    class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('mahasiswa.skripsi-files.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
@@ -27,11 +35,32 @@
    class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('mahasiswa.ppl.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
     <i class="fa-solid fa-briefcase text-emerald-300"></i>
     <span class="text-sm font-medium">PPL</span>
+    @php
+        $unreadPplCount = auth()->user()->unreadPplCount();
+    @endphp
+    @if ($unreadPplCount > 0)
+        <span class="ml-auto inline-flex items-center justify-center min-w-7 h-7 px-2 rounded-full text-xs font-semibold bg-rose-500/15 border border-rose-500/25 text-rose-100">
+            {{ $unreadPplCount }}
+        </span>
+    @endif
 </a>
 <a href="{{ route('mahasiswa.ppl-files.index') }}"
    class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('mahasiswa.ppl-files.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
     <i class="fa-solid fa-upload text-emerald-300"></i>
     <span class="text-sm font-medium">Upload Laporan PPL</span>
+</a>
+<a href="{{ route('mahasiswa.laporan.index') }}"
+   class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('mahasiswa.laporan.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+    <i class="fa-solid fa-comments text-emerald-300"></i>
+    <span class="text-sm font-medium">Lapor Pengajuan</span>
+    @php
+        $unreadLaporanCount = auth()->user()->unreadLaporanCount();
+    @endphp
+    @if ($unreadLaporanCount > 0)
+        <span class="ml-auto inline-flex items-center justify-center min-w-7 h-7 px-2 rounded-full text-xs font-semibold bg-rose-500/15 border border-rose-500/25 text-rose-100">
+            {{ $unreadLaporanCount }}
+        </span>
+    @endif
 </a>
 <a href="{{ route('mahasiswa.krs.index') }}"
    class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('mahasiswa.krs.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">

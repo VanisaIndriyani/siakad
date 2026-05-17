@@ -37,17 +37,33 @@
    class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('dosen.skripsi.bimbingan.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
     <i class="fa-solid fa-graduation-cap text-emerald-300"></i>
     <span class="text-sm font-medium">Bimbingan Skripsi</span>
+    @php
+        $unreadSkripsiCount = auth()->user()->unreadSkripsiCount();
+    @endphp
+    @if ($unreadSkripsiCount > 0)
+        <span class="ml-auto inline-flex items-center justify-center min-w-7 h-7 px-2 rounded-full text-xs font-semibold bg-rose-500/15 border border-rose-500/25 text-rose-100">
+            {{ $unreadSkripsiCount }}
+        </span>
+    @endif
 </a>
 <a href="{{ route('dosen.ppl.bimbingan.index') }}"
    class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('dosen.ppl.bimbingan.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
     <i class="fa-solid fa-briefcase text-emerald-300"></i>
     <span class="text-sm font-medium">Bimbingan PPL</span>
+    @php
+        $unreadPplCount = auth()->user()->unreadPplCount();
+    @endphp
+    @if ($unreadPplCount > 0)
+        <span class="ml-auto inline-flex items-center justify-center min-w-7 h-7 px-2 rounded-full text-xs font-semibold bg-rose-500/15 border border-rose-500/25 text-rose-100">
+            {{ $unreadPplCount }}
+        </span>
+    @endif
 </a>
 @php
     $dosen = auth()->user()?->dosen;
-    $isProdiApprover = in_array((string) ($dosen?->status_akademik ?? ''), ['Ketua Prodi', 'Sekretaris Prodi'], true);
+    $hasProdi = !empty($dosen?->program_studi);
 @endphp
-@if ($isProdiApprover)
+@if ($hasProdi)
     <a href="{{ route('dosen.krs.approval') }}"
        class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('dosen.krs.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
         <i class="fa-solid fa-circle-check text-emerald-300"></i>
@@ -57,10 +73,39 @@
        class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('dosen.skripsi-pengajuan.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
         <i class="fa-solid fa-graduation-cap text-emerald-300"></i>
         <span class="text-sm font-medium">Skripsi</span>
+        @php
+            $unreadSkripsiProdiCount = auth()->user()->unreadSkripsiProdiCount();
+        @endphp
+        @if ($unreadSkripsiProdiCount > 0)
+            <span class="ml-auto inline-flex items-center justify-center min-w-7 h-7 px-2 rounded-full text-xs font-semibold bg-rose-500/15 border border-rose-500/25 text-rose-100">
+                {{ $unreadSkripsiProdiCount }}
+            </span>
+        @endif
     </a>
     <a href="{{ route('dosen.ppl-pengajuan.index') }}"
        class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('dosen.ppl-pengajuan.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
         <i class="fa-solid fa-briefcase text-emerald-300"></i>
         <span class="text-sm font-medium">PPL</span>
+        @php
+            $unreadPplProdiCount = auth()->user()->unreadPplProdiCount();
+        @endphp
+        @if ($unreadPplProdiCount > 0)
+            <span class="ml-auto inline-flex items-center justify-center min-w-7 h-7 px-2 rounded-full text-xs font-semibold bg-rose-500/15 border border-rose-500/25 text-rose-100">
+                {{ $unreadPplProdiCount }}
+            </span>
+        @endif
+    </a>
+    <a href="{{ route('dosen.laporan.index') }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('dosen.laporan.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+        <i class="fa-solid fa-comments text-emerald-300"></i>
+        <span class="text-sm font-medium">Laporan</span>
+        @php
+            $unreadLaporanCount = auth()->user()->unreadLaporanCount();
+        @endphp
+        @if ($unreadLaporanCount > 0)
+            <span class="ml-auto inline-flex items-center justify-center min-w-7 h-7 px-2 rounded-full text-xs font-semibold bg-rose-500/15 border border-rose-500/25 text-rose-100">
+                {{ $unreadLaporanCount }}
+            </span>
+        @endif
     </a>
 @endif
