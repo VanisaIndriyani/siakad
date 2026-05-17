@@ -1,5 +1,9 @@
 @extends('layouts.portal')
 
+@section('sidebar')
+    @include('admin.partials.sidebar')
+@endsection
+
 @section('content')
 <div x-data="{
     showPassword: {}
