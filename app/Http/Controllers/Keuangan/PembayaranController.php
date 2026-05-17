@@ -33,6 +33,9 @@ class PembayaranController extends Controller
         'Jurnal',
         'Wisuda',
         'Ujian Komprehensif',
+        'Seminar Proposal',
+        'Seminar Hasil',
+        'Seminar Tutup',
     ];
 
     public function index(Request $request): View

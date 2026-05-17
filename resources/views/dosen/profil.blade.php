@@ -188,7 +188,8 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="text-sm text-emerald-100/80">Nama Lengkap</label>
-                    <input value="{{ $dosen?->nama ?? auth()->user()->name }}" readonly class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 opacity-80" />
+                    <input name="nama" value="{{ old('nama', $dosen?->nama ?? auth()->user()->name) }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" required />
+                    @error('nama') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
                 </div>
                 <div>
                     <label class="text-sm text-emerald-100/80">NIDN</label>

@@ -59,6 +59,7 @@ class ProfilController extends Controller
         }
 
         $validated = $request->validate([
+            'nama' => ['required', 'string', 'max:255'],
             'nik' => ['required', 'string', 'max:50', 'unique:dosen,nik,'.$dosen->id],
             'nidn' => ['nullable', 'string', 'max:50', 'unique:dosen,nidn,'.$dosen->id],
             'nuptk' => ['nullable', 'string', 'max:50', 'unique:dosen,nuptk,'.$dosen->id],
@@ -87,6 +88,9 @@ class ProfilController extends Controller
             }
             $dosen->foto_path = $request->file('foto')->store('photos/dosen', 'public');
         }
+
+        // Update User name for consistency
+        $user->update(['name' => $validated['nama']]);
 
         unset($validated['foto']);
         $dosen->fill($validated);
