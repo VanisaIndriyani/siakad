@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <title>Data Akun User</title>
+    <style>
+        @page { margin: 1.5cm; }
+        * { font-family: 'Helvetica', 'Arial', sans-serif; box-sizing: border-box; }
+        body { font-size: 10px; color: #111827; line-height: 1.4; }
+        .kop-surat { width: 100%; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 2px; }
+        .kop-logo { width: 110px; text-align: left; vertical-align: middle; }
+        .kop-logo img { width: 100px; height: auto; }
+        .kop-text { text-align: center; vertical-align: middle; }
+        .kop-title-1 { font-size: 16px; font-weight: 800; margin: 0; line-height: 1.1; }
+        .kop-title-2 { font-size: 22px; font-weight: 900; margin: 2px 0; line-height: 1; }
+        .kop-title-3 { font-size: 16px; font-weight: 800; margin: 0; line-height: 1.1; }
+        .kop-meta { font-size: 9px; font-weight: 700; margin-top: 3px; }
+        .kop-alamat { font-size: 9px; margin: 2px 0; }
+        .kop-line-2 { border-top: 1px solid #000; margin-top: 2px; margin-bottom: 20px; }
+        .doc-title { text-align: center; font-size: 14px; font-weight: bold; text-decoration: underline; margin-bottom: 20px; text-transform: uppercase; }
+        table.data-table { width: 100%; border-collapse: collapse; }
+        table.data-table th { background: #f3f4f6; border: 1px solid #000; padding: 6px; font-weight: bold; text-align: center; }
+        table.data-table td { border: 1px solid #000; padding: 6px; vertical-align: top; }
+        .footer { margin-top: 20px; text-align: right; font-size: 8px; color: #6b7280; }
+    </style>
+</head>
+<body>
+    <table class="kop-surat">
+        <tr>
+            <td class="kop-logo">
+                @php
+                    $logoPath = public_path('img/lo.jpeg');
+                    $logoBase64 = '';
+                    if (file_exists($logoPath)) {
+                        $logoData = file_get_contents($logoPath);
+                        $logoType = pathinfo($logoPath, PATHINFO_EXTENSION);
+                        $logoBase64 = 'data:image/' . $logoType . ';base64,' . base64_encode($logoData);
+                    }
+                @endphp
+                @if($logoBase64)
+                    <img src="{{ $logoBase64 }}" alt="Logo">
+                @endif
+            </td>
+            <td class="kop-text">
+                <div class="kop-title-1">INSTITUT AGAMA ISLAM</div>
+                <div class="kop-title-2">DARUD DA'WAH WAL IRSYAD</div>
+                <div class="kop-title-3">SIDENRENG RAPPANG</div>
+                <div class="kop-meta">TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021</div>
+                <div class="kop-alamat">Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang</div>
+                <div class="kop-alamat">E-mail : iaiddisrapp@gmail.com Website : www.yppddisrapp.ac.id</div>
+            </td>
+            <td style="width: 90px;"></td>
+        </tr>
+    </table>
+    <div class="kop-line-2"></div>
+
+    <div class="doc-title">Laporan Data Akun User</div>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th style="width: 30px;">No</th>
+                <th>Nama</th>
+                <th>Email / Username</th>
+                <th style="width: 80px;">Role</th>
+                <th>Password (Hashed)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($users as $i => $u)
+                <tr>
+                    <td style="text-align: center;">{{ $i + 1 }}</td>
+                    <td>{{ $u->name }}</td>
+                    <td>{{ $u->email }}<br><span style="color: #6b7280; font-size: 8px;">{{ $u->username }}</span></td>
+                    <td style="text-align: center;">{{ strtoupper($u->role) }}</td>
+                    <td style="font-family: monospace; font-size: 8px; word-break: break-all;">{{ $u->password }}</td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+
+    <div class="footer">
+        Dicetak pada: {{ now()->format('d/m/Y H:i') }} • Dokumen ini dihasilkan otomatis oleh Sistem Informasi Akademik.
+    </div>
+</body>
+</html>

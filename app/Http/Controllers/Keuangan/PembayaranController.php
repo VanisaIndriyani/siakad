@@ -199,23 +199,14 @@ class PembayaranController extends Controller
         }
 
         foreach ($targetMahasiswa as $m) {
-            $pembayaran = Pembayaran::query()->firstOrCreate(
-                [
-                    'mahasiswa_id' => (int) $m->id,
-                    'semester' => $semester,
-                    'tahun_ajaran' => $tahunAjaran,
-                    'jenis_tagihan' => $jenisTagihan,
-                ],
-                [
-                    'total_biaya' => $totalBiaya,
-                    'catatan' => $catatan,
-                ]
-            );
-
-            if (! $pembayaran->wasRecentlyCreated) {
-                $skipped++;
-                continue;
-            }
+            $pembayaran = Pembayaran::query()->create([
+                'mahasiswa_id' => (int) $m->id,
+                'semester' => $semester,
+                'tahun_ajaran' => $tahunAjaran,
+                'jenis_tagihan' => $jenisTagihan,
+                'total_biaya' => $totalBiaya,
+                'catatan' => $catatan,
+            ]);
 
             $created++;
 

@@ -4,6 +4,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\AcademicCalendarController as AdminAcademicCalendarController;
 use App\Http\Controllers\Admin\AbsensiController as AdminAbsensiController;
 use App\Http\Controllers\Admin\DosenController as AdminDosenController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\KhsController as AdminKhsController;
 use App\Http\Controllers\Admin\KrsController as AdminKrsController;
@@ -60,6 +61,10 @@ Route::prefix('admin')
     ->middleware(['auth', 'role:admin'])
     ->group(function () {
         Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
+        
+        // User Management
+        Route::get('/user', [AdminUserController::class, 'index'])->name('user.index');
+        Route::get('/user/pdf', [AdminUserController::class, 'exportPdf'])->name('user.pdf');
 
         Route::get('/mahasiswa/export/pdf', [AdminMahasiswaController::class, 'exportPdf'])->name('mahasiswa.export.pdf');
         Route::get('/mahasiswa/export/excel', [AdminMahasiswaController::class, 'exportExcel'])->name('mahasiswa.export.excel');

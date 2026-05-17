@@ -99,6 +99,11 @@
         <i class="fa-solid fa-money-bill-wave text-emerald-300"></i>
         <span class="text-sm font-medium">Pembayaran</span>
     </a>
+    <a href="{{ route('admin.user.index') }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('admin.user.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+        <i class="fa-solid fa-users-gear text-emerald-300"></i>
+        <span class="text-sm font-medium">Manajemen User</span>
+    </a>
 @endif
 
 @if (auth()->user()->role === 'keuangan')
