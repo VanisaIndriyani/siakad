@@ -54,6 +54,20 @@ class PengajuanLaporanController extends Controller
         ]);
     }
 
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'ids' => ['required'],
+        ]);
+
+        $raw = $validated['ids'];
+        $ids = is_array($raw) ? $raw : preg_split('/\s*,\s*/', (string) $raw, -1, PREG_SPLIT_NO_EMPTY);
+        
+        PengajuanLaporan::whereIn('id', $ids)->delete();
+
+        return back()->with('success', 'Laporan terpilih berhasil dihapus.');
+    }
+
     public function storeMessage(Request $request, PengajuanLaporan $laporan): RedirectResponse
     {
         abort_unless($laporan->status === 'open', 403);

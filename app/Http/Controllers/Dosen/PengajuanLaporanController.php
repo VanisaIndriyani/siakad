@@ -80,6 +80,27 @@ class PengajuanLaporanController extends Controller
         ]);
     }
 
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        $this->authorizeProdi($request);
+        $dosen = $request->user()->dosen;
+
+        $validated = $request->validate([
+            'ids' => ['required'],
+        ]);
+
+        $raw = $validated['ids'];
+        $ids = is_array($raw) ? $raw : preg_split('/\s*,\s*/', (string) $raw, -1, PREG_SPLIT_NO_EMPTY);
+
+        PengajuanLaporan::whereIn('id', $ids)
+            ->whereHas('mahasiswa', function ($q) use ($dosen) {
+                $q->where('program_studi', $dosen->program_studi);
+            })
+            ->delete();
+
+        return back()->with('success', 'Laporan terpilih berhasil dihapus.');
+    }
+
     public function storeMessage(Request $request, PengajuanLaporan $laporan): RedirectResponse
     {
         $this->authorizeProdi($request);
