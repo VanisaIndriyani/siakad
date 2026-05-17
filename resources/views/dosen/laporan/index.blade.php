@@ -58,7 +58,7 @@
         </div>
 
         <form x-ref="bulkForm" method="POST" action="{{ route('dosen.laporan.bulk-delete') }}" @change="onBulkChange($event)"
-              @submit.prevent="if(confirm('Apakah kamu yakin ingin menghapus laporan yang dipilih?')) $el.submit()">
+              @submit.prevent="$el.submit()">
             @csrf
             @method('DELETE')
             <input type="hidden" name="ids" :value="selectedIds.join(',')">

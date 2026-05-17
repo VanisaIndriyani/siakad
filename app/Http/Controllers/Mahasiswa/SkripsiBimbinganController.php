@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Mahasiswa;
 
 use App\Http\Controllers\Controller;
 use App\Models\SkripsiPengajuan;
+use Dompdf\Dompdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -21,6 +22,31 @@ class SkripsiBimbinganController extends Controller
 
         return view('mahasiswa.skripsi.bimbingan', [
             'skripsi' => $skripsi,
+        ]);
+    }
+
+    public function pdf(Request $request, SkripsiPengajuan $skripsi)
+    {
+        $mahasiswa = $request->user()?->mahasiswa;
+        abort_unless($mahasiswa, 403);
+        abort_unless((int) $skripsi->mahasiswa_id === (int) $mahasiswa->id, 404);
+
+        $skripsi->load(['mahasiswa', 'dosenPembimbing', 'dosenPembimbing2', 'messages.sender']);
+
+        $html = view('dosen.skripsi.bimbingan-pdf', [
+            'skripsi' => $skripsi,
+        ])->render();
+
+        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $filename = 'bimbingan-skripsi-'.$skripsi->id.'.pdf';
+
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ]);
     }
 

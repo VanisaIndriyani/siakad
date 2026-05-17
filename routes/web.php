@@ -167,6 +167,7 @@ Route::prefix('mahasiswa')
         Route::get('/skripsi/{skripsi}/sk-pembimbing', [AdminSkripsiController::class, 'downloadSkPembimbing'])->name('skripsi.sk.download');
         Route::get('/skripsi/{skripsi}/sk-pembimbing/preview', [AdminSkripsiController::class, 'previewSkPembimbing'])->name('skripsi.sk.preview');
         Route::get('/skripsi/{skripsi}/bimbingan', [MahasiswaSkripsiBimbinganController::class, 'show'])->name('skripsi.bimbingan');
+        Route::get('/skripsi/{skripsi}/bimbingan/pdf', [MahasiswaSkripsiBimbinganController::class, 'pdf'])->name('skripsi.bimbingan.pdf');
         Route::post('/skripsi/{skripsi}/bimbingan', [MahasiswaSkripsiBimbinganController::class, 'store'])->name('skripsi.bimbingan.store');
         Route::get('/skripsi/{skripsi}/revisi', [MahasiswaSkripsiRevisiController::class, 'index'])->name('skripsi.revisi');
         Route::get('/skripsi/{skripsi}/revisi/pdf', [MahasiswaSkripsiRevisiController::class, 'pdf'])->name('skripsi.revisi.pdf');
@@ -238,6 +239,7 @@ Route::prefix('dosen')
 
         Route::get('/skripsi/bimbingan', [DosenSkripsiBimbinganController::class, 'index'])->name('skripsi.bimbingan.index');
         Route::get('/skripsi/{skripsi}/bimbingan', [DosenSkripsiBimbinganController::class, 'show'])->name('skripsi.bimbingan.show');
+        Route::get('/skripsi/{skripsi}/bimbingan/pdf', [DosenSkripsiBimbinganController::class, 'pdf'])->name('skripsi.bimbingan.pdf');
         Route::post('/skripsi/{skripsi}/bimbingan', [DosenSkripsiBimbinganController::class, 'store'])->name('skripsi.bimbingan.store');
         Route::get('/skripsi/{skripsi}/revisi', [DosenSkripsiRevisiController::class, 'index'])->name('skripsi.revisi');
         Route::post('/skripsi/{skripsi}/revisi', [DosenSkripsiRevisiController::class, 'store'])->name('skripsi.revisi.store');

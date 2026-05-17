@@ -24,6 +24,12 @@
         .chat-send:disabled { opacity: 0.55; cursor: not-allowed; }
         .chat-warn { margin-top: 14px; border-radius: 14px; border: 1px solid rgba(245, 158, 11, 0.25); background: rgba(245, 158, 11, 0.10); padding: 12px 14px; font-weight: 800; color: rgba(120, 53, 15, 0.95); }
         .chat-empty { padding: 18px; text-align: center; color: rgba(17, 24, 39, 0.55); font-weight: 900; }
+        @media print {
+            .no-print { display: none !important; }
+            .chat-stream { max-height: none !important; overflow: visible !important; }
+            .chat-card { border: none !important; padding: 0 !important; }
+            .chat-wrap { max-width: none !important; margin: 0 !important; }
+        }
     </style>
 
     <div class="chat-wrap">
@@ -39,7 +45,15 @@
                         @endif
                     </div>
                 </div>
-                <div style="display:flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <div style="display:flex; gap: 10px; align-items: center; flex-wrap: wrap;" class="no-print">
+                    <a href="{{ route('mahasiswa.skripsi.bimbingan.pdf', $skripsi) }}" class="chat-back">
+                        <i class="fa-solid fa-file-pdf" style="color: #f43f5e;"></i>
+                        PDF
+                    </a>
+                    <button type="button" onclick="window.print()" class="chat-back">
+                        <i class="fa-solid fa-print" style="color: #10b981;"></i>
+                        Print
+                    </button>
                     <a href="{{ route('mahasiswa.skripsi.revisi', $skripsi) }}" class="chat-back">
                         <i class="fa-solid fa-list-check"></i>
                         Revisi
@@ -77,7 +91,7 @@
                 @endforelse
             </div>
 
-            <form method="POST" action="{{ route('mahasiswa.skripsi.bimbingan.store', $skripsi) }}" class="chat-form">
+            <form method="POST" action="{{ route('mahasiswa.skripsi.bimbingan.store', $skripsi) }}" class="chat-form no-print">
                 @csrf
                 <textarea name="pesan" rows="2" {{ ($skripsi->dosen_pembimbing_id || $skripsi->dosen_pembimbing_id_2) ? '' : 'disabled' }}
                           class="chat-input"

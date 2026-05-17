@@ -21,6 +21,12 @@
         .chat-input { flex: 1; min-height: 44px; max-height: 120px; resize: vertical; border-radius: 14px; border: 1px solid rgba(17, 24, 39, 0.12); background: #fff; padding: 12px 12px; font-size: 13px; font-weight: 700; color: #111827; outline: none; }
         .chat-send { height: 44px; padding: 0 16px; border-radius: 14px; border: 1px solid rgba(16, 185, 129, 0.25); background: linear-gradient(to right, #059669, #10b981); color: #fff; font-weight: 900; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
         .chat-empty { padding: 18px; text-align: center; color: rgba(17, 24, 39, 0.55); font-weight: 900; }
+        @media print {
+            .no-print { display: none !important; }
+            .chat-stream { max-height: none !important; overflow: visible !important; }
+            .chat-card { border: none !important; padding: 0 !important; }
+            .chat-wrap { max-width: none !important; margin: 0 !important; }
+        }
     </style>
 
     <div class="chat-wrap">
@@ -30,7 +36,15 @@
                     <div class="title">Bimbingan Skripsi</div>
                     <div class="sub">{{ $skripsi->mahasiswa?->nama_lengkap ?: '-' }} ({{ $skripsi->mahasiswa?->npm ?: '-' }}) • {{ $skripsi->judul }}</div>
                 </div>
-                <div style="display:flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <div style="display:flex; gap: 10px; align-items: center; flex-wrap: wrap;" class="no-print">
+                    <a href="{{ route('dosen.skripsi.bimbingan.pdf', $skripsi) }}" class="chat-back">
+                        <i class="fa-solid fa-file-pdf" style="color: #f43f5e;"></i>
+                        PDF
+                    </a>
+                    <button type="button" onclick="window.print()" class="chat-back">
+                        <i class="fa-solid fa-print" style="color: #10b981;"></i>
+                        Print
+                    </button>
                     <a href="{{ route('dosen.skripsi.revisi', $skripsi) }}" class="chat-back">
                         <i class="fa-solid fa-list-check"></i>
                         Revisi
@@ -62,7 +76,7 @@
                 @endforelse
             </div>
 
-            <form method="POST" action="{{ route('dosen.skripsi.bimbingan.store', $skripsi) }}" class="chat-form">
+            <form method="POST" action="{{ route('dosen.skripsi.bimbingan.store', $skripsi) }}" class="chat-form no-print">
                 @csrf
                 <textarea name="pesan" rows="2" class="chat-input" placeholder="Tulis pesan...">{{ old('pesan') }}</textarea>
                 <button class="chat-send">
