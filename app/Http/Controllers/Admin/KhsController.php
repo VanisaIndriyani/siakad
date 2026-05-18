@@ -126,4 +126,22 @@ class KhsController extends Controller
 
         return redirect()->route('admin.khs.show', $khs)->with('success', 'KHS berhasil diperbarui.');
     }
+
+    public function destroy(Khs $khs): RedirectResponse
+    {
+        $khs->delete();
+        return back()->with('success', 'Data KHS berhasil dihapus.');
+    }
+
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:khs,id'],
+        ]);
+
+        Khs::query()->whereIn('id', $validated['ids'])->delete();
+
+        return back()->with('success', 'Data KHS terpilih berhasil dihapus.');
+    }
 }

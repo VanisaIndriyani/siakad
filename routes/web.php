@@ -91,12 +91,14 @@ Route::prefix('admin')
         Route::patch('/krs/{krs}/status', [AdminKrsController::class, 'updateStatus'])->name('krs.status');
         Route::delete('/krs/{krs}', [AdminKrsController::class, 'destroy'])->name('krs.destroy');
 
+        Route::delete('/khs/bulk-delete', [AdminKhsController::class, 'bulkDestroy'])->name('khs.bulk-delete');
         Route::get('/khs', [AdminKhsController::class, 'index'])->name('khs.index');
         Route::get('/khs/create', [AdminKhsController::class, 'create'])->name('khs.create');
         Route::post('/khs', [AdminKhsController::class, 'store'])->name('khs.store');
         Route::get('/khs/{khs}', [AdminKhsController::class, 'show'])->name('khs.show');
         Route::get('/khs/{khs}/edit', [AdminKhsController::class, 'edit'])->name('khs.edit');
         Route::put('/khs/{khs}', [AdminKhsController::class, 'update'])->name('khs.update');
+        Route::delete('/khs/{khs}', [AdminKhsController::class, 'destroy'])->name('khs.destroy');
 
         Route::get('/absensi', [AdminAbsensiController::class, 'index'])->name('absensi.index');
         Route::get('/absensi/entry', [AdminAbsensiController::class, 'entry'])->name('absensi.entry');
