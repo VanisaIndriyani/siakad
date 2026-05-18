@@ -110,11 +110,12 @@ Route::prefix('admin')
         Route::delete('/khs/{khs}', [AdminKhsController::class, 'destroy'])->name('khs.destroy');
 
         Route::get('/absensi', [AdminAbsensiController::class, 'index'])->name('absensi.index');
+        Route::get('/absensi/manual', [AdminAbsensiController::class, 'downloadManual'])->name('absensi.manual');
         Route::get('/absensi/entry', [AdminAbsensiController::class, 'entry'])->name('absensi.entry');
         Route::post('/absensi/{absensi}', [AdminAbsensiController::class, 'update'])->name('absensi.update');
         Route::get('/absensi/{absensi}/export/pdf', [AdminAbsensiController::class, 'exportPdf'])->name('absensi.export.pdf');
         Route::get('/absensi/{absensi}/export/excel', [AdminAbsensiController::class, 'exportExcel'])->name('absensi.export.excel');
-        Route::get('/absensi/rekap/pdf', [AdminAbsensiController::class, 'exportRekapPdf'])->name('absensi.rekap.pdf');
+        Route::get('/absensi/rekap', [AdminAbsensiController::class, 'exportRekapPdf'])->name('absensi.rekap');
 
         Route::resource('kalender-akademik', AdminAcademicCalendarController::class)
             ->parameters(['kalender-akademik' => 'kalender_akademik'])

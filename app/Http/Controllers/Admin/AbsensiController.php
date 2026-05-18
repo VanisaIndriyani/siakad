@@ -90,6 +90,70 @@ class AbsensiController extends Controller
         ]);
     }
 
+    public function downloadManual(Request $request)
+    {
+        $dosen = $request->user()?->dosen;
+        abort_unless($request->user()?->isDosen() && $dosen, 403);
+
+        $validated = $request->validate([
+            'jurusan' => ['required', 'string'],
+            'semester' => ['required', 'integer', 'min:1', 'max:8'],
+            'mata_kuliah_id' => [
+                'required',
+                'integer',
+                Rule::exists('mata_kuliah', 'id')
+                    ->where('semester', (int) $request->input('semester'))
+                    ->where('jurusan', (string) $request->input('jurusan'))
+                    ->where(function ($q) use ($dosen) {
+                        $q->where('dosen_id', $dosen->id)->orWhere('dosen_id_2', $dosen->id);
+                    }),
+            ],
+        ]);
+
+        $jurusan = (string) $validated['jurusan'];
+        $semester = (int) $validated['semester'];
+        $mataKuliahId = (int) $validated['mata_kuliah_id'];
+
+        $mk = MataKuliah::query()
+            ->with(['dosen', 'dosen2'])
+            ->where('id', $mataKuliahId)
+            ->firstOrFail();
+
+        $mahasiswa = Mahasiswa::query()
+            ->where('program_studi', $jurusan)
+            ->whereHas('krs', function ($q) use ($semester, $mataKuliahId) {
+                $q->where('semester', $semester)
+                    ->where('status_approval', 'approved')
+                    ->whereHas('items', function ($qi) use ($mataKuliahId) {
+                        $qi->where('mata_kuliah_id', $mataKuliahId);
+                    });
+            })
+            ->orderBy('npm')
+            ->get();
+
+        $kaprodiNama = $this->resolveKaprodiNama($jurusan);
+
+        $html = view('admin.absensi.manual-pdf', [
+            'jurusan' => $jurusan,
+            'semester' => $semester,
+            'mk' => $mk,
+            'mahasiswa' => $mahasiswa,
+            'kaprodiNama' => $kaprodiNama,
+            'dosenNama' => $dosen->nama,
+        ])->render();
+
+        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->render();
+
+        $safeKode = preg_replace('/[^A-Za-z0-9._-]+/', '-', (string) ($mk?->kode ?? 'MK'));
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="Absensi_Manual_'.$safeKode.'.pdf"',
+        ]);
+    }
+
     private function resolveKaprodiNama(?string $programStudi): ?string
     {
         $programStudi = trim((string) $programStudi);
