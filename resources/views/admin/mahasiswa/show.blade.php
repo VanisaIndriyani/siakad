@@ -268,7 +268,7 @@
                 <!-- Section: Danger Zone -->
                 <div style="background-color: rgba(239,68,68,0.05); border-radius: 24px; border: 1px solid rgba(239,68,68,0.15); padding: 25px;">
                     <h3 style="color: #f87171; font-size: 12px; font-weight: 800; margin: 0 0 15px 0; text-transform: uppercase; letter-spacing: 1px;">Zona Berbahaya</h3>
-                    <form action="{{ route('admin.mahasiswa.destroy', $mahasiswa) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus mahasiswa ini?')">
+                    <form action="{{ route('admin.mahasiswa.destroy', $mahasiswa) }}" method="POST" data-confirm="Apakah Anda yakin ingin menghapus mahasiswa ini?">
                         @csrf
                         @method('DELETE')
                         <button type="submit" style="width: 100%; height: 45px; background-color: rgba(239,68,68,0.1); color: #f87171; border: 1px solid rgba(239,68,68,0.3); border-radius: 12px; font-size: 12px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s;">

@@ -314,26 +314,18 @@ class PplController extends Controller
         abort_unless($request->user()?->isAdmin(), 403);
 
         $validated = $request->validate([
-            'ids' => ['required'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer'],
         ]);
 
-        $raw = $validated['ids'];
-        $ids = is_array($raw)
-            ? $raw
-            : preg_split('/\s*,\s*/', (string) $raw, -1, PREG_SPLIT_NO_EMPTY);
-
-        $ids = collect($ids)
-            ->map(fn ($v) => (int) $v)
-            ->filter(fn ($v) => $v > 0)
-            ->unique()
-            ->values()
-            ->all();
-
-        if (count($ids) === 0) {
-            return back()->with('error', 'Pilih minimal 1 data PPL.');
-        }
+        $ids = array_values(array_unique(array_map('intval', $validated['ids'])));
 
         $items = PplPengajuan::query()->whereIn('id', $ids)->get();
+
+        if ($items->isEmpty()) {
+            return back()->with('error', 'Tidak ada data PPL yang ditemukan untuk dihapus.');
+        }
+
         foreach ($items as $it) {
             if ($it->sk_pembimbing_path) {
                 Storage::disk('public')->delete($it->sk_pembimbing_path);

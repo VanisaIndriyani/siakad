@@ -105,7 +105,7 @@
                                                 Download
                                             </a>
                                             @if ($prefix === 'admin')
-                                                <form method="POST" action="{{ route('admin.ppl-files.destroy', $f) }}" onsubmit="return confirm('Hapus file ini?');">
+                                                <form method="POST" action="{{ route('admin.ppl-files.destroy', $f) }}" data-confirm="Hapus file ini?">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/25 transition">

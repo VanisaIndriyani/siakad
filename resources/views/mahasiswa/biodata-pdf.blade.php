@@ -3,20 +3,19 @@
     <head>
         <meta charset="utf-8">
     <style>
-        @page { margin: 1.5cm; }
-        * { font-family: 'Helvetica', 'Arial', sans-serif; box-sizing: border-box; }
-        body { font-size: 10px; color: #111827; line-height: 1.4; }
-        .kop-surat { width: 100%; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 2px; }
-        .kop-logo { width: 110px; text-align: left; vertical-align: middle; }
-        .kop-logo img { width: 100px; height: auto; }
-        .kop-text { text-align: center; vertical-align: middle; }
-        .kop-title-1 { font-size: 16px; font-weight: 800; margin: 0; line-height: 1.1; }
-        .kop-title-2 { font-size: 22px; font-weight: 900; margin: 2px 0; line-height: 1; }
-        .kop-title-3 { font-size: 16px; font-weight: 800; margin: 0; line-height: 1.1; }
-        .kop-meta { font-size: 9px; font-weight: 700; margin-top: 3px; }
-        .kop-alamat { font-size: 9px; margin: 2px 0; }
-        .kop-line-2 { border-top: 1px solid #000; margin-top: 2px; margin-bottom: 20px; }
-        .doc-title { text-align: center; font-size: 14px; font-weight: bold; text-decoration: underline; margin-bottom: 20px; text-transform: uppercase; }
+        @page { margin: 16mm 14mm 16mm 17mm; }
+        * { box-sizing: border-box; }
+        body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #111827; line-height: 1.4; }
+        
+        /* KOP SURAT MATCHING KRS */
+        .kop-title-1 { color: #111827; font-size: 19px; font-weight: 800; margin: 0; line-height: 1.12; }
+        .kop-title-2 { color: #111827; font-size: 27px; font-weight: 900; margin: 1px 0 0; letter-spacing: 0.4px; line-height: 1.06; }
+        .kop-title-3 { color: #111827; font-size: 19px; font-weight: 900; margin: 1px 0 0; line-height: 1.12; }
+        .kop-meta { color: #111827; font-size: 11px; margin-top: 3px; line-height: 1.2; }
+        .kop-line-1 { border-top: 3px solid #6b7280; margin-top: 7px; }
+        .kop-line-2 { border-top: 1px solid #6b7280; margin-top: 3px; margin-bottom: 20px; }
+
+        .doc-title { text-align: center; font-size: 14px; font-weight: bold; text-decoration: underline; margin: 20px 0; text-transform: uppercase; }
         
         .section-title { background-color: #f3f4f6; border-left: 4px solid #000; padding: 5px 10px; font-weight: bold; font-size: 11px; color: #000; margin: 15px 0 10px 0; text-transform: uppercase; }
         
@@ -36,33 +35,41 @@
     </style>
 </head>
 <body>
-    <table class="kop-surat">
+    @php
+        $logoPath = public_path('img/lo.jpeg');
+        $logoBase64 = null;
+        if (file_exists($logoPath)) {
+            $data = file_get_contents($logoPath);
+            $logoBase64 = 'data:image/' . pathinfo($logoPath, PATHINFO_EXTENSION) . ';base64,' . base64_encode($data);
+        }
+
+        $kop1 = 'INSTITUT AGAMA ISLAM';
+        $kop2 = "DARUD DA'WAH WAL IRSYAD";
+        $kop3 = 'SIDENRENG RAPPANG';
+        $kop4 = 'TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021';
+        $kop5 = 'Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang';
+        $kop6 = 'E-mail : iaiddisrapp@gmail.com  Website : www.yppddisrapp.ac.id';
+    @endphp
+
+    <table style="width: 100%; border-collapse: collapse;">
         <tr>
-            <td class="kop-logo">
-                @php
-                    $logoPath = public_path('img/lo.jpeg');
-                    $logoBase64 = '';
-                    if (file_exists($logoPath)) {
-                        $logoData = file_get_contents($logoPath);
-                        $logoType = pathinfo($logoPath, PATHINFO_EXTENSION);
-                        $logoBase64 = 'data:image/' . $logoType . ';base64,' . base64_encode($logoData);
-                    }
-                @endphp
+            <td style="width: 130px; vertical-align: middle; padding-top: 2px;">
                 @if($logoBase64)
-                    <img src="{{ $logoBase64 }}" alt="Logo">
+                    <img src="{{ $logoBase64 }}" alt="Logo" style="display: block; width: 125px; height: auto;" />
                 @endif
             </td>
-            <td class="kop-text">
-                <div class="kop-title-1">INSTITUT AGAMA ISLAM</div>
-                <div class="kop-title-2">DARUD DA'WAH WAL IRSYAD</div>
-                <div class="kop-title-3">SIDENRENG RAPPANG</div>
-                <div class="kop-meta">TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021</div>
-                <div class="kop-alamat">Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang</div>
-                <div class="kop-alamat">E-mail : iaiddisrapp@gmail.com Website : www.yppddisrapp.ac.id</div>
+            <td style="text-align: center;">
+                <div class="kop-title-1">{{ $kop1 }}</div>
+                <div class="kop-title-2">{{ $kop2 }}</div>
+                <div class="kop-title-3">{{ $kop3 }}</div>
+                <div class="kop-meta" style="font-weight: 700;">{{ $kop4 }}</div>
+                <div class="kop-meta">{{ $kop5 }}</div>
+                <div class="kop-meta">{{ $kop6 }}</div>
             </td>
             <td style="width: 90px;"></td>
         </tr>
     </table>
+    <div class="kop-line-1"></div>
     <div class="kop-line-2"></div>
 
     <div class="doc-title">BIODATA MAHASISWA (PD-DIKTI)</div>

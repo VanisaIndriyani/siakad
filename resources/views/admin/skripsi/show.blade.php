@@ -102,7 +102,7 @@
                                                 Download
                                             </a>
                                             @if ($prefix === 'admin')
-                                                <form method="POST" action="{{ route('admin.skripsi-files.destroy', $f) }}" onsubmit="return confirm('Hapus file ini?');">
+                                                <form method="POST" action="{{ route('admin.skripsi-files.destroy', $f) }}" data-confirm="Hapus file ini?">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/25 transition">
@@ -220,7 +220,7 @@
                 @if ($prefix === 'admin' && ($skripsi->dosen_pembimbing_id || $skripsi->dosen_pembimbing_id_2 || $skripsi->nomor_sk || $skripsi->tanggal_sk || $skripsi->sk_pembimbing_path))
                     <div class="mt-3 flex items-center gap-2 flex-wrap">
                         @if ($skripsi->sk_pembimbing_path)
-                            <form method="POST" action="{{ route('admin.skripsi.sk.destroy', $skripsi) }}" onsubmit="return confirm('Hapus file SK pembimbing?');">
+                            <form method="POST" action="{{ route('admin.skripsi.sk.destroy', $skripsi) }}" data-confirm="Hapus file SK pembimbing?">
                                 @csrf
                                 @method('DELETE')
                                 <button class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/25 transition">
@@ -229,7 +229,7 @@
                                 </button>
                             </form>
                         @endif
-                        <form method="POST" action="{{ route('admin.skripsi.pembimbing.reset', $skripsi) }}" onsubmit="return confirm('Reset pembimbing & SK untuk skripsi ini?');">
+                        <form method="POST" action="{{ route('admin.skripsi.pembimbing.reset', $skripsi) }}" data-confirm="Reset pembimbing & SK untuk skripsi ini?">
                             @csrf
                             @method('DELETE')
                             <button class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/25 transition">

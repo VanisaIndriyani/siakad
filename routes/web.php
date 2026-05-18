@@ -115,8 +115,8 @@ Route::prefix('admin')
         Route::get('/skripsi/{skripsi}/sk-pembimbing/preview', [AdminSkripsiController::class, 'previewSkPembimbing'])->name('skripsi.sk.preview');
         Route::delete('/skripsi/{skripsi}/sk-pembimbing', [AdminSkripsiController::class, 'destroySkPembimbing'])->name('skripsi.sk.destroy');
         Route::delete('/skripsi/{skripsi}/pembimbing', [AdminSkripsiController::class, 'resetPembimbing'])->name('skripsi.pembimbing.reset');
-        Route::delete('/skripsi/{skripsi}', [AdminSkripsiController::class, 'destroy'])->name('skripsi.destroy');
         Route::delete('/skripsi/bulk-delete', [AdminSkripsiController::class, 'bulkDestroy'])->name('skripsi.bulk-delete');
+        Route::delete('/skripsi/{skripsi}', [AdminSkripsiController::class, 'destroy'])->name('skripsi.destroy');
         Route::delete('/skripsi-files/{file}', [AdminSkripsiController::class, 'destroyFile'])->name('skripsi-files.destroy');
 
         Route::get('/ppl', [AdminPplController::class, 'index'])->name('ppl.index');
@@ -125,12 +125,12 @@ Route::prefix('admin')
         Route::patch('/ppl/{ppl}/assign', [AdminPplController::class, 'assign'])->name('ppl.assign');
         Route::get('/ppl/{ppl}/sk-pembimbing', [AdminPplController::class, 'downloadSkPembimbing'])->name('ppl.sk.download');
         Route::get('/ppl/{ppl}/sk-pembimbing/preview', [AdminPplController::class, 'previewSkPembimbing'])->name('ppl.sk.preview');
-        Route::delete('/ppl/{ppl}', [AdminPplController::class, 'destroy'])->name('ppl.destroy');
         Route::delete('/ppl/bulk-delete', [AdminPplController::class, 'bulkDestroy'])->name('ppl.bulk-delete');
+        Route::delete('/ppl/{ppl}', [AdminPplController::class, 'destroy'])->name('ppl.destroy');
         Route::delete('/ppl-files/{file}', [AdminPplController::class, 'destroyFile'])->name('ppl-files.destroy');
 
-        Route::get('/laporan', [AdminPengajuanLaporanController::class, 'index'])->name('laporan.index');
         Route::delete('/laporan/bulk-delete', [AdminPengajuanLaporanController::class, 'bulkDestroy'])->name('laporan.bulk-delete');
+        Route::get('/laporan', [AdminPengajuanLaporanController::class, 'index'])->name('laporan.index');
         Route::get('/laporan/{laporan}', [AdminPengajuanLaporanController::class, 'show'])->name('laporan.show');
         Route::post('/laporan/{laporan}/pesan', [AdminPengajuanLaporanController::class, 'storeMessage'])->name('laporan.pesan.store');
     });

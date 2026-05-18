@@ -34,15 +34,32 @@ class MahasiswaController extends Controller
         'Fakultas Ekonomi & Bisnis Islam',
     ];
 
-    public function index(Request $request): View
+    private function applyFilters($query, Request $request)
     {
         $q = trim((string) $request->get('q', ''));
         $status = trim((string) $request->get('status', ''));
+        $angkatan = trim((string) $request->get('angkatan', ''));
+        $prodi = trim((string) $request->get('prodi', ''));
+        $semester = trim((string) $request->get('semester', ''));
 
-        $query = Mahasiswa::query()->with('user');
         if ($status !== '') {
             $query->where('status_mahasiswa', $status);
         }
+
+        if ($angkatan !== '') {
+            $query->where('angkatan', $angkatan);
+        }
+
+        if ($prodi !== '') {
+            $query->where('program_studi', $prodi);
+        }
+
+        if ($semester !== '') {
+            $query->whereHas('krs', function ($sub) use ($semester) {
+                $sub->where('semester', $semester);
+            });
+        }
+
         if ($q !== '') {
             $query->where(function ($sub) use ($q) {
                 $sub->where('nama_lengkap', 'like', "%{$q}%")
@@ -53,6 +70,20 @@ class MahasiswaController extends Controller
             });
         }
 
+        return $query;
+    }
+
+    public function index(Request $request): View
+    {
+        $q = trim((string) $request->get('q', ''));
+        $status = trim((string) $request->get('status', ''));
+        $angkatan = trim((string) $request->get('angkatan', ''));
+        $prodi = trim((string) $request->get('prodi', ''));
+        $semester = trim((string) $request->get('semester', ''));
+
+        $query = Mahasiswa::query()->with('user');
+        $query = $this->applyFilters($query, $request);
+
         $mahasiswa = $query->orderByDesc('id')->paginate(10)->withQueryString();
 
         if ($request->boolean('partial')) {
@@ -61,10 +92,23 @@ class MahasiswaController extends Controller
             ]);
         }
 
+        $angkatanList = Mahasiswa::query()
+            ->whereNotNull('angkatan')
+            ->distinct()
+            ->pluck('angkatan')
+            ->sortDesc()
+            ->values()
+            ->all();
+
         return view('admin.mahasiswa.index', [
             'mahasiswa' => $mahasiswa,
             'q' => $q,
             'status' => $status ?: null,
+            'angkatan' => $angkatan,
+            'prodi' => $prodi,
+            'semester' => $semester,
+            'angkatanList' => $angkatanList,
+            'prodiList' => self::JURUSAN,
         ]);
     }
 
@@ -235,22 +279,8 @@ class MahasiswaController extends Controller
 
     public function exportPdf(Request $request)
     {
-        $q = trim((string) $request->get('q', ''));
-        $status = trim((string) $request->get('status', ''));
-
         $query = Mahasiswa::query()->with('user')->orderByDesc('id');
-        if ($status !== '') {
-            $query->where('status_mahasiswa', $status);
-        }
-        if ($q !== '') {
-            $query->where(function ($sub) use ($q) {
-                $sub->where('nama_lengkap', 'like', "%{$q}%")
-                    ->orWhere('npm', 'like', "%{$q}%")
-                    ->orWhere('nik', 'like', "%{$q}%")
-                    ->orWhere('program_studi', 'like', "%{$q}%")
-                    ->orWhere('angkatan', 'like', "%{$q}%");
-            });
-        }
+        $query = $this->applyFilters($query, $request);
 
         $rows = $query->get();
         $html = view('admin.mahasiswa.export-pdf', ['rows' => $rows])->render();
@@ -268,22 +298,8 @@ class MahasiswaController extends Controller
 
     public function exportExcel(Request $request)
     {
-        $q = trim((string) $request->get('q', ''));
-        $status = trim((string) $request->get('status', ''));
-
         $query = Mahasiswa::query()->with('user')->orderByDesc('id');
-        if ($status !== '') {
-            $query->where('status_mahasiswa', $status);
-        }
-        if ($q !== '') {
-            $query->where(function ($sub) use ($q) {
-                $sub->where('nama_lengkap', 'like', "%{$q}%")
-                    ->orWhere('npm', 'like', "%{$q}%")
-                    ->orWhere('nik', 'like', "%{$q}%")
-                    ->orWhere('program_studi', 'like', "%{$q}%")
-                    ->orWhere('angkatan', 'like', "%{$q}%");
-            });
-        }
+        $query = $this->applyFilters($query, $request);
 
         $rows = $query->get();
 

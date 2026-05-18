@@ -13,10 +13,9 @@
             <div class="text-sm text-emerald-100/70">{{ $isAdminView ? 'Review pengajuan instansi/sekolah dan tetapkan pembimbing.' : 'ACC pengajuan instansi/sekolah PPL.' }}</div>
         </div>
         @if ($isAdminView)
-            <form method="POST" action="{{ route('admin.ppl.bulk-delete') }}" onsubmit="return confirm('Hapus data PPL yang dicentang?')">
+            <form id="bulkDeleteForm" method="POST" action="{{ route('admin.ppl.bulk-delete') }}" data-confirm="Hapus data PPL yang dicentang?">
                 @csrf
                 @method('DELETE')
-                <input type="hidden" name="ids" id="bulkDeletePplIds" value="" />
                 <button type="submit" class="h-10 px-4 rounded-xl bg-red-500/15 hover:bg-red-500/20 border border-red-500/25 transition text-sm font-medium inline-flex items-center gap-2">
                     <i class="fa-solid fa-trash"></i>
                     Hapus Terpilih
@@ -72,7 +71,7 @@
                         <tr class="hover:bg-white/5">
                             @if ($isAdminView)
                                 <td class="px-4 py-3">
-                                    <input type="checkbox" class="ppl-check h-4 w-4 rounded border-white/10 bg-white/5" value="{{ $row->id }}" />
+                                    <input type="checkbox" name="ids[]" form="bulkDeleteForm" class="ppl-check h-4 w-4 rounded border-white/10 bg-white/5" value="{{ $row->id }}" />
                                 </td>
                             @endif
                             <td class="px-4 py-3">
@@ -103,7 +102,7 @@
                                         <span class="text-sm font-medium">Detail</span>
                                     </a>
                                     @if ($isAdminView)
-                                        <form method="POST" action="{{ route('admin.ppl.destroy', $row) }}" onsubmit="return confirm('Hapus data PPL ini?')">
+                                        <form method="POST" action="{{ route('admin.ppl.destroy', $row) }}" data-confirm="Hapus data PPL ini?">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-red-500/15 hover:bg-red-500/20 border border-red-500/25 transition text-red-100">
@@ -133,31 +132,24 @@
         <script>
             (function () {
                 const checkAll = document.getElementById('checkAllPpl');
-                const checks = Array.from(document.querySelectorAll('.ppl-check'));
-                const hidden = document.getElementById('bulkDeletePplIds');
-                if (!hidden) return;
-
-                const sync = () => {
-                    const ids = checks.filter(c => c.checked).map(c => c.value);
-                    hidden.value = ids.join(',');
-                };
+                const checks = document.querySelectorAll('.ppl-check');
+                const form = document.getElementById('bulkDeleteForm');
 
                 if (checkAll) {
                     checkAll.addEventListener('change', () => {
                         checks.forEach(c => c.checked = checkAll.checked);
-                        sync();
                     });
                 }
 
-                checks.forEach(c => c.addEventListener('change', sync));
-                sync();
-
-                hidden.form?.addEventListener('submit', (e) => {
-                    if (!hidden.value) {
-                        e.preventDefault();
-                        alert('Pilih minimal 1 data PPL.');
-                    }
-                });
+                if (form) {
+                    form.addEventListener('submit', (e) => {
+                        const anyChecked = Array.from(checks).some(c => c.checked);
+                        if (!anyChecked) {
+                            e.preventDefault();
+                            alert('Pilih minimal 1 data PPL.');
+                        }
+                    });
+                }
             })();
         </script>
     @endif

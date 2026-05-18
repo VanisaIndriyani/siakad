@@ -13,10 +13,9 @@
             <div class="text-sm text-emerald-100/70">{{ ($routePrefix ?? 'admin') === 'admin' ? 'Review pengajuan judul dan tetapkan pembimbing.' : 'ACC pengajuan judul skripsi.' }}</div>
         </div>
         @if ($isAdminView)
-            <form method="POST" action="{{ route('admin.skripsi.bulk-delete') }}" onsubmit="return confirm('Hapus data skripsi yang dicentang?')">
+            <form id="bulkDeleteSkripsiForm" method="POST" action="{{ route('admin.skripsi.bulk-delete') }}" data-confirm="Hapus data skripsi yang dicentang?">
                 @csrf
                 @method('DELETE')
-                <input type="hidden" name="ids" id="bulkDeleteIds" value="" />
                 <button type="submit" class="h-10 px-4 rounded-xl bg-red-500/15 hover:bg-red-500/20 border border-red-500/25 transition text-sm font-medium inline-flex items-center gap-2">
                     <i class="fa-solid fa-trash"></i>
                     Hapus Terpilih
@@ -72,7 +71,7 @@
                         <tr class="hover:bg-white/5">
                             @if ($isAdminView)
                                 <td class="px-4 py-3">
-                                    <input type="checkbox" class="skripsi-check h-4 w-4 rounded border-white/10 bg-white/5" value="{{ $row->id }}" />
+                                    <input type="checkbox" name="ids[]" form="bulkDeleteSkripsiForm" class="skripsi-check h-4 w-4 rounded border-white/10 bg-white/5" value="{{ $row->id }}" />
                                 </td>
                             @endif
                             <td class="px-4 py-3">
@@ -98,7 +97,7 @@
                                         <span class="text-sm font-medium">Detail</span>
                                     </a>
                                     @if ($isAdminView)
-                                        <form method="POST" action="{{ route('admin.skripsi.destroy', $row) }}" onsubmit="return confirm('Hapus data skripsi ini?')">
+                                        <form method="POST" action="{{ route('admin.skripsi.destroy', $row) }}" data-confirm="Hapus data skripsi ini?">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-red-500/15 hover:bg-red-500/20 border border-red-500/25 transition text-red-100">
@@ -128,31 +127,24 @@
         <script>
             (function () {
                 const checkAll = document.getElementById('checkAllSkripsi');
-                const checks = Array.from(document.querySelectorAll('.skripsi-check'));
-                const hidden = document.getElementById('bulkDeleteIds');
-                if (!hidden) return;
-
-                const sync = () => {
-                    const ids = checks.filter(c => c.checked).map(c => c.value);
-                    hidden.value = ids.join(',');
-                };
+                const checks = document.querySelectorAll('.skripsi-check');
+                const form = document.getElementById('bulkDeleteSkripsiForm');
 
                 if (checkAll) {
                     checkAll.addEventListener('change', () => {
                         checks.forEach(c => c.checked = checkAll.checked);
-                        sync();
                     });
                 }
 
-                checks.forEach(c => c.addEventListener('change', sync));
-                sync();
-
-                hidden.form?.addEventListener('submit', (e) => {
-                    if (!hidden.value) {
-                        e.preventDefault();
-                        alert('Pilih minimal 1 data skripsi.');
-                    }
-                });
+                if (form) {
+                    form.addEventListener('submit', (e) => {
+                        const anyChecked = Array.from(checks).some(c => c.checked);
+                        if (!anyChecked) {
+                            e.preventDefault();
+                            alert('Pilih minimal 1 data skripsi.');
+                        }
+                    });
+                }
             })();
         </script>
     @endif
