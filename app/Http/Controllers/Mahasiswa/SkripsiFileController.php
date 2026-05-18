@@ -30,7 +30,7 @@ class SkripsiFileController extends Controller
         $skripsi = $this->resolveSkripsi($request);
 
         if ($skripsi) {
-            $skripsi->load(['files' => fn ($q) => $q->orderByDesc('id')]);
+            $skripsi->load(['files' => fn ($q) => $q->with('creator')->orderByDesc('id')]);
         }
 
         return view('mahasiswa.skripsi.files', [

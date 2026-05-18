@@ -137,16 +137,37 @@
 
             <div style="margin-top: 14px; border-top: 1px solid rgba(17, 24, 39, 0.10); padding-top: 14px;">
                 <div style="display:flex; align-items:center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
-                    <div style="font-size: 13px; font-weight: 900;">Upload File Skripsi</div>
-                    <div style="font-size: 12px; color: rgba(17, 24, 39, 0.55); font-weight: 800;">File diupload oleh mahasiswa.</div>
+                    <div style="font-size: 13px; font-weight: 900;">File Skripsi</div>
+                    <div style="font-size: 12px; color: rgba(17, 24, 39, 0.55); font-weight: 800;">Dosen & Mahasiswa bisa upload file skripsi/hasil periksa.</div>
                 </div>
 
-                <div style="margin-top: 10px; overflow-x: auto;">
+                {{-- Form Upload Dosen --}}
+                <form method="POST" action="{{ route('dosen.skripsi.bimbingan.file.store', $skripsi) }}" enctype="multipart/form-data" style="margin-top: 12px; padding: 12px; border-radius: 12px; background: rgba(16, 185, 129, 0.05); border: 1px dashed rgba(16, 185, 129, 0.25);" class="no-print">
+                    @csrf
+                    <div style="font-size: 11px; font-weight: 800; color: #059669; text-transform: uppercase; margin-bottom: 8px;">Upload Hasil Periksa (Dosen)</div>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <label style="display: block; font-size: 11px; font-weight: 700; color: rgba(17, 24, 39, 0.6); margin-bottom: 4px;">Pilih File (PDF/DOC/DOCX)</label>
+                            <input type="file" name="file" required style="width: 100%; font-size: 12px; color: #111827;">
+                        </div>
+                        <div style="flex: 2; min-width: 250px;">
+                            <label style="display: block; font-size: 11px; font-weight: 700; color: rgba(17, 24, 39, 0.6); margin-bottom: 4px;">Keterangan</label>
+                            <input type="text" name="keterangan" required placeholder="Contoh: Hasil periksa Bab II..." style="width: 100%; height: 34px; border-radius: 8px; border: 1px solid rgba(17, 24, 39, 0.12); padding: 0 10px; font-size: 12px; font-weight: 700;">
+                        </div>
+                        <button type="submit" class="chat-send" style="height: 34px; border-radius: 8px;">
+                            <i class="fa-solid fa-upload"></i>
+                            Upload
+                        </button>
+                    </div>
+                </form>
+
+                <div style="margin-top: 14px; overflow-x: auto;">
                     <table style="width: 100%; border-collapse: collapse; min-width: 720px;">
                         <thead>
                             <tr style="background: #f3f4f6; border: 1px solid rgba(17, 24, 39, 0.10);">
                                 <th style="text-align:left; padding: 10px 12px; font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase; color: rgba(17, 24, 39, 0.60); width: 44px;">No</th>
                                 <th style="text-align:left; padding: 10px 12px; font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase; color: rgba(17, 24, 39, 0.60);">Nama File</th>
+                                <th style="text-align:left; padding: 10px 12px; font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase; color: rgba(17, 24, 39, 0.60);">Oleh</th>
                                 <th style="text-align:left; padding: 10px 12px; font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase; color: rgba(17, 24, 39, 0.60);">Keterangan</th>
                                 <th style="text-align:left; padding: 10px 12px; font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase; color: rgba(17, 24, 39, 0.60); width: 140px;">Tanggal</th>
                                 <th style="text-align:right; padding: 10px 12px; font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase; color: rgba(17, 24, 39, 0.60); width: 210px;">Aksi</th>
@@ -157,6 +178,14 @@
                                 <tr style="border-bottom: 1px solid rgba(17, 24, 39, 0.08);">
                                     <td style="padding: 10px 12px; font-weight: 900; color: rgba(17, 24, 39, 0.70);">{{ $i + 1 }}</td>
                                     <td style="padding: 10px 12px; font-weight: 900; color: rgba(17, 24, 39, 0.90);">{{ $f->file_name }}</td>
+                                    <td style="padding: 10px 12px; font-weight: 700; color: rgba(17, 24, 39, 0.80);">
+                                        @if($f->creator)
+                                            <div style="color: #111827;">{{ $f->creator->name }}</div>
+                                            <div style="font-size: 10px; color: rgba(17, 24, 39, 0.5);">{{ ucfirst($f->creator->role) }}</div>
+                                        @else
+                                            <span style="color: rgba(17, 24, 39, 0.4);">---</span>
+                                        @endif
+                                    </td>
                                     <td style="padding: 10px 12px; font-weight: 700; color: rgba(17, 24, 39, 0.80); white-space: pre-line;">{{ $f->keterangan ?: '-' }}</td>
                                     <td style="padding: 10px 12px; font-weight: 800; color: rgba(17, 24, 39, 0.60);">{{ $f->created_at?->format('d/m/Y H:i') }}</td>
                                     <td style="padding: 10px 12px;">
@@ -174,7 +203,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" style="padding: 14px; text-align:center; color: rgba(17, 24, 39, 0.55); font-weight: 900;">Belum ada file diupload.</td>
+                                    <td colspan="6" style="padding: 14px; text-align:center; color: rgba(17, 24, 39, 0.55); font-weight: 900;">Belum ada file diupload.</td>
                                 </tr>
                             @endforelse
                         </tbody>

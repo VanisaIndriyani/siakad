@@ -30,7 +30,7 @@ class PplFileController extends Controller
         $ppl = $this->resolvePpl($request);
 
         if ($ppl) {
-            $ppl->load(['files' => fn ($q) => $q->orderByDesc('id')]);
+            $ppl->load(['files' => fn ($q) => $q->with('creator')->orderByDesc('id')]);
         }
 
         return view('mahasiswa.ppl.files', [
@@ -94,6 +94,11 @@ class PplFileController extends Controller
     public function destroy(Request $request, PplFile $file): RedirectResponse
     {
         $this->authorizeFile($request, $file);
+
+        // Mahasiswa hanya bisa hapus file yang mereka upload sendiri
+        if ((int) $file->created_by_user_id !== (int) $request->user()?->id) {
+            return back()->with('error', 'Anda tidak memiliki akses untuk menghapus file ini.');
+        }
 
         if ($file->file_path) {
             Storage::disk('public')->delete($file->file_path);

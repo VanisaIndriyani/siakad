@@ -274,6 +274,7 @@ Route::prefix('dosen')
         Route::get('/skripsi/{skripsi}/bimbingan', [DosenSkripsiBimbinganController::class, 'show'])->name('skripsi.bimbingan.show');
         Route::get('/skripsi/{skripsi}/bimbingan/pdf', [DosenSkripsiBimbinganController::class, 'pdf'])->name('skripsi.bimbingan.pdf');
         Route::post('/skripsi/{skripsi}/bimbingan', [DosenSkripsiBimbinganController::class, 'store'])->name('skripsi.bimbingan.store');
+        Route::post('/skripsi/{skripsi}/bimbingan/file', [DosenSkripsiBimbinganController::class, 'storeFile'])->name('skripsi.bimbingan.file.store');
         Route::get('/skripsi/{skripsi}/revisi', [DosenSkripsiRevisiController::class, 'index'])->name('skripsi.revisi');
         Route::post('/skripsi/{skripsi}/revisi', [DosenSkripsiRevisiController::class, 'store'])->name('skripsi.revisi.store');
         Route::get('/skripsi/{skripsi}/revisi/pdf', [DosenSkripsiRevisiController::class, 'pdf'])->name('skripsi.revisi.pdf');
@@ -290,6 +291,7 @@ Route::prefix('dosen')
         Route::get('/ppl/bimbingan', [DosenPplBimbinganController::class, 'index'])->name('ppl.bimbingan.index');
         Route::get('/ppl/{ppl}/bimbingan', [DosenPplBimbinganController::class, 'show'])->name('ppl.bimbingan.show');
         Route::post('/ppl/{ppl}/bimbingan', [DosenPplBimbinganController::class, 'store'])->name('ppl.bimbingan.store');
+        Route::post('/ppl/{ppl}/bimbingan/file', [DosenPplBimbinganController::class, 'storeFile'])->name('ppl.bimbingan.file.store');
         Route::get('/ppl/{ppl}/bimbingan/pdf', [DosenPplBimbinganController::class, 'pdf'])->name('ppl.bimbingan.pdf');
 
         Route::get('/ppl/pengajuan', [AdminPplController::class, 'index'])->name('ppl-pengajuan.index');

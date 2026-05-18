@@ -54,6 +54,7 @@
                         <tr>
                             <th class="text-left font-medium px-6 py-3 w-14">No</th>
                             <th class="text-left font-medium px-6 py-3">Nama File</th>
+                            <th class="text-left font-medium px-6 py-3">Oleh</th>
                             <th class="text-left font-medium px-6 py-3">Keterangan</th>
                             <th class="text-left font-medium px-6 py-3 w-44">Tanggal</th>
                             <th class="text-right font-medium px-6 py-3 w-56">Aksi</th>
@@ -65,6 +66,14 @@
                                 <td class="px-6 py-3">{{ $i + 1 }}</td>
                                 <td class="px-6 py-3 text-emerald-100/90">
                                     <div class="font-semibold">{{ $f->file_name }}</div>
+                                </td>
+                                <td class="px-6 py-3">
+                                    @if($f->creator)
+                                        <div class="font-semibold text-emerald-100/90">{{ $f->creator->name }}</div>
+                                        <div class="text-xs text-emerald-100/60">{{ ucfirst($f->creator->role) }}</div>
+                                    @else
+                                        <span class="text-emerald-100/50">---</span>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-3 text-emerald-100/80 whitespace-pre-line">{{ $f->keterangan ?: '-' }}</td>
                                 <td class="px-6 py-3 text-emerald-100/70">{{ $f->created_at?->format('d/m/Y H:i') }}</td>
@@ -93,7 +102,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-6 py-10 text-center text-emerald-100/70">Belum ada file diupload.</td>
+                                <td colspan="6" class="px-6 py-10 text-center text-emerald-100/70">Belum ada file diupload.</td>
                             </tr>
                         @endforelse
                     </tbody>

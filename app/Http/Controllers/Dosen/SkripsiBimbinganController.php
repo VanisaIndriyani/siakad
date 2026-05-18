@@ -9,6 +9,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+
 class SkripsiBimbinganController extends Controller
 {
     public function index(Request $request): View
@@ -37,7 +40,7 @@ class SkripsiBimbinganController extends Controller
         $allowed = in_array((int) $dosen->id, [(int) $skripsi->dosen_pembimbing_id, (int) $skripsi->dosen_pembimbing_id_2], true);
         abort_unless($allowed, 404);
 
-        $skripsi->load(['mahasiswa', 'dosenPembimbing', 'dosenPembimbing2', 'messages.sender', 'files']);
+        $skripsi->load(['mahasiswa', 'dosenPembimbing', 'dosenPembimbing2', 'messages.sender', 'files.creator']);
         $skripsi->update(['dosen_last_read_at' => now()]);
 
         return view('dosen.skripsi.show', [
@@ -88,5 +91,33 @@ class SkripsiBimbinganController extends Controller
         ]);
 
         return back()->with('success', 'Pesan bimbingan terkirim.');
+    }
+
+    public function storeFile(Request $request, SkripsiPengajuan $skripsi): RedirectResponse
+    {
+        $dosen = $request->user()?->dosen;
+        abort_unless($dosen, 403);
+        $allowed = in_array((int) $dosen->id, [(int) $skripsi->dosen_pembimbing_id, (int) $skripsi->dosen_pembimbing_id_2], true);
+        abort_unless($allowed, 404);
+
+        $validated = $request->validate([
+            'file' => ['required', 'file', 'max:10240', 'mimes:pdf,doc,docx'],
+            'keterangan' => ['required', 'string'],
+        ]);
+
+        $file = $validated['file'];
+        $originalName = (string) $file->getClientOriginalName();
+        $ext = (string) $file->getClientOriginalExtension();
+        $filename = 'bimbingan-skripsi-'.now()->format('YmdHis').'-'.Str::random(8).($ext !== '' ? '.'.$ext : '');
+        $path = $file->storeAs('skripsi/laporan/'.$skripsi->id, $filename, 'public');
+
+        $skripsi->files()->create([
+            'created_by_user_id' => $request->user()?->id,
+            'file_path' => $path,
+            'file_name' => $originalName,
+            'keterangan' => $validated['keterangan'],
+        ]);
+
+        return back()->with('success', 'Laporan/Hasil periksa Skripsi berhasil diupload.');
     }
 }
