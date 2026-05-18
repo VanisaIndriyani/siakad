@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Dosen;
 use App\Models\SkripsiFile;
 use App\Models\SkripsiPengajuan;
+use Dompdf\Dompdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -96,6 +97,35 @@ class SkripsiController extends Controller
             'dosenList' => $dosenList,
             'routePrefix' => $context['routePrefix'],
             'canAssign' => $context['canAssign'],
+        ]);
+    }
+
+    public function downloadPdf(Request $request, SkripsiPengajuan $skripsi)
+    {
+        $context = $this->resolveContext($request);
+        if ($context['programStudi']) {
+            $skripsi->loadMissing('mahasiswa');
+            abort_unless((string) ($skripsi->mahasiswa?->program_studi ?? '') === $context['programStudi'], 403);
+        }
+
+        $skripsi->load(['mahasiswa', 'dosenPembimbing', 'dosenPembimbing2', 'revisis.creator']);
+
+        $html = view('skripsi.revisi-pdf', [
+            'skripsi' => $skripsi,
+            'revisis' => $skripsi->revisis->sortBy('id')->values(),
+            'printedBy' => $request->user()?->name,
+        ])->render();
+
+        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $filename = 'skripsi-revisi-'.$skripsi->mahasiswa->npm.'.pdf';
+
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ]);
     }
 

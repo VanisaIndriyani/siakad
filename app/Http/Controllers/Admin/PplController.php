@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Dosen;
 use App\Models\PplFile;
 use App\Models\PplPengajuan;
+use Dompdf\Dompdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -107,6 +108,35 @@ class PplController extends Controller
             'dosenList' => $dosenList,
             'routePrefix' => $context['routePrefix'],
             'canAssign' => $context['canAssign'],
+        ]);
+    }
+
+    public function downloadPdf(Request $request, PplPengajuan $ppl)
+    {
+        $context = $this->resolveContext($request);
+        if ($context['programStudi']) {
+            $ppl->loadMissing('mahasiswa');
+            abort_unless((string) ($ppl->mahasiswa?->program_studi ?? '') === $context['programStudi'], 403);
+        }
+
+        $ppl->load(['mahasiswa', 'dosenPembimbing', 'dosenPembimbing2', 'revisis.creator']);
+
+        $html = view('ppl.revisi-pdf', [
+            'ppl' => $ppl,
+            'revisis' => $ppl->revisis->sortBy('id')->values(),
+            'printedBy' => $request->user()?->name,
+        ])->render();
+
+        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $filename = 'ppl-revisi-'.$ppl->mahasiswa->npm.'.pdf';
+
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ]);
     }
 

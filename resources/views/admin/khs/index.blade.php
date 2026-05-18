@@ -103,6 +103,9 @@
                                     <td class="px-4 py-3 text-emerald-100/80">{{ $row->ipk ?? '-' }}</td>
                                     <td class="px-4 py-3">
                                         <div class="flex items-center justify-end gap-2">
+                                            <a href="{{ route('admin.khs.pdf', $row) }}" class="h-9 px-3 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-emerald-100" title="Print PDF">
+                                                <i class="fa-solid fa-print"></i>
+                                            </a>
                                             <a href="{{ route('admin.khs.show', $row) }}" class="h-9 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                                                 <i class="fa-solid fa-eye"></i>
                                                 Detail

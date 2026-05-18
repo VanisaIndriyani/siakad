@@ -100,10 +100,28 @@ class CutiController extends Controller
 
         $cuti->load(['mahasiswa.user', 'approvedByAdmin', 'approvedByProdi']);
         
-        // Ambil data kaprodi dan sekprodi (biasanya dari dosen dengan jabatan tertentu di prodi yang sama)
-        // Untuk sementara kita biarkan view menangani atau lewat parameter
+        $prodi = $cuti->mahasiswa->program_studi ?? null;
+        $kaprodi = null;
+        $sekprodi = null;
+
+        if ($prodi) {
+            $kaprodi = \App\Models\Dosen::query()
+                ->where('program_studi', $prodi)
+                ->where('status_akademik', 'Ketua Prodi')
+                ->orderByDesc('id')
+                ->first();
+
+            $sekprodi = \App\Models\Dosen::query()
+                ->where('program_studi', $prodi)
+                ->where('status_akademik', 'Sekretaris Prodi')
+                ->orderByDesc('id')
+                ->first();
+        }
+
         $html = view('mahasiswa.cuti.pdf', [
             'cuti' => $cuti,
+            'kaprodi' => $kaprodi,
+            'sekprodi' => $sekprodi,
         ])->render();
 
         $dompdf = new Dompdf(['isRemoteEnabled' => true]);

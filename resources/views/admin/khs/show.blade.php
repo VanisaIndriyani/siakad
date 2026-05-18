@@ -9,6 +9,10 @@
             <div class="text-sm text-emerald-100/70">{{ $khs->mahasiswa?->nama_lengkap }} • Semester {{ $khs->semester }}</div>
         </div>
         <div class="flex items-center gap-2">
+            <a href="{{ route('admin.khs.pdf', $khs) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                <i class="fa-solid fa-print"></i>
+                Print PDF
+            </a>
             <a href="{{ route('admin.khs.edit', $khs) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                 <i class="fa-solid fa-pen"></i>
                 Edit

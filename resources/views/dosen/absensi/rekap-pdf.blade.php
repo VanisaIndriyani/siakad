@@ -13,12 +13,12 @@
         table { width: 100%; border-collapse: collapse; }
         
         /* Kop Surat Styles */
-        .kop-title-1 { color: #111827; font-size: 16px; font-weight: 800; margin: 0; line-height: 1.1; }
-        .kop-title-2 { color: #111827; font-size: 24px; font-weight: 900; margin: 1px 0 0; letter-spacing: 0.4px; line-height: 1.0; }
-        .kop-title-3 { color: #111827; font-size: 16px; font-weight: 900; margin: 1px 0 0; line-height: 1.1; }
-        .kop-meta { color: #111827; font-size: 10px; margin-top: 2px; line-height: 1.2; }
-        .kop-line-1 { border-top: 3px solid #6b7280; margin-top: 6px; }
-        .kop-line-2 { border-top: 1px solid #6b7280; margin-top: 2px; }
+        .kop-title-1 { color: #000; font-size: 20px; font-weight: 800; margin: 0; line-height: 1.12; }
+        .kop-title-2 { color: #000; font-size: 28px; font-weight: 900; margin: 1px 0 0; letter-spacing: 0.4px; line-height: 1.06; }
+        .kop-title-3 { color: #000; font-size: 20px; font-weight: 900; margin: 1px 0 0; line-height: 1.12; }
+        .kop-meta { color: #000; font-size: 12px; margin-top: 3px; line-height: 1.2; }
+        .kop-line-1 { border-top: 4px solid #000; margin-top: 7px; }
+        .kop-line-2 { border-top: 2px solid #000; margin-top: 3px; }
         
         .doc-title { text-align: center; font-size: 13px; font-weight: 900; margin: 10px 0 8px; text-transform: uppercase; }
         
@@ -58,9 +58,9 @@
 
     <table style="border: none;">
         <tr>
-            <td style="width: 100px; vertical-align: middle; padding-top: 2px; border: none;">
+            <td style="width: 130px; vertical-align: middle; padding-top: 2px; border: none;">
                 @if($logoBase64)
-                    <img src="{{ $logoBase64 }}" alt="Logo" style="display: block; width: 100px; height: auto;" />
+                    <img src="{{ $logoBase64 }}" alt="Logo" style="display: block; width: 125px; height: auto;" />
                 @endif
             </td>
             <td style="text-align: center; border: none;">

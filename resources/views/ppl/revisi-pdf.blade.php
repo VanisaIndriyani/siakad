@@ -19,62 +19,38 @@
         }
         .kop-surat {
             width: 100%;
-            border-bottom: 2px solid #000;
             padding-bottom: 5px;
-            margin-bottom: 20px;
         }
         .kop-logo {
-            width: 110px;
+            width: 130px;
             text-align: left;
             vertical-align: middle;
+            padding-top: 2px;
         }
         .kop-logo img {
-            width: 100px;
+            width: 125px;
             height: auto;
         }
         .kop-text {
             text-align: center;
             vertical-align: middle;
         }
-        .kop-text .instansi {
-            font-size: 16px;
-            font-weight: 800;
-            margin: 0;
-            line-height: 1.1;
-        }
-        .kop-text .nama-kampus {
-            font-size: 24px;
-            font-weight: 900;
-            margin: 2px 0;
-            line-height: 1;
-        }
-        .kop-text .lokasi {
-            font-size: 16px;
-            font-weight: 800;
-            margin: 0;
-            line-height: 1.1;
-        }
-        .kop-text .akreditasi {
-            font-size: 10px;
-            font-weight: 700;
-            margin-top: 3px;
-        }
-        .kop-text .alamat {
-            font-size: 10px;
-            margin: 2px 0;
-        }
-        .kop-line-2 {
-            border-top: 1px solid #000;
-            margin-top: 2px;
-            margin-bottom: 20px;
-        }
+        .kop-title-1 { color: #000; font-size: 20px; font-weight: 800; margin: 0; line-height: 1.12; }
+        .kop-title-2 { color: #000; font-size: 28px; font-weight: 900; margin: 1px 0 0; letter-spacing: 0.4px; line-height: 1.06; }
+        .kop-title-3 { color: #000; font-size: 20px; font-weight: 900; margin: 1px 0 0; line-height: 1.12; }
+        .kop-meta { color: #000; font-size: 12px; margin-top: 3px; line-height: 1.2; }
+        .kop-line-1 { border-top: 4px solid #000; margin-top: 7px; }
+        .kop-line-2 { border-top: 2px solid #000; margin-top: 3px; }
         .title-box {
             text-align: center;
             margin-bottom: 20px;
         }
         .title-box h2 {
             font-size: 16px;
-            text-decoration: underline;
+            text-decoration: none;
+            border-bottom: 3px double #000;
+            display: inline-block;
+            padding-bottom: 2px;
             margin: 0;
             text-transform: uppercase;
         }
@@ -96,13 +72,13 @@
         }
         .data-table th {
             background-color: #f9fafb;
-            border: 1px solid #d1d5db;
+            border: 1px solid #000;
             padding: 8px;
             text-align: center;
             font-weight: bold;
         }
         .data-table td {
-            border: 1px solid #d1d5db;
+            border: 1px solid #000;
             padding: 8px;
             vertical-align: top;
         }
@@ -120,28 +96,35 @@
             <td class="kop-logo">
                 @php
                     $logoPath = public_path('img/lo.jpeg');
-                    $logoBase64 = '';
-                    if (file_exists($logoPath)) {
-                        $logoData = file_get_contents($logoPath);
-                        $logoType = pathinfo($logoPath, PATHINFO_EXTENSION);
-                        $logoBase64 = 'data:image/' . $logoType . ';base64,' . base64_encode($logoData);
+                    $logoBase64 = null;
+                    if (is_string($logoPath) && file_exists($logoPath)) {
+                        $data = file_get_contents($logoPath);
+                        $logoBase64 = 'data:image/' . pathinfo($logoPath, PATHINFO_EXTENSION) . ';base64,' . base64_encode($data);
                     }
+
+                    $kop1 = 'INSTITUT AGAMA ISLAM';
+                    $kop2 = "DARUD DA'WAH WAL IRSYAD";
+                    $kop3 = 'SIDENRENG RAPPANG';
+                    $kop4 = 'TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021';
+                    $kop5 = 'Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang';
+                    $kop6 = 'E-mail : iaiddisidrap@gmail.com  Website : www.yppddisrapp.ac.id';
                 @endphp
                 @if($logoBase64)
-                    <img src="{{ $logoBase64 }}" alt="Logo">
+                    <img src="{{ $logoBase64 }}" alt="Logo" style="display: block; width: 125px; height: auto;" />
                 @endif
             </td>
             <td class="kop-text">
-                <div class="instansi">INSTITUT AGAMA ISLAM</div>
-                <div class="nama-kampus">DARUD DA'WAH WAL IRSYAD</div>
-                <div class="lokasi">SIDENRENG RAPPANG</div>
-                <div class="akreditasi">TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021</div>
-                <div class="alamat">Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang</div>
-                <div class="alamat">E-mail : iaiddisidrap@gmail.com Website : www.yppddisrapp.ac.id</div>
+                <div class="kop-title-1">{{ $kop1 }}</div>
+                <div class="kop-title-2">{{ $kop2 }}</div>
+                <div class="kop-title-3">{{ $kop3 }}</div>
+                <div class="kop-meta" style="font-weight: 700;">{{ $kop4 }}</div>
+                <div class="kop-meta">{{ $kop5 }}</div>
+                <div class="kop-meta">{{ $kop6 }}</div>
             </td>
             <td style="width: 90px;"></td>
         </tr>
     </table>
+    <div class="kop-line-1"></div>
     <div class="kop-line-2"></div>
 
     <div class="title-box">

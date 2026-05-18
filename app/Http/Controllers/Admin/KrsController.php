@@ -8,6 +8,7 @@ use App\Models\AbsensiItem;
 use App\Models\Khs;
 use App\Models\KhsItem;
 use App\Models\Krs;
+use Dompdf\Dompdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -49,6 +50,56 @@ class KrsController extends Controller
 
         return view('admin.krs.show', [
             'krs' => $krs,
+        ]);
+    }
+
+    private function resolveProdiSigners(?string $programStudi): array
+    {
+        $programStudi = trim((string) $programStudi);
+        if ($programStudi === '') {
+            return ['kaprodi' => null, 'sekprodi' => null];
+        }
+
+        $kaprodi = \App\Models\Dosen::query()
+            ->where('program_studi', $programStudi)
+            ->where('status_akademik', 'Ketua Prodi')
+            ->orderByDesc('id')
+            ->first();
+
+        $sekprodi = \App\Models\Dosen::query()
+            ->where('program_studi', $programStudi)
+            ->where('status_akademik', 'Sekretaris Prodi')
+            ->orderByDesc('id')
+            ->first();
+
+        return [
+            'kaprodi' => $kaprodi?->nama,
+            'sekprodi' => $sekprodi?->nama,
+        ];
+    }
+
+    public function downloadPdf(Krs $krs)
+    {
+        $krs->load(['mahasiswa', 'items.mataKuliah']);
+        
+        $signers = $this->resolveProdiSigners($krs->mahasiswa->program_studi ?? null);
+
+        $html = view('mahasiswa.krs.pdf', [
+            'krs' => $krs,
+            'kaprodiNama' => $signers['kaprodi'],
+            'sekprodiNama' => $signers['sekprodi'],
+        ])->render();
+
+        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $filename = 'krs-'.$krs->mahasiswa->npm.'-'.$krs->semester.'.pdf';
+
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ]);
     }
 

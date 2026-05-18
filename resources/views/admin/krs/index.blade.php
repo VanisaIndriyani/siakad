@@ -113,6 +113,9 @@
                                     </td>
                                     <td class="px-4 py-3">
                                         <div class="flex items-center justify-end gap-2">
+                                            <a href="{{ route('admin.krs.pdf', $row) }}" class="h-9 px-3 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-emerald-100" title="Print PDF">
+                                                <i class="fa-solid fa-print"></i>
+                                            </a>
                                             @if ($row->status_approval === 'pending')
                                                 <button type="button" 
                                                         onclick="if(confirm('Approve KRS ini?')) { document.getElementById('approve-form-{{ $row->id }}').submit(); }"

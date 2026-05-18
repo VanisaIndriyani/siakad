@@ -7,6 +7,7 @@ use App\Models\Khs;
 use App\Models\KhsItem;
 use App\Models\Mahasiswa;
 use App\Models\MataKuliah;
+use Dompdf\Dompdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -48,6 +49,28 @@ class KhsController extends Controller
 
         return view('admin.khs.show', [
             'khs' => $khs,
+        ]);
+    }
+
+    public function downloadPdf(Khs $khs)
+    {
+        $khs->load(['mahasiswa', 'items.mataKuliah']);
+        
+        $html = view('mahasiswa.khs.pdf', [
+            'khs' => $khs,
+            'kaprodiNama' => null, 
+        ])->render();
+
+        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $filename = 'khs-'.$khs->mahasiswa->npm.'-'.$khs->semester.'.pdf';
+
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ]);
     }
 

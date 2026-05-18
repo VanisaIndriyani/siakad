@@ -5,27 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Surat Pengajuan Cuti</title>
     <style>
-        @page { margin: 16mm 14mm 16mm 17mm; }
-        body { font-family: DejaVu Sans, sans-serif; font-size: 12px; color: #111827; line-height: 1.6; }
+        @page { margin: 12mm 14mm 12mm 17mm; }
+        body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #000; line-height: 1.4; }
         table { width: 100%; border-collapse: collapse; }
-        .kop-title-1 { color: #111827; font-size: 19px; font-weight: 800; margin: 0; line-height: 1.12; }
-        .kop-title-2 { color: #111827; font-size: 27px; font-weight: 900; margin: 1px 0 0; letter-spacing: 0.4px; line-height: 1.06; }
-        .kop-title-3 { color: #111827; font-size: 19px; font-weight: 900; margin: 1px 0 0; line-height: 1.12; }
-        .kop-meta { color: #111827; font-size: 11px; margin-top: 3px; line-height: 1.2; }
-        .kop-line-1 { border-top: 3px solid #6b7280; margin-top: 7px; }
-        .kop-line-2 { border-top: 1px solid #6b7280; margin-top: 3px; }
-        .doc-title { text-align: center; font-size: 15px; font-weight: 900; margin: 25px 0 10px; text-decoration: underline; text-transform: uppercase; }
-        .doc-number { text-align: center; font-size: 12px; margin-bottom: 25px; }
-        .content { margin-top: 10px; text-align: justify; }
-        .kv { margin: 20px 0 20px 15px; }
-        .kv td { padding: 5px 0; }
+        .kop-title-1 { color: #000; font-size: 20px; font-weight: 800; margin: 0; line-height: 1.12; }
+        .kop-title-2 { color: #000; font-size: 28px; font-weight: 900; margin: 1px 0 0; letter-spacing: 0.4px; line-height: 1.06; }
+        .kop-title-3 { color: #000; font-size: 20px; font-weight: 900; margin: 1px 0 0; line-height: 1.12; }
+        .kop-meta { color: #000; font-size: 12px; margin-top: 3px; line-height: 1.2; }
+        .kop-line-1 { border-top: 4px solid #000; margin-top: 7px; }
+        .kop-line-2 { border-top: 2px solid #000; margin-top: 3px; }
+        .doc-title { text-align: center; font-size: 14px; font-weight: 900; margin: 15px 0 5px; text-decoration: underline; text-transform: uppercase; }
+        .doc-number { text-align: center; font-size: 11px; margin-bottom: 15px; }
+        .content { margin-top: 5px; text-align: justify; }
+        .kv { margin: 10px 0 10px 15px; }
+        .kv td { padding: 3px 0; }
         .label { width: 180px; }
         .colon { width: 20px; text-align: center; }
         .value { font-weight: 700; }
-        .alasan-box { margin: 10px 0 20px 15px; padding: 12px; border: 1px solid #d1d5db; background-color: #f9fafb; min-height: 60px; font-style: italic; }
-        .footer-table { margin-top: 25mm; }
+        .alasan-box { margin: 5px 0 10px 15px; padding: 10px; border: 1px solid #000; background-color: #f9fafb; min-height: 40px; font-style: italic; }
+        .footer-table { margin-top: 15mm; }
         .footer-table td { text-align: center; vertical-align: top; width: 33.33%; }
-        .sig-space { height: 75px; }
+        .sig-space { height: 60px; }
         .sig-name { font-weight: 800; text-decoration: underline; }
     </style>
 </head>
@@ -69,7 +69,17 @@
     <div class="kop-line-2"></div>
 
     <div class="doc-title">SURAT PERMOHONAN CUTI AKADEMIK</div>
-    <div class="doc-number">Nomor: {{ str_pad($cuti->id, 4, '0', STR_PAD_LEFT) }}/IAI-DDI/{{ date('Y') }}</div>
+    @php
+        $romanMonths = [
+            1 => 'I', 2 => 'II', 3 => 'III', 4 => 'IV', 5 => 'V', 6 => 'VI',
+            7 => 'VII', 8 => 'VIII', 9 => 'IX', 10 => 'X', 11 => 'XI', 12 => 'XII'
+        ];
+        $month = $romanMonths[(int)($cuti->created_at?->format('m') ?? date('m'))];
+        $year = $cuti->created_at?->format('Y') ?? date('Y');
+        $nomorUrut = str_pad($cuti->id, 4, '0', STR_PAD_LEFT);
+        $nomorSurat = "Nomor : {$nomorUrut}/SIAKAD/IAI/DDI/SR/{$month}/{$year}";
+    @endphp
+    <div class="doc-number">{{ $nomorSurat }}</div>
 
     <div class="content">
         <p>Kepada Yth,<br>Rektor Institut Agama Islam DDI Sidrap<br>di -<br>&nbsp;&nbsp;&nbsp;&nbsp;Tempat</p>
@@ -120,15 +130,15 @@
                 <div>Mengetahui,</div>
                 <div style="font-weight: 700;">Ketua Prodi</div>
                 <div class="sig-space"></div>
-                <div class="sig-name">{{ $cuti->approvedByProdi?->name ?? '........................................' }}</div>
-                <div style="font-size: 10px;">NIDN. ................................</div>
+                <div class="sig-name">{{ $kaprodi?->nama ?? '........................................' }}</div>
+                <div style="font-size: 10px;">NUPTK. {{ $kaprodi?->nuptk ?? '................................' }}</div>
             </td>
             <td>
                 <div>Mengetahui,</div>
                 <div style="font-weight: 700;">Sekretaris Prodi</div>
                 <div class="sig-space"></div>
-                <div class="sig-name">........................................</div>
-                <div style="font-size: 10px;">NIDN. ................................</div>
+                <div class="sig-name">{{ $sekprodi?->nama ?? '........................................' }}</div>
+                <div style="font-size: 10px;">NUPTK. {{ $sekprodi?->nuptk ?? '................................' }}</div>
             </td>
             <td>
                 <div>Sidrap, {{ now()->translatedFormat('d F Y') }}</div>
