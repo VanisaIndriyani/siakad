@@ -6,13 +6,13 @@
 
     <style>
         @page {
-            size: A4 portrait;
+            size: A4 landscape;
             margin: 10mm 8mm 10mm 8mm;
         }
 
         body {
             font-family: DejaVu Sans, sans-serif;
-            font-size: 9px;
+            font-size: 10px;
             color: #111827;
             line-height: 1.3;
         }
@@ -27,25 +27,25 @@
         ========================= */
 
      .kop-title-1 {
-    font-size: 12px;
+    font-size: 16px;
     font-weight: 800;
     margin: 0;
 }
 
 .kop-title-2 {
-    font-size: 18px;
+    font-size: 24px;
     font-weight: 900;
     margin: 1px 0 0;
     line-height: 1;
 }
 
 .kop-title-3 {
-    font-size: 13px;
+    font-size: 16px;
     font-weight: 900;
 }
 
 .kop-meta {
-    font-size: 8px;
+    font-size: 10px;
     line-height: 1.2;
 }
 
@@ -111,26 +111,26 @@
 
 .attendance-table th {
     background: #f3f4f6;
-    font-size: 5.5px;
+    font-size: 8px;
     font-weight: 800;
-    line-height: 1;
+    line-height: 1.1;
 }
 
 .attendance-table td {
-    font-size: 6px;
-    height: 24px;
+    font-size: 9px;
+    height: 32px;
 }
 
 .student-name-cell {
     text-align: left !important;
-    padding-left: 3px !important;
-    font-size: 6px;
+    padding-left: 6px !important;
+    font-size: 9px;
     white-space: nowrap;
     overflow: hidden;
 }
 
 .student-name-header {
-    font-size: 5.5px;
+    font-size: 8px;
 }
 
         .npm-column {
@@ -215,7 +215,7 @@
                     <img
                         src="{{ $logoBase64 }}"
                         alt="Logo"
-                        style="display:block; width:70px; height:auto;"
+                        style="display:block; width:100px; height:auto;"
                     >
                 @endif
 
@@ -321,15 +321,15 @@
     <table class="attendance-table">
 
   <colgroup>
-    <col style="width:22px;"> <!-- No -->
-    <col style="width:55px;"> <!-- NPM -->
-    <col style="width:95px;"> <!-- Nama -->
+    <col style="width:30px;"> <!-- No -->
+    <col style="width:70px;"> <!-- NPM -->
+    <col style="width:400px;"> <!-- Nama Mahasiswa -->
 
     @for ($i = 1; $i <= 16; $i++)
-        <col style="width:18px;"> <!-- Pertemuan -->
+        <col style="width:23px;"> <!-- Pertemuan sama rata -->
     @endfor
 
-    <col style="width:28px;"> <!-- Ket -->
+    <col style="width:45px;"> <!-- Ket -->
 </colgroup>
 
         <thead>

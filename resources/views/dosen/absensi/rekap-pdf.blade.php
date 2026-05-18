@@ -6,10 +6,10 @@
     <title>Rekap Absensi</title>
     <style>
         @page {
-            size: A4 portrait;
+            size: A4 landscape;
             margin: 10mm 8mm 10mm 8mm;
         }
-        body { font-family: DejaVu Sans, sans-serif; font-size: 8px; color: #111827; line-height: 1.2; }
+        body { font-family: DejaVu Sans, sans-serif; font-size: 10px; color: #111827; line-height: 1.3; }
         table { width: 100%; border-collapse: collapse; }
         
         /* Kop Surat Styles */
@@ -115,20 +115,20 @@
     <table class="tbl">
         <thead>
             <tr>
-                <th rowspan="2" style="width: 20px;">No</th>
-                <th rowspan="2" style="width: 60px;">NPM</th>
-                <th rowspan="2" class="text-left" style="width: 150px;">Nama Mahasiswa</th>
+                <th rowspan="2" style="width: 25px;">No</th>
+                <th rowspan="2" style="width: 75px;">NPM</th>
+                <th rowspan="2" class="text-left" style="width: 200px;">Nama Mahasiswa</th>
                 <th colspan="16">Pertemuan Ke-</th>
                 <th colspan="4">Total</th>
             </tr>
             <tr>
                 @for ($i = 1; $i <= 16; $i++)
-                    <th style="width: 14px; font-size: 6px;">{{ $i }}</th>
+                    <th style="width: 18px; font-size: 8px;">{{ $i }}</th>
                 @endfor
-                <th style="width: 14px; font-size: 6px;">H</th>
-                <th style="width: 14px; font-size: 6px;">I</th>
-                <th style="width: 14px; font-size: 6px;">S</th>
-                <th style="width: 14px; font-size: 6px;">A</th>
+                <th style="width: 18px; font-size: 8px;">H</th>
+                <th style="width: 18px; font-size: 8px;">I</th>
+                <th style="width: 18px; font-size: 8px;">S</th>
+                <th style="width: 18px; font-size: 8px;">A</th>
             </tr>
         </thead>
         <tbody>

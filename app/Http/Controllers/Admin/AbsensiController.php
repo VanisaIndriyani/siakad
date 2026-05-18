@@ -136,7 +136,7 @@ class AbsensiController extends Controller
 
         $dompdf = new Dompdf(['isRemoteEnabled' => true]);
         $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->setPaper('A4', 'landscape');
         $dompdf->render();
 
         $safeKode = preg_replace('/[^A-Za-z0-9._-]+/', '-', (string) ($mk?->kode ?? 'MK'));
@@ -311,7 +311,7 @@ class AbsensiController extends Controller
 
         $dompdf = new Dompdf(['isRemoteEnabled' => true]);
         $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->setPaper('A4', 'landscape');
         $dompdf->render();
 
         $mk = $absensi->mataKuliah;
