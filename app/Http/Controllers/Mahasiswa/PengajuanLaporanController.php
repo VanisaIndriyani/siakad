@@ -7,6 +7,7 @@ use App\Models\PengajuanLaporan;
 use App\Models\PplPengajuan;
 use App\Models\SkripsiPengajuan;
 use App\Models\Krs;
+use App\Models\Khs;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
