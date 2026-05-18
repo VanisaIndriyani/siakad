@@ -100,46 +100,37 @@
            TABEL ABSENSI
         ========================= */
 
-        .attendance-table {
-            width: 100%;
-            table-layout: fixed;
-            border-collapse: collapse;
-        }
+ .attendance-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
 
-        .attendance-table th,
-        .attendance-table td {
-            border: 1px solid #111827;
-            padding: 4px 2px;
-            text-align: center;
-            vertical-align: middle;
-        }
+.attendance-table th,
+.attendance-table td {
+    border: 1px solid #111827;
+    text-align: center;
+    vertical-align: middle;
+    padding: 2px;
+}
 
-        .attendance-table th {
-            background-color: #f3f4f6;
-            font-size: 7.5px;
-            font-weight: 800;
-            text-transform: uppercase;
-            line-height: 1.1;
-        }
+.attendance-table th {
+    background: #f3f4f6;
+    font-size: 7px;
+    font-weight: 800;
+}
 
-        .attendance-table td {
-            font-size: 9px;
-            height: 32px;
-        }
+.student-name-cell {
+    text-align: left !important;
+    padding-left: 5px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    font-size: 8.5px;
+}
 
-        .student-name-header {
-            text-align: center !important;
-            font-size: 8px;
-            font-weight: 800;
-        }
-
-        .student-name-cell {
-            text-align: left !important;
-            padding-left: 6px !important;
-            white-space: normal !important;
-            font-size: 9px;
-            font-weight: 500;
-        }
+.student-name-header {
+    font-size: 7px;
+}
 
         .npm-column {
             font-weight: 700;
@@ -177,6 +168,18 @@
             font-weight: 700;
             font-size: 9px;
         }
+  .student-name-cell {
+    text-align: left !important;
+    padding-left: 6px !important;
+    font-size: 9px;
+    font-weight: 600;
+    white-space: nowrap; /* biar tidak turun */
+}
+.student-name-header {
+    font-size: 8px;
+}
+
+
     </style>
 </head>
 
@@ -325,15 +328,17 @@
 
     <table class="attendance-table">
 
-        <colgroup>
-            <col style="width: 30px;">
-            <col style="width: 70px;">
-            <col style="width: 550px;">
-            @for ($i = 1; $i <= 16; $i++)
-                <col style="width: 18px;">
-            @endfor
-            <col style="width: 45px;">
-        </colgroup>
+  <colgroup>
+    <col style="width:35px;"> <!-- No -->
+    <col style="width:75px;"> <!-- NPM -->
+    <col style="width:180px;"> <!-- Nama Mahasiswa -->
+
+    @for ($i = 1; $i <= 16; $i++)
+        <col style="width:22px;"> <!-- Pertemuan sama rata -->
+    @endfor
+
+    <col style="width:40px;"> <!-- Ket -->
+</colgroup>
 
         <thead>
 
