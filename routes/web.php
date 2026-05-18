@@ -91,6 +91,11 @@ Route::prefix('admin')
         Route::patch('/krs/{krs}/status', [AdminKrsController::class, 'updateStatus'])->name('krs.status');
         Route::delete('/krs/{krs}', [AdminKrsController::class, 'destroy'])->name('krs.destroy');
 
+        Route::get('/cuti', [AdminCutiApprovalController::class, 'index'])->name('cuti.index');
+        Route::get('/cuti/{cuti}', [AdminCutiApprovalController::class, 'show'])->name('cuti.show');
+        Route::patch('/cuti/{cuti}/status', [AdminCutiApprovalController::class, 'updateStatus'])->name('cuti.status');
+        Route::delete('/cuti/bulk-delete', [AdminCutiApprovalController::class, 'bulkDestroy'])->name('cuti.bulk-delete');
+
         Route::delete('/khs/bulk-delete', [AdminKhsController::class, 'bulkDestroy'])->name('khs.bulk-delete');
         Route::get('/khs', [AdminKhsController::class, 'index'])->name('khs.index');
         Route::get('/khs/create', [AdminKhsController::class, 'create'])->name('khs.create');
@@ -152,9 +157,16 @@ Route::prefix('mahasiswa')
         Route::get('/krs/create', [MahasiswaKrsController::class, 'create'])->name('krs.create');
         Route::post('/krs', [MahasiswaKrsController::class, 'store'])->name('krs.store');
         Route::get('/krs/{krs}', [MahasiswaKrsController::class, 'show'])->name('krs.show');
-        Route::get('/krs/{krs}/pdf', [MahasiswaKrsController::class, 'pdf'])->name('krs.pdf');
         Route::get('/krs/{krs}/edit', [MahasiswaKrsController::class, 'edit'])->name('krs.edit');
         Route::put('/krs/{krs}', [MahasiswaKrsController::class, 'update'])->name('krs.update');
+        Route::get('/krs/{krs}/pdf', [MahasiswaKrsController::class, 'downloadPdf'])->name('krs.pdf');
+
+        Route::get('/cuti', [MahasiswaCutiController::class, 'index'])->name('cuti.index');
+        Route::get('/cuti/create', [MahasiswaCutiController::class, 'create'])->name('cuti.create');
+        Route::post('/cuti', [MahasiswaCutiController::class, 'store'])->name('cuti.store');
+        Route::get('/cuti/{cuti}', [MahasiswaCutiController::class, 'show'])->name('cuti.show');
+        Route::delete('/cuti/{cuti}', [MahasiswaCutiController::class, 'destroy'])->name('cuti.destroy');
+        Route::get('/cuti/{cuti}/pdf', [MahasiswaCutiController::class, 'downloadPdf'])->name('cuti.pdf');
 
         Route::get('/khs', [MahasiswaKhsController::class, 'index'])->name('khs.index');
         Route::get('/khs/{khs}', [MahasiswaKhsController::class, 'show'])->name('khs.show');
@@ -239,6 +251,10 @@ Route::prefix('dosen')
         Route::get('/krs/approval', [DosenKrsApprovalController::class, 'index'])->name('krs.approval');
         Route::get('/krs/{krs}', [DosenKrsApprovalController::class, 'show'])->name('krs.show');
         Route::patch('/krs/{krs}', [DosenKrsApprovalController::class, 'updateStatus'])->name('krs.update');
+
+        Route::get('/cuti', [DosenCutiApprovalController::class, 'index'])->name('cuti.index');
+        Route::get('/cuti/{cuti}', [DosenCutiApprovalController::class, 'show'])->name('cuti.show');
+        Route::patch('/cuti/{cuti}/status', [DosenCutiApprovalController::class, 'updateStatus'])->name('cuti.status');
 
         Route::get('/profil', [DosenProfilController::class, 'show'])->name('profil');
         Route::post('/profil', [DosenProfilController::class, 'update'])->name('profil.update');

@@ -55,7 +55,7 @@
             @php
                 $selected = old('status_mahasiswa', $mahasiswa->status_mahasiswa ?? 'Aktif');
             @endphp
-            @foreach (['Aktif', 'Cuti', 'Lulus', 'Alumni', 'Nonaktif'] as $opt)
+            @foreach (['Aktif', 'Cuti', 'Alumni', 'Nonaktif'] as $opt)
                 <option value="{{ $opt }}" @selected($selected === $opt) class="text-black">{{ $opt }}</option>
             @endforeach
         </select>
