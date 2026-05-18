@@ -1,139 +1,177 @@
 <!doctype html>
-<html>
-    <head>
-        <meta charset="utf-8">
-        <style>
-            @page { margin: 14px 14px 18px 14px; }
-            body { font-family: DejaVu Sans, sans-serif; font-size: 9px; color: #0f172a; }
-            .header { border: 1px solid #e5e7eb; padding: 10px 12px; border-radius: 10px; }
-            .title { font-size: 13px; font-weight: 700; margin: 0; }
-            .meta { margin-top: 6px; font-size: 9px; color: #334155; }
-            .meta-row { margin-top: 2px; }
-            .logo { width: 62px; vertical-align: top; }
-            .logo img { height: 42px; width: auto; display: block; border: 1px solid #e5e7eb; padding: 6px 8px; border-radius: 10px; background: #fff; }
-            .card { margin-top: 10px; border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; }
-            table { width: 100%; border-collapse: collapse; }
-            thead th { background: #f1f5f9; color: #0f172a; font-weight: 700; text-align: center; padding: 6px 6px; border-bottom: 1px solid #e5e7eb; }
-            thead th.left { text-align: left; }
-            tbody td { padding: 6px 6px; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
-            tbody tr:nth-child(even) td { background: #fafafa; }
-            .left { text-align: left; }
-            .center { text-align: center; }
-            .w-no { width: 26px; }
-            .w-npm { width: 88px; }
-            .w-p { width: 18px; }
-            .w-t { width: 36px; }
-            .muted { color: #64748b; }
-            .sign { margin-top: 12px; }
-            .sign table { width: 78%; margin: 0 auto; }
-            .sign td { width: 50%; vertical-align: top; padding-top: 2px; }
-            .sign .label { font-weight: 700; font-size: 10px; }
-            .sign .sub { font-size: 9.5px; color: #334155; margin-top: 2px; }
-            .sign .space { height: 52px; }
-            .sign .name { font-weight: 700; font-size: 10px; }
-            .footer { margin-top: 8px; font-size: 9px; color: #64748b; }
-        </style>
-    </head>
-    <body>
-        @php
-            $logoFile = public_path('img/lo.jpeg');
-            $logoSrc = is_file($logoFile)
-                ? 'data:image/jpeg;base64,'.base64_encode(file_get_contents($logoFile))
-                : null;
-        @endphp
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Rekap Absensi</title>
+    <style>
+        @page { margin: 12mm 10mm 12mm 10mm; }
+        body { font-family: DejaVu Sans, sans-serif; font-size: 9px; color: #111827; line-height: 1.3; }
+        table { width: 100%; border-collapse: collapse; }
+        
+        /* Kop Surat Styles */
+        .kop-title-1 { color: #111827; font-size: 16px; font-weight: 800; margin: 0; line-height: 1.1; }
+        .kop-title-2 { color: #111827; font-size: 24px; font-weight: 900; margin: 1px 0 0; letter-spacing: 0.4px; line-height: 1.0; }
+        .kop-title-3 { color: #111827; font-size: 16px; font-weight: 900; margin: 1px 0 0; line-height: 1.1; }
+        .kop-meta { color: #111827; font-size: 10px; margin-top: 2px; line-height: 1.2; }
+        .kop-line-1 { border-top: 3px solid #6b7280; margin-top: 6px; }
+        .kop-line-2 { border-top: 1px solid #6b7280; margin-top: 2px; }
+        
+        .doc-title { text-align: center; font-size: 13px; font-weight: 900; margin: 10px 0 8px; text-transform: uppercase; }
+        
+        .kv2 { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
+        .kv2 td { padding: 1px 0; font-size: 9px; vertical-align: top; border: none; text-align: left; }
+        .kv2 .label { width: 100px; }
+        .kv2 .colon { width: 10px; text-align: center; }
+        .kv2 .value { font-weight: 700; }
 
-        <div class="header">
-            <table style="width:100%; border-collapse: collapse;">
-                <tr>
-                    <td class="logo">
-                        @if ($logoSrc)
-                            <img src="{{ $logoSrc }}" alt="Logo" />
-                        @endif
-                    </td>
-                    <td style="padding-left: 10px; vertical-align: top;">
-                        <div class="title">Rekap Absensi Mata Kuliah</div>
-                        <div class="meta">
-                            <div class="meta-row"><span class="muted">Kampus:</span> {{ config('app.name') }}</div>
-                            <div class="meta-row"><span class="muted">Jurusan:</span> {{ $jurusan }} • <span class="muted">Semester:</span> {{ $semester }}</div>
-                            <div class="meta-row"><span class="muted">Mata Kuliah:</span> {{ $mk?->kode }} - {{ $mk?->nama }}</div>
-                            <div class="meta-row"><span class="muted">Dosen:</span> {{ $dosenNama ?: '-' }}</div>
-                        </div>
-                    </td>
-                    <td style="width: 150px; text-align: right; vertical-align: top;">
-                        <div class="meta">
-                            <div class="meta-row"><span class="muted">Dicetak:</span> {{ now()->format('d/m/Y H:i') }}</div>
-                            <div class="meta-row"><span class="muted">Keterangan:</span> H (Hadir) • I (Izin) • S (Sakit) • A (Alpha)</div>
-                        </div>
-                    </td>
-                </tr>
-            </table>
-        </div>
+        .tbl { width: 100%; border-collapse: collapse; }
+        .tbl th, .tbl td { border: 1px solid #111827; padding: 4px 2px; text-align: center; }
+        .tbl th { background-color: #f3f4f6; font-size: 8px; font-weight: 800; text-transform: uppercase; }
+        .text-left { text-align: left !important; padding-left: 5px !important; }
+        
+        .sign-table { margin-top: 20px; width: 100%; border-collapse: collapse; }
+        .sign-table td { border: none; width: 50%; text-align: center; vertical-align: top; padding: 0; }
+        .sign-space { height: 50px; }
+        .sign-name { font-weight: 800; text-decoration: underline; }
+    </style>
+</head>
+<body>
+    @php
+        $logoPath = public_path('img/lo.jpeg');
+        $logoBase64 = null;
+        if (is_string($logoPath) && file_exists($logoPath)) {
+            $data = file_get_contents($logoPath);
+            $logoBase64 = 'data:image/' . pathinfo($logoPath, PATHINFO_EXTENSION) . ';base64,' . base64_encode($data);
+        }
 
-        <div class="card">
-            <table>
-                <thead>
+        $kop1 = 'INSTITUT AGAMA ISLAM';
+        $kop2 = "DARUD DA'WAH WAL IRSYAD";
+        $kop3 = 'SIDENRENG RAPPANG';
+        $kop4 = 'TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021';
+        $kop5 = 'Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang';
+        $kop6 = 'E-mail : iaiddisidrap@gmail.com  Website : www.yppddisrapp.ac.id';
+    @endphp
+
+    <table style="border: none;">
+        <tr>
+            <td style="width: 100px; vertical-align: middle; padding-top: 2px; border: none;">
+                @if($logoBase64)
+                    <img src="{{ $logoBase64 }}" alt="Logo" style="display: block; width: 100px; height: auto;" />
+                @endif
+            </td>
+            <td style="text-align: center; border: none;">
+                <div class="kop-title-1">{{ $kop1 }}</div>
+                <div class="kop-title-2">{{ $kop2 }}</div>
+                <div class="kop-title-3">{{ $kop3 }}</div>
+                <div class="kop-meta" style="font-weight: 700;">{{ $kop4 }}</div>
+                <div class="kop-meta">{{ $kop5 }}</div>
+                <div class="kop-meta">{{ $kop6 }}</div>
+            </td>
+            <td style="width: 100px; border: none;"></td>
+        </tr>
+    </table>
+    <div class="kop-line-1"></div>
+    <div class="kop-line-2"></div>
+
+    <div class="doc-title">REKAPITULASI ABSENSI MAHASISWA</div>
+
+    <table style="margin-bottom: 8px; border: none;">
+        <tr>
+            <td style="width: 55%; vertical-align: top; border: none;">
+                <table class="kv2">
                     <tr>
-                        <th class="w-no">No</th>
-                        <th class="w-npm left">NPM</th>
-                        <th class="left">Nama</th>
-                        @foreach (range(1, 16) as $p)
-                            <th class="w-p">{{ $p }}</th>
-                        @endforeach
-                        <th class="w-t">H</th>
-                        <th class="w-t">I</th>
-                        <th class="w-t">S</th>
-                        <th class="w-t">A</th>
+                        <td class="label">Mata Kuliah</td>
+                        <td class="colon">:</td>
+                        <td class="value">{{ $mk->kode }} - {{ $mk->nama }}</td>
                     </tr>
-                </thead>
-                <tbody>
-                    @foreach ($items as $i => $row)
-                        @php
-                            $map = [
-                                'hadir' => 'H',
-                                'izin' => 'I',
-                                'sakit' => 'S',
-                                'alpha' => 'A',
-                            ];
-                        @endphp
-                        <tr>
-                            <td class="center">{{ $i + 1 }}</td>
-                            <td class="left">{{ $row['npm'] }}</td>
-                            <td class="left">{{ $row['nama'] }}</td>
-                            @foreach (range(1, 16) as $p)
-                                @php
-                                    $st = $row['pertemuan'][$p] ?? null;
-                                @endphp
-                                <td class="center">{{ $st ? ($map[$st] ?? '-') : '-' }}</td>
-                            @endforeach
-                            <td class="center">{{ (int) ($row['totals']['hadir'] ?? 0) }}</td>
-                            <td class="center">{{ (int) ($row['totals']['izin'] ?? 0) }}</td>
-                            <td class="center">{{ (int) ($row['totals']['sakit'] ?? 0) }}</td>
-                            <td class="center">{{ (int) ($row['totals']['alpha'] ?? 0) }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
+                    <tr>
+                        <td class="label">Dosen Pengampu</td>
+                        <td class="colon">:</td>
+                        <td class="value">{{ $dosenNama }}</td>
+                    </tr>
+                </table>
+            </td>
+            <td style="width: 45%; vertical-align: top; border: none; padding-left: 20px;">
+                <table class="kv2">
+                    <tr>
+                        <td class="label">Program Studi</td>
+                        <td class="colon">:</td>
+                        <td class="value">{{ $jurusan }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Semester / TA</td>
+                        <td class="colon">:</td>
+                        <td class="value">{{ $semester }} / {{ date('Y') }}</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 
-        <div class="sign">
-            <table>
+    <table class="tbl">
+        <thead>
+            <tr>
+                <th rowspan="2" style="width: 25px;">No</th>
+                <th rowspan="2" style="width: 75px;">NPM</th>
+                <th rowspan="2" class="text-left">Nama Mahasiswa</th>
+                <th colspan="16">Pertemuan Ke-</th>
+                <th colspan="4">Total</th>
+            </tr>
+            <tr>
+                @for ($i = 1; $i <= 16; $i++)
+                    <th style="width: 18px; font-size: 7px;">{{ $i }}</th>
+                @endfor
+                <th style="width: 18px; font-size: 7px;">H</th>
+                <th style="width: 18px; font-size: 7px;">I</th>
+                <th style="width: 18px; font-size: 7px;">S</th>
+                <th style="width: 18px; font-size: 7px;">A</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($items as $i => $row)
+                @php
+                    $map = [
+                        'hadir' => 'H',
+                        'izin' => 'I',
+                        'sakit' => 'S',
+                        'alpha' => 'A',
+                    ];
+                @endphp
                 <tr>
-                    <td>
-                        <div class="label">Ketua Prodi</div>
-                        <div class="sub">{{ $jurusan }}</div>
-                        <div class="space"></div>
-                        <div class="name">{{ $kaprodiNama ?: '________________' }}</div>
-                    </td>
-                    <td style="text-align: right;">
-                        <div class="label">Dosen Pengampu</div>
-                        <div class="sub">{{ $mk?->kode }} - {{ $mk?->nama }}</div>
-                        <div class="space"></div>
-                        <div class="name">{{ $dosenNama ?: '________________' }}</div>
-                    </td>
+                    <td>{{ $i + 1 }}</td>
+                    <td style="font-size: 8px;">{{ $row['npm'] }}</td>
+                    <td class="text-left" style="font-size: 8px;">{{ $row['nama'] }}</td>
+                    @foreach (range(1, 16) as $p)
+                        @php
+                            $st = $row['pertemuan'][$p] ?? null;
+                        @endphp
+                        <td style="font-size: 7px;">{{ $st ? ($map[$st] ?? '-') : '-' }}</td>
+                    @endforeach
+                    <td style="font-size: 8px; font-weight: 700;">{{ (int) ($row['totals']['hadir'] ?? 0) }}</td>
+                    <td style="font-size: 8px;">{{ (int) ($row['totals']['izin'] ?? 0) }}</td>
+                    <td style="font-size: 8px;">{{ (int) ($row['totals']['sakit'] ?? 0) }}</td>
+                    <td style="font-size: 8px;">{{ (int) ($row['totals']['alpha'] ?? 0) }}</td>
                 </tr>
-            </table>
-        </div>
+            @endforeach
+        </tbody>
+    </table>
 
-        <div class="footer">Dokumen ini dihasilkan otomatis oleh {{ config('app.name') }}.</div>
-    </body>
+    <table class="sign-table">
+        <tr>
+            <td>
+                <div style="font-weight: 700;">Mengetahui,</div>
+                <div style="font-weight: 700;">Ketua Program Studi</div>
+                <div class="sign-space"></div>
+                <div class="sign-name">{{ $kaprodiNama ?? '........................................' }}</div>
+            </td>
+            <td>
+                <div style="font-weight: 700;">Sidrap, {{ date('d F Y') }}</div>
+                <div style="font-weight: 700;">Dosen Pengampu,</div>
+                <div class="sign-space"></div>
+                <div class="sign-name">{{ $dosenNama }}</div>
+            </td>
+        </tr>
+    </table>
+</body>
 </html>
