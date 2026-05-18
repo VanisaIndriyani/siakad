@@ -123,14 +123,14 @@
 
 .student-name-cell {
     text-align: left !important;
-    padding-left: 5px !important;
+    padding-left: 3px !important;
+    font-size: 6px;
     white-space: nowrap;
     overflow: hidden;
-    font-size: 8.5px;
 }
 
 .student-name-header {
-    font-size: 7px;
+    font-size: 5.5px;
 }
 
         .npm-column {
@@ -215,7 +215,7 @@
                     <img
                         src="{{ $logoBase64 }}"
                         alt="Logo"
-                        style="display:block; width:100px; height:auto;"
+                        style="display:block; width:70px; height:auto;"
                     >
                 @endif
 
@@ -321,15 +321,15 @@
     <table class="attendance-table">
 
   <colgroup>
-    <col style="width:25px;"> <!-- No -->
-    <col style="width:65px;"> <!-- NPM -->
-    <col style="width:220px;"> <!-- Nama Mahasiswa -->
+    <col style="width:22px;"> <!-- No -->
+    <col style="width:55px;"> <!-- NPM -->
+    <col style="width:95px;"> <!-- Nama -->
 
     @for ($i = 1; $i <= 16; $i++)
-        <col style="width:17px;"> <!-- Pertemuan sama rata -->
+        <col style="width:18px;"> <!-- Pertemuan -->
     @endfor
 
-    <col style="width:40px;"> <!-- Ket -->
+    <col style="width:28px;"> <!-- Ket -->
 </colgroup>
 
         <thead>
