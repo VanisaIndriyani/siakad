@@ -6,7 +6,7 @@
     <title>Surat Pengajuan Cuti</title>
     <style>
         @page { margin: 16mm 14mm 16mm 17mm; }
-        body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #111827; line-height: 1.5; }
+        body { font-family: DejaVu Sans, sans-serif; font-size: 12px; color: #111827; line-height: 1.6; }
         table { width: 100%; border-collapse: collapse; }
         .kop-title-1 { color: #111827; font-size: 19px; font-weight: 800; margin: 0; line-height: 1.12; }
         .kop-title-2 { color: #111827; font-size: 27px; font-weight: 900; margin: 1px 0 0; letter-spacing: 0.4px; line-height: 1.06; }
@@ -14,16 +14,18 @@
         .kop-meta { color: #111827; font-size: 11px; margin-top: 3px; line-height: 1.2; }
         .kop-line-1 { border-top: 3px solid #6b7280; margin-top: 7px; }
         .kop-line-2 { border-top: 1px solid #6b7280; margin-top: 3px; }
-        .doc-title { text-align: center; font-size: 14px; font-weight: 900; margin: 20px 0 15px; text-decoration: underline; }
-        .content { margin-top: 20px; text-align: justify; }
-        .kv { margin: 15px 0; }
-        .kv td { padding: 4px 0; }
-        .label { width: 160px; }
+        .doc-title { text-align: center; font-size: 15px; font-weight: 900; margin: 25px 0 10px; text-decoration: underline; text-transform: uppercase; }
+        .doc-number { text-align: center; font-size: 12px; margin-bottom: 25px; }
+        .content { margin-top: 10px; text-align: justify; }
+        .kv { margin: 20px 0 20px 15px; }
+        .kv td { padding: 5px 0; }
+        .label { width: 180px; }
         .colon { width: 20px; text-align: center; }
         .value { font-weight: 700; }
-        .footer-table { margin-top: 30mm; }
+        .alasan-box { margin: 10px 0 20px 15px; padding: 12px; border: 1px solid #d1d5db; background-color: #f9fafb; min-height: 60px; font-style: italic; }
+        .footer-table { margin-top: 25mm; }
         .footer-table td { text-align: center; vertical-align: top; width: 33.33%; }
-        .sig-space { height: 70px; }
+        .sig-space { height: 75px; }
         .sig-name { font-weight: 800; text-decoration: underline; }
     </style>
 </head>
@@ -67,8 +69,12 @@
     <div class="kop-line-2"></div>
 
     <div class="doc-title">SURAT PERMOHONAN CUTI AKADEMIK</div>
+    <div class="doc-number">Nomor: {{ str_pad($cuti->id, 4, '0', STR_PAD_LEFT) }}/IAI-DDI/{{ date('Y') }}</div>
 
     <div class="content">
+        <p>Kepada Yth,<br>Rektor Institut Agama Islam DDI Sidrap<br>di -<br>&nbsp;&nbsp;&nbsp;&nbsp;Tempat</p>
+        
+        <p style="margin-top: 15px;">Assalamu'alaikum Wr. Wb.</p>
         <p>Yang bertanda tangan di bawah ini:</p>
         
         <table class="kv">
@@ -99,12 +105,13 @@
             </tr>
         </table>
 
-        <p>Mengajukan permohonan cuti akademik pada semester tersebut di atas dengan alasan sebagai berikut:</p>
-        <div style="padding: 10px; border: 1px solid #e5e7eb; background-color: #f9fafb; min-height: 60px;">
-            {{ $cuti->alasan }}
+        <p>Dengan ini mengajukan permohonan cuti akademik pada semester tersebut di atas dengan alasan sebagai berikut:</p>
+        <div class="alasan-box">
+            "{{ $cuti->alasan }}"
         </div>
 
-        <p style="margin-top: 20px;">Demikian surat permohonan ini saya buat dengan sebenar-benarnya untuk dapat dipergunakan sebagaimana mestinya.</p>
+        <p>Demikian surat permohonan ini saya buat dengan sebenar-benarnya untuk dapat dipergunakan sebagaimana mestinya. Atas perhatian dan persetujuan Bapak, saya ucapkan terima kasih.</p>
+        <p style="margin-top: 10px;">Wassalamu'alaikum Wr. Wb.</p>
     </div>
 
     <table class="footer-table">
@@ -114,18 +121,21 @@
                 <div style="font-weight: 700;">Ketua Prodi</div>
                 <div class="sig-space"></div>
                 <div class="sig-name">{{ $cuti->approvedByProdi?->name ?? '........................................' }}</div>
+                <div style="font-size: 10px;">NIDN. ................................</div>
             </td>
             <td>
                 <div>Mengetahui,</div>
                 <div style="font-weight: 700;">Sekretaris Prodi</div>
                 <div class="sig-space"></div>
                 <div class="sig-name">........................................</div>
+                <div style="font-size: 10px;">NIDN. ................................</div>
             </td>
             <td>
                 <div>Sidrap, {{ now()->translatedFormat('d F Y') }}</div>
-                <div style="font-weight: 700;">Mahasiswa</div>
+                <div style="font-weight: 700;">Mahasiswa Pemohon</div>
                 <div class="sig-space"></div>
                 <div class="sig-name">{{ $mahasiswa->nama_lengkap }}</div>
+                <div style="font-size: 10px;">NPM. {{ $mahasiswa->npm }}</div>
             </td>
         </tr>
     </table>

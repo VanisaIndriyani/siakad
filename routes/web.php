@@ -96,6 +96,7 @@ Route::prefix('admin')
 
         Route::get('/cuti', [AdminCutiApprovalController::class, 'index'])->name('cuti.index');
         Route::get('/cuti/{cuti}', [AdminCutiApprovalController::class, 'show'])->name('cuti.show');
+        Route::get('/cuti/{cuti}/pdf', [MahasiswaCutiController::class, 'downloadPdf'])->name('cuti.pdf');
         Route::patch('/cuti/{cuti}/status', [AdminCutiApprovalController::class, 'updateStatus'])->name('cuti.status');
         Route::delete('/cuti/bulk-delete', [AdminCutiApprovalController::class, 'bulkDestroy'])->name('cuti.bulk-delete');
 

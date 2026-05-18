@@ -30,7 +30,20 @@
                 </div>
                 <div>
                     <label class="text-sm text-emerald-100/80">Tahun Ajaran</label>
-                    <input name="tahun_ajaran" value="{{ old('tahun_ajaran') }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400 text-white" placeholder="Contoh: 2026/2027" />
+                    <select name="tahun_ajaran" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400 text-white">
+                        @php
+                            $currentYear = date('Y');
+                            $years = [];
+                            for ($i = -1; $i <= 3; $i++) {
+                                $y1 = $currentYear + $i;
+                                $y2 = $y1 + 1;
+                                $years[] = "$y1/$y2";
+                            }
+                        @endphp
+                        @foreach ($years as $year)
+                            <option value="{{ $year }}" @selected(old('tahun_ajaran') == $year) class="text-black">{{ $year }}</option>
+                        @endforeach
+                    </select>
                     @error('tahun_ajaran') <div class="mt-1 text-xs text-red-200">{{ $message }}</div> @enderror
                 </div>
             </div>
