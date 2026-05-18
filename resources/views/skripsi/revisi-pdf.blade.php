@@ -137,7 +137,7 @@
                 <div class="lokasi">SIDENRENG RAPPANG</div>
                 <div class="akreditasi">TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021</div>
                 <div class="alamat">Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang</div>
-                <div class="alamat">E-mail : iaiddisrapp@gmail.com Website : www.yppddisrapp.ac.id</div>
+                <div class="alamat">E-mail : iaiddisidrap@gmail.com Website : www.yppddisrapp.ac.id</div>
             </td>
             <td style="width: 90px;"></td>
         </tr>

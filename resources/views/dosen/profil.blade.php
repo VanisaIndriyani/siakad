@@ -37,7 +37,7 @@
                     <div style="font-size: 18px; font-weight: 800; margin: 0; line-height: 1.1;">SIDENRENG RAPPANG</div>
                     <div style="font-size: 10px; font-weight: 700; margin-top: 3px;">TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021</div>
                     <div style="font-size: 10px; margin: 2px 0;">Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang</div>
-                    <div style="font-size: 10px; margin: 2px 0;">E-mail : iaiddisrapp@gmail.com Website : www.yppddisrapp.ac.id</div>
+                    <div style="font-size: 11px; margin: 2px 0;">E-mail : iaiddisidrap@gmail.com Website : www.yppddisrapp.ac.id</div>
                 </td>
                 <td style="width: 90px;"></td>
             </tr>

@@ -48,7 +48,7 @@
         $kopLine3 = 'SIDENRENG RAPPANG';
         $kopLine4 = 'TERAKREDITASI INSTITUSI • SK: 576/SK/BAN-PT/Akred/PT/IV/2021';
         $kopLine5 = 'Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang';
-        $kopLine6 = 'E-mail : iaiddisrapp@gmail.com  Website : www.yppddisrapp.ac.id';
+        $kopLine6 = 'E-mail : iaiddisidrap@gmail.com  Website : www.yppddisrapp.ac.id';
     @endphp
 
     <div class="print-only" style="margin-bottom: 14px;">
