@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Absensi Pertemuan</title>
     <style>
-        @page { margin: 16mm 14mm 16mm 17mm; }
-        body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #111827; line-height: 1.3; }
+        @page {
+            size: A4 portrait;
+            margin: 10mm 10mm 10mm 10mm;
+        }
+        body { font-family: DejaVu Sans, sans-serif; font-size: 10px; color: #111827; line-height: 1.3; }
         table { width: 100%; border-collapse: collapse; }
         
         /* Kop Surat Styles */

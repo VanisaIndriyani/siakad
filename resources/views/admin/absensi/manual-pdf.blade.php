@@ -26,33 +26,28 @@
            HEADER
         ========================= */
 
-        .kop-title-1 {
-            font-size: 16px;
-            font-weight: 800;
-            margin: 0;
-            line-height: 1.1;
-        }
+     .kop-title-1 {
+    font-size: 12px;
+    font-weight: 800;
+    margin: 0;
+}
 
-        .kop-title-2 {
-            font-size: 24px;
-            font-weight: 900;
-            margin: 1px 0 0;
-            letter-spacing: 0.4px;
-            line-height: 1;
-        }
+.kop-title-2 {
+    font-size: 18px;
+    font-weight: 900;
+    margin: 1px 0 0;
+    line-height: 1;
+}
 
-        .kop-title-3 {
-            font-size: 16px;
-            font-weight: 900;
-            margin: 1px 0 0;
-            line-height: 1.1;
-        }
+.kop-title-3 {
+    font-size: 13px;
+    font-weight: 900;
+}
 
-        .kop-meta {
-            font-size: 10px;
-            margin-top: 2px;
-            line-height: 1.2;
-        }
+.kop-meta {
+    font-size: 8px;
+    line-height: 1.2;
+}
 
         .kop-line-1 {
             border-top: 3px solid #6b7280;
@@ -111,13 +106,19 @@
     border: 1px solid #111827;
     text-align: center;
     vertical-align: middle;
-    padding: 2px;
+    padding: 1px;
 }
 
 .attendance-table th {
     background: #f3f4f6;
-    font-size: 7px;
+    font-size: 5.5px;
     font-weight: 800;
+    line-height: 1;
+}
+
+.attendance-table td {
+    font-size: 6px;
+    height: 24px;
 }
 
 .student-name-cell {
@@ -168,16 +169,7 @@
             font-weight: 700;
             font-size: 9px;
         }
-  .student-name-cell {
-    text-align: left !important;
-    padding-left: 6px !important;
-    font-size: 9px;
-    font-weight: 600;
-    white-space: nowrap; /* biar tidak turun */
-}
-.student-name-header {
-    font-size: 8px;
-}
+  
 
 
     </style>
@@ -329,12 +321,12 @@
     <table class="attendance-table">
 
   <colgroup>
-    <col style="width:30px;"> <!-- No -->
-    <col style="width:70px;"> <!-- NPM -->
-    <col style="width:200px;"> <!-- Nama Mahasiswa -->
+    <col style="width:25px;"> <!-- No -->
+    <col style="width:65px;"> <!-- NPM -->
+    <col style="width:220px;"> <!-- Nama Mahasiswa -->
 
     @for ($i = 1; $i <= 16; $i++)
-        <col style="width:20px;"> <!-- Pertemuan sama rata -->
+        <col style="width:17px;"> <!-- Pertemuan sama rata -->
     @endfor
 
     <col style="width:40px;"> <!-- Ket -->
