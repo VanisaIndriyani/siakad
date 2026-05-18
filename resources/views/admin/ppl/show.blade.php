@@ -8,6 +8,7 @@
         $canAssign = (bool) ($canAssign ?? false);
         $indexUrl = $prefix === 'admin' ? route('admin.ppl.index') : route('dosen.ppl-pengajuan.index');
         $statusAction = $prefix === 'admin' ? route('admin.ppl.status', $ppl) : route('dosen.ppl-pengajuan.status', $ppl);
+        $assignAction = $prefix === 'admin' ? route('admin.ppl.assign', $ppl) : route('dosen.ppl-pengajuan.assign', $ppl);
         $skPreviewUrl = $prefix === 'admin'
             ? route('admin.ppl.sk.preview', $ppl)
             : route('dosen.ppl-pengajuan.sk.preview', $ppl);
@@ -155,7 +156,7 @@
                 <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
                     <div class="text-sm font-semibold">Tetapkan Pembimbing (SK)</div>
 
-                    <form method="POST" action="{{ route('admin.ppl.assign', $ppl) }}" enctype="multipart/form-data" class="mt-4 space-y-3">
+                    <form method="POST" action="{{ $assignAction }}" enctype="multipart/form-data" class="mt-4 space-y-3">
                         @csrf
                         @method('PATCH')
 

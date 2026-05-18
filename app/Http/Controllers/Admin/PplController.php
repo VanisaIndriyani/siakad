@@ -32,12 +32,13 @@ class PplController extends Controller
         if ($user?->isDosen()) {
             $dosen = $user->dosen;
             $programStudi = trim((string) ($dosen?->program_studi ?? ''));
-            // Jangan abort 403 jika prodi kosong
-            // abort_unless($programStudi !== '', 403, 'Anda belum memiliki Program Studi yang terdaftar.');
+            $statusAkademik = (string) ($dosen?->status_akademik ?? '');
+            
+            $canAssign = in_array($statusAkademik, self::PRODI_APPROVER_STATUS, true);
 
             return [
                 'routePrefix' => 'dosen',
-                'canAssign' => false,
+                'canAssign' => $canAssign,
                 'programStudi' => $programStudi ?: '---',
             ];
         }
@@ -112,6 +113,7 @@ class PplController extends Controller
     public function updateStatus(Request $request, PplPengajuan $ppl): RedirectResponse
     {
         $context = $this->resolveContext($request);
+        abort_unless($context['canAssign'], 403);
 
         if ($context['programStudi']) {
             $ppl->loadMissing('mahasiswa');
@@ -139,7 +141,13 @@ class PplController extends Controller
 
     public function assign(Request $request, PplPengajuan $ppl): RedirectResponse
     {
-        abort_unless($request->user()?->isAdmin(), 403);
+        $context = $this->resolveContext($request);
+        abort_unless($context['canAssign'], 403);
+
+        if ($context['programStudi']) {
+            $ppl->loadMissing('mahasiswa');
+            abort_unless((string) ($ppl->mahasiswa?->program_studi ?? '') === $context['programStudi'], 403);
+        }
 
         $validated = $request->validate([
             'dosen_pembimbing_id' => ['required', 'exists:dosen,id'],

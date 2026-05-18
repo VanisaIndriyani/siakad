@@ -28,10 +28,11 @@ class SkripsiController extends Controller
         if ($user?->isDosen()) {
             $dosen = $user->dosen;
             $programStudi = trim((string) ($dosen?->program_studi ?? ''));
-            // Jangan abort 403 jika prodi kosong
-            // abort_unless($programStudi !== '', 403, 'Anda belum memiliki Program Studi yang terdaftar.');
+            $statusAkademik = (string) ($dosen?->status_akademik ?? '');
 
-            return ['routePrefix' => 'dosen', 'canAssign' => false, 'programStudi' => $programStudi ?: '---'];
+            $canAssign = in_array($statusAkademik, self::PRODI_APPROVER_STATUS, true);
+
+            return ['routePrefix' => 'dosen', 'canAssign' => $canAssign, 'programStudi' => $programStudi ?: '---'];
         }
 
         abort(403);
@@ -101,6 +102,7 @@ class SkripsiController extends Controller
     public function updateStatus(Request $request, SkripsiPengajuan $skripsi): RedirectResponse
     {
         $context = $this->resolveContext($request);
+        abort_unless($context['canAssign'], 403);
 
         if ($context['programStudi']) {
             $skripsi->loadMissing('mahasiswa');
@@ -128,7 +130,13 @@ class SkripsiController extends Controller
 
     public function assign(Request $request, SkripsiPengajuan $skripsi): RedirectResponse
     {
-        abort_unless($request->user()?->isAdmin(), 403);
+        $context = $this->resolveContext($request);
+        abort_unless($context['canAssign'], 403);
+
+        if ($context['programStudi']) {
+            $skripsi->loadMissing('mahasiswa');
+            abort_unless((string) ($skripsi->mahasiswa?->program_studi ?? '') === $context['programStudi'], 403);
+        }
 
         $validated = $request->validate([
             'dosen_pembimbing_id' => ['required', 'exists:dosen,id'],
@@ -174,7 +182,13 @@ class SkripsiController extends Controller
 
     public function destroySkPembimbing(Request $request, SkripsiPengajuan $skripsi): RedirectResponse
     {
-        abort_unless($request->user()?->isAdmin(), 403);
+        $context = $this->resolveContext($request);
+        abort_unless($context['canAssign'], 403);
+
+        if ($context['programStudi']) {
+            $skripsi->loadMissing('mahasiswa');
+            abort_unless((string) ($skripsi->mahasiswa?->program_studi ?? '') === $context['programStudi'], 403);
+        }
 
         if ($skripsi->sk_pembimbing_path) {
             Storage::disk('public')->delete($skripsi->sk_pembimbing_path);
@@ -190,7 +204,13 @@ class SkripsiController extends Controller
 
     public function resetPembimbing(Request $request, SkripsiPengajuan $skripsi): RedirectResponse
     {
-        abort_unless($request->user()?->isAdmin(), 403);
+        $context = $this->resolveContext($request);
+        abort_unless($context['canAssign'], 403);
+
+        if ($context['programStudi']) {
+            $skripsi->loadMissing('mahasiswa');
+            abort_unless((string) ($skripsi->mahasiswa?->program_studi ?? '') === $context['programStudi'], 403);
+        }
 
         if ($skripsi->sk_pembimbing_path) {
             Storage::disk('public')->delete($skripsi->sk_pembimbing_path);

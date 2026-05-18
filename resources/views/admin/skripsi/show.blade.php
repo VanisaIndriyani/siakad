@@ -8,6 +8,9 @@
         $canAssign = (bool) ($canAssign ?? false);
         $indexUrl = $prefix === 'admin' ? route('admin.skripsi.index') : route('dosen.skripsi-pengajuan.index');
         $statusAction = $prefix === 'admin' ? route('admin.skripsi.status', $skripsi) : route('dosen.skripsi-pengajuan.status', $skripsi);
+        $assignAction = $prefix === 'admin' ? route('admin.skripsi.assign', $skripsi) : route('dosen.skripsi-pengajuan.assign', $skripsi);
+        $skDestroyAction = $prefix === 'admin' ? route('admin.skripsi.sk.destroy', $skripsi) : route('dosen.skripsi-pengajuan.sk.destroy', $skripsi);
+        $pembimbingResetAction = $prefix === 'admin' ? route('admin.skripsi.pembimbing.reset', $skripsi) : route('dosen.skripsi-pengajuan.pembimbing.reset', $skripsi);
         $skPreviewUrl = $prefix === 'admin'
             ? route('admin.skripsi.sk.preview', $skripsi)
             : route('dosen.skripsi-pengajuan.sk.preview', $skripsi);
@@ -152,7 +155,7 @@
                 <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
                     <div class="text-sm font-semibold">Tetapkan Pembimbing (SK)</div>
 
-                    <form method="POST" action="{{ route('admin.skripsi.assign', $skripsi) }}" enctype="multipart/form-data" class="mt-4 space-y-3">
+                    <form method="POST" action="{{ $assignAction }}" enctype="multipart/form-data" class="mt-4 space-y-3">
                         @csrf
                         @method('PATCH')
 
@@ -217,10 +220,10 @@
                         <span class="font-medium">{{ $skripsi->tanggal_sk->format('d/m/Y') }}</span>
                     @endif
                 </div>
-                @if ($prefix === 'admin' && ($skripsi->dosen_pembimbing_id || $skripsi->dosen_pembimbing_id_2 || $skripsi->nomor_sk || $skripsi->tanggal_sk || $skripsi->sk_pembimbing_path))
+                @if ($canAssign && ($skripsi->dosen_pembimbing_id || $skripsi->dosen_pembimbing_id_2 || $skripsi->nomor_sk || $skripsi->tanggal_sk || $skripsi->sk_pembimbing_path))
                     <div class="mt-3 flex items-center gap-2 flex-wrap">
                         @if ($skripsi->sk_pembimbing_path)
-                            <form method="POST" action="{{ route('admin.skripsi.sk.destroy', $skripsi) }}" data-confirm="Hapus file SK pembimbing?">
+                            <form method="POST" action="{{ $skDestroyAction }}" data-confirm="Hapus file SK pembimbing?">
                                 @csrf
                                 @method('DELETE')
                                 <button class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/25 transition">
@@ -229,7 +232,7 @@
                                 </button>
                             </form>
                         @endif
-                        <form method="POST" action="{{ route('admin.skripsi.pembimbing.reset', $skripsi) }}" data-confirm="Reset pembimbing & SK untuk skripsi ini?">
+                        <form method="POST" action="{{ $pembimbingResetAction }}" data-confirm="Reset pembimbing & SK untuk skripsi ini?">
                             @csrf
                             @method('DELETE')
                             <button class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/25 transition">

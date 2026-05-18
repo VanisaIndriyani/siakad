@@ -281,6 +281,9 @@ Route::prefix('dosen')
         Route::get('/skripsi/pengajuan', [AdminSkripsiController::class, 'index'])->name('skripsi-pengajuan.index');
         Route::get('/skripsi/pengajuan/{skripsi}', [AdminSkripsiController::class, 'show'])->name('skripsi-pengajuan.show');
         Route::patch('/skripsi/pengajuan/{skripsi}/status', [AdminSkripsiController::class, 'updateStatus'])->name('skripsi-pengajuan.status');
+        Route::patch('/skripsi/pengajuan/{skripsi}/assign', [AdminSkripsiController::class, 'assign'])->name('skripsi-pengajuan.assign');
+        Route::delete('/skripsi/pengajuan/{skripsi}/sk-pembimbing', [AdminSkripsiController::class, 'destroySkPembimbing'])->name('skripsi-pengajuan.sk.destroy');
+        Route::delete('/skripsi/pengajuan/{skripsi}/pembimbing', [AdminSkripsiController::class, 'resetPembimbing'])->name('skripsi-pengajuan.pembimbing.reset');
         Route::get('/skripsi/pengajuan/{skripsi}/sk-pembimbing', [AdminSkripsiController::class, 'downloadSkPembimbing'])->name('skripsi-pengajuan.sk.download');
         Route::get('/skripsi/pengajuan/{skripsi}/sk-pembimbing/preview', [AdminSkripsiController::class, 'previewSkPembimbing'])->name('skripsi-pengajuan.sk.preview');
 
@@ -292,6 +295,7 @@ Route::prefix('dosen')
         Route::get('/ppl/pengajuan', [AdminPplController::class, 'index'])->name('ppl-pengajuan.index');
         Route::get('/ppl/pengajuan/{ppl}', [AdminPplController::class, 'show'])->name('ppl-pengajuan.show');
         Route::patch('/ppl/pengajuan/{ppl}/status', [AdminPplController::class, 'updateStatus'])->name('ppl-pengajuan.status');
+        Route::patch('/ppl/pengajuan/{ppl}/assign', [AdminPplController::class, 'assign'])->name('ppl-pengajuan.assign');
         Route::get('/ppl/pengajuan/{ppl}/sk-pembimbing', [AdminPplController::class, 'downloadSkPembimbing'])->name('ppl-pengajuan.sk.download');
         Route::get('/ppl/pengajuan/{ppl}/sk-pembimbing/preview', [AdminPplController::class, 'previewSkPembimbing'])->name('ppl-pengajuan.sk.preview');
 
