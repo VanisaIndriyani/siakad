@@ -55,10 +55,16 @@ class PengajuanLaporanController extends Controller
             ->orderByDesc('id')
             ->get();
 
+        $pendingKhs = Khs::query()
+            ->where('mahasiswa_id', $mahasiswa->id)
+            ->orderByDesc('id')
+            ->get();
+
         return view('mahasiswa.laporan.create', [
             'pendingSkripsi' => $pendingSkripsi,
             'pendingPpl' => $pendingPpl,
             'pendingKrs' => $pendingKrs,
+            'pendingKhs' => $pendingKhs,
         ]);
     }
 
@@ -68,7 +74,7 @@ class PengajuanLaporanController extends Controller
         abort_unless($mahasiswa, 403);
 
         $validated = $request->validate([
-            'jenis' => ['required', 'string', Rule::in(['skripsi', 'ppl', 'krs'])],
+            'jenis' => ['required', 'string', Rule::in(['skripsi', 'ppl', 'krs', 'khs'])],
             'pengajuan_id' => ['required', 'integer', 'min:1'],
             'judul' => ['required', 'string', 'max:255'],
             'pesan' => ['required', 'string'],
@@ -86,11 +92,16 @@ class PengajuanLaporanController extends Controller
                 ->where('mahasiswa_id', $mahasiswa->id)
                 ->where('status', 'pending')
                 ->firstOrFail();
-        } else {
+        } elseif ($validated['jenis'] === 'krs') {
             Krs::query()
                 ->where('id', (int) $validated['pengajuan_id'])
                 ->where('mahasiswa_id', $mahasiswa->id)
                 ->where('status_approval', 'pending')
+                ->firstOrFail();
+        } else {
+            Khs::query()
+                ->where('id', (int) $validated['pengajuan_id'])
+                ->where('mahasiswa_id', $mahasiswa->id)
                 ->firstOrFail();
         }
 

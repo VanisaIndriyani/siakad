@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\CutiApprovalController as AdminCutiApprovalController;
+use App\Http\Controllers\Dosen\CutiApprovalController as DosenCutiApprovalController;
+use App\Http\Controllers\Mahasiswa\CutiController as MahasiswaCutiController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\AcademicCalendarController as AdminAcademicCalendarController;
 use App\Http\Controllers\Admin\AbsensiController as AdminAbsensiController;

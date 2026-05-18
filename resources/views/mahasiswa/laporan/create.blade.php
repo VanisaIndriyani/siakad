@@ -19,13 +19,14 @@
         $hasSkripsi = $pendingSkripsi->count() > 0;
         $hasPpl = $pendingPpl->count() > 0;
         $hasKrs = $pendingKrs->count() > 0;
-        $hasPending = $hasSkripsi || $hasPpl || $hasKrs;
-        $defaultJenis = old('jenis') ?: ($hasSkripsi ? 'skripsi' : ($hasPpl ? 'ppl' : 'krs'));
+        $hasKhs = $pendingKhs->count() > 0;
+        $hasPending = $hasSkripsi || $hasPpl || $hasKrs || $hasKhs;
+        $defaultJenis = old('jenis') ?: ($hasSkripsi ? 'skripsi' : ($hasPpl ? 'ppl' : ($hasKrs ? 'krs' : 'khs')));
     @endphp
 
     @if (! $hasPending)
         <div class="mt-5 rounded-2xl bg-yellow-500/10 border border-yellow-500/20 p-5 text-yellow-100">
-            Tidak ada pengajuan Pending yang bisa dibuat laporan saat ini.
+            Tidak ada pengajuan yang bisa dibuat laporan saat ini.
         </div>
     @else
         <div class="mt-5 rounded-2xl bg-white/5 border border-white/10 p-5">
@@ -34,18 +35,19 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-emerald-100/70 mb-1">Jenis</label>
+                        <label class="block text-xs font-semibold text-emerald-100/70 mb-1">Jenis Laporan</label>
                         <select id="jenisSelect" name="jenis"
                                 class="h-11 w-full rounded-xl bg-white/5 border border-white/10 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
                             <option value="skripsi" @selected($defaultJenis === 'skripsi') {{ $hasSkripsi ? '' : 'disabled' }} style="background-color: #0d2a23; color: #fff;">Skripsi</option>
                             <option value="ppl" @selected($defaultJenis === 'ppl') {{ $hasPpl ? '' : 'disabled' }} style="background-color: #0d2a23; color: #fff;">PPL</option>
                             <option value="krs" @selected($defaultJenis === 'krs') {{ $hasKrs ? '' : 'disabled' }} style="background-color: #0d2a23; color: #fff;">KRS</option>
+                            <option value="khs" @selected($defaultJenis === 'khs') {{ $hasKhs ? '' : 'disabled' }} style="background-color: #0d2a23; color: #fff;">KHS</option>
                         </select>
                         @error('jenis') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-emerald-100/70 mb-1">Pilih Pengajuan (Pending)</label>
+                        <label class="block text-xs font-semibold text-emerald-100/70 mb-1">Pilih Data Pengajuan</label>
 
                         <div id="pengajuanSkripsiWrap">
                             <select name="pengajuan_id"
@@ -75,6 +77,17 @@
                                 @foreach ($pendingKrs as $k)
                                     <option value="{{ $k->id }}" @selected((string) old('pengajuan_id') === (string) $k->id) style="background-color: #0d2a23; color: #fff;">
                                         #{{ $k->id }} • Semester {{ $k->semester }} ({{ $k->tahun_ajaran }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div id="pengajuanKhsWrap" style="display:none;">
+                            <select name="pengajuan_id"
+                                    class="h-11 w-full rounded-xl bg-white/5 border border-white/10 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+                                @foreach ($pendingKhs as $kh)
+                                    <option value="{{ $kh->id }}" @selected((string) old('pengajuan_id') === (string) $kh->id) style="background-color: #0d2a23; color: #fff;">
+                                        #{{ $kh->id }} • Semester {{ $kh->semester }} ({{ $kh->tahun_ajaran }})
                                     </option>
                                 @endforeach
                             </select>
@@ -114,10 +127,12 @@
             const skripsiWrap = document.getElementById('pengajuanSkripsiWrap');
             const pplWrap = document.getElementById('pengajuanPplWrap');
             const krsWrap = document.getElementById('pengajuanKrsWrap');
-            if (!jenisSelect || !skripsiWrap || !pplWrap || !krsWrap) return;
+            const khsWrap = document.getElementById('pengajuanKhsWrap');
+            if (!jenisSelect || !skripsiWrap || !pplWrap || !krsWrap || !khsWrap) return;
             const skripsiSelect = skripsiWrap.querySelector('select');
             const pplSelect = pplWrap.querySelector('select');
             const krsSelect = krsWrap.querySelector('select');
+            const khsSelect = khsWrap.querySelector('select');
 
             function render() {
                 const v = (jenisSelect.value || 'skripsi').toLowerCase();
@@ -125,10 +140,12 @@
                 skripsiWrap.style.display = v === 'skripsi' ? '' : 'none';
                 pplWrap.style.display = v === 'ppl' ? '' : 'none';
                 krsWrap.style.display = v === 'krs' ? '' : 'none';
+                khsWrap.style.display = v === 'khs' ? '' : 'none';
 
                 if (skripsiSelect) skripsiSelect.disabled = v !== 'skripsi';
                 if (pplSelect) pplSelect.disabled = v !== 'ppl';
                 if (krsSelect) krsSelect.disabled = v !== 'krs';
+                if (khsSelect) khsSelect.disabled = v !== 'khs';
             }
 
             render();
