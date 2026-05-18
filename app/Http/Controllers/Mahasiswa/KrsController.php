@@ -200,7 +200,7 @@ class KrsController extends Controller
         ]);
     }
 
-    public function pdf(Request $request, Krs $krs)
+    public function downloadPdf(Request $request, Krs $krs)
     {
         /** @var User $user */
         $user = $request->user();
