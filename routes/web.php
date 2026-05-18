@@ -211,7 +211,10 @@ Route::prefix('mahasiswa')
         Route::get('/ppl/{ppl}/sk-pembimbing', [AdminPplController::class, 'downloadSkPembimbing'])->name('ppl.sk.download');
         Route::get('/ppl/{ppl}/sk-pembimbing/preview', [AdminPplController::class, 'previewSkPembimbing'])->name('ppl.sk.preview');
         Route::get('/ppl/{ppl}/bimbingan', [MahasiswaPplBimbinganController::class, 'show'])->name('ppl.bimbingan');
+        Route::get('/ppl/{ppl}/bimbingan/pdf', [MahasiswaPplBimbinganController::class, 'pdf'])->name('ppl.bimbingan.pdf');
         Route::post('/ppl/{ppl}/bimbingan', [MahasiswaPplBimbinganController::class, 'store'])->name('ppl.bimbingan.store');
+        Route::get('/ppl/{ppl}/revisi', [MahasiswaPplRevisiController::class, 'index'])->name('ppl.revisi');
+        Route::get('/ppl/{ppl}/revisi/pdf', [MahasiswaPplRevisiController::class, 'pdf'])->name('ppl.revisi.pdf');
         Route::get('/ppl-files', [MahasiswaPplFileController::class, 'index'])->name('ppl-files.index');
         Route::post('/ppl-files', [MahasiswaPplFileController::class, 'store'])->name('ppl-files.store');
         Route::get('/ppl-files/{file}/preview', [MahasiswaPplFileController::class, 'preview'])->name('ppl-files.preview');
@@ -293,6 +296,9 @@ Route::prefix('dosen')
         Route::post('/ppl/{ppl}/bimbingan', [DosenPplBimbinganController::class, 'store'])->name('ppl.bimbingan.store');
         Route::post('/ppl/{ppl}/bimbingan/file', [DosenPplBimbinganController::class, 'storeFile'])->name('ppl.bimbingan.file.store');
         Route::get('/ppl/{ppl}/bimbingan/pdf', [DosenPplBimbinganController::class, 'pdf'])->name('ppl.bimbingan.pdf');
+        Route::get('/ppl/{ppl}/revisi', [DosenPplRevisiController::class, 'index'])->name('ppl.revisi');
+        Route::post('/ppl/{ppl}/revisi', [DosenPplRevisiController::class, 'store'])->name('ppl.revisi.store');
+        Route::get('/ppl/{ppl}/revisi/pdf', [DosenPplRevisiController::class, 'pdf'])->name('ppl.revisi.pdf');
 
         Route::get('/ppl/pengajuan', [AdminPplController::class, 'index'])->name('ppl-pengajuan.index');
         Route::get('/ppl/pengajuan/{ppl}', [AdminPplController::class, 'show'])->name('ppl-pengajuan.show');

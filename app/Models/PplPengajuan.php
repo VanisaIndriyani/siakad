@@ -76,4 +76,9 @@ class PplPengajuan extends Model
     {
         return $this->hasMany(PplFile::class, 'ppl_pengajuan_id');
     }
+
+    public function revisis(): HasMany
+    {
+        return $this->hasMany(PplRevisi::class, 'ppl_pengajuan_id');
+    }
 }

@@ -45,6 +45,10 @@
                         {{ strtoupper($ppl->status) }}
                     </span>
                     @if ($ppl->dosen_pembimbing_id || $ppl->dosen_pembimbing_id_2)
+                        <a href="{{ route('mahasiswa.ppl.revisi', $ppl) }}" class="btn">
+                            <i class="fa-solid fa-list-check"></i>
+                            Revisi
+                        </a>
                         <a href="{{ route('mahasiswa.ppl.bimbingan', $ppl) }}" class="btn btn-primary">
                             <i class="fa-solid fa-comments"></i>
                             Bimbingan

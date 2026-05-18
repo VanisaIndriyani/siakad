@@ -31,6 +31,10 @@
                     <div class="sub">{{ $ppl->mahasiswa?->nama_lengkap ?: '-' }} ({{ $ppl->mahasiswa?->npm ?: '-' }}) • {{ $ppl->instansi_nama }}</div>
                 </div>
                 <div style="display:flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <a href="{{ route('dosen.ppl.revisi', $ppl) }}" class="chat-back">
+                        <i class="fa-solid fa-list-check"></i>
+                        Revisi
+                    </a>
                     <a href="{{ route('dosen.ppl.bimbingan.pdf', $ppl) }}" class="chat-back">
                         <i class="fa-solid fa-print"></i>
                         Print
