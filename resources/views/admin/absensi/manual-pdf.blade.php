@@ -6,7 +6,7 @@
 
     <style>
         @page {
-            size: A4 landscape;
+            size: A4 portrait;
             margin: 10mm 8mm 10mm 8mm;
         }
 
@@ -329,12 +329,12 @@
     <table class="attendance-table">
 
   <colgroup>
-    <col style="width:35px;"> <!-- No -->
-    <col style="width:75px;"> <!-- NPM -->
-    <col style="width:180px;"> <!-- Nama Mahasiswa -->
+    <col style="width:30px;"> <!-- No -->
+    <col style="width:70px;"> <!-- NPM -->
+    <col style="width:200px;"> <!-- Nama Mahasiswa -->
 
     @for ($i = 1; $i <= 16; $i++)
-        <col style="width:22px;"> <!-- Pertemuan sama rata -->
+        <col style="width:20px;"> <!-- Pertemuan sama rata -->
     @endfor
 
     <col style="width:40px;"> <!-- Ket -->
