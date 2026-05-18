@@ -123,4 +123,25 @@ class KrsController extends Controller
 
         return redirect()->route('admin.krs.show', $krs)->with('success', 'Status KRS berhasil diperbarui.');
     }
+
+    public function destroy(Krs $krs): RedirectResponse
+    {
+        $krs->delete();
+        cache()->forget('admin_pending_krs_count');
+
+        return back()->with('success', 'Data KRS berhasil dihapus.');
+    }
+
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer', 'exists:krs,id'],
+        ]);
+
+        Krs::query()->whereIn('id', $validated['ids'])->delete();
+        cache()->forget('admin_pending_krs_count');
+
+        return back()->with('success', 'Data KRS terpilih berhasil dihapus.');
+    }
 }

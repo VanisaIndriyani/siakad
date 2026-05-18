@@ -85,9 +85,11 @@ Route::prefix('admin')
         Route::get('/mata-kuliah/{mataKuliah}/rps-dosen/preview', [AdminMataKuliahController::class, 'previewRpsDosen'])->name('mata-kuliah.rps-dosen.preview');
         Route::delete('/mata-kuliah/{mataKuliah}/rps-dosen', [AdminMataKuliahController::class, 'destroyRpsDosen'])->name('mata-kuliah.rps-dosen.destroy');
 
+        Route::delete('/krs/bulk-delete', [AdminKrsController::class, 'bulkDestroy'])->name('krs.bulk-delete');
         Route::get('/krs', [AdminKrsController::class, 'index'])->name('krs.index');
         Route::get('/krs/{krs}', [AdminKrsController::class, 'show'])->name('krs.show');
         Route::patch('/krs/{krs}/status', [AdminKrsController::class, 'updateStatus'])->name('krs.status');
+        Route::delete('/krs/{krs}', [AdminKrsController::class, 'destroy'])->name('krs.destroy');
 
         Route::get('/khs', [AdminKhsController::class, 'index'])->name('khs.index');
         Route::get('/khs/create', [AdminKhsController::class, 'create'])->name('khs.create');
