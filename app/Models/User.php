@@ -278,6 +278,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Count unread notifications for Laporan (Prodi-wide)
+     */
+    public function unreadLaporanProdiCount(): int
+    {
+        return $this->unreadLaporanCount();
+    }
+
+    /**
      * Count unread notifications for PPL (Prodi-wide)
      */
     public function unreadPplProdiCount(): int
