@@ -98,6 +98,14 @@
        class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('admin.cuti.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
         <i class="fa-solid fa-user-clock text-emerald-300"></i>
         <span class="text-sm font-medium">Pengajuan Cuti</span>
+        @php
+            $pendingCutiCount = auth()->user()->pendingCutiCount();
+        @endphp
+        @if ($pendingCutiCount > 0)
+            <span class="ml-auto inline-flex items-center justify-center min-w-7 h-7 px-2 rounded-full text-xs font-semibold bg-rose-500/15 border border-rose-500/25 text-rose-100">
+                {{ $pendingCutiCount }}
+            </span>
+        @endif
     </a>
     <a href="{{ route('keuangan.pembayaran.index') }}"
        class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('keuangan.pembayaran.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">

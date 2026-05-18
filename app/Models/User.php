@@ -10,6 +10,7 @@ use Illuminate\Notifications\Notifiable;
 use App\Models\PengajuanLaporan;
 use App\Models\PplPengajuan;
 use App\Models\SkripsiPengajuan;
+use App\Models\CutiPengajuan;
 
 class User extends Authenticatable
 {
@@ -298,6 +299,30 @@ class User extends Authenticatable
                 })
                 ->count();
         }
+        return 0;
+    }
+
+    /**
+     * Count pending leave applications
+     */
+    public function pendingCutiCount(): int
+    {
+        if ($this->isAdmin()) {
+            return CutiPengajuan::query()->where('status', 'pending')->count();
+        }
+
+        if ($this->isDosen()) {
+            $dosen = $this->dosen;
+            if (!$dosen || !$dosen->program_studi) return 0;
+
+            return CutiPengajuan::query()
+                ->where('status', 'pending')
+                ->whereHas('mahasiswa', function ($q) use ($dosen) {
+                    $q->where('program_studi', $dosen->program_studi);
+                })
+                ->count();
+        }
+
         return 0;
     }
 }
