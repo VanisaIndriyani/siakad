@@ -17,7 +17,8 @@
         .kop-line-1 { border-top: 3px solid #6b7280; margin-top: 7px; }
         .kop-line-2 { border-top: 1px solid #6b7280; margin-top: 3px; }
         
-        .doc-title { text-align: center; font-size: 14px; font-weight: 900; margin: 12px 0 10px; text-transform: uppercase; }
+        .doc-title { text-align: center; font-size: 14px; font-weight: 900; margin: 12px 0 6px; text-transform: uppercase; }
+        .doc-subtitle { text-align: center; font-size: 12px; font-weight: 800; margin-bottom: 12px; }
         
         .kv2 { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
         .kv2 td { padding: 2px 0; font-size: 11px; vertical-align: top; border: none; text-align: left; }
@@ -26,14 +27,15 @@
         .kv2 .value { font-weight: 700; }
 
         .tbl { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .tbl th, .tbl td { border: 1px solid #111827; padding: 6px 8px; text-align: center; }
-        .tbl th { background-color: #f3f4f6; font-size: 10px; font-weight: 800; text-transform: uppercase; }
-        .text-left { text-align: left !important; padding-left: 8px !important; }
+        .tbl th, .tbl td { border: 1px solid #111827; padding: 7px 8px; text-align: center; }
+        .tbl th { background-color: #f8fafc; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; }
+        .text-left { text-align: left !important; padding-left: 10px !important; }
         
         .sign-table { margin-top: 25px; width: 100%; border-collapse: collapse; }
         .sign-table td { border: none; width: 50%; text-align: center; vertical-align: top; padding: 0; }
-        .sign-space { height: 60px; }
-        .sign-name { font-weight: 800; text-decoration: underline; }
+        .sign-space { height: 64px; }
+        .sign-name { font-weight: 900; text-decoration: underline; font-size: 11.5px; }
+        .sign-label { font-weight: 800; font-size: 11px; margin-bottom: 2px; }
     </style>
 </head>
 <body>
@@ -52,6 +54,9 @@
         $kop5 = 'Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang';
         $kop6 = 'E-mail : iaiddisidrap@gmail.com  Website : www.yppddisrapp.ac.id';
         $mk = $absensi->mataKuliah;
+        
+        $semesterLabel = ((int) $absensi->semester % 2 === 0) ? 'GENAP' : 'GANJIL';
+        $ta = date('Y') . '/' . (date('Y') + 1);
     @endphp
 
     <table style="border: none;">
@@ -75,11 +80,12 @@
     <div class="kop-line-1"></div>
     <div class="kop-line-2"></div>
 
-    <div class="doc-title">DAFTAR HADIR (ABSENSI)</div>
+    <div class="doc-title">DAFTAR HADIR MAHASISWA</div>
+    <div class="doc-subtitle">PERTEMUAN KE : {{ $absensi->pertemuan }}</div>
 
     <table style="margin-bottom: 12px; border: none;">
         <tr>
-            <td style="width: 50%; vertical-align: top; border: none;">
+            <td style="width: 55%; vertical-align: top; border: none;">
                 <table class="kv2">
                     <tr>
                         <td class="label">Mata Kuliah</td>
@@ -92,13 +98,13 @@
                         <td class="value">{{ $absensi->jurusan }}</td>
                     </tr>
                     <tr>
-                        <td class="label">Pertemuan</td>
+                        <td class="label">Semester / TA</td>
                         <td class="colon">:</td>
-                        <td class="value">{{ $absensi->pertemuan }}</td>
+                        <td class="value">{{ $absensi->semester }} ({{ $semesterLabel }}) / {{ $ta }}</td>
                     </tr>
                 </table>
             </td>
-            <td style="width: 50%; vertical-align: top; border: none; padding-left: 16px;">
+            <td style="width: 45%; vertical-align: top; border: none; padding-left: 20px;">
                 <table class="kv2">
                     <tr>
                         <td class="label">Dosen Pengampu</td>
@@ -106,14 +112,14 @@
                         <td class="value">{{ $dosenNama ?: '-' }}</td>
                     </tr>
                     <tr>
-                        <td class="label">Semester / TA</td>
-                        <td class="colon">:</td>
-                        <td class="value">{{ $absensi->semester }} / {{ date('Y') }}</td>
-                    </tr>
-                    <tr>
-                        <td class="label">Tanggal</td>
+                        <td class="label">Tanggal Kuliah</td>
                         <td class="colon">:</td>
                         <td class="value">{{ $absensi->tanggal?->format('d F Y') ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Waktu Cetak</td>
+                        <td class="colon">:</td>
+                        <td class="value" style="font-weight: 400; font-size: 10px;">{{ now()->format('d/m/Y H:i') }}</td>
                     </tr>
                 </table>
             </td>
@@ -121,9 +127,9 @@
     </table>
 
     @if($absensi->materi)
-        <div style="margin-bottom: 12px;">
-            <div style="font-weight: 700; margin-bottom: 2px;">Materi Kuliah:</div>
-            <div style="padding: 6px 10px; border: 1px solid #e5e7eb; background: #f9fafb; font-size: 10.5px;">
+        <div style="margin-bottom: 14px;">
+            <div style="font-weight: 800; font-size: 11px; margin-bottom: 4px; text-transform: uppercase; color: #374151;">Materi Perkuliahan:</div>
+            <div style="padding: 10px 12px; border: 1px solid #d1d5db; background: #f9fafb; font-size: 11px; border-radius: 4px; line-height: 1.5;">
                 {{ $absensi->materi }}
             </div>
         </div>
@@ -132,12 +138,12 @@
     <table class="tbl">
         <thead>
             <tr>
-                <th style="width: 30px;">No</th>
-                <th style="width: 100px;">NPM</th>
-                <th class="text-left">Nama Mahasiswa</th>
-                <th style="width: 80px;">Status</th>
-                <th style="width: 120px;">Keterangan</th>
-                <th style="width: 80px;">Paraf</th>
+                <th style="width: 35px;">No</th>
+                <th style="width: 110px;">NPM</th>
+                <th class="text-left">Nama Lengkap Mahasiswa</th>
+                <th style="width: 85px;">Status</th>
+                <th style="width: 130px;">Keterangan</th>
+                <th style="width: 90px;">Paraf</th>
             </tr>
         </thead>
         <tbody>
@@ -153,10 +159,10 @@
                 @endphp
                 <tr>
                     <td>{{ $i + 1 }}</td>
-                    <td>{{ $item->mahasiswa?->npm }}</td>
+                    <td style="font-weight: 700; font-size: 10.5px;">{{ $item->mahasiswa?->npm }}</td>
                     <td class="text-left">{{ $item->mahasiswa?->nama_lengkap }}</td>
-                    <td>{{ $statusText }}</td>
-                    <td>{{ $item->keterangan ?: '-' }}</td>
+                    <td style="font-weight: 700; text-transform: uppercase; font-size: 10px;">{{ $statusText }}</td>
+                    <td style="font-size: 10px;">{{ $item->keterangan ?: '-' }}</td>
                     <td></td>
                 </tr>
             @endforeach
@@ -166,14 +172,16 @@
     <table class="sign-table">
         <tr>
             <td>
-                <div style="font-weight: 700;">Ketua Program Studi</div>
+                <div class="sign-label">Ketua Program Studi</div>
+                <div class="sign-label">{{ $absensi->jurusan }}</div>
                 <div class="sign-space"></div>
-                <div class="sign-name">{{ $kaprodiNama ?: '________________' }}</div>
+                <div class="sign-name">{{ $kaprodiNama ?: '________________________' }}</div>
             </td>
             <td>
-                <div style="font-weight: 700;">Dosen Pengampu,</div>
+                <div class="sign-label">Sidrap, {{ now()->translatedFormat('d F Y') }}</div>
+                <div class="sign-label">Dosen Pengampu,</div>
                 <div class="sign-space"></div>
-                <div class="sign-name">{{ $dosenNama ?: '________________' }}</div>
+                <div class="sign-name">{{ $dosenNama ?: '________________________' }}</div>
             </td>
         </tr>
     </table>

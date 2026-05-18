@@ -20,20 +20,21 @@
         .doc-title { text-align: center; font-size: 13px; font-weight: 900; margin: 10px 0 8px; text-transform: uppercase; }
         
         .kv2 { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
-        .kv2 td { padding: 2px 0; font-size: 10px; vertical-align: top; border: none; text-align: left; }
+        .kv2 td { padding: 1px 0; font-size: 10px; vertical-align: top; border: none; text-align: left; }
         .kv2 .label { width: 100px; }
         .kv2 .colon { width: 10px; text-align: center; }
         .kv2 .value { font-weight: 700; }
 
-        .tbl { width: 100%; border-collapse: collapse; }
-        .tbl th, .tbl td { border: 1px solid #111827; padding: 4px 2px; text-align: center; }
-        .tbl th { background-color: #f3f4f6; font-size: 9px; font-weight: 800; text-transform: uppercase; }
-        .text-left { text-align: left !important; padding-left: 5px !important; }
+        .tbl { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        .tbl th, .tbl td { border: 1px solid #111827; padding: 4px 1px; text-align: center; overflow: hidden; }
+        .tbl th { background-color: #f8fafc; font-size: 8.5px; font-weight: 800; text-transform: uppercase; }
+        .text-left { text-align: left !important; padding-left: 4px !important; }
         
         .sign-table { margin-top: 20px; width: 100%; border-collapse: collapse; }
         .sign-table td { border: none; width: 50%; text-align: center; vertical-align: top; padding: 0; }
-        .sign-space { height: 50px; }
-        .sign-name { font-weight: 800; text-decoration: underline; }
+        .sign-space { height: 54px; }
+        .sign-name { font-weight: 800; text-decoration: underline; font-size: 11px; }
+        .sign-label { font-weight: 700; font-size: 10.5px; }
     </style>
 </head>
 <body>
@@ -51,6 +52,9 @@
         $kop4 = 'TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021';
         $kop5 = 'Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang';
         $kop6 = 'E-mail : iaiddisidrap@gmail.com  Website : www.yppddisrapp.ac.id';
+        
+        $semesterLabel = ((int) $semester % 2 === 0) ? 'GENAP' : 'GANJIL';
+        $ta = date('Y') . '/' . (date('Y') + 1);
     @endphp
 
     <table style="border: none;">
@@ -76,7 +80,7 @@
 
     <div class="doc-title">DAFTAR HADIR MAHASISWA (MANUAL)</div>
 
-    <table style="margin-bottom: 10px; border: none;">
+    <table style="margin-bottom: 8px; border: none;">
         <tr>
             <td style="width: 55%; vertical-align: top; border: none;">
                 <table class="kv2">
@@ -86,23 +90,23 @@
                         <td class="value">{{ $mk->kode }} - {{ $mk->nama }}</td>
                     </tr>
                     <tr>
-                        <td class="label">Dosen Pengampu</td>
+                        <td class="label">Program Studi</td>
                         <td class="colon">:</td>
-                        <td class="value">{{ $dosenNama }}</td>
+                        <td class="value">{{ $jurusan }}</td>
                     </tr>
                 </table>
             </td>
             <td style="width: 45%; vertical-align: top; border: none; padding-left: 20px;">
                 <table class="kv2">
                     <tr>
-                        <td class="label">Program Studi</td>
+                        <td class="label">Dosen Pengampu</td>
                         <td class="colon">:</td>
-                        <td class="value">{{ $jurusan }}</td>
+                        <td class="value">{{ $dosenNama }}</td>
                     </tr>
                     <tr>
-                        <td class="label">Semester</td>
+                        <td class="label">Semester / TA</td>
                         <td class="colon">:</td>
-                        <td class="value">{{ $semester }}</td>
+                        <td class="value">{{ $semester }} ({{ $semesterLabel }}) / {{ $ta }}</td>
                     </tr>
                 </table>
             </td>
@@ -120,7 +124,7 @@
             </tr>
             <tr>
                 @for ($i = 1; $i <= 16; $i++)
-                    <th style="width: 18px; font-size: 7px;">{{ $i }}</th>
+                    <th style="width: 20px; font-size: 7.5px;">{{ $i }}</th>
                 @endfor
             </tr>
         </thead>
@@ -128,8 +132,8 @@
             @forelse ($mahasiswa as $i => $mhs)
                 <tr>
                     <td>{{ $i + 1 }}</td>
-                    <td style="font-size: 8px;">{{ $mhs->npm }}</td>
-                    <td class="text-left" style="font-size: 8px;">{{ $mhs->nama_lengkap }}</td>
+                    <td style="font-size: 8.5px; font-weight: 700;">{{ $mhs->npm }}</td>
+                    <td class="text-left" style="font-size: 8.5px;">{{ $mhs->nama_lengkap }}</td>
                     @for ($j = 1; $j <= 16; $j++)
                         <td></td>
                     @endfor
@@ -146,14 +150,14 @@
     <table class="sign-table">
         <tr>
             <td>
-                <div style="font-weight: 700;">Mengetahui,</div>
-                <div style="font-weight: 700;">Ketua Program Studi</div>
+                <div class="sign-label">Mengetahui,</div>
+                <div class="sign-label">Ketua Program Studi</div>
                 <div class="sign-space"></div>
                 <div class="sign-name">{{ $kaprodiNama ?? '........................................' }}</div>
             </td>
             <td>
-                <div style="font-weight: 700;">Sidrap, {{ date('d F Y') }}</div>
-                <div style="font-weight: 700;">Dosen Pengampu,</div>
+                <div class="sign-label">Sidrap, {{ date('d F Y') }}</div>
+                <div class="sign-label">Dosen Pengampu,</div>
                 <div class="sign-space"></div>
                 <div class="sign-name">{{ $dosenNama }}</div>
             </td>
