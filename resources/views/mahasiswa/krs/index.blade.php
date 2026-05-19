@@ -20,7 +20,7 @@
                 <thead class="bg-white/5 text-emerald-100/80">
                     <tr>
                         <th class="text-left font-medium px-4 py-3">Semester</th>
-                        <th class="text-left font-medium px-4 py-3">Tahun Ajaran</th>
+                        <th class="text-left font-medium px-4 py-3">Tahun Akademik</th>
                         <th class="text-left font-medium px-4 py-3">Mata Kuliah</th>
                         <th class="text-left font-medium px-4 py-3">Status</th>
                         <th class="text-right font-medium px-4 py-3">Aksi</th>

@@ -60,7 +60,7 @@
                             <div class="text-sm text-emerald-100/70">Semester</div>
                             <div class="text-xl font-semibold">Semester {{ $row->semester }}</div>
                             <div class="mt-1 text-sm text-emerald-100/70">
-                                Tahun Ajaran: <span class="text-emerald-100/90 font-medium">{{ $row->tahun_ajaran ?? '-' }}</span>
+                                Tahun Akademik: <span class="text-emerald-100/90 font-medium">{{ $row->tahun_ajaran ?? '-' }}</span>
                                 • Nilai: <span class="text-emerald-100/90 font-medium">{{ $row->nilai_count }}</span>
                             </div>
                             <div class="mt-2 text-sm text-emerald-100/70">IPS: <span class="text-emerald-100/90 font-medium">{{ $row->ips ?? '-' }}</span> • IPK: <span class="text-emerald-100/90 font-medium">{{ $row->ipk ?? '-' }}</span></div>

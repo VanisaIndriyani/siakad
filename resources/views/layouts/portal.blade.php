@@ -82,6 +82,37 @@
             </div>
         </div>
 
+        @php
+            $waUser = auth()->user();
+            $waRoleRaw = trim((string) ($waUser?->role ?? ''));
+            $waRoleKey = strtolower($waRoleRaw);
+            $showWa = $waUser && in_array($waRoleKey, ['mahasiswa', 'dosen'], true);
+            $waNumber = '6282371114136';
+            $waRole = $waRoleKey === 'mahasiswa' ? 'Mahasiswa' : ($waRoleKey === 'dosen' ? 'Dosen' : 'User');
+            $waNama = (string) ($waUser?->name ?? '');
+            $waNpm = (string) ($waUser?->mahasiswa?->npm ?? '');
+            $waNuptk = (string) ($waUser?->dosen?->nuptk ?? '');
+            $waUrl = (string) request()->fullUrl();
+            $waIdentity = $waRole.($waNama !== '' ? (': '.$waNama) : '');
+            if ($waNpm !== '') {
+                $waIdentity .= ' (NPM: '.$waNpm.')';
+            }
+            if ($waNuptk !== '') {
+                $waIdentity .= ' (NUPTK: '.$waNuptk.')';
+            }
+            $waTemplate = "Assalamu'alaikum Admin,\n\nSaya {$waIdentity} melaporkan kendala pada web SIAKAD.\n\nKendala: [tuliskan error/kendala]\nHalaman: {$waUrl}\nWaktu: ".now()->format('d/m/Y H:i')."\n\nTerima kasih.";
+            $waText = rawurlencode($waTemplate);
+        @endphp
+        @if ($showWa)
+            <a href="https://wa.me/{{ $waNumber }}?text={{ $waText }}" target="_blank" rel="noopener"
+               class="no-print"
+               style="position: fixed; right: 20px; bottom: 20px; z-index: 9999; width: 56px; height: 56px; border-radius: 9999px; background: #ef4444; border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 18px 40px rgba(0,0,0,0.35); display: inline-flex; align-items: center; justify-content: center; text-decoration: none;"
+               title="Kontak Admin WhatsApp • Apabila ada kendala terkait web SIAKAD">
+                <i class="fa-brands fa-whatsapp" style="font-size: 26px; color: #fff;"></i>
+                <span style="position: absolute; left: -9999px;">WhatsApp</span>
+            </a>
+        @endif
+
         <div id="confirmModal" class="fixed inset-0 z-[999] hidden items-center justify-center p-4">
             <div id="confirmModalOverlay" class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
             <div class="relative w-full max-w-md rounded-2xl bg-brand-950 border border-white/10 shadow-2xl overflow-hidden">

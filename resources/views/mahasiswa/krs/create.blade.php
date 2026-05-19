@@ -32,7 +32,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div class="md:col-span-2">
-                    <label class="text-sm text-emerald-100/80">Tahun Ajaran</label>
+                    <label class="text-sm text-emerald-100/80">Tahun Akademik</label>
                     <input name="tahun_ajaran" value="{{ old('tahun_ajaran') }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" placeholder="Contoh: 2026/2027" />
                     @error('tahun_ajaran') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
                 </div>
