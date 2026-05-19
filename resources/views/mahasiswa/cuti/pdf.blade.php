@@ -125,8 +125,8 @@
         </div>
 
         <p>Demikian surat permohonan ini saya buat dengan sebenar-benarnya untuk dapat dipergunakan sebagaimana mestinya. Atas perhatian dan persetujuan Bapak, saya ucapkan terima kasih.</p>
-        <p style="margin-top: 10px;" class="strong-italic">Billahi taufiq Wadda'watu wal irsyad.</p>
-        <p style="margin-top: 6px;" class="strong-italic">Wassalamu'alaikum warahmatullahi wabarakatuh.</p>
+        <p style="margin-top: 6px; margin-bottom: 0;" class="strong-italic">Billahi taufiq Wadda'watu wal irsyad.</p>
+        <p style="margin-top: 2px;" class="strong-italic">Wassalamu'alaikum warahmatullahi wabarakatuh.</p>
     </div>
 
     <div style="text-align: right; margin-top: 9mm; font-weight: 800; letter-spacing: 0.2px;">SIDRAP, {{ now()->translatedFormat('d F Y') }}</div>
