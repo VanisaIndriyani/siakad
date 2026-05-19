@@ -27,6 +27,8 @@
         .footer-table td { text-align: center; vertical-align: top; width: 33.33%; }
         .sig-space { height: 60px; }
         .sig-name { font-weight: 800; text-decoration: underline; }
+        .strong-italic { font-weight: 900; font-style: italic; color: #000; }
+        .strong { font-weight: 900; color: #000; }
     </style>
 </head>
 <body>
@@ -82,9 +84,9 @@
     <div class="doc-number">{{ $nomorSurat }}</div>
 
     <div class="content">
-        <p>Kepada Yth,<br>Rektor Institut Agama Islam DDI Sidrap<br>di -<br>&nbsp;&nbsp;&nbsp;&nbsp;Tempat</p>
+        <p>Kepada Yth,<br><span class="strong">Rektor Institut Agama Islam DDI Sidrap</span><br>di -<br>&nbsp;&nbsp;&nbsp;&nbsp;Tempat</p>
         
-        <p style="margin-top: 15px;">Assalamu'alaikum warahmatullahi wabarakatu.</p>
+        <p style="margin-top: 15px;" class="strong-italic">Assalamu'alaikum warahmatullahi wabarakatu.</p>
         <p>Yang bertanda tangan di bawah ini:</p>
         
         <table class="kv">
@@ -121,9 +123,11 @@
         </div>
 
         <p>Demikian surat permohonan ini saya buat dengan sebenar-benarnya untuk dapat dipergunakan sebagaimana mestinya. Atas perhatian dan persetujuan Bapak, saya ucapkan terima kasih.</p>
-        <p style="margin-top: 10px;">Billahi taufiq Wadda'watu wal irsyad.</p>
-        <p style="margin-top: 6px;">Wassalamu'alaikum warahmatullahi wabarakatu.</p>
+        <p style="margin-top: 10px;" class="strong-italic">Billahi taufiq Wadda'watu wal irsyad.</p>
+        <p style="margin-top: 6px;" class="strong-italic">Wassalamu'alaikum warahmatullahi wabarakatu.</p>
     </div>
+
+    <div style="text-align: right; margin-top: 10mm;">Sidrap, {{ now()->translatedFormat('d F Y') }}</div>
 
     <table class="footer-table">
         <tr>
@@ -142,7 +146,6 @@
                 <div style="font-size: 10px;">NUPTK. {{ $sekprodi?->nuptk ?? '................................' }}</div>
             </td>
             <td>
-                <div>Sidrap, {{ now()->translatedFormat('d F Y') }}</div>
                 <div style="font-weight: 700;">Mahasiswa Pemohon</div>
                 <div class="sig-space"></div>
                 <div class="sig-name">{{ $mahasiswa->nama_lengkap }}</div>
