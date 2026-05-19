@@ -23,7 +23,7 @@
         .colon { width: 20px; text-align: center; }
         .value { font-weight: 700; }
         .alasan-box { margin: 5px 0 10px 15px; padding: 10px; border: 1px solid #000; background-color: #f9fafb; min-height: 40px; font-style: italic; }
-        .footer-table { margin-top: 15mm; }
+        .footer-table { margin-top: 11mm; }
         .footer-table td { text-align: center; vertical-align: top; width: 33.33%; font-size: 12px; }
         .sig-head { height: 38px; }
         .sig-title { font-weight: 800; }
@@ -49,6 +49,13 @@
         $kop4 = 'TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021';
         $kop5 = 'Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang';
         $kop6 = 'E-mail : iaiddisidrap@gmail.com  Website : www.yppddisrapp.ac.id';
+
+        $indoMonths = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April', 5 => 'Mei', 6 => 'Juni',
+            7 => 'Juli', 8 => 'Agustus', 9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+        ];
+        $now = now();
+        $tanggalIndo = $now->format('d') . ' ' . ($indoMonths[(int) $now->format('n')] ?? $now->format('F')) . ' ' . $now->format('Y');
     @endphp
 
     <table>
@@ -129,7 +136,7 @@
         <p style="margin-top: 2px;" class="strong-italic">Wassalamu'alaikum warahmatullahi wabarakatuh.</p>
     </div>
 
-    <div style="text-align: right; margin-top: 9mm; font-weight: 800; letter-spacing: 0.2px;">SIDRAP, {{ now()->translatedFormat('d F Y') }}</div>
+    <div style="text-align: right; margin-top: 8mm; font-weight: 800; letter-spacing: 0.2px;">SIDRAP, {{ $tanggalIndo }}</div>
 
     <table class="footer-table">
         <tr>
