@@ -11,6 +11,8 @@ use Illuminate\View\View;
 
 class KrsApprovalController extends Controller
 {
+    private const PRODI_APPROVER_STATUS = ['Ketua Prodi', 'Sekretaris Prodi'];
+
     private function resolveApprover(Request $request): array
     {
         /** @var User $user */
@@ -18,6 +20,9 @@ class KrsApprovalController extends Controller
         $dosen = $user->dosen;
 
         abort_unless($dosen, 403);
+
+        $statusAkademik = trim((string) ($dosen->status_akademik ?? ''));
+        abort_unless(in_array($statusAkademik, self::PRODI_APPROVER_STATUS, true), 403);
 
         $programStudi = trim((string) ($dosen->program_studi ?? ''));
         // Jangan abort 403 jika prodi kosong, biarkan query menghasilkan kosong
@@ -40,7 +45,7 @@ class KrsApprovalController extends Controller
             ->when($status !== '', fn ($q2) => $q2->where('status_approval', $status));
 
         $query->whereHas('mahasiswa', function ($sub) use ($programStudi) {
-            $sub->where('program_studi', $programStudi);
+            $sub->whereRaw('LOWER(TRIM(program_studi)) = ?', [mb_strtolower($programStudi)]);
         });
 
         if ($q !== '') {
@@ -64,7 +69,8 @@ class KrsApprovalController extends Controller
         [, $programStudi] = $this->resolveApprover($request);
 
         $krs->load(['mahasiswa', 'items.mataKuliah', 'mahasiswa.user']);
-        abort_unless((string) ($krs->mahasiswa?->program_studi ?? '') === $programStudi, 403);
+        $krsProdi = trim(mb_strtolower((string) ($krs->mahasiswa?->program_studi ?? '')));
+        abort_unless($krsProdi === mb_strtolower($programStudi), 403);
 
         return view('dosen.krs.show', [
             'krs' => $krs,
@@ -76,7 +82,8 @@ class KrsApprovalController extends Controller
         [$dosen, $programStudi] = $this->resolveApprover($request);
 
         $krs->loadMissing('mahasiswa');
-        abort_unless((string) ($krs->mahasiswa?->program_studi ?? '') === $programStudi, 403);
+        $krsProdi = trim(mb_strtolower((string) ($krs->mahasiswa?->program_studi ?? '')));
+        abort_unless($krsProdi === mb_strtolower($programStudi), 403);
 
         $validated = $request->validate([
             'status_approval' => ['required', 'in:pending,approved,rejected'],
