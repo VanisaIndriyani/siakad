@@ -97,7 +97,7 @@
                                             <i class="fa-solid fa-print"></i>
                                         </a>
                                     @endif
-                                    <a href="{{ ($routePrefix ?? 'admin') === 'admin' ? route('admin.skripsi.show', $row) : route('dosen.skripsi-pengajuan.show', $row) }}" class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                                    <a href="{{ route(($routePrefix ?? 'admin').'.skripsi.show', $row) }}" class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                                         <i class="fa-solid fa-eye"></i>
                                         <span class="text-sm font-medium">Detail</span>
                                     </a>
