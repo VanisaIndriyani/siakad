@@ -19,7 +19,7 @@
         
         .section-title { background-color: #f3f4f6; border-left: 4px solid #000; padding: 5px 10px; font-weight: bold; font-size: 11px; color: #000; margin: 15px 0 10px 0; text-transform: uppercase; }
         
-        .info-table { width: 100%; border-collapse: collapse; }
+        .info-table { width: 100%; border-collapse: collapse; page-break-inside: avoid; }
         .info-table td { padding: 5px 4px; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
         .label { width: 35%; color: #4b5563; font-weight: 500; }
         .value { width: 65%; color: #111827; font-weight: bold; }
@@ -30,8 +30,6 @@
         .footer { margin-top: 40px; text-align: right; }
         .signature-space { height: 60px; }
         .signature-name { font-weight: bold; text-decoration: underline; }
-        
-        .page-break { page-break-after: always; }
     </style>
 </head>
 <body>
@@ -126,8 +124,6 @@
             <tr><td class="label">Penerima KPS</td><td class="value">{{ $mahasiswa->penerima_kps ?? 'Tidak' }}</td></tr>
             <tr><td class="label">Nomor KPS</td><td class="value">{{ $mahasiswa->no_kps ?? '-' }}</td></tr>
         </table>
-
-        <div class="page-break"></div>
 
         <div class="section-title">D. DATA ORANG TUA (AYAH)</div>
         <table class="info-table">

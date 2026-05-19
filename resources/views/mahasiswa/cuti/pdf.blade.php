@@ -84,7 +84,7 @@
     <div class="content">
         <p>Kepada Yth,<br>Rektor Institut Agama Islam DDI Sidrap<br>di -<br>&nbsp;&nbsp;&nbsp;&nbsp;Tempat</p>
         
-        <p style="margin-top: 15px;">Assalamu'alaikum Wr. Wb.</p>
+        <p style="margin-top: 15px;">Assalamu'alaikum warahmatullahi wabarakatu.</p>
         <p>Yang bertanda tangan di bawah ini:</p>
         
         <table class="kv">
@@ -121,7 +121,8 @@
         </div>
 
         <p>Demikian surat permohonan ini saya buat dengan sebenar-benarnya untuk dapat dipergunakan sebagaimana mestinya. Atas perhatian dan persetujuan Bapak, saya ucapkan terima kasih.</p>
-        <p style="margin-top: 10px;">Wassalamu'alaikum Wr. Wb.</p>
+        <p style="margin-top: 10px;">Billahi taufiq Wadda'watu wal irsyad.</p>
+        <p style="margin-top: 6px;">Wassalamu'alaikum warahmatullahi wabarakatu.</p>
     </div>
 
     <table class="footer-table">

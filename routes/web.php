@@ -23,6 +23,7 @@ use App\Http\Controllers\Dosen\MahasiswaController as DosenMahasiswaController;
 use App\Http\Controllers\Dosen\NilaiController as DosenNilaiController;
 use App\Http\Controllers\Dosen\PengajuanLaporanController as DosenPengajuanLaporanController;
 use App\Http\Controllers\Dosen\PplBimbinganController as DosenPplBimbinganController;
+use App\Http\Controllers\Dosen\PplRevisiController as DosenPplRevisiController;
 use App\Http\Controllers\Dosen\ProfilController as DosenProfilController;
 use App\Http\Controllers\Dosen\SkripsiBimbinganController as DosenSkripsiBimbinganController;
 use App\Http\Controllers\Dosen\SkripsiRevisiController as DosenSkripsiRevisiController;
@@ -36,6 +37,7 @@ use App\Http\Controllers\Mahasiswa\PengajuanLaporanController as MahasiswaPengaj
 use App\Http\Controllers\Mahasiswa\PplBimbinganController as MahasiswaPplBimbinganController;
 use App\Http\Controllers\Mahasiswa\PplController as MahasiswaPplController;
 use App\Http\Controllers\Mahasiswa\PplFileController as MahasiswaPplFileController;
+use App\Http\Controllers\Mahasiswa\PplRevisiController as MahasiswaPplRevisiController;
 use App\Http\Controllers\Mahasiswa\ProfilController as MahasiswaProfilController;
 use App\Http\Controllers\Mahasiswa\SkripsiBimbinganController as MahasiswaSkripsiBimbinganController;
 use App\Http\Controllers\Mahasiswa\SkripsiController as MahasiswaSkripsiController;
@@ -123,6 +125,7 @@ Route::prefix('admin')
         Route::resource('kalender-akademik', AdminAcademicCalendarController::class)
             ->parameters(['kalender-akademik' => 'kalender_akademik'])
             ->except(['show']);
+        Route::get('/kalender-akademik/pdf', [AdminAcademicCalendarController::class, 'pdf'])->name('kalender-akademik.pdf');
 
         Route::get('/skripsi', [AdminSkripsiController::class, 'index'])->name('skripsi.index');
         Route::get('/skripsi/{skripsi}', [AdminSkripsiController::class, 'show'])->name('skripsi.show');
@@ -190,6 +193,7 @@ Route::prefix('mahasiswa')
         Route::post('/pembayaran/{pembayaran}/upload', [MahasiswaDashboardController::class, 'uploadPembayaran'])->name('pembayaran.upload');
 
         Route::get('/kalender-akademik', [MahasiswaAcademicCalendarController::class, 'index'])->name('kalender.index');
+        Route::get('/kalender-akademik/pdf', [MahasiswaAcademicCalendarController::class, 'pdf'])->name('kalender.pdf');
 
         Route::get('/skripsi', [MahasiswaSkripsiController::class, 'index'])->name('skripsi.index');
         Route::get('/skripsi/create', [MahasiswaSkripsiController::class, 'create'])->name('skripsi.create');
@@ -276,6 +280,7 @@ Route::prefix('dosen')
         Route::get('/profil/pdf', [DosenProfilController::class, 'pdf'])->name('profil.pdf');
 
         Route::get('/kalender-akademik', [DosenAcademicCalendarController::class, 'index'])->name('kalender.index');
+        Route::get('/kalender-akademik/pdf', [DosenAcademicCalendarController::class, 'pdf'])->name('kalender.pdf');
 
         Route::get('/skripsi/bimbingan', [DosenSkripsiBimbinganController::class, 'index'])->name('skripsi.bimbingan.index');
         Route::get('/skripsi/{skripsi}/bimbingan', [DosenSkripsiBimbinganController::class, 'show'])->name('skripsi.bimbingan.show');

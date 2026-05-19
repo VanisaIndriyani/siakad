@@ -4,19 +4,19 @@
     <meta charset="utf-8" />
     <title>Profil Dosen - {{ $dosen?->nama }}</title>
     <style>
-        @page { margin: 1.5cm; }
+        @page { margin: 16mm 14mm 16mm 17mm; }
         * { font-family: 'Helvetica', 'Arial', sans-serif; box-sizing: border-box; }
         body { font-size: 10px; color: #111827; line-height: 1.4; }
-        .kop-surat { width: 100%; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 2px; }
-        .kop-logo { width: 110px; text-align: left; vertical-align: middle; }
-        .kop-logo img { width: 100px; height: auto; }
+        .kop-surat { width: 100%; padding-bottom: 5px; }
+        .kop-logo { width: 130px; text-align: left; vertical-align: middle; padding-top: 2px; }
+        .kop-logo img { width: 125px; height: auto; }
         .kop-text { text-align: center; vertical-align: middle; }
-        .kop-title-1 { font-size: 16px; font-weight: 800; margin: 0; line-height: 1.1; }
-        .kop-title-2 { font-size: 22px; font-weight: 900; margin: 2px 0; line-height: 1; }
-        .kop-title-3 { font-size: 16px; font-weight: 800; margin: 0; line-height: 1.1; }
-        .kop-meta { font-size: 9px; font-weight: 700; margin-top: 3px; }
-        .kop-alamat { font-size: 9px; margin: 2px 0; }
-        .kop-line-2 { border-top: 1px solid #000; margin-top: 2px; margin-bottom: 20px; }
+        .kop-title-1 { color: #000; font-size: 20px; font-weight: 800; margin: 0; line-height: 1.12; }
+        .kop-title-2 { color: #000; font-size: 28px; font-weight: 900; margin: 1px 0 0; letter-spacing: 0.4px; line-height: 1.06; }
+        .kop-title-3 { color: #000; font-size: 20px; font-weight: 900; margin: 1px 0 0; line-height: 1.12; }
+        .kop-meta { color: #000; font-size: 12px; margin-top: 3px; line-height: 1.2; }
+        .kop-line-1 { border-top: 4px solid #000; margin-top: 7px; }
+        .kop-line-2 { border-top: 2px solid #000; margin-top: 3px; margin-bottom: 20px; }
         .doc-title { text-align: center; font-size: 14px; font-weight: bold; text-decoration: underline; margin-bottom: 20px; text-transform: uppercase; }
         
         .info-table { width: 100%; border-collapse: collapse; }
@@ -53,13 +53,14 @@
                 <div class="kop-title-1">INSTITUT AGAMA ISLAM</div>
                 <div class="kop-title-2">DARUD DA'WAH WAL IRSYAD</div>
                 <div class="kop-title-3">SIDENRENG RAPPANG</div>
-                <div class="kop-meta">TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021</div>
-                <div class="kop-alamat">Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang</div>
-                <div class="kop-alamat">E-mail : iaiddisidrap@gmail.com Website : www.yppddisrapp.ac.id</div>
+                <div class="kop-meta" style="font-weight: 700;">TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021</div>
+                <div class="kop-meta">Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang</div>
+                <div class="kop-meta">E-mail : iaiddisidrap@gmail.com Website : www.yppddisrapp.ac.id</div>
             </td>
             <td style="width: 90px;"></td>
         </tr>
     </table>
+    <div class="kop-line-1"></div>
     <div class="kop-line-2"></div>
 
     <div class="doc-title">PROFIL DOSEN</div>
@@ -182,4 +183,3 @@
     </div>
 </body>
 </html>
-

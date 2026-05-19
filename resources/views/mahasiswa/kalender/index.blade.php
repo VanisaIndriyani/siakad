@@ -59,7 +59,9 @@
                     <i class="fa-solid fa-arrow-left"></i>
                 </a>
                 <div class="cal-title">Kalender Akademik</div>
-                <div class="cal-spacer"></div>
+                <a href="{{ route('mahasiswa.kalender.pdf', ['q' => $q]) }}" class="cal-back" aria-label="Print PDF">
+                    <i class="fa-solid fa-print"></i>
+                </a>
             </div>
 
             <div class="cal-monthbar">
