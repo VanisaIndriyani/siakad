@@ -76,7 +76,8 @@
             $ps = strtoupper((string) ($mahasiswa?->program_studi ?? ''));
             $jenjang = str_contains($ps, 'S2') ? 'S2' : (str_contains($ps, 'S3') ? 'S3' : ($ps !== '' ? 'S1' : '-'));
             $semesterLabel = ((int) $krs->semester % 2 === 0) ? 'GENAP' : 'GANJIL';
-            $semesterHeader = $semesterLabel.($krs->tahun_ajaran ? '-'.$krs->tahun_ajaran : '');
+            $tahunAjaran = trim((string) ($krs->tahun_ajaran ?? ''));
+            $semesterHeader = $semesterLabel.($tahunAjaran !== '' ? '-'.$tahunAjaran : '');
         @endphp
 
         <div style="text-align: center; margin-top: 14px; font-size: 12px; font-weight: 800;">KARTU RENCANA STUDI</div>
@@ -95,6 +96,7 @@
                     <table style="width: 100%; border-collapse: collapse;">
                         <tr><td style="width: 140px;">Nama</td><td style="width: 10px; text-align: center;">:</td><td style="font-weight: 700;">{{ $mahasiswa?->nama_lengkap ?? auth()->user()->name }}</td></tr>
                         <tr><td>NIM</td><td style="text-align: center;">:</td><td style="font-weight: 700;">{{ $mahasiswa?->npm ?? '-' }}</td></tr>
+                        <tr><td>Tahun Akademik</td><td style="text-align: center;">:</td><td style="font-weight: 700;">{{ $tahunAjaran !== '' ? $tahunAjaran : '-' }}</td></tr>
                         <tr><td>Semester</td><td style="text-align: center;">:</td><td style="font-weight: 700;">{{ $semesterHeader }}</td></tr>
                     </table>
                 </td>
@@ -110,7 +112,7 @@
                 @if ($mahasiswa?->npm)
                     • {{ $mahasiswa->npm }}
                 @endif
-                • {{ $krs->tahun_ajaran ?? '-' }} • Semester {{ $krs->semester }}
+                • {{ trim((string) ($krs->tahun_ajaran ?? '')) !== '' ? $krs->tahun_ajaran : '-' }} • Semester {{ $krs->semester }}
             </div>
         </div>
         <div class="flex items-center gap-2">

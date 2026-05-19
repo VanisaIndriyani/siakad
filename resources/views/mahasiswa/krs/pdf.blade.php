@@ -50,7 +50,8 @@
         $ps = strtoupper((string) ($mahasiswa?->program_studi ?? ''));
         $jenjang = str_contains($ps, 'S2') ? 'S2' : (str_contains($ps, 'S3') ? 'S3' : ($ps !== '' ? 'S1' : '-'));
         $semesterLabel = ((int) $krs->semester % 2 === 0) ? 'GENAP' : 'GANJIL';
-        $semesterHeader = $semesterLabel.($krs->tahun_ajaran ? '-'.$krs->tahun_ajaran : '');
+        $tahunAjaran = trim((string) ($krs->tahun_ajaran ?? ''));
+        $semesterHeader = $semesterLabel.($tahunAjaran !== '' ? '-'.$tahunAjaran : '');
 
         $kaprodiNama = $kaprodiNama ?? null;
         $sekprodiNama = $sekprodiNama ?? null;
@@ -112,6 +113,11 @@
                         <td class="label">NPM</td>
                         <td class="colon">:</td>
                         <td class="value">{{ $mahasiswa?->npm ?? '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">Tahun Akademik</td>
+                        <td class="colon">:</td>
+                        <td class="value">{{ $tahunAjaran !== '' ? $tahunAjaran : '-' }}</td>
                     </tr>
                     <tr>
                         <td class="label">Semester</td>

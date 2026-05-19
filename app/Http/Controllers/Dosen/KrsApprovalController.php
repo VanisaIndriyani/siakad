@@ -99,7 +99,9 @@ class KrsApprovalController extends Controller
 
         $krs->update([
             'status_approval' => $validated['status_approval'],
-            'catatan_approval' => $validated['catatan_approval'] ?: null,
+            'catatan_approval' => isset($validated['catatan_approval']) && trim((string) $validated['catatan_approval']) !== ''
+                ? $validated['catatan_approval']
+                : null,
             'approved_by_dosen_id' => $approvedByDosenId,
         ]);
 

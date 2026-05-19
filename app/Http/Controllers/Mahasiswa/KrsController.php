@@ -158,10 +158,15 @@ class KrsController extends Controller
             ],
         ]);
 
+        $tahunAjaran = trim((string) ($validated['tahun_ajaran'] ?? ''));
+        if ($tahunAjaran === '') {
+            $tahunAjaran = null;
+        }
+
         $krs = Krs::query()->create([
             'mahasiswa_id' => $mahasiswa->id,
             'semester' => $validated['semester'],
-            'tahun_ajaran' => $validated['tahun_ajaran'] ?? null,
+            'tahun_ajaran' => $tahunAjaran,
             'status_approval' => 'pending',
         ]);
 
@@ -291,8 +296,13 @@ class KrsController extends Controller
             ],
         ]);
 
+        $tahunAjaran = trim((string) ($validated['tahun_ajaran'] ?? ''));
+        if ($tahunAjaran === '') {
+            $tahunAjaran = null;
+        }
+
         $krs->update([
-            'tahun_ajaran' => $validated['tahun_ajaran'] ?? $krs->tahun_ajaran,
+            'tahun_ajaran' => $tahunAjaran,
             'status_approval' => 'pending',
         ]);
 

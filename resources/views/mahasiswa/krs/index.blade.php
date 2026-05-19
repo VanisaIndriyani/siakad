@@ -44,7 +44,7 @@
                         @endphp
                         <tr class="hover:bg-white/5">
                             <td class="px-4 py-3 font-medium">{{ $row->semester }}</td>
-                            <td class="px-4 py-3 text-emerald-100/80">{{ $row->tahun_ajaran ?? '-' }}</td>
+                            <td class="px-4 py-3 text-emerald-100/80">{{ trim((string) ($row->tahun_ajaran ?? '')) !== '' ? $row->tahun_ajaran : '-' }}</td>
                             <td class="px-4 py-3 text-emerald-100/80">
                                 <div class="font-medium text-white">{{ $row->items_count }} MK</div>
                                 @if ($mkPreview !== '')
