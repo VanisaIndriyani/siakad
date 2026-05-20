@@ -45,13 +45,64 @@ use App\Http\Controllers\Mahasiswa\SkripsiFileController as MahasiswaSkripsiFile
 use App\Http\Controllers\Mahasiswa\SkripsiRevisiController as MahasiswaSkripsiRevisiController;
 use App\Http\Controllers\Keuangan\PembayaranController as KeuanganPembayaranController;
 use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Route;
+use Spatie\Sitemap\Sitemap;
+use Spatie\Sitemap\Tags\Url;
 
 Route::any('/', function () {
     return auth()->check()
         ? redirect()->route('dashboard')
         : redirect()->route('login');
 });
+
+Route::get('/sitemap.xml', function () {
+    $sitemap = Sitemap::create();
+    $added = [];
+
+    foreach (app('router')->getRoutes()->getRoutes() as $route) {
+        $methods = $route->methods();
+        if (!in_array('GET', $methods, true) && !in_array('HEAD', $methods, true)) {
+            continue;
+        }
+
+        $uri = $route->uri();
+        if ($uri === 'sitemap.xml') {
+            continue;
+        }
+
+        if (Str::contains($uri, '{')) {
+            continue;
+        }
+
+        if (Str::startsWith($uri, ['_ignition', '_debugbar', 'telescope', 'horizon'])) {
+            continue;
+        }
+
+        $middleware = $route->gatherMiddleware();
+        $isProtected = false;
+        foreach ($middleware as $m) {
+            $m = (string) $m;
+            if ($m === 'auth' || Str::startsWith($m, ['auth:', 'verified', 'role:', 'permission:'])) {
+                $isProtected = true;
+                break;
+            }
+        }
+        if ($isProtected) {
+            continue;
+        }
+
+        $url = url($uri === '/' ? '/' : $uri);
+        if (isset($added[$url])) {
+            continue;
+        }
+        $added[$url] = true;
+
+        $sitemap->add(Url::create($url));
+    }
+
+    return $sitemap->toResponse(request());
+})->name('sitemap');
 
 Route::get('/dashboard', DashboardController::class)->middleware('auth')->name('dashboard');
 
