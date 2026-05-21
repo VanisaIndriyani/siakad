@@ -1,7 +1,7 @@
 <x-guest-layout>
     <div class="mb-6">
         <h1 class="text-2xl font-semibold text-white">Masuk</h1>
-        <p class="text-sm text-emerald-100/80 mt-1">Gunakan akun yang sudah disediakan untuk demo.</p>
+        <p class="text-sm text-emerald-100/80 mt-1">Gunakan akun yang telah disiapkan oleh admin.</p>
     </div>
 
     @if (session('status'))
