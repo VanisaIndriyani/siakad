@@ -61,12 +61,19 @@
                     <div class="text-sm text-emerald-100/70">Buka pertemuan untuk mengisi daftar hadir.</div>
                 </div>
                 <div class="flex items-center gap-2">
+                    <a href="{{ route(($routePrefix ?? 'admin').'.absensi.manual', ['jurusan' => $jurusan, 'semester' => $semester, 'mata_kuliah_id' => $mataKuliahId]) }}"
+                       class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                        <i class="fa-solid fa-file-pdf text-emerald-300"></i>
+                        Manual (PDF)
+                    </a>
+                    <a href="{{ route(($routePrefix ?? 'admin').'.absensi.manual', ['jurusan' => $jurusan, 'semester' => $semester, 'mata_kuliah_id' => $mataKuliahId, 'inline' => 1]) }}"
+                       target="_blank"
+                       rel="noopener"
+                       class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                        <i class="fa-solid fa-print text-emerald-200"></i>
+                        Manual (Print)
+                    </a>
                     @if (($routePrefix ?? 'admin') === 'dosen')
-                        <a href="{{ route('dosen.absensi.manual', ['jurusan' => $jurusan, 'semester' => $semester, 'mata_kuliah_id' => $mataKuliahId]) }}"
-                           class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
-                            <i class="fa-solid fa-file-pdf text-emerald-300"></i>
-                            Cetak Manual
-                        </a>
                         <a href="{{ route('dosen.absensi.rekap', ['jurusan' => $jurusan, 'semester' => $semester, 'mata_kuliah_id' => $mataKuliahId]) }}"
                            class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                             <i class="fa-solid fa-file-pdf text-red-300"></i>
@@ -106,6 +113,18 @@
                                     <td class="px-4 py-3 text-emerald-100/80">{{ (int) $s->terisi_count }}/{{ (int) $s->items_count }}</td>
                                     <td class="px-4 py-3">
                                         <div class="flex items-center justify-end">
+                                            <a href="{{ route(($routePrefix ?? 'admin').'.absensi.export.pdf', ['absensi' => $s, 'inline' => 1]) }}"
+                                               target="_blank"
+                                               rel="noopener"
+                                               class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition mr-2">
+                                                <i class="fa-solid fa-print"></i>
+                                                Print
+                                            </a>
+                                            <a href="{{ route(($routePrefix ?? 'admin').'.absensi.export.pdf', ['absensi' => $s]) }}"
+                                               class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition mr-2">
+                                                <i class="fa-solid fa-file-pdf"></i>
+                                                PDF
+                                            </a>
                                             <a href="{{ route(($routePrefix ?? 'admin').'.absensi.entry', ['jurusan' => $jurusan, 'semester' => $semester, 'mata_kuliah_id' => $mataKuliahId, 'pertemuan' => $s->pertemuan]) }}"
                                                class="h-9 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                                                 <i class="fa-solid fa-pen-to-square"></i>

@@ -85,8 +85,13 @@ class AbsensiController extends Controller
 
     public function downloadManual(Request $request)
     {
-        $dosen = $request->user()?->dosen;
-        abort_unless($request->user()?->isDosen() && $dosen, 403);
+        $user = $request->user();
+        abort_unless($user, 403);
+
+        $dosen = $user->isDosen() ? $user->dosen : null;
+        if ($user->isDosen() && ! $dosen) {
+            abort(403);
+        }
 
         $validated = $request->validate([
             'jurusan' => ['required', 'string'],
@@ -97,8 +102,10 @@ class AbsensiController extends Controller
                 Rule::exists('mata_kuliah', 'id')
                     ->where('semester', (int) $request->input('semester'))
                     ->where('jurusan', (string) $request->input('jurusan'))
-                    ->where(function ($q) use ($dosen) {
-                        $q->where('dosen_id', $dosen->id)->orWhere('dosen_id_2', $dosen->id);
+                    ->when($dosen, function ($q) use ($dosen) {
+                        $q->where(function ($qq) use ($dosen) {
+                            $qq->where('dosen_id', $dosen->id)->orWhere('dosen_id_2', $dosen->id);
+                        });
                     }),
             ],
         ]);
@@ -125,13 +132,21 @@ class AbsensiController extends Controller
 
         $kaprodiNama = $this->resolveKaprodiNama($jurusan);
 
+        $dosenNama = $dosen?->nama;
+        if (! $dosenNama) {
+            $dosenParts = collect([$mk->dosen?->nama, $mk->dosen2?->nama])
+                ->filter(fn ($v) => trim((string) $v) !== '')
+                ->values();
+            $dosenNama = $dosenParts->isNotEmpty() ? $dosenParts->implode(' / ') : null;
+        }
+
         $html = view('admin.absensi.manual-pdf', [
             'jurusan' => $jurusan,
             'semester' => $semester,
             'mk' => $mk,
             'mahasiswa' => $mahasiswa,
             'kaprodiNama' => $kaprodiNama,
-            'dosenNama' => $dosen->nama,
+            'dosenNama' => $dosenNama,
         ])->render();
 
         $dompdf = new Dompdf(['isRemoteEnabled' => true]);
@@ -140,9 +155,11 @@ class AbsensiController extends Controller
         $dompdf->render();
 
         $safeKode = preg_replace('/[^A-Za-z0-9._-]+/', '-', (string) ($mk?->kode ?? 'MK'));
+        $disposition = $request->boolean('inline') ? 'inline' : 'attachment';
+
         return response($dompdf->output(), 200, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="Absensi_Manual_'.$safeKode.'.pdf"',
+            'Content-Disposition' => $disposition.'; filename="Absensi_Manual_'.$safeKode.'.pdf"',
         ]);
     }
 
@@ -318,9 +335,11 @@ class AbsensiController extends Controller
         $safeKode = preg_replace('/[^A-Za-z0-9._-]+/', '-', (string) ($mk?->kode ?? 'MK'));
         $filename = 'absensi-'.$safeKode.'-P'.$absensi->pertemuan.'.pdf';
 
+        $disposition = $request->boolean('inline') ? 'inline' : 'attachment';
+
         return response($dompdf->output(), 200, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+            'Content-Disposition' => $disposition.'; filename="'.$filename.'"',
         ]);
     }
 
