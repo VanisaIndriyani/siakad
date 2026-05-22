@@ -22,9 +22,13 @@
     <body>
         @php
             $logoFile = public_path('img/lo.jpeg');
-            $logoSrc = is_file($logoFile)
-                ? 'data:image/jpeg;base64,'.base64_encode(file_get_contents($logoFile))
-                : null;
+            $logoSrc = null;
+            if (is_file($logoFile) && is_readable($logoFile)) {
+                $logoData = @file_get_contents($logoFile);
+                if ($logoData !== false) {
+                    $logoSrc = 'data:image/jpeg;base64,'.base64_encode($logoData);
+                }
+            }
         @endphp
 
         <div class="header">

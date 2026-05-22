@@ -279,7 +279,24 @@ class MahasiswaController extends Controller
 
     public function exportPdf(Request $request)
     {
-        $query = Mahasiswa::query()->with('user')->orderByDesc('id');
+        @ini_set('memory_limit', '512M');
+        @set_time_limit(300);
+
+        $query = Mahasiswa::query()
+            ->select([
+                'id',
+                'user_id',
+                'nama_lengkap',
+                'npm',
+                'nik',
+                'angkatan',
+                'fakultas',
+                'program_studi',
+                'nomor_telp',
+                'status_mahasiswa',
+            ])
+            ->with(['user:id,email'])
+            ->orderByDesc('id');
         $query = $this->applyFilters($query, $request);
 
         $rows = $query->get();
