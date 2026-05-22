@@ -30,11 +30,31 @@
     </head>
     <body>
         @php
-            $logoPath = public_path('img/lo.jpeg');
+            $logoCandidates = [
+                public_path('img/lo.jpeg'),
+                public_path('img/logo.png'),
+                base_path('../img/lo.jpeg'),
+                base_path('../img/logo.png'),
+                base_path('../public/img/lo.jpeg'),
+                base_path('../public/img/logo.png'),
+            ];
+
+            $logoPath = null;
+            foreach ($logoCandidates as $candidate) {
+                if (is_string($candidate) && is_file($candidate) && is_readable($candidate)) {
+                    $logoPath = $candidate;
+                    break;
+                }
+            }
+
             $logoBase64 = null;
-            if (is_string($logoPath) && file_exists($logoPath)) {
-                $data = file_get_contents($logoPath);
-                $logoBase64 = 'data:image/' . pathinfo($logoPath, PATHINFO_EXTENSION) . ';base64,' . base64_encode($data);
+            if ($logoPath) {
+                $data = @file_get_contents($logoPath);
+                if ($data !== false) {
+                    $ext = strtolower((string) pathinfo($logoPath, PATHINFO_EXTENSION));
+                    $ext = $ext === 'jpg' ? 'jpeg' : $ext;
+                    $logoBase64 = 'data:image/'.$ext.';base64,'.base64_encode($data);
+                }
             }
 
             $kop1 = 'INSTITUT AGAMA ISLAM';
@@ -117,4 +137,3 @@
         <div class="footer">Dicetak pada: {{ now()->format('d/m/Y H:i') }} • Dokumen ini dihasilkan otomatis oleh Sistem Informasi Akademik.</div>
     </body>
 </html>
-

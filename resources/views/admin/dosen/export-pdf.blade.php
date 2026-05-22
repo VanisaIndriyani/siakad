@@ -21,10 +21,32 @@
     </head>
     <body>
         @php
-            $logoFile = public_path('img/lo.jpeg');
-            $logoSrc = is_file($logoFile)
-                ? 'data:image/jpeg;base64,'.base64_encode(file_get_contents($logoFile))
-                : null;
+            $logoCandidates = [
+                public_path('img/lo.jpeg'),
+                public_path('img/logo.png'),
+                base_path('../img/lo.jpeg'),
+                base_path('../img/logo.png'),
+                base_path('../public/img/lo.jpeg'),
+                base_path('../public/img/logo.png'),
+            ];
+
+            $logoFile = null;
+            foreach ($logoCandidates as $candidate) {
+                if (is_string($candidate) && is_file($candidate) && is_readable($candidate)) {
+                    $logoFile = $candidate;
+                    break;
+                }
+            }
+
+            $logoSrc = null;
+            if ($logoFile) {
+                $logoData = @file_get_contents($logoFile);
+                if ($logoData !== false) {
+                    $ext = strtolower((string) pathinfo($logoFile, PATHINFO_EXTENSION));
+                    $ext = $ext === 'jpg' ? 'jpeg' : $ext;
+                    $logoSrc = 'data:image/'.$ext.';base64,'.base64_encode($logoData);
+                }
+            }
         @endphp
 
         <div class="header">

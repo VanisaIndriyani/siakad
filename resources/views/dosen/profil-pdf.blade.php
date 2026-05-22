@@ -37,12 +37,31 @@
         <tr>
             <td class="kop-logo">
                 @php
-                    $logoPath = public_path('img/lo.jpeg');
-                    $logoBase64 = '';
-                    if (file_exists($logoPath)) {
-                        $logoData = file_get_contents($logoPath);
-                        $logoType = pathinfo($logoPath, PATHINFO_EXTENSION);
-                        $logoBase64 = 'data:image/' . $logoType . ';base64,' . base64_encode($logoData);
+                    $logoCandidates = [
+                        public_path('img/lo.jpeg'),
+                        public_path('img/logo.png'),
+                        base_path('../img/lo.jpeg'),
+                        base_path('../img/logo.png'),
+                        base_path('../public/img/lo.jpeg'),
+                        base_path('../public/img/logo.png'),
+                    ];
+
+                    $logoPath = null;
+                    foreach ($logoCandidates as $candidate) {
+                        if (is_string($candidate) && is_file($candidate) && is_readable($candidate)) {
+                            $logoPath = $candidate;
+                            break;
+                        }
+                    }
+
+                    $logoBase64 = null;
+                    if ($logoPath) {
+                        $logoData = @file_get_contents($logoPath);
+                        if ($logoData !== false) {
+                            $ext = strtolower((string) pathinfo($logoPath, PATHINFO_EXTENSION));
+                            $ext = $ext === 'jpg' ? 'jpeg' : $ext;
+                            $logoBase64 = 'data:image/'.$ext.';base64,'.base64_encode($logoData);
+                        }
                     }
                 @endphp
                 @if($logoBase64)
