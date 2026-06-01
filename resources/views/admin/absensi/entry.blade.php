@@ -63,6 +63,14 @@
                                 <i class="fa-solid fa-eye"></i>
                                 Lihat
                             </a>
+                            <form action="{{ route(($routePrefix ?? 'admin').'.absensi.materi.destroy', $absensi) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus dokumen ini?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="h-8 px-3 inline-flex items-center gap-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-300 transition">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                    Hapus
+                                </button>
+                            </form>
                         </div>
                     @endif
                 </div>

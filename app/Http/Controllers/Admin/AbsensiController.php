@@ -346,6 +346,34 @@ class AbsensiController extends Controller
         ]);
     }
 
+    public function destroyMateriFile(Request $request, Absensi $absensi): RedirectResponse
+    {
+        $routePrefix = $request->user()?->isDosen() ? 'dosen' : 'admin';
+
+        if ($request->user()?->isDosen()) {
+            $dosen = $request->user()?->dosen;
+            if (! $dosen) {
+                abort(403);
+            }
+            $absensi->loadMissing('mataKuliah');
+            abort_unless(in_array((int) $dosen->id, [(int) ($absensi->mataKuliah?->dosen_id ?? 0), (int) ($absensi->mataKuliah?->dosen_id_2 ?? 0)], true), 403);
+        }
+
+        if ($absensi->materi_file_path) {
+            Storage::disk('public')->delete($absensi->materi_file_path);
+        }
+
+        $absensi->update([
+            'materi_file_path' => null,
+            'materi_file_name' => null,
+            'materi_file_mime' => null,
+            'materi_file_size' => null,
+            'materi_file_uploaded_by_user_id' => null,
+        ]);
+
+        return redirect()->back()->with('success', 'Dokumen materi berhasil dihapus.');
+    }
+
     public function exportPdf(Request $request, Absensi $absensi)
     {
         $routePrefix = $request->user()?->isDosen() ? 'dosen' : 'admin';
