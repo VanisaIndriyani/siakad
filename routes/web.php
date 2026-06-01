@@ -170,6 +170,7 @@ Route::prefix('admin')
         Route::get('/absensi/entry', [AdminAbsensiController::class, 'entry'])->name('absensi.entry');
         Route::post('/absensi/{absensi}', [AdminAbsensiController::class, 'update'])->name('absensi.update');
         Route::get('/absensi/{absensi}/export/pdf', [AdminAbsensiController::class, 'exportPdf'])->name('absensi.export.pdf');
+        Route::get('/absensi/{absensi}/materi', [AdminAbsensiController::class, 'materiFile'])->name('absensi.materi');
         Route::get('/absensi/{absensi}/export/excel', [AdminAbsensiController::class, 'exportExcel'])->name('absensi.export.excel');
         Route::get('/absensi/rekap', [AdminAbsensiController::class, 'exportRekapPdf'])->name('absensi.rekap');
 
@@ -237,6 +238,7 @@ Route::prefix('mahasiswa')
         Route::get('/khs/{khs}/pdf', [MahasiswaKhsController::class, 'pdf'])->name('khs.pdf');
 
         Route::get('/absensi', [MahasiswaAbsensiController::class, 'index'])->name('absensi.index');
+        Route::get('/absensi/materi/{absensi}', [MahasiswaAbsensiController::class, 'materi'])->name('absensi.materi');
         Route::get('/absensi/{mataKuliah}/{semester}', [MahasiswaAbsensiController::class, 'show'])->name('absensi.show');
         Route::get('/absensi/{mataKuliah}/{semester}/pdf', [MahasiswaAbsensiController::class, 'pdf'])->name('absensi.pdf');
 
@@ -315,6 +317,7 @@ Route::prefix('dosen')
         Route::get('/absensi/entry', [AdminAbsensiController::class, 'entry'])->name('absensi.entry');
         Route::post('/absensi/{absensi}', [AdminAbsensiController::class, 'update'])->name('absensi.update');
         Route::get('/absensi/{absensi}/export/pdf', [AdminAbsensiController::class, 'exportPdf'])->name('absensi.export.pdf');
+        Route::get('/absensi/{absensi}/materi', [AdminAbsensiController::class, 'materiFile'])->name('absensi.materi');
         Route::get('/absensi/{absensi}/export/excel', [AdminAbsensiController::class, 'exportExcel'])->name('absensi.export.excel');
         Route::get('/absensi/rekap/pdf', [AdminAbsensiController::class, 'exportRekapPdf'])->name('absensi.rekap');
 

@@ -17,6 +17,11 @@ class Absensi extends Model
         'pertemuan',
         'tanggal',
         'materi',
+        'materi_file_path',
+        'materi_file_name',
+        'materi_file_mime',
+        'materi_file_size',
+        'materi_file_uploaded_by_user_id',
         'created_by_user_id',
     ];
 
@@ -24,6 +29,7 @@ class Absensi extends Model
         'semester' => 'integer',
         'pertemuan' => 'integer',
         'tanggal' => 'date',
+        'materi_file_size' => 'integer',
     ];
 
     public function mataKuliah(): BelongsTo
@@ -41,4 +47,3 @@ class Absensi extends Model
         return $this->hasMany(AbsensiItem::class, 'absensi_id');
     }
 }
-

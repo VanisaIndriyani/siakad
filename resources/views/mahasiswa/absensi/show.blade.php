@@ -54,7 +54,25 @@
                         <tr class="hover:bg-white/5">
                             <td class="px-4 py-3 font-medium">Pertemuan {{ $item->absensi->pertemuan }}</td>
                             <td class="px-4 py-3 text-emerald-100/80">{{ $item->absensi->tanggal?->format('d/m/Y') ?? '-' }}</td>
-                            <td class="px-4 py-3 text-emerald-100/80">{{ $item->absensi->materi ?? '-' }}</td>
+                            <td class="px-4 py-3 text-emerald-100/80">
+                                <div>{{ $item->absensi->materi ?? '-' }}</div>
+                                @if ($item->absensi->materi_file_path)
+                                    <div class="mt-2 flex flex-wrap items-center gap-2">
+                                        <a href="{{ route('mahasiswa.absensi.materi', ['absensi' => $item->absensi]) }}"
+                                           class="h-8 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                                            <i class="fa-solid fa-download"></i>
+                                            Materi
+                                        </a>
+                                        <a href="{{ route('mahasiswa.absensi.materi', ['absensi' => $item->absensi, 'inline' => 1]) }}"
+                                           target="_blank"
+                                           rel="noopener"
+                                           class="h-8 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                                            <i class="fa-solid fa-eye"></i>
+                                            Lihat
+                                        </a>
+                                    </div>
+                                @endif
+                            </td>
                             <td class="px-4 py-3">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full border {{ $badge }}">{{ $label }}</span>
                             </td>

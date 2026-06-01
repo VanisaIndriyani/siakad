@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Mahasiswa;
 
 use App\Http\Controllers\Controller;
+use App\Models\Absensi;
 use App\Models\AbsensiItem;
 use App\Models\MataKuliah;
 use App\Models\User;
 use Dompdf\Dompdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class AbsensiController extends Controller
@@ -105,6 +107,32 @@ class AbsensiController extends Controller
             'mataKuliah' => $mataKuliah,
             'semester' => $semester,
             'items' => $items,
+        ]);
+    }
+
+    public function materi(Request $request, Absensi $absensi)
+    {
+        /** @var User $user */
+        $user = $request->user();
+        $mahasiswa = $user->mahasiswa;
+        abort_unless($mahasiswa, 403);
+
+        $allowed = AbsensiItem::query()
+            ->where('absensi_id', $absensi->id)
+            ->where('mahasiswa_id', $mahasiswa->id)
+            ->exists();
+        abort_unless($allowed, 403);
+
+        $disk = Storage::disk('public');
+        abort_unless($absensi->materi_file_path, 404);
+        abort_unless($disk->exists($absensi->materi_file_path), 404);
+
+        $filename = preg_replace('/[^A-Za-z0-9._-]+/', '-', (string) ($absensi->materi_file_name ?: 'materi'));
+        $disposition = $request->boolean('inline') ? 'inline' : 'attachment';
+
+        return response()->file($disk->path($absensi->materi_file_path), [
+            'Content-Type' => $absensi->materi_file_mime ?: 'application/octet-stream',
+            'Content-Disposition' => $disposition.'; filename="'.$filename.'"',
         ]);
     }
 

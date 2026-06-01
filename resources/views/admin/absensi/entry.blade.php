@@ -29,7 +29,7 @@
         </div>
     </div>
 
-    <form method="POST" action="{{ route(($routePrefix ?? 'admin').'.absensi.update', $absensi) }}" class="rounded-2xl bg-white/5 border border-white/10 p-5">
+    <form method="POST" action="{{ route(($routePrefix ?? 'admin').'.absensi.update', $absensi) }}" enctype="multipart/form-data" class="rounded-2xl bg-white/5 border border-white/10 p-5">
         @csrf
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -42,6 +42,30 @@
                 <label class="text-sm text-emerald-100/80">Materi Pembelajaran</label>
                 <input name="materi" value="{{ old('materi', $absensi->materi) }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" placeholder="Masukkan materi yang diajarkan..." />
                 @error('materi') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
+
+                <div class="mt-3">
+                    <label class="text-sm text-emerald-100/80">Upload Materi (PDF/Word/PPT)</label>
+                    <input type="file" name="materi_file" accept=".pdf,.doc,.docx,.ppt,.pptx" class="mt-2 w-full rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400 p-2" />
+                    @error('materi_file') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
+
+                    @if ($absensi->materi_file_path)
+                        <div class="mt-2 text-sm text-emerald-100/70 flex flex-wrap items-center gap-2">
+                            <span>File saat ini: <span class="font-medium">{{ $absensi->materi_file_name ?? 'materi' }}</span></span>
+                            <a href="{{ route(($routePrefix ?? 'admin').'.absensi.materi', $absensi) }}"
+                               class="h-8 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                                <i class="fa-solid fa-download"></i>
+                                Download
+                            </a>
+                            <a href="{{ route(($routePrefix ?? 'admin').'.absensi.materi', ['absensi' => $absensi, 'inline' => 1]) }}"
+                               target="_blank"
+                               rel="noopener"
+                               class="h-8 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                                <i class="fa-solid fa-eye"></i>
+                                Lihat
+                            </a>
+                        </div>
+                    @endif
+                </div>
             </div>
             <div class="lg:col-span-3 flex flex-col gap-3 lg:items-end">
                 <div class="w-full max-w-lg">

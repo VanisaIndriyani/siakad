@@ -11,6 +11,8 @@ use App\Models\MataKuliah;
 use Dompdf\Dompdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -265,6 +267,7 @@ class AbsensiController extends Controller
         $validated = $request->validate([
             'tanggal' => ['nullable', 'date'],
             'materi' => ['nullable', 'string'],
+            'materi_file' => ['nullable', 'file', 'max:20480', 'mimes:pdf,doc,docx,ppt,pptx'],
             'status' => ['required', 'array'],
             'status.*' => ['nullable', 'in:hadir,izin,sakit,alpha'],
             'keterangan' => ['nullable', 'array'],
@@ -275,6 +278,28 @@ class AbsensiController extends Controller
             'tanggal' => $validated['tanggal'] ?? null,
             'materi' => $validated['materi'] ?? null,
         ]);
+
+        if ($request->hasFile('materi_file')) {
+            $file = $request->file('materi_file');
+
+            if ($absensi->materi_file_path) {
+                Storage::disk('public')->delete($absensi->materi_file_path);
+            }
+
+            $ext = strtolower((string) $file->getClientOriginalExtension());
+            $basename = 'materi-'.$absensi->id.'-'.Str::uuid()->toString();
+            $filename = $basename.($ext !== '' ? '.'.$ext : '');
+
+            $path = $file->storeAs('materi/absensi/'.$absensi->id, $filename, 'public');
+
+            $absensi->update([
+                'materi_file_path' => $path,
+                'materi_file_name' => $file->getClientOriginalName(),
+                'materi_file_mime' => $file->getClientMimeType(),
+                'materi_file_size' => $file->getSize(),
+                'materi_file_uploaded_by_user_id' => $request->user()?->id,
+            ]);
+        }
 
         $items = $absensi->items()->get()->keyBy('id');
         foreach (($validated['status'] ?? []) as $itemId => $status) {
@@ -295,6 +320,30 @@ class AbsensiController extends Controller
             'mata_kuliah_id' => $absensi->mata_kuliah_id,
             'pertemuan' => $absensi->pertemuan,
         ])->with('success', 'Absensi berhasil disimpan.');
+    }
+
+    public function materiFile(Request $request, Absensi $absensi)
+    {
+        if ($request->user()?->isDosen()) {
+            $dosen = $request->user()?->dosen;
+            if (! $dosen) {
+                abort(403);
+            }
+            $absensi->loadMissing('mataKuliah');
+            abort_unless(in_array((int) $dosen->id, [(int) ($absensi->mataKuliah?->dosen_id ?? 0), (int) ($absensi->mataKuliah?->dosen_id_2 ?? 0)], true), 403);
+        }
+
+        $disk = Storage::disk('public');
+        abort_unless($absensi->materi_file_path, 404);
+        abort_unless($disk->exists($absensi->materi_file_path), 404);
+
+        $filename = preg_replace('/[^A-Za-z0-9._-]+/', '-', (string) ($absensi->materi_file_name ?: 'materi'));
+        $disposition = $request->boolean('inline') ? 'inline' : 'attachment';
+
+        return response()->file($disk->path($absensi->materi_file_path), [
+            'Content-Type' => $absensi->materi_file_mime ?: 'application/octet-stream',
+            'Content-Disposition' => $disposition.'; filename="'.$filename.'"',
+        ]);
     }
 
     public function exportPdf(Request $request, Absensi $absensi)
