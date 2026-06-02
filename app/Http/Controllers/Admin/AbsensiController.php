@@ -102,8 +102,6 @@ class AbsensiController extends Controller
                 'required',
                 'integer',
                 Rule::exists('mata_kuliah', 'id')
-                    ->where('semester', (int) $request->input('semester'))
-                    ->where('jurusan', (string) $request->input('jurusan'))
                     ->when($dosen, function ($q) use ($dosen) {
                         $q->where(function ($qq) use ($dosen) {
                             $qq->where('dosen_id', $dosen->id)->orWhere('dosen_id_2', $dosen->id);
@@ -271,7 +269,7 @@ class AbsensiController extends Controller
             'status' => ['required', 'array'],
             'status.*' => ['nullable', 'in:hadir,izin,sakit,alpha'],
             'keterangan' => ['nullable', 'array'],
-            'keterangan.*' => ['nullable', 'string', 'max:255'],
+            'keterangan.*' => ['nullable', 'string'],
         ]);
 
         $absensi->update([
