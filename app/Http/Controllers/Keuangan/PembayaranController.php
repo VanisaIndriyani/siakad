@@ -367,6 +367,10 @@ class PembayaranController extends Controller
         }
 
         $rows = $query->get();
+        if ($rows->isEmpty()) {
+            return back()->with('error', 'Tidak ada data untuk diekspor.');
+        }
+
         $html = view('keuangan.pembayaran.export-pdf', [
             'rows' => $rows,
             'q' => $q,

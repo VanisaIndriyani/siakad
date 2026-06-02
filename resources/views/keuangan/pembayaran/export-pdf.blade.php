@@ -80,9 +80,9 @@
     <div class="kop-line-1"></div>
     <div class="kop-line-2"></div>
 
-    <div class="doc-title">REKAP PEMBAYARAN</div>
+    <div class="doc-title" style="margin-top: 15px;">REKAP PEMBAYARAN</div>
     <div class="meta">
-        <div>Filter: {{ $q ? 'q='.$q : '-' }} | Semester: {{ $semester ?? '-' }} | Angkatan: {{ $angkatan ?? '-' }} | Jurusan: {{ $jurusan ?? '-' }} | Tagihan: {{ $jenis_tagihan ?? '-' }}</div>
+        <div>Filter: {{ $q ? 'q='.$q : '-' }} | Semester: {{ $semester ?: '-' }} | Angkatan: {{ $angkatan ?: '-' }} | Jurusan: {{ $jurusan ?: '-' }} | Tagihan: {{ $jenis_tagihan ?: '-' }}</div>
         <div>Dicetak: {{ now()->format('d/m/Y H:i') }}</div>
     </div>
 
@@ -111,9 +111,9 @@
                 <td class="nowrap">{{ $p->semester }}</td>
                 <td class="nowrap">{{ $p->tahun_ajaran }}</td>
                 <td>{{ $p->jenis_tagihan ?? '-' }}</td>
-                <td class="right nowrap">Rp {{ number_format((float) $p->total_biaya, 0, ',', '.') }}</td>
-                <td class="right nowrap">Rp {{ number_format((float) $p->total_dibayar, 0, ',', '.') }}</td>
-                <td class="nowrap">{{ $p->status_pembayaran }}</td>
+                <td class="right nowrap">Rp {{ number_format((float) ($p->total_biaya ?? 0), 0, ',', '.') }}</td>
+                <td class="right nowrap">Rp {{ number_format((float) ($p->total_dibayar ?? 0), 0, ',', '.') }}</td>
+                <td class="nowrap">{{ $p->status_pembayaran ?? '-' }}</td>
             </tr>
         @empty
             <tr>
