@@ -319,6 +319,7 @@ Route::prefix('dosen')
         Route::post('/absensi/{absensi}', [AdminAbsensiController::class, 'update'])->name('absensi.update');
         Route::get('/absensi/{absensi}/export/pdf', [AdminAbsensiController::class, 'exportPdf'])->name('absensi.export.pdf');
         Route::get('/absensi/{absensi}/materi', [AdminAbsensiController::class, 'materiFile'])->name('absensi.materi');
+        Route::delete('/absensi/{absensi}/materi', [AdminAbsensiController::class, 'destroyMateriFile'])->name('absensi.materi.destroy');
         Route::get('/absensi/{absensi}/export/excel', [AdminAbsensiController::class, 'exportExcel'])->name('absensi.export.excel');
         Route::get('/absensi/rekap/pdf', [AdminAbsensiController::class, 'exportRekapPdf'])->name('absensi.rekap');
 
