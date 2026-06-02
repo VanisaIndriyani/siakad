@@ -12,22 +12,46 @@
         tableHtml: null,
         loading: false,
         selectedIds: [],
-        fetchTable() {
+        fetchTable(url = null) {
             this.loading = true;
+            const baseUrl = url || `{{ route('admin.mahasiswa.index') }}`;
             const params = new URLSearchParams({
                 q: this.q || '',
                 status: this.status || '',
                 angkatan: this.angkatan || '',
                 prodi: this.prodi || '',
                 semester: this.semester || '',
-                partial: '1'
             });
-            fetch(`{{ route('admin.mahasiswa.index') }}?${params.toString()}`, {
+            
+            // If url is provided, it already has query params, so we merge them
+            let finalUrl = baseUrl;
+            if (!url) {
+                finalUrl += `?${params.toString()}`;
+            }
+
+            fetch(finalUrl, {
                 headers: { 'X-Requested-With': 'XMLHttpRequest' }
             })
             .then(r => r.text())
-            .then(html => { this.tableHtml = html; this.$nextTick(() => this.syncSelectedFromDom()); })
+            .then(html => { 
+                this.tableHtml = html; 
+                this.$nextTick(() => {
+                    this.syncSelectedFromDom();
+                    this.initPaginationAjax();
+                }); 
+            })
             .finally(() => { this.loading = false; });
+        },
+        initPaginationAjax() {
+            const container = this.$refs.tableContainer;
+            if (!container) return;
+            const links = container.querySelectorAll('.pagination a, nav a');
+            links.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.fetchTable(link.getAttribute('href'));
+                });
+            });
         },
         onBulkChange(e) {
             const t = e.target;
@@ -57,7 +81,7 @@
             selectAll.checked = checkedCount === rows.length;
             selectAll.indeterminate = checkedCount > 0 && checkedCount < rows.length;
         },
-    }" x-init="tableHtml = $refs.initial.innerHTML; $nextTick(() => syncSelectedFromDom())">
+    }" x-init="tableHtml = $refs.initial.innerHTML; $nextTick(() => { syncSelectedFromDom(); initPaginationAjax(); })">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
             <div class="text-xl font-semibold">Mahasiswa</div>
@@ -145,7 +169,7 @@
                 </button>
             </div>
 
-            <div x-html="tableHtml"></div>
+            <div x-html="tableHtml" x-ref="tableContainer"></div>
         </form>
         <div x-ref="initial" class="hidden">
             @include('admin.mahasiswa.partials.table', ['mahasiswa' => $mahasiswa])

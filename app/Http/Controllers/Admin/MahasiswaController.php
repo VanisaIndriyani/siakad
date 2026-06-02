@@ -86,7 +86,7 @@ class MahasiswaController extends Controller
 
         $mahasiswa = $query->orderByDesc('id')->paginate(10)->withQueryString();
 
-        if ($request->boolean('partial')) {
+        if ($request->ajax()) {
             return view('admin.mahasiswa.partials.table', [
                 'mahasiswa' => $mahasiswa,
             ]);
