@@ -433,4 +433,7 @@ Route::middleware(['auth', 'role:admin,dosen,mahasiswa'])->group(function () {
     Route::post('/kkn/posko/{posko}/message', [KknBimbinganController::class, 'sendMessage'])->name('kkn.bimbingan.message');
     Route::post('/kkn/posko/{posko}/file', [KknBimbinganController::class, 'uploadFile'])->name('kkn.bimbingan.file');
     Route::delete('/kkn/file/{file}', [KknBimbinganController::class, 'deleteFile'])->name('kkn.bimbingan.file.destroy');
+    Route::post('/kkn/posko/{posko}/revisi', [KknBimbinganController::class, 'storeRevisi'])->name('kkn.bimbingan.revisi.store');
+    Route::delete('/kkn/revisi/{revisi}', [KknBimbinganController::class, 'destroyRevisi'])->name('kkn.bimbingan.revisi.destroy');
+    Route::get('/kkn/posko/{posko}/revisi/print', [KknBimbinganController::class, 'printRevisi'])->name('kkn.bimbingan.revisi.print');
 });

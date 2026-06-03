@@ -47,4 +47,9 @@ class KknPosko extends Model
     {
         return $this->hasMany(KknFile::class, 'kkn_posko_id');
     }
+
+    public function revisis(): HasMany
+    {
+        return $this->hasMany(KknRevisi::class, 'kkn_posko_id');
+    }
 }

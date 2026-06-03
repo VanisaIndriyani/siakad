@@ -117,6 +117,87 @@
                     @endforelse
                 </div>
             </div>
+
+            <!-- Revisi Section -->
+            <div class="rounded-3xl bg-[#0d2a23] border border-white/10 p-6 shadow-xl">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="text-[10px] font-black text-emerald-100/30 uppercase tracking-[0.2em]">Riwayat Bimbingan & Revisi</div>
+                    <div class="flex items-center gap-2">
+                        <a href="{{ route('kkn.bimbingan.revisi.print', $posko) }}" target="_blank" class="h-9 px-4 rounded-xl bg-white/5 text-white border border-white/10 flex items-center justify-center gap-2 hover:bg-white/10 transition text-[10px] font-black uppercase tracking-widest">
+                            <i class="fa-solid fa-print"></i>
+                            Cetak
+                        </a>
+                        <button onclick="document.getElementById('revisiModal').classList.remove('hidden')" class="h-9 px-4 rounded-xl bg-emerald-600 text-white flex items-center justify-center gap-2 hover:bg-emerald-500 transition text-[10px] font-black uppercase tracking-widest shadow-lg shadow-emerald-900/20">
+                            <i class="fa-solid fa-plus"></i>
+                            Input Revisi
+                        </button>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    @forelse ($posko->revisis->sortByDesc('tanggal') as $rev)
+                        <div class="p-4 rounded-2xl bg-white/5 border border-white/5 relative overflow-hidden group">
+                            <div class="absolute top-0 left-0 w-1 h-full bg-emerald-500/30"></div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-[10px] font-black text-emerald-400 uppercase tracking-widest">{{ $rev->tanggal->format('d F Y') }}</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[8px] font-bold text-emerald-100/30 uppercase bg-white/5 px-2 py-0.5 rounded-full">{{ $rev->user?->name }}</span>
+                                    @if (auth()->id() === (int)$rev->user_id || auth()->user()->isAdmin())
+                                        <form method="POST" action="{{ route('kkn.bimbingan.revisi.destroy', $rev) }}" data-confirm="Hapus data revisi ini?">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-400/50 hover:text-red-400 transition">
+                                                <i class="fa-solid fa-trash text-[10px]"></i>
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="text-xs text-emerald-100/80 leading-relaxed italic">"{{ $rev->uraian_revisi }}"</div>
+                        </div>
+                    @empty
+                        <div class="py-10 text-center">
+                            <i class="fa-solid fa-clipboard-check text-3xl text-white/10 mb-2"></i>
+                            <p class="text-[10px] font-bold text-emerald-100/20 uppercase tracking-[0.2em]">Belum ada revisi</p>
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+
+        <!-- Revisi Modal (Dosen Only) -->
+        <div id="revisiModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+            <div class="flex min-h-screen items-center justify-center p-4">
+                <div class="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity" onclick="this.parentElement.parentElement.classList.add('hidden')"></div>
+                <div class="relative w-full max-w-md transform rounded-3xl bg-[#0d2a23] border border-white/10 p-8 shadow-2xl transition-all">
+                    <div class="mb-6 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="h-10 w-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
+                                <i class="fa-solid fa-pen-to-square text-emerald-400"></i>
+                            </div>
+                            <h3 class="text-lg font-black text-white uppercase tracking-widest">Input Revisi Laporan</h3>
+                        </div>
+                        <button onclick="document.getElementById('revisiModal').classList.add('hidden')" class="text-white/40 hover:text-white transition">
+                            <i class="fa-solid fa-xmark text-xl"></i>
+                        </button>
+                    </div>
+                    <form method="POST" action="{{ route('kkn.bimbingan.revisi.store', $posko) }}" class="space-y-6">
+                        @csrf
+                        <div>
+                            <label class="block text-[10px] font-black text-emerald-100/40 uppercase tracking-[0.2em] mb-3">Tanggal Bimbingan</label>
+                            <input type="date" name="tanggal" value="{{ date('Y-m-d') }}" required
+                                   class="h-12 w-full rounded-xl bg-white/5 border border-white/10 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition" />
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-emerald-100/40 uppercase tracking-[0.2em] mb-3">Uraian Bimbingan / Revisi</label>
+                            <textarea name="uraian_revisi" rows="5" required placeholder="Contoh: Perbaiki bab 1 bagian latar belakang..."
+                                      class="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition resize-none"></textarea>
+                        </div>
+                        <button type="submit" class="w-full h-14 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black tracking-[0.2em] uppercase text-xs transition-all shadow-xl shadow-emerald-900/40">
+                            Simpan Revisi
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
 
         <!-- Chat Section (Right) -->

@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\KknBimbinganMessage;
 use App\Models\KknFile;
 use App\Models\KknPosko;
+use App\Models\KknRevisi;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View;
 
 class KknBimbinganController extends Controller
 {
@@ -94,5 +96,46 @@ class KknBimbinganController extends Controller
     {
         $this->checkAccess($request, $file->posko);
         return Storage::disk('public')->download($file->file_path, $file->file_name);
+    }
+
+    public function storeRevisi(Request $request, KknPosko $posko): RedirectResponse
+    {
+        $user = $request->user();
+        abort_unless($user->isDosen() || $user->isAdmin(), 403);
+        $this->checkAccess($request, $posko);
+
+        $validated = $request->validate([
+            'tanggal' => ['required', 'date'],
+            'uraian_revisi' => ['required', 'string'],
+        ]);
+
+        KknRevisi::query()->create([
+            'kkn_posko_id' => $posko->id,
+            'user_id' => $user->id,
+            'tanggal' => $validated['tanggal'],
+            'uraian_revisi' => $validated['uraian_revisi'],
+        ]);
+
+        return back()->with('success', 'Data revisi berhasil ditambahkan.');
+    }
+
+    public function destroyRevisi(Request $request, KknRevisi $revisi): RedirectResponse
+    {
+        $user = $request->user();
+        abort_unless($user->isAdmin() || (int) $revisi->user_id === (int) $user->id, 403);
+
+        $revisi->delete();
+
+        return back()->with('success', 'Data revisi berhasil dihapus.');
+    }
+
+    public function printRevisi(Request $request, KknPosko $posko): View
+    {
+        $this->checkAccess($request, $posko);
+        $posko->load(['pembimbingS', 'pengajuans.mahasiswa', 'revisis.user']);
+
+        return view('shared.kkn.print-revisi', [
+            'posko' => $posko,
+        ]);
     }
 }

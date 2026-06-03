@@ -117,6 +117,34 @@
                     @endforelse
                 </div>
             </div>
+
+            <!-- Revisi Section -->
+            <div class="rounded-3xl bg-[#0d2a23] border border-white/10 p-6 shadow-xl">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="text-[10px] font-black text-emerald-100/30 uppercase tracking-[0.2em]">Riwayat Bimbingan & Revisi</div>
+                    <a href="{{ route('kkn.bimbingan.revisi.print', $posko) }}" target="_blank" class="h-9 px-4 rounded-xl bg-emerald-600/20 text-emerald-400 border border-emerald-500/20 flex items-center justify-center gap-2 hover:bg-emerald-600 hover:text-white transition text-[10px] font-black uppercase tracking-widest">
+                        <i class="fa-solid fa-print"></i>
+                        Cetak
+                    </a>
+                </div>
+                <div class="space-y-4">
+                    @forelse ($posko->revisis->sortByDesc('tanggal') as $rev)
+                        <div class="p-4 rounded-2xl bg-white/5 border border-white/5 relative overflow-hidden group">
+                            <div class="absolute top-0 left-0 w-1 h-full bg-emerald-500/30"></div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-[10px] font-black text-emerald-400 uppercase tracking-widest">{{ $rev->tanggal->format('d F Y') }}</span>
+                                <span class="text-[8px] font-bold text-emerald-100/30 uppercase bg-white/5 px-2 py-0.5 rounded-full">{{ $rev->user?->name }}</span>
+                            </div>
+                            <div class="text-xs text-emerald-100/80 leading-relaxed italic">"{{ $rev->uraian_revisi }}"</div>
+                        </div>
+                    @empty
+                        <div class="py-10 text-center">
+                            <i class="fa-solid fa-clipboard-check text-3xl text-white/10 mb-2"></i>
+                            <p class="text-[10px] font-bold text-emerald-100/20 uppercase tracking-[0.2em]">Belum ada revisi</p>
+                        </div>
+                    @endforelse
+                </div>
+            </div>
         </div>
 
         <!-- Chat Section (Right) -->
