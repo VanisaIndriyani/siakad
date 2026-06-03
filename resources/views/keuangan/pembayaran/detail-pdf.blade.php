@@ -49,10 +49,6 @@
         $logoCandidates = [
             public_path('img/lo.jpeg'),
             public_path('img/logo.png'),
-            base_path('../img/lo.jpeg'),
-            base_path('../img/logo.png'),
-            base_path('../public/img/lo.jpeg'),
-            base_path('../public/img/logo.png'),
         ];
 
         $logoPath = null;
@@ -117,9 +113,9 @@
         <tr>
             <td style="width: 50%;">
                 <table class="kv2">
-                    <tr><td class="label">Nama</td><td class="colon">:</td><td class="value">{{ $pembayaran->mahasiswa->nama_lengkap ?? '-' }}</td></tr>
-                    <tr><td class="label">NPM</td><td class="colon">:</td><td class="value">{{ $pembayaran->mahasiswa->npm ?? '-' }}</td></tr>
-                    <tr><td class="label">Angkatan</td><td class="colon">:</td><td class="value">{{ $pembayaran->mahasiswa->angkatan ?? '-' }}</td></tr>
+                    <tr><td class="label">Nama</td><td class="colon">:</td><td class="value">{{ $pembayaran->mahasiswa?->nama_lengkap ?? '-' }}</td></tr>
+                    <tr><td class="label">NPM</td><td class="colon">:</td><td class="value">{{ $pembayaran->mahasiswa?->npm ?? '-' }}</td></tr>
+                    <tr><td class="label">Angkatan</td><td class="colon">:</td><td class="value">{{ $pembayaran->mahasiswa?->angkatan ?? '-' }}</td></tr>
                     <tr><td class="label">Jenis Tagihan</td><td class="colon">:</td><td class="value">{{ $pembayaran->jenis_tagihan ?? '-' }}</td></tr>
                 </table>
             </td>

@@ -18,18 +18,7 @@
         <table style="width: 100%; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 2px;">
             <tr>
                 <td style="width: 110px; vertical-align: middle;">
-                    @php
-                        $logoPath = public_path('img/lo.jpeg');
-                        $logoBase64 = '';
-                        if (file_exists($logoPath)) {
-                            $logoData = file_get_contents($logoPath);
-                            $logoType = pathinfo($logoPath, PATHINFO_EXTENSION);
-                            $logoBase64 = 'data:image/' . $logoType . ';base64,' . base64_encode($logoData);
-                        }
-                    @endphp
-                    @if($logoBase64)
-                        <img src="{{ $logoBase64 }}" style="width: 100px; height: auto;">
-                    @endif
+                    <img src="{{ asset('img/lo.jpeg') }}" style="width: 100px; height: auto;">
                 </td>
                 <td style="text-align: center; vertical-align: middle;">
                     <div style="font-size: 18px; font-weight: 800; margin: 0; line-height: 1.1;">INSTITUT AGAMA ISLAM</div>
@@ -71,13 +60,7 @@
                 <td style="width: 120px; text-align: right; vertical-align: top; border: none; padding-left: 10px;">
                     <div style="width: 100px; height: 125px; border: 1px solid #000; padding: 2px; background: white; display: inline-block;">
                         @if ($dosen?->foto_path)
-                            @php
-                                $path = storage_path('app/public/'.$dosen->foto_path);
-                                $type = pathinfo($path, PATHINFO_EXTENSION);
-                                $data = @file_get_contents($path);
-                                $base64 = $data ? 'data:image/' . $type . ';base64,' . base64_encode($data) : asset('storage/'.$dosen->foto_path);
-                            @endphp
-                            <img src="{{ $base64 }}" style="width: 100%; height: 100%; object-fit: cover;" alt="Foto" />
+                            <img src="{{ asset('storage/'.$dosen->foto_path) }}" style="width: 100%; height: 100%; object-fit: cover;" alt="Foto" />
                         @else
                             <div style="width: 100%; height: 100%; background: #f3f4f6; color: #9ca3af; display: flex; align-items: center; justify-content: center; text-align: center; padding-top: 40px; font-size: 8px;">No Photo</div>
                         @endif

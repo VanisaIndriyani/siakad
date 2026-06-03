@@ -7,6 +7,7 @@ use App\Models\Mahasiswa;
 use App\Models\Pembayaran;
 use App\Models\PembayaranDetail;
 use Dompdf\Dompdf;
+use Dompdf\Options;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -336,6 +337,9 @@ class PembayaranController extends Controller
 
     public function exportPdf(Request $request)
     {
+        @ini_set('memory_limit', '512M');
+        @set_time_limit(300);
+
         $q = trim((string) $request->get('q', ''));
         $semester = (int) $request->get('semester', 0);
         $angkatan = (int) $request->get('angkatan', 0);
@@ -380,7 +384,12 @@ class PembayaranController extends Controller
             'jenis_tagihan' => $jenisTagihan ?: null,
         ])->render();
 
-        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+        $options = new Options();
+        $options->set('isRemoteEnabled', true);
+        $options->set('defaultFont', 'DejaVu Sans');
+        $options->set('isHtml5ParserEnabled', true);
+
+        $dompdf = new Dompdf($options);
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'landscape');
         $dompdf->render();
@@ -393,6 +402,8 @@ class PembayaranController extends Controller
 
     public function downloadPdf(Pembayaran $pembayaran)
     {
+        @ini_set('memory_limit', '256M');
+        
         $pembayaran->load(['mahasiswa', 'details' => function ($q) {
             $q->orderByDesc('tanggal_bayar');
         }]);
@@ -401,7 +412,11 @@ class PembayaranController extends Controller
             'pembayaran' => $pembayaran,
         ])->render();
 
-        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+        $options = new Options();
+        $options->set('isRemoteEnabled', true);
+        $options->set('defaultFont', 'DejaVu Sans');
+
+        $dompdf = new Dompdf($options);
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'portrait');
         $dompdf->render();

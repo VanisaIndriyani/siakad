@@ -265,7 +265,7 @@ class AbsensiController extends Controller
         $validated = $request->validate([
             'tanggal' => ['nullable', 'date'],
             'materi' => ['nullable', 'string'],
-            'materi_file' => ['nullable', 'file', 'max:20480', 'mimes:pdf,doc,docx,ppt,pptx'],
+            'materi_file' => ['nullable', 'file', 'max:20480', 'mimes:pdf,doc,docx,ppt,pptx,pps,ppsx,odp'],
             'status' => ['required', 'array'],
             'status.*' => ['nullable', 'in:hadir,izin,sakit,alpha'],
             'keterangan' => ['nullable', 'array'],

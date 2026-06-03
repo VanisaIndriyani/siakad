@@ -27,10 +27,6 @@
         $logoCandidates = [
             public_path('img/lo.jpeg'),
             public_path('img/logo.png'),
-            base_path('../img/lo.jpeg'),
-            base_path('../img/logo.png'),
-            base_path('../public/img/lo.jpeg'),
-            base_path('../public/img/logo.png'),
         ];
 
         $logoPath = null;
@@ -105,9 +101,9 @@
         @forelse($rows as $i => $p)
             <tr>
                 <td class="nowrap">{{ $i + 1 }}</td>
-                <td>{{ $p->mahasiswa->nama_lengkap ?? '-' }}</td>
-                <td class="nowrap">{{ $p->mahasiswa->npm ?? '-' }}</td>
-                <td class="nowrap">{{ $p->mahasiswa->angkatan ?? '-' }}</td>
+                <td>{{ $p->mahasiswa?->nama_lengkap ?? '-' }}</td>
+                <td class="nowrap">{{ $p->mahasiswa?->npm ?? '-' }}</td>
+                <td class="nowrap">{{ $p->mahasiswa?->angkatan ?? '-' }}</td>
                 <td class="nowrap">{{ $p->semester }}</td>
                 <td class="nowrap">{{ $p->tahun_ajaran }}</td>
                 <td>{{ $p->jenis_tagihan ?? '-' }}</td>

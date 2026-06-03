@@ -45,7 +45,7 @@
 
                 <div class="mt-3">
                     <label class="text-sm text-emerald-100/80">Upload Materi (PDF/Word/PPT)</label>
-                    <input type="file" name="materi_file" accept=".pdf,.doc,.docx,.ppt,.pptx" class="mt-2 w-full rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400 p-2" />
+                    <input type="file" name="materi_file" accept=".pdf,.doc,.docx,.ppt,.pptx,.pps,.ppsx,.odp" class="mt-2 w-full rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400 p-2" />
                     @error('materi_file') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
 
                     @if ($absensi->materi_file_path)
@@ -63,14 +63,12 @@
                                 <i class="fa-solid fa-eye"></i>
                                 Lihat
                             </a>
-                            <form action="{{ route(($routePrefix ?? 'admin').'.absensi.materi.destroy', $absensi) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus dokumen ini?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="h-8 px-3 inline-flex items-center gap-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-300 transition">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                    Hapus
-                                </button>
-                            </form>
+                            <button type="button" 
+                                    onclick="if(confirm('Apakah Anda yakin ingin menghapus dokumen ini?')) document.getElementById('delete-materi-form').submit();"
+                                    class="h-8 px-3 inline-flex items-center gap-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-300 transition">
+                                <i class="fa-solid fa-trash-can"></i>
+                                Hapus
+                            </button>
                         </div>
                     @endif
                 </div>
@@ -144,6 +142,11 @@
                 Simpan Absensi
             </button>
         </div>
+    </form>
+
+    <form id="delete-materi-form" action="{{ route(($routePrefix ?? 'admin').'.absensi.materi.destroy', $absensi) }}" method="POST" style="display: none;">
+        @csrf
+        @method('DELETE')
     </form>
 
     <script>
