@@ -62,10 +62,19 @@
         @error('status_mahasiswa') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
     </div>
 
-    <div class="lg:col-span-2">
+    <div>
         <label class="text-sm text-emerald-100/80">Foto (Opsional)</label>
         <input type="file" name="foto" accept="image/*" class="mt-2 w-full rounded-xl bg-white/5 border border-white/10 file:bg-white/10 file:border-0 file:text-white file:px-4 file:py-2 file:rounded-xl" />
         @error('foto') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
+    </div>
+
+    <div>
+        <label class="text-sm text-emerald-100/80">Kartu Mahasiswa (Opsional)</label>
+        <input type="file" name="kartu_mahasiswa" accept="image/*" class="mt-2 w-full rounded-xl bg-white/5 border border-white/10 file:bg-white/10 file:border-0 file:text-white file:px-4 file:py-2 file:rounded-xl" />
+        @error('kartu_mahasiswa') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
+    </div>
+
+    <div class="lg:col-span-2">
         <div class="mt-2 text-xs text-emerald-100/60 italic">Admin hanya menginput data dasar. Mahasiswa dapat melengkapi biodata PD-DIKTI melalui profil mereka sendiri.</div>
     </div>
 </div>

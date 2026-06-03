@@ -43,6 +43,7 @@ class Mahasiswa extends Model
         'asal_sekolah',
         'status_mahasiswa',
         'foto_path',
+        'kartu_mahasiswa_path',
         'penerima_kps',
         'no_kps',
         'ayah_nik',

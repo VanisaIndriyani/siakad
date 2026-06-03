@@ -54,11 +54,16 @@
         $unreadPplCount = auth()->user()->unreadPplCount();
     @endphp
     @if ($unreadPplCount > 0)
-        <span class="ml-auto inline-flex items-center justify-center min-w-7 h-7 px-2 rounded-full text-xs font-semibold bg-rose-500/15 border border-rose-500/25 text-rose-100">
-            {{ $unreadPplCount }}
-        </span>
-    @endif
-</a>
+            <span class="ml-auto inline-flex items-center justify-center min-w-7 h-7 px-2 rounded-full text-xs font-semibold bg-rose-500/15 border border-rose-500/25 text-rose-100">
+                {{ $unreadPplCount }}
+            </span>
+        @endif
+    </a>
+    <a href="{{ route('dosen.kkn.index') }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('dosen.kkn.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+        <i class="fa-solid fa-tent text-emerald-300"></i>
+        <span class="text-sm font-medium">Bimbingan KKN</span>
+    </a>
 @php
     $dosen = auth()->user()?->dosen;
     $hasProdi = !empty($dosen?->program_studi);

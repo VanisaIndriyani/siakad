@@ -10,6 +10,7 @@
                     <th class="text-left font-medium px-4 py-3">Dosen</th>
                     <th class="text-left font-medium px-4 py-3">NIDN</th>
                     <th class="text-left font-medium px-4 py-3">NUPTK</th>
+                    <th class="text-left font-medium px-4 py-3">Program Studi</th>
                     <th class="text-left font-medium px-4 py-3">Nomor HP</th>
                     <th class="text-left font-medium px-4 py-3">Mata Kuliah</th>
                     <th class="text-right font-medium px-4 py-3">Aksi</th>
@@ -39,6 +40,7 @@
                         </td>
                         <td class="px-4 py-3 text-emerald-100/80">{{ $row->nidn }}</td>
                         <td class="px-4 py-3 text-emerald-100/80">{{ $row->nuptk ?? '-' }}</td>
+                        <td class="px-4 py-3 text-emerald-100/80">{{ $row->program_studi ?? '-' }}</td>
                         <td class="px-4 py-3 text-emerald-100/80">{{ $row->nomor_hp ?? '-' }}</td>
                         <td class="px-4 py-3 text-emerald-100/80">{{ $row->mata_kuliah ?? '-' }}</td>
                         <td class="px-4 py-3">
@@ -61,7 +63,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="px-4 py-10 text-center text-emerald-100/70">Data tidak ditemukan.</td>
+                        <td colspan="8" class="px-4 py-10 text-center text-emerald-100/70">Data tidak ditemukan.</td>
                     </tr>
                 @endforelse
             </tbody>

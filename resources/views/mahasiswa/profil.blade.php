@@ -416,6 +416,24 @@
                             <span style="padding: 4px 12px; background-color: rgba(16,185,129,0.2); color: #34d399; font-size: 10px; font-weight: 800; text-transform: uppercase; border-radius: 8px; border: 1px solid rgba(16,185,129,0.3);">{{ $mahasiswa?->status_mahasiswa ?? 'Aktif' }}</span>
                         </div>
                     </div>
+
+                    @if ($mahasiswa?->kartu_mahasiswa_path)
+                        <div style="padding: 15px; background-color: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 15px;">
+                            <span style="color: rgba(255,255,255,0.4); font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Kartu Mahasiswa</span>
+                            <div style="margin-top: 10px;">
+                                <a href="{{ asset('storage/'.$mahasiswa->kartu_mahasiswa_path) }}" target="_blank" style="display: block; position: relative; border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); group;">
+                                    <img src="{{ asset('storage/'.$mahasiswa->kartu_mahasiswa_path) }}" style="width: 100%; height: auto; display: block;" alt="Kartu Mahasiswa" />
+                                    <div style="position: absolute; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'">
+                                        <i class="fa-solid fa-magnifying-glass-plus" style="color: white; font-size: 1.5rem;"></i>
+                                    </div>
+                                </a>
+                                <a href="{{ asset('storage/'.$mahasiswa->kartu_mahasiswa_path) }}" download class="mt-2" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 35px; background-color: rgba(16,185,129,0.1); color: #34d399; font-size: 11px; font-weight: 700; border-radius: 8px; border: 1px solid rgba(16,185,129,0.2); text-decoration: none; transition: all 0.3s;">
+                                    <i class="fa-solid fa-download"></i>
+                                    <span>Unduh Kartu</span>
+                                </a>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
 

@@ -18,6 +18,15 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class DosenController extends Controller
 {
+    private const PROGRAM_STUDI = [
+        'Pendidikan Agama Islam',
+        'Pendidikan Islam Anak Usia Dini',
+        'Hukum Keluarga Islam',
+        'Hukum Tata Negara',
+        'Perbankan Syariah',
+        'Ekonomi Syariah',
+    ];
+
     private const STATUS_AKADEMIK = [
         'Dosen',
         'Ketua Prodi',
@@ -41,6 +50,7 @@ class DosenController extends Controller
                     ->orWhere('nidn', 'like', "%{$q}%")
                     ->orWhere('nuptk', 'like', "%{$q}%")
                     ->orWhere('nomor_sk', 'like', "%{$q}%")
+                    ->orWhere('program_studi', 'like', "%{$q}%")
                     ->orWhere('mata_kuliah', 'like', "%{$q}%");
             });
         }
@@ -61,7 +71,9 @@ class DosenController extends Controller
 
     public function create(): View
     {
-        return view('admin.dosen.create');
+        return view('admin.dosen.create', [
+            'programStudiList' => self::PROGRAM_STUDI,
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -133,6 +145,7 @@ class DosenController extends Controller
     {
         return view('admin.dosen.edit', [
             'dosen' => $dosen,
+            'programStudiList' => self::PROGRAM_STUDI,
         ]);
     }
 
@@ -163,7 +176,7 @@ class DosenController extends Controller
             'nidn' => $validated['nidn'] ?? $dosen->nidn,
             'nuptk' => $validated['nuptk'] ?? $dosen->nuptk,
             'nomor_sk' => $validated['nomor_sk'] ?? $dosen->nomor_sk,
-            'program_studi' => $validated['program_studi'] ?? $dosen->program_studi,
+            'program_studi' => $validated['program_studi'],
             'status_akademik' => $validated['status_akademik'] ?? ($dosen->status_akademik ?: 'Dosen'),
             'status_dosen' => $validated['status_dosen'] ?? ($dosen->status_dosen ?: 'aktif'),
         ])->save();
@@ -236,6 +249,7 @@ class DosenController extends Controller
                     ->orWhere('nidn', 'like', "%{$q}%")
                     ->orWhere('nuptk', 'like', "%{$q}%")
                     ->orWhere('nomor_sk', 'like', "%{$q}%")
+                    ->orWhere('program_studi', 'like', "%{$q}%")
                     ->orWhere('mata_kuliah', 'like', "%{$q}%");
             });
         }
@@ -266,6 +280,7 @@ class DosenController extends Controller
                     ->orWhere('nidn', 'like', "%{$q}%")
                     ->orWhere('nuptk', 'like', "%{$q}%")
                     ->orWhere('nomor_sk', 'like', "%{$q}%")
+                    ->orWhere('program_studi', 'like', "%{$q}%")
                     ->orWhere('mata_kuliah', 'like', "%{$q}%");
             });
         }
@@ -276,7 +291,7 @@ class DosenController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Dosen');
 
-        $headers = ['Nama', 'NIK', 'NIDN', 'NUPTK', 'Nomor SK', 'Nomor HP', 'Mata Kuliah'];
+        $headers = ['Nama', 'NIK', 'NIDN', 'NUPTK', 'Nomor SK', 'Program Studi', 'Nomor HP', 'Mata Kuliah'];
         foreach ($headers as $col => $label) {
             $sheet->setCellValue([$col + 1, 1], $label);
         }
@@ -288,8 +303,9 @@ class DosenController extends Controller
             $sheet->setCellValue([3, $rowIndex], $row->nidn);
             $sheet->setCellValue([4, $rowIndex], $row->nuptk);
             $sheet->setCellValue([5, $rowIndex], $row->nomor_sk);
-            $sheet->setCellValue([6, $rowIndex], $row->nomor_hp);
-            $sheet->setCellValue([7, $rowIndex], $row->mata_kuliah);
+            $sheet->setCellValue([6, $rowIndex], $row->program_studi);
+            $sheet->setCellValue([7, $rowIndex], $row->nomor_hp);
+            $sheet->setCellValue([8, $rowIndex], $row->mata_kuliah);
             $rowIndex++;
         }
 

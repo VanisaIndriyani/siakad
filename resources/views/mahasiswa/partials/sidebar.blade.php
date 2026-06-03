@@ -49,6 +49,11 @@
     <i class="fa-solid fa-upload text-emerald-300"></i>
     <span class="text-sm font-medium">Upload Laporan PPL</span>
 </a>
+<a href="{{ route('mahasiswa.kkn.index') }}"
+   class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('mahasiswa.kkn.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+    <i class="fa-solid fa-tent text-emerald-300"></i>
+    <span class="text-sm font-medium">KKN</span>
+</a>
 <a href="{{ route('mahasiswa.laporan.index') }}"
    class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('mahasiswa.laporan.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
     <i class="fa-solid fa-comments text-emerald-300"></i>

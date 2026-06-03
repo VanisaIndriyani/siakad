@@ -29,7 +29,13 @@
 
     <div>
         <label class="text-sm text-emerald-100/80">Program Studi (Opsional)</label>
-        <input name="program_studi" value="{{ old('program_studi', $dosen->program_studi ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" placeholder="Contoh: Perbankan Syariah" />
+        <select name="program_studi" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400">
+            @php $selectedProdi = old('program_studi', $dosen->program_studi ?? ''); @endphp
+            <option value="" @selected($selectedProdi === '') class="text-black">Pilih Program Studi</option>
+            @foreach (($programStudiList ?? []) as $opt)
+                <option value="{{ $opt }}" @selected($selectedProdi === $opt) class="text-black">{{ $opt }}</option>
+            @endforeach
+        </select>
         @error('program_studi') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
     </div>
 

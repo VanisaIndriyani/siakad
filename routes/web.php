@@ -16,6 +16,10 @@ use App\Http\Controllers\Admin\MataKuliahController as AdminMataKuliahController
 use App\Http\Controllers\Admin\PengajuanLaporanController as AdminPengajuanLaporanController;
 use App\Http\Controllers\Admin\PplController as AdminPplController;
 use App\Http\Controllers\Admin\SkripsiController as AdminSkripsiController;
+use App\Http\Controllers\Admin\KknController as AdminKknController;
+use App\Http\Controllers\Mahasiswa\KknController as MahasiswaKknController;
+use App\Http\Controllers\Dosen\KknController as DosenKknController;
+use App\Http\Controllers\KknBimbinganController;
 use App\Http\Controllers\Dosen\AcademicCalendarController as DosenAcademicCalendarController;
 use App\Http\Controllers\Dosen\DashboardController as DosenDashboardController;
 use App\Http\Controllers\Dosen\KrsApprovalController as DosenKrsApprovalController;
@@ -204,7 +208,18 @@ Route::prefix('admin')
         Route::delete('/ppl/{ppl}', [AdminPplController::class, 'destroy'])->name('ppl.destroy');
         Route::delete('/ppl-files/{file}', [AdminPplController::class, 'destroyFile'])->name('ppl-files.destroy');
 
-        Route::delete('/laporan/bulk-delete', [AdminPengajuanLaporanController::class, 'bulkDestroy'])->name('laporan.bulk-delete');
+        // KKN Management
+        Route::get('/kkn', [AdminKknController::class, 'index'])->name('kkn.index');
+        Route::patch('/kkn/{kkn}/status', [AdminKknController::class, 'updateStatus'])->name('kkn.status');
+        Route::get('/kkn/posko', [AdminKknController::class, 'poskoIndex'])->name('kkn.posko.index');
+        Route::get('/kkn/posko/create', [AdminKknController::class, 'poskoCreate'])->name('kkn.posko.create');
+        Route::post('/kkn/posko', [AdminKknController::class, 'poskoStore'])->name('kkn.posko.store');
+        Route::get('/kkn/posko/{posko}', [AdminKknController::class, 'poskoShow'])->name('kkn.posko.show');
+        Route::put('/kkn/posko/{posko}', [AdminKknController::class, 'poskoUpdate'])->name('kkn.posko.update');
+        Route::delete('/kkn/posko/{posko}', [AdminKknController::class, 'poskoDestroy'])->name('kkn.posko.destroy');
+        Route::post('/kkn/posko/{posko}/assign', [AdminKknController::class, 'assignStudent'])->name('kkn.posko.assign');
+        Route::delete('/kkn/pengajuan/{kkn}/remove', [AdminKknController::class, 'removeStudent'])->name('kkn.pengajuan.remove');
+
         Route::get('/laporan', [AdminPengajuanLaporanController::class, 'index'])->name('laporan.index');
         Route::get('/laporan/{laporan}', [AdminPengajuanLaporanController::class, 'show'])->name('laporan.show');
         Route::post('/laporan/{laporan}/pesan', [AdminPengajuanLaporanController::class, 'storeMessage'])->name('laporan.pesan.store');
@@ -282,6 +297,11 @@ Route::prefix('mahasiswa')
         Route::get('/ppl-files/{file}/preview', [MahasiswaPplFileController::class, 'preview'])->name('ppl-files.preview');
         Route::get('/ppl-files/{file}/download', [MahasiswaPplFileController::class, 'download'])->name('ppl-files.download');
         Route::delete('/ppl-files/{file}', [MahasiswaPplFileController::class, 'destroy'])->name('ppl-files.destroy');
+
+        // KKN
+        Route::get('/kkn', [MahasiswaKknController::class, 'index'])->name('kkn.index');
+        Route::post('/kkn', [MahasiswaKknController::class, 'store'])->name('kkn.store');
+        Route::get('/kkn/posko/{posko}', [MahasiswaKknController::class, 'showPosko'])->name('kkn.posko');
 
         Route::get('/laporan', [MahasiswaPengajuanLaporanController::class, 'index'])->name('laporan.index');
         Route::get('/laporan/create', [MahasiswaPengajuanLaporanController::class, 'create'])->name('laporan.create');
@@ -374,6 +394,10 @@ Route::prefix('dosen')
         Route::get('/ppl/pengajuan/{ppl}/sk-pembimbing', [AdminPplController::class, 'downloadSkPembimbing'])->name('ppl-pengajuan.sk.download');
         Route::get('/ppl/pengajuan/{ppl}/sk-pembimbing/preview', [AdminPplController::class, 'previewSkPembimbing'])->name('ppl-pengajuan.sk.preview');
 
+        // KKN
+        Route::get('/kkn', [DosenKknController::class, 'index'])->name('kkn.index');
+        Route::get('/kkn/posko/{posko}', [DosenKknController::class, 'showPosko'])->name('kkn.posko');
+
         Route::get('/laporan', [DosenPengajuanLaporanController::class, 'index'])->name('laporan.index');
         Route::delete('/laporan/bulk-delete', [DosenPengajuanLaporanController::class, 'bulkDestroy'])->name('laporan.bulk-delete');
         Route::get('/laporan/{laporan}', [DosenPengajuanLaporanController::class, 'show'])->name('laporan.show');
@@ -401,4 +425,11 @@ Route::middleware(['auth', 'role:admin,dosen,mahasiswa'])->group(function () {
     Route::get('/files/skripsi/{file}/download', [AdminSkripsiController::class, 'downloadFile'])->name('files.skripsi.download');
     Route::get('/files/ppl/{file}/preview', [AdminPplController::class, 'previewFile'])->name('files.ppl.preview');
     Route::get('/files/ppl/{file}/download', [AdminPplController::class, 'downloadFile'])->name('files.ppl.download');
+
+    // Shared KKN Bimbingan
+    Route::get('/files/kkn/{file}/preview', [KknBimbinganController::class, 'previewFile'])->name('files.kkn.preview');
+    Route::get('/files/kkn/{file}/download', [KknBimbinganController::class, 'downloadFile'])->name('files.kkn.download');
+    Route::post('/kkn/posko/{posko}/message', [KknBimbinganController::class, 'sendMessage'])->name('kkn.bimbingan.message');
+    Route::post('/kkn/posko/{posko}/file', [KknBimbinganController::class, 'uploadFile'])->name('kkn.bimbingan.file');
+    Route::delete('/kkn/file/{file}', [KknBimbinganController::class, 'deleteFile'])->name('kkn.bimbingan.file.destroy');
 });

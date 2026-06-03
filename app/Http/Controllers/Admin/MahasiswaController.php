@@ -130,6 +130,7 @@ class MahasiswaController extends Controller
             'status_mahasiswa' => ['required', 'string', 'max:50'],
             'angkatan' => ['nullable', 'integer', 'min:1900', 'max:2100'],
             'foto' => ['nullable', 'image', 'max:2048'],
+            'kartu_mahasiswa' => ['nullable', 'image', 'max:2048'],
         ]);
 
         $emailDomain = (string) config('app.email_domain');
@@ -154,6 +155,11 @@ class MahasiswaController extends Controller
             $fotoPath = $request->file('foto')->store('photos/mahasiswa', 'public');
         }
 
+        $kartuMahasiswaPath = null;
+        if ($request->hasFile('kartu_mahasiswa')) {
+            $kartuMahasiswaPath = $request->file('kartu_mahasiswa')->store('kartu/mahasiswa', 'public');
+        }
+
         $mahasiswa = Mahasiswa::query()->create([
             'user_id' => $user->id,
             'nama_lengkap' => $validated['nama_lengkap'],
@@ -163,6 +169,7 @@ class MahasiswaController extends Controller
             'status_mahasiswa' => $validated['status_mahasiswa'],
             'angkatan' => $validated['angkatan'] ?? null,
             'foto_path' => $fotoPath,
+            'kartu_mahasiswa_path' => $kartuMahasiswaPath,
         ]);
 
         foreach (range(1, 8) as $semester) {
@@ -203,6 +210,7 @@ class MahasiswaController extends Controller
             'status_mahasiswa' => ['required', 'string', 'max:50'],
             'angkatan' => ['nullable', 'integer', 'min:1900', 'max:2100'],
             'foto' => ['nullable', 'image', 'max:2048'],
+            'kartu_mahasiswa' => ['nullable', 'image', 'max:2048'],
         ]);
 
         if ($request->hasFile('foto')) {
@@ -210,6 +218,13 @@ class MahasiswaController extends Controller
                 Storage::disk('public')->delete($mahasiswa->foto_path);
             }
             $mahasiswa->foto_path = $request->file('foto')->store('photos/mahasiswa', 'public');
+        }
+
+        if ($request->hasFile('kartu_mahasiswa')) {
+            if ($mahasiswa->kartu_mahasiswa_path) {
+                Storage::disk('public')->delete($mahasiswa->kartu_mahasiswa_path);
+            }
+            $mahasiswa->kartu_mahasiswa_path = $request->file('kartu_mahasiswa')->store('kartu/mahasiswa', 'public');
         }
 
         $mahasiswa->fill([
@@ -232,6 +247,10 @@ class MahasiswaController extends Controller
 
         if ($mahasiswa->foto_path) {
             Storage::disk('public')->delete($mahasiswa->foto_path);
+        }
+
+        if ($mahasiswa->kartu_mahasiswa_path) {
+            Storage::disk('public')->delete($mahasiswa->kartu_mahasiswa_path);
         }
 
         if ($user) {
@@ -265,6 +284,10 @@ class MahasiswaController extends Controller
 
             if ($mahasiswa->foto_path) {
                 Storage::disk('public')->delete($mahasiswa->foto_path);
+            }
+
+            if ($mahasiswa->kartu_mahasiswa_path) {
+                Storage::disk('public')->delete($mahasiswa->kartu_mahasiswa_path);
             }
 
             if ($user) {

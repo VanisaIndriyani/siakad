@@ -207,6 +207,28 @@
             <!-- Right Column: Sidebar Data -->
             <div style="width: 350px; display: flex; flex-direction: column; gap: 30px;">
                 <!-- Section: Akademik -->
+                @if ($mahasiswa->kartu_mahasiswa_path)
+                    <!-- Section: Kartu Mahasiswa -->
+                    <div style="background-color: #0d2a23 !important; border-radius: 24px; border: 1px solid rgba(255,255,255,0.08); padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+                        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px;">
+                            <i class="fa-solid fa-address-card" style="color: #10b981; font-size: 1.2rem;"></i>
+                            <h3 style="color: white; font-size: 14px; font-weight: 800; margin: 0; text-transform: uppercase; letter-spacing: 1px;">Kartu Mahasiswa</h3>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <a href="{{ asset('storage/'.$mahasiswa->kartu_mahasiswa_path) }}" target="_blank" style="display: block; position: relative; border-radius: 15px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
+                                <img src="{{ asset('storage/'.$mahasiswa->kartu_mahasiswa_path) }}" style="width: 100%; height: auto; display: block;" alt="Kartu Mahasiswa" />
+                                <div style="position: absolute; inset: 0; background-color: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; opacity: 0; transition: all 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'">
+                                    <i class="fa-solid fa-magnifying-glass-plus" style="color: white; font-size: 1.5rem;"></i>
+                                </div>
+                            </a>
+                            <a href="{{ asset('storage/'.$mahasiswa->kartu_mahasiswa_path) }}" download style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; height: 45px; background-color: rgba(16,185,129,0.1); color: #34d399; font-size: 12px; font-weight: 800; border-radius: 12px; border: 1px solid rgba(16,185,129,0.2); transition: all 0.3s;">
+                                <i class="fa-solid fa-download"></i>
+                                UNDUH KARTU
+                            </a>
+                        </div>
+                    </div>
+                @endif
+
                 <div style="background-color: #0d2a23 !important; border-radius: 24px; border: 1px solid rgba(255,255,255,0.08); padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
                     <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px;">
                         <i class="fa-solid fa-graduation-cap" style="color: #f59e0b; font-size: 1.2rem;"></i>
