@@ -45,7 +45,7 @@
 
                 <div class="mt-3">
                     <label class="text-sm text-emerald-100/80">Upload Materi (PDF/Word/PPT)</label>
-                    <input type="file" name="materi_file" accept=".pdf,.doc,.docx,.ppt,.pptx,.pps,.ppsx,.odp" class="mt-2 w-full rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400 p-2" />
+                    <input type="file" name="materi_file" accept=".pdf,.doc,.docx,.ppt,.pptx,.pps,.ppsx,.pot,.potx,.odp" class="mt-2 w-full rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400 p-2" />
                     @error('materi_file') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
 
                     @if ($absensi->materi_file_path)
