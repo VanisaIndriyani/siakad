@@ -14,6 +14,8 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class PembayaranController extends Controller
 {
@@ -405,6 +407,100 @@ class PembayaranController extends Controller
             ]);
         } catch (\Throwable $e) {
             return "Gagal membuat PDF: " . $e->getMessage();
+        }
+    }
+
+    public function exportExcel(Request $request)
+    {
+        try {
+            $q = trim((string) $request->get('q', ''));
+            $semester = (int) $request->get('semester', 0);
+            $angkatan = (int) $request->get('angkatan', 0);
+            $jenisTagihan = trim((string) $request->get('jenis_tagihan', ''));
+            $jurusan = trim((string) $request->get('jurusan', ''));
+
+            $query = Pembayaran::query()
+                ->with(['mahasiswa:id,nama_lengkap,npm,angkatan,program_studi'])
+                ->orderByDesc('id');
+
+            if ($q !== '') {
+                $query->whereHas('mahasiswa', function ($sub) use ($q) {
+                    $sub->where('nama_lengkap', 'like', "%{$q}%")
+                        ->orWhere('npm', 'like', "%{$q}%");
+                });
+            }
+            if ($semester > 0) {
+                $query->where('semester', $semester);
+            }
+            if ($jenisTagihan !== '') {
+                $query->where('jenis_tagihan', $jenisTagihan);
+            }
+            if ($angkatan > 0) {
+                $query->whereHas('mahasiswa', function ($sub) use ($angkatan) {
+                    $sub->where('angkatan', $angkatan);
+                });
+            }
+            if ($jurusan !== '') {
+                $query->whereHas('mahasiswa', function ($sub) use ($jurusan) {
+                    $sub->where('program_studi', $jurusan);
+                });
+            }
+
+            $rows = $query->get();
+            if ($rows->isEmpty()) {
+                return back()->with('error', 'Tidak ada data untuk diekspor.');
+            }
+
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheet->setTitle('Data Pembayaran');
+
+            // Header
+            $headers = ['NO', 'NAMA MAHASISWA', 'NPM', 'ANGKATAN', 'JURUSAN', 'SEMESTER', 'TAHUN AJARAN', 'JENIS TAGIHAN', 'TOTAL BIAYA', 'TOTAL DIBAYAR', 'SISA', 'STATUS'];
+            $sheet->fromArray($headers, NULL, 'A1');
+
+            // Data
+            $data = [];
+            foreach ($rows as $i => $p) {
+                $total = (float)($p->total_biaya ?? 0);
+                $bayar = (float)($p->total_dibayar ?? 0);
+                $data[] = [
+                    $i + 1,
+                    $p->mahasiswa?->nama_lengkap ?? '-',
+                    $p->mahasiswa?->npm ?? '-',
+                    $p->mahasiswa?->angkatan ?? '-',
+                    $p->mahasiswa?->program_studi ?? '-',
+                    $p->semester,
+                    $p->tahun_ajaran,
+                    $p->jenis_tagihan ?? '-',
+                    $total,
+                    $bayar,
+                    $total - $bayar,
+                    $p->status_pembayaran ?? '-'
+                ];
+            }
+            $sheet->fromArray($data, NULL, 'A2');
+
+            // Styling
+            $lastRow = count($data) + 1;
+            $sheet->getStyle('A1:L1')->getFont()->setBold(true);
+            $sheet->getStyle('I2:K' . $lastRow)->getNumberFormat()->setFormatCode('#,##0');
+            
+            foreach (range('A', 'L') as $col) {
+                $sheet->getColumnDimension($col)->setAutoSize(true);
+            }
+
+            $writer = new Xlsx($spreadsheet);
+            $filename = 'pembayaran-' . now()->format('YmdHis') . '.xlsx';
+
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="' . $filename . '"');
+            header('Cache-Control: max-age=0');
+
+            $writer->save('php://output');
+            exit;
+        } catch (\Throwable $e) {
+            return "Gagal membuat Excel: " . $e->getMessage();
         }
     }
 

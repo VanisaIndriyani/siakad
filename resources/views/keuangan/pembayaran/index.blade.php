@@ -16,6 +16,12 @@
                     <i class="fa-solid fa-file-pdf"></i>
                     PDF
                 </a>
+
+                <a href="{{ route('keuangan.pembayaran.export.excel', request()->query()) }}"
+                   style="text-decoration: none; background-color: rgba(16,185,129,0.12); color: #a7f3d0; padding: 12px 18px; border-radius: 14px; font-weight: 900; font-size: 12px; display: flex; align-items: center; gap: 10px; border: 1px solid rgba(16,185,129,0.22); text-transform: uppercase; letter-spacing: 1px;">
+                    <i class="fa-solid fa-file-excel"></i>
+                    EXCEL
+                </a>
                
                 <a href="{{ route('keuangan.pembayaran.create') }}"
                    style="text-decoration: none; background: linear-gradient(to right, #059669, #10b981); color: white; padding: 12px 25px; border-radius: 14px; font-weight: 800; font-size: 13px; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 20px rgba(16,185,129,0.3); border: 1px solid rgba(255,255,255,0.1); text-transform: uppercase; letter-spacing: 1px;">

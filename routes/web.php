@@ -386,6 +386,7 @@ Route::prefix('keuangan')
     ->group(function () {
         Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
         Route::get('pembayaran/export/pdf', [KeuanganPembayaranController::class, 'exportPdf'])->name('pembayaran.export.pdf');
+        Route::get('pembayaran/export/excel', [KeuanganPembayaranController::class, 'exportExcel'])->name('pembayaran.export.excel');
         Route::get('pembayaran/{pembayaran}/pdf', [KeuanganPembayaranController::class, 'downloadPdf'])->name('pembayaran.pdf');
         Route::patch('pembayaran/{pembayaran}/detail/{detail}/status', [KeuanganPembayaranController::class, 'updateDetailStatus'])->name('pembayaran.detail.status');
         Route::delete('pembayaran/bulk-delete', [KeuanganPembayaranController::class, 'bulkDestroy'])->name('pembayaran.bulk-delete');
