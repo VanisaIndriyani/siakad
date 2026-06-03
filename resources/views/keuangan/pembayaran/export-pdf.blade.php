@@ -39,12 +39,14 @@
 
         $logoBase64 = null;
         if ($logoPath) {
-            $data = @file_get_contents($logoPath);
-            if ($data !== false) {
-                $ext = strtolower((string) pathinfo($logoPath, PATHINFO_EXTENSION));
-                $ext = $ext === 'jpg' ? 'jpeg' : $ext;
-                $logoBase64 = 'data:image/'.$ext.';base64,'.base64_encode($data);
-            }
+            try {
+                $data = @file_get_contents($logoPath);
+                if ($data !== false) {
+                    $ext = strtolower((string) pathinfo($logoPath, PATHINFO_EXTENSION));
+                    $ext = $ext === 'jpg' ? 'jpeg' : $ext;
+                    $logoBase64 = 'data:image/'.$ext.';base64,'.base64_encode($data);
+                }
+            } catch (\Exception $e) {}
         }
 
         $kop1 = 'INSTITUT AGAMA ISLAM';

@@ -337,67 +337,82 @@ class PembayaranController extends Controller
 
     public function exportPdf(Request $request)
     {
-        @ini_set('memory_limit', '512M');
-        @set_time_limit(300);
+        try {
+            @ini_set('memory_limit', '1024M');
+            @set_time_limit(600);
 
-        $q = trim((string) $request->get('q', ''));
-        $semester = (int) $request->get('semester', 0);
-        $angkatan = (int) $request->get('angkatan', 0);
-        $jenisTagihan = trim((string) $request->get('jenis_tagihan', ''));
-        $jurusan = trim((string) $request->get('jurusan', ''));
+            $q = trim((string) $request->get('q', ''));
+            $semester = (int) $request->get('semester', 0);
+            $angkatan = (int) $request->get('angkatan', 0);
+            $jenisTagihan = trim((string) $request->get('jenis_tagihan', ''));
+            $jurusan = trim((string) $request->get('jurusan', ''));
 
-        $query = Pembayaran::query()->with('mahasiswa')->orderByDesc('id');
-        if ($q !== '') {
-            $query->whereHas('mahasiswa', function ($sub) use ($q) {
-                $sub->where('nama_lengkap', 'like', "%{$q}%")
-                    ->orWhere('npm', 'like', "%{$q}%");
-            });
+            $query = Pembayaran::query()
+                ->with(['mahasiswa' => function($q) {
+                    $q->select('id', 'nama_lengkap', 'npm', 'angkatan', 'program_studi');
+                }])
+                ->orderByDesc('id');
+
+            if ($q !== '') {
+                $query->whereHas('mahasiswa', function ($sub) use ($q) {
+                    $sub->where('nama_lengkap', 'like', "%{$q}%")
+                        ->orWhere('npm', 'like', "%{$q}%");
+                });
+            }
+            if ($semester > 0) {
+                $query->where('semester', $semester);
+            }
+            if ($jenisTagihan !== '') {
+                $query->where('jenis_tagihan', $jenisTagihan);
+            }
+            if ($angkatan > 0) {
+                $query->whereHas('mahasiswa', function ($sub) use ($angkatan) {
+                    $sub->where('angkatan', $angkatan);
+                });
+            }
+            if ($jurusan !== '') {
+                $query->whereHas('mahasiswa', function ($sub) use ($jurusan) {
+                    $sub->where('program_studi', $jurusan);
+                });
+            }
+
+            $rows = $query->get();
+            if ($rows->isEmpty()) {
+                return back()->with('error', 'Tidak ada data untuk diekspor.');
+            }
+
+            $html = view('keuangan.pembayaran.export-pdf', [
+                'rows' => $rows,
+                'q' => $q,
+                'semester' => $semester ?: null,
+                'angkatan' => $angkatan ?: null,
+                'jurusan' => $jurusan ?: null,
+                'jenis_tagihan' => $jenisTagihan ?: null,
+            ])->render();
+
+            $options = new Options();
+            $options->set('isRemoteEnabled', true);
+            $options->set('isHtml5ParserEnabled', true);
+            $options->set('defaultFont', 'sans-serif');
+            $options->set('chroot', base_path());
+            $options->set('tempDir', storage_path('app/public'));
+
+            $dompdf = new Dompdf($options);
+            $dompdf->loadHtml($html);
+            $dompdf->setPaper('A4', 'landscape');
+            $dompdf->render();
+
+            return response($dompdf->output(), 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="pembayaran.pdf"',
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'error' => 'Gagal membuat PDF: ' . $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ], 500);
         }
-        if ($semester > 0) {
-            $query->where('semester', $semester);
-        }
-        if ($jenisTagihan !== '') {
-            $query->where('jenis_tagihan', $jenisTagihan);
-        }
-        if ($angkatan > 0) {
-            $query->whereHas('mahasiswa', function ($sub) use ($angkatan) {
-                $sub->where('angkatan', $angkatan);
-            });
-        }
-        if ($jurusan !== '') {
-            $query->whereHas('mahasiswa', function ($sub) use ($jurusan) {
-                $sub->where('program_studi', $jurusan);
-            });
-        }
-
-        $rows = $query->get();
-        if ($rows->isEmpty()) {
-            return back()->with('error', 'Tidak ada data untuk diekspor.');
-        }
-
-        $html = view('keuangan.pembayaran.export-pdf', [
-            'rows' => $rows,
-            'q' => $q,
-            'semester' => $semester ?: null,
-            'angkatan' => $angkatan ?: null,
-            'jurusan' => $jurusan ?: null,
-            'jenis_tagihan' => $jenisTagihan ?: null,
-        ])->render();
-
-        $options = new Options();
-        $options->set('isRemoteEnabled', true);
-        $options->set('defaultFont', 'DejaVu Sans');
-        $options->set('isHtml5ParserEnabled', true);
-
-        $dompdf = new Dompdf($options);
-        $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'landscape');
-        $dompdf->render();
-
-        return response($dompdf->output(), 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="pembayaran.pdf"',
-        ]);
     }
 
     public function downloadPdf(Pembayaran $pembayaran)
