@@ -474,9 +474,10 @@ class PembayaranController extends Controller
             $sheet->setCellValue('A1', 'INSTITUT AGAMA ISLAM');
             $sheet->setCellValue('A2', "DARUD DA'WAH WAL IRSYAD");
             $sheet->setCellValue('A3', 'SIDENRENG RAPPANG');
-            $sheet->setCellValue('A4', 'Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang');
-            $sheet->setCellValue('A5', 'E-mail : iaiddisidrap@gmail.com  Website : www.yppddisrapp.ac.id');
-            $sheet->setCellValue('A7', 'REKAP PEMBAYARAN MAHASISWA');
+            $sheet->setCellValue('A4', 'TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021');
+            $sheet->setCellValue('A5', 'Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang');
+            $sheet->setCellValue('A6', 'E-mail : iaiddisidrap@gmail.com  Website : www.yppddisrapp.ac.id');
+            $sheet->setCellValue('A8', 'REKAP PEMBAYARAN MAHASISWA');
 
             // Merge & Center KOP
             $sheet->mergeCells('A1:L1');
@@ -484,17 +485,22 @@ class PembayaranController extends Controller
             $sheet->mergeCells('A3:L3');
             $sheet->mergeCells('A4:L4');
             $sheet->mergeCells('A5:L5');
-            $sheet->mergeCells('A7:L7');
+            $sheet->mergeCells('A6:L6');
+            $sheet->mergeCells('A8:L8');
 
             $sheet->getStyle('A1:A3')->getFont()->setBold(true)->setSize(14);
-            $sheet->getStyle('A7')->getFont()->setBold(true)->setSize(12);
-            $sheet->getStyle('A1:L7')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('A4')->getFont()->setBold(true)->setSize(11);
+            $sheet->getStyle('A8')->getFont()->setBold(true)->setSize(12);
+            $sheet->getStyle('A1:L8')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
-            // Header Table di Baris 9
+            // Garis bawah KOP (Double Line effect)
+            $sheet->getStyle('A6:L6')->getBorders()->getBottom()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THICK);
+
+            // Header Table di Baris 10
             $headers = ['NO', 'NAMA MAHASISWA', 'NPM', 'ANGKATAN', 'JURUSAN', 'SEMESTER', 'TAHUN AJARAN', 'JENIS TAGIHAN', 'TOTAL BIAYA', 'TOTAL DIBAYAR', 'SISA', 'STATUS'];
-            $sheet->fromArray($headers, NULL, 'A9');
+            $sheet->fromArray($headers, NULL, 'A10');
 
-            // Data mulai Baris 10
+            // Data mulai Baris 11
             $data = [];
             foreach ($rows as $i => $p) {
                 $total = (float)($p->total_biaya ?? 0);
@@ -514,13 +520,13 @@ class PembayaranController extends Controller
                     $p->status_pembayaran ?? '-'
                 ];
             }
-            $sheet->fromArray($data, NULL, 'A10');
+            $sheet->fromArray($data, NULL, 'A11');
 
             // Styling Table
-            $lastRow = count($data) + 9;
-            $sheet->getStyle('A9:L9')->getFont()->setBold(true);
-            $sheet->getStyle('A9:L' . $lastRow)->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
-            $sheet->getStyle('I10:K' . $lastRow)->getNumberFormat()->setFormatCode('#,##0');
+            $lastRow = count($data) + 10;
+            $sheet->getStyle('A10:L10')->getFont()->setBold(true);
+            $sheet->getStyle('A10:L' . $lastRow)->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+            $sheet->getStyle('I11:K' . $lastRow)->getNumberFormat()->setFormatCode('#,##0');
             
             foreach (range('A', 'L') as $col) {
                 $sheet->getColumnDimension($col)->setAutoSize(true);
