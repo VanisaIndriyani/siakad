@@ -265,28 +265,37 @@ class AbsensiController extends Controller
         $validated = $request->validate([
             'tanggal' => ['nullable', 'date'],
             'materi' => ['nullable', 'string'],
-            'materi_file' => [
-                'nullable',
-                'file',
-                'max:40960', // Max 40MB
-            ],
             'status' => ['required', 'array'],
             'status.*' => ['nullable', 'in:hadir,izin,sakit,alpha'],
             'keterangan' => ['nullable', 'array'],
             'keterangan.*' => ['nullable', 'string'],
         ]);
 
-        if ($request->hasFile('materi_file')) {
+        if ($request->has('materi_file') || $request->hasFile('materi_file')) {
             $file = $request->file('materi_file');
+            
+            if (!$file) {
+                // Ini terjadi jika file ada tapi post_max_size terlampaui
+                return back()->withErrors(['materi_file' => 'File terlalu besar untuk server ini (Melebihi post_max_size). Silakan perkecil ukuran file atau simpan sebagai PDF.'])->withInput();
+            }
+
+            if (!$file->isValid()) {
+                $errorMsg = 'Gagal upload: ' . $file->getErrorMessage();
+                if ($file->getError() === 1 || $file->getError() === 2) {
+                    $errorMsg = 'File terlalu besar (Melebihi upload_max_filesize). Silakan perkecil ukuran file atau simpan sebagai PDF.';
+                }
+                return back()->withErrors(['materi_file' => $errorMsg])->withInput();
+            }
+
             $ext = strtolower((string) $file->getClientOriginalExtension());
             $allowedExtensions = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'pps', 'ppsx', 'pot', 'potx', 'odp'];
             
             if (!in_array($ext, $allowedExtensions)) {
-                return back()->withErrors(['materi_file' => 'Format file tidak didukung. Gunakan PDF, Word, atau PowerPoint.'])->withInput();
+                return back()->withErrors(['materi_file' => 'Format file tidak didukung (.' . $ext . '). Gunakan PDF, Word, atau PowerPoint.'])->withInput();
             }
 
-            if (!$file->isValid()) {
-                return back()->withErrors(['materi_file' => 'File gagal diupload ke server. Periksa ukuran file.'])->withInput();
+            if ($file->getSize() > 40 * 1024 * 1024) {
+                return back()->withErrors(['materi_file' => 'Ukuran file (' . round($file->getSize()/(1024*1024), 2) . 'MB) melebihi batas 40MB.'])->withInput();
             }
         }
 
