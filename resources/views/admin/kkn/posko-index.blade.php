@@ -38,8 +38,10 @@
                             <td class="px-4 py-3 font-medium">{{ $row->nama_posko }}</td>
                             <td class="px-4 py-3 text-emerald-100/80">{{ $row->lokasi ?: '-' }}</td>
                             <td class="px-4 py-3 text-emerald-100/80">
-                                <div class="font-medium text-white">{{ $row->dosenPembimbing?->nama ?: '-' }}</div>
-                                <div class="text-xs text-emerald-100/60">{{ $row->nomor_sk ?: 'SK belum ada' }}</div>
+                                @foreach ($row->pembimbingS as $dpl)
+                                    <div class="font-medium text-white">{{ $dpl->nama }}</div>
+                                @endforeach
+                                <div class="text-xs text-emerald-100/60 mt-1">{{ $row->nomor_sk ?: 'SK belum ada' }}</div>
                             </td>
                             <td class="px-4 py-3">
                                 <span class="inline-flex items-center rounded-full bg-emerald-500/15 border border-emerald-500/20 px-2.5 py-0.5 text-xs font-semibold text-emerald-100">

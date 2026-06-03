@@ -114,14 +114,21 @@
                         <div class="p-8 grid grid-cols-1 sm:grid-cols-2 gap-8">
                             <div>
                                 <div class="text-[10px] font-black text-emerald-100/30 uppercase tracking-[0.2em] mb-3">DOSEN PEMBIMBING LAPANGAN</div>
-                                <div class="flex items-center gap-4">
-                                    <div class="h-14 w-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-xl font-black text-emerald-400">
-                                        {{ mb_substr($pengajuan->posko->dosenPembimbing?->nama ?? '?', 0, 1) }}
-                                    </div>
-                                    <div>
-                                        <div class="text-base font-bold text-white">{{ $pengajuan->posko->dosenPembimbing?->nama ?: 'Belum ditentukan' }}</div>
-                                        <div class="text-xs text-emerald-100/50 mt-1">NIDN: {{ $pengajuan->posko->dosenPembimbing?->nidn ?: '-' }}</div>
-                                    </div>
+                                <div class="space-y-4">
+                                    @foreach ($pengajuan->posko->pembimbingS as $dpl)
+                                        <div class="flex items-center gap-4">
+                                            <div class="h-10 w-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-sm font-black text-emerald-400">
+                                                {{ mb_substr($dpl->nama, 0, 1) }}
+                                            </div>
+                                            <div>
+                                                <div class="text-sm font-bold text-white">{{ $dpl->nama }}</div>
+                                                <div class="text-[10px] text-emerald-100/50">NIDN: {{ $dpl->nidn ?: '-' }}</div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                    @if ($pengajuan->posko->pembimbingS->isEmpty())
+                                        <div class="text-sm font-medium text-emerald-100/40 italic">Belum ditentukan</div>
+                                    @endif
                                 </div>
                             </div>
 

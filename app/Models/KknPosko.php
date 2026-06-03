@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class KknPosko extends Model
@@ -25,6 +26,11 @@ class KknPosko extends Model
     public function dosenPembimbing(): BelongsTo
     {
         return $this->belongsTo(Dosen::class, 'dosen_pembimbing_id');
+    }
+
+    public function pembimbingS(): BelongsToMany
+    {
+        return $this->belongsToMany(Dosen::class, 'kkn_posko_dosen', 'kkn_posko_id', 'dosen_id')->withTimestamps();
     }
 
     public function pengajuans(): HasMany

@@ -58,7 +58,7 @@ class KknController extends Controller
 
     public function poskoIndex(): View
     {
-        $poskos = KknPosko::query()->with(['dosenPembimbing', 'pengajuans'])->orderByDesc('id')->paginate(10);
+        $poskos = KknPosko::query()->with(['pembimbingS', 'pengajuans'])->orderByDesc('id')->paginate(10);
         return view('admin.kkn.posko-index', [
             'poskos' => $poskos,
         ]);
@@ -77,7 +77,8 @@ class KknController extends Controller
         $validated = $request->validate([
             'nama_posko' => ['required', 'string', 'max:255'],
             'lokasi' => ['nullable', 'string', 'max:255'],
-            'dosen_pembimbing_id' => ['nullable', 'exists:dosen,id'],
+            'dosen_ids' => ['required', 'array', 'min:1', 'max:5'],
+            'dosen_ids.*' => ['exists:dosen,id'],
             'nomor_sk' => ['nullable', 'string', 'max:255'],
             'sk_pembimbing_file' => ['nullable', 'file', 'max:10240', 'mimes:pdf,jpg,jpeg,png'],
         ]);
@@ -91,21 +92,22 @@ class KknController extends Controller
             $skPath = $file->store('kkn/sk', 'public');
         }
 
-        KknPosko::query()->create([
+        $posko = KknPosko::query()->create([
             'nama_posko' => $validated['nama_posko'],
             'lokasi' => $validated['lokasi'],
-            'dosen_pembimbing_id' => $validated['dosen_pembimbing_id'],
             'nomor_sk' => $validated['nomor_sk'],
             'sk_pembimbing_path' => $skPath,
             'sk_pembimbing_name' => $skName,
         ]);
+
+        $posko->pembimbingS()->sync($validated['dosen_ids']);
 
         return redirect()->route('admin.kkn.posko.index')->with('success', 'Posko KKN berhasil dibuat.');
     }
 
     public function poskoShow(KknPosko $posko): View
     {
-        $posko->load(['dosenPembimbing', 'pengajuans.mahasiswa', 'messages.sender', 'files.user']);
+        $posko->load(['pembimbingS', 'pengajuans.mahasiswa', 'messages.sender', 'files.user']);
         $dosenList = Dosen::query()->orderBy('nama')->get();
         
         // Students who are approved but not yet in a posko
@@ -127,7 +129,8 @@ class KknController extends Controller
         $validated = $request->validate([
             'nama_posko' => ['required', 'string', 'max:255'],
             'lokasi' => ['nullable', 'string', 'max:255'],
-            'dosen_pembimbing_id' => ['nullable', 'exists:dosen,id'],
+            'dosen_ids' => ['required', 'array', 'min:1', 'max:5'],
+            'dosen_ids.*' => ['exists:dosen,id'],
             'nomor_sk' => ['nullable', 'string', 'max:255'],
             'sk_pembimbing_file' => ['nullable', 'file', 'max:10240', 'mimes:pdf,jpg,jpeg,png'],
         ]);
@@ -144,9 +147,10 @@ class KknController extends Controller
         $posko->update([
             'nama_posko' => $validated['nama_posko'],
             'lokasi' => $validated['lokasi'],
-            'dosen_pembimbing_id' => $validated['dosen_pembimbing_id'],
             'nomor_sk' => $validated['nomor_sk'],
         ]);
+
+        $posko->pembimbingS()->sync($validated['dosen_ids']);
 
         return back()->with('success', 'Data posko berhasil diperbarui.');
     }

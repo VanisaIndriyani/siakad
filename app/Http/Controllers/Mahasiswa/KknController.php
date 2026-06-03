@@ -17,7 +17,7 @@ class KknController extends Controller
         abort_unless($mahasiswa, 403);
 
         $pengajuan = KknPengajuan::query()
-            ->with(['posko.dosenPembimbing', 'posko.pengajuans.mahasiswa'])
+            ->with(['posko.pembimbingS', 'posko.pengajuans.mahasiswa'])
             ->where('mahasiswa_id', $mahasiswa->id)
             ->first();
 
@@ -57,7 +57,7 @@ class KknController extends Controller
             ->exists();
         abort_unless($isMember, 404);
 
-        $posko->load(['dosenPembimbing', 'pengajuans.mahasiswa', 'messages.sender', 'files.user']);
+        $posko->load(['pembimbingS', 'pengajuans.mahasiswa', 'messages.sender', 'files.user']);
 
         return view('mahasiswa.kkn.posko', [
             'posko' => $posko,

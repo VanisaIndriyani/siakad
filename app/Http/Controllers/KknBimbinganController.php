@@ -17,7 +17,8 @@ class KknBimbinganController extends Controller
         if ($user->isAdmin()) return;
 
         if ($user->isDosen()) {
-            abort_unless((int) $posko->dosen_pembimbing_id === (int) $user->dosen?->id, 403);
+            $isAssigned = $posko->pembimbingS()->where('dosen_id', $user->dosen?->id)->exists();
+            abort_unless($isAssigned, 403);
             return;
         }
 

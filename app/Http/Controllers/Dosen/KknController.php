@@ -14,9 +14,8 @@ class KknController extends Controller
         $dosen = $request->user()?->dosen;
         abort_unless($dosen, 403);
 
-        $poskos = KknPosko::query()
+        $poskos = $dosen->kknBimbinganS()
             ->with(['pengajuans.mahasiswa'])
-            ->where('dosen_pembimbing_id', $dosen->id)
             ->get();
 
         return view('dosen.kkn.index', [
@@ -28,9 +27,11 @@ class KknController extends Controller
     {
         $dosen = $request->user()?->dosen;
         abort_unless($dosen, 403);
-        abort_unless((int) $posko->dosen_pembimbing_id === (int) $dosen->id, 403);
+        
+        $isAssigned = $posko->pembimbingS()->where('dosen_id', $dosen->id)->exists();
+        abort_unless($isAssigned, 403);
 
-        $posko->load(['pengajuans.mahasiswa', 'messages.sender', 'files.user']);
+        $posko->load(['pembimbingS', 'pengajuans.mahasiswa', 'messages.sender', 'files.user']);
 
         return view('dosen.kkn.posko', [
             'posko' => $posko,

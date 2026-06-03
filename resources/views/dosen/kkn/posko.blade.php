@@ -26,15 +26,22 @@
                 <div class="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/10 blur-3xl rounded-full"></div>
                 <div class="relative z-10">
                     <div class="text-[10px] font-black text-emerald-100/30 uppercase tracking-[0.2em] mb-4">Dosen Pembimbing</div>
-                    <div class="flex items-center gap-4">
-                        <div class="h-16 w-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-2xl font-black text-emerald-400">
-                            {{ mb_substr($posko->dosenPembimbing?->nama ?? '?', 0, 1) }}
+                <div class="space-y-4">
+                    @foreach ($posko->pembimbingS as $dpl)
+                        <div class="flex items-center gap-4">
+                            <div class="h-12 w-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-xl font-black text-emerald-400">
+                                {{ mb_substr($dpl->nama, 0, 1) }}
+                            </div>
+                            <div class="min-w-0">
+                                <div class="text-sm font-bold text-white truncate">{{ $dpl->nama }}</div>
+                                <div class="text-[10px] text-emerald-100/50 mt-1">NIDN: {{ $dpl->nidn ?: '-' }}</div>
+                            </div>
                         </div>
-                        <div class="min-w-0">
-                            <div class="text-base font-bold text-white truncate">{{ $posko->dosenPembimbing?->nama ?: 'Belum ditentukan' }}</div>
-                            <div class="text-xs text-emerald-100/50 mt-1">NIDN: {{ $posko->dosenPembimbing?->nidn ?: '-' }}</div>
-                        </div>
-                    </div>
+                    @endforeach
+                    @if ($posko->pembimbingS->isEmpty())
+                        <div class="text-sm font-medium text-emerald-100/40 italic">Belum ditentukan</div>
+                    @endif
+                </div>
                     @if ($posko->sk_pembimbing_path)
                         <a href="{{ asset('storage/'.$posko->sk_pembimbing_path) }}" target="_blank" class="mt-6 flex items-center gap-4 p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition group">
                             <div class="h-10 w-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 group-hover:scale-110 transition">
@@ -90,10 +97,7 @@
                                 </div>
                             </div>
                             <div class="mt-3 flex items-center gap-2">
-                                <a href="{{ asset('storage/'.$f->file_path) }}" target="_blank" class="flex-1 h-8 rounded-xl bg-white/5 text-[9px] font-black uppercase tracking-widest flex items-center justify-center hover:bg-white/10 transition border border-white/5">Preview</a>
-                                <a href="{{ asset('storage/'.$f->file_path) }}" download class="h-8 w-8 rounded-xl bg-white/5 flex items-center justify-center hover:bg-white/10 transition border border-white/5">
-                                    <i class="fa-solid fa-download text-[10px] text-emerald-400"></i>
-                                </a>
+                                <a href="{{ route('files.kkn.download', $f) }}" class="flex-1 h-8 rounded-xl bg-emerald-600 text-[9px] font-black uppercase tracking-widest flex items-center justify-center hover:bg-emerald-500 transition border border-emerald-500/20 shadow-lg shadow-emerald-900/20">Download File</a>
                                 @if (auth()->id() === (int)$f->user_id || auth()->user()->isAdmin())
                                     <form method="POST" action="{{ route('kkn.bimbingan.file.destroy', $f) }}" data-confirm="Hapus file ini?">
                                         @csrf

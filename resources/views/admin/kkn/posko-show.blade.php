@@ -37,14 +37,19 @@
                             <input name="lokasi" value="{{ old('lokasi', $posko->lokasi) }}"
                                    class="h-11 w-full rounded-xl bg-white/5 border border-white/10 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition" />
                         </div>
-                        <div>
-                            <label class="block text-xs font-bold text-emerald-100/50 uppercase tracking-wider mb-1">Dosen Pembimbing (DPL)</label>
-                            <select name="dosen_pembimbing_id" class="h-11 w-full rounded-xl bg-white/5 border border-white/10 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition">
-                                <option value="" style="background-color: #0d2a23;">Pilih DPL</option>
-                                @foreach ($dosenList as $d)
-                                    <option value="{{ $d->id }}" @selected(old('dosen_pembimbing_id', $posko->dosen_pembimbing_id) == $d->id) style="background-color: #0d2a23;">{{ $d->nama }}</option>
-                                @endforeach
-                            </select>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-bold text-emerald-100/50 uppercase tracking-wider mb-2">Dosen Pembimbing Lapangan (Maksimal 5)</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                @php $assignedIds = $posko->pembimbingS->pluck('id')->toArray(); @endphp
+                                @for ($i = 0; $i < 5; $i++)
+                                    <select name="dosen_ids[]" class="h-11 w-full rounded-xl bg-white/5 border border-white/10 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition">
+                                        <option value="" style="background-color: #0d2a23;">Pilih DPL {{ $i + 1 }}</option>
+                                        @foreach ($dosenList as $d)
+                                            <option value="{{ $d->id }}" @selected(old('dosen_ids.'.$i, $assignedIds[$i] ?? '') == $d->id) style="background-color: #0d2a23;">{{ $d->nama }}</option>
+                                        @endforeach
+                                    </select>
+                                @endfor
+                            </div>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-emerald-100/50 uppercase tracking-wider mb-1">Nomor SK</label>
@@ -153,7 +158,7 @@
                                 Oleh: {{ $f->user?->name }} • {{ $f->created_at->format('d/m/Y') }}
                             </div>
                             <div class="mt-3 flex items-center gap-2">
-                                <a href="{{ asset('storage/'.$f->file_path) }}" target="_blank" class="flex-1 h-8 inline-flex items-center justify-center rounded-lg bg-white/10 text-[10px] font-bold uppercase tracking-widest hover:bg-white/20 transition">Lihat</a>
+                                <a href="{{ route('files.kkn.download', $f) }}" class="flex-1 h-8 inline-flex items-center justify-center rounded-lg bg-emerald-600 text-[10px] font-bold uppercase tracking-widest hover:bg-emerald-500 transition shadow-lg shadow-emerald-900/20">Download</a>
                                 <form method="POST" action="{{ route('kkn.bimbingan.file.destroy', $f) }}" data-confirm="Hapus file ini?">
                                     @csrf
                                     @method('DELETE')

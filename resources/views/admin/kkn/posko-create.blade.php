@@ -31,14 +31,20 @@
                        class="h-12 w-full rounded-xl bg-white/5 border border-white/10 px-4 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition" />
             </div>
 
-            <div>
-                <label class="block text-sm font-medium text-emerald-100/80 mb-2">Dosen Pembimbing Lapangan (DPL)</label>
-                <select name="dosen_pembimbing_id" class="h-12 w-full rounded-xl bg-white/5 border border-white/10 px-4 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition">
-                    <option value="" style="background-color: #0d2a23;">Pilih DPL</option>
-                    @foreach ($dosenList as $d)
-                        <option value="{{ $d->id }}" @selected(old('dosen_pembimbing_id') == $d->id) style="background-color: #0d2a23;">{{ $d->nama }}</option>
-                    @endforeach
-                </select>
+            <div class="lg:col-span-2">
+                <label class="block text-sm font-medium text-emerald-100/80 mb-2">Dosen Pembimbing Lapangan (Maksimal 5)</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    @for ($i = 0; $i < 5; $i++)
+                        <select name="dosen_ids[]" class="h-12 w-full rounded-xl bg-white/5 border border-white/10 px-4 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition">
+                            <option value="" style="background-color: #0d2a23;">Pilih DPL {{ $i + 1 }}</option>
+                            @foreach ($dosenList as $d)
+                                <option value="{{ $d->id }}" @selected(old('dosen_ids.'.$i) == $d->id) style="background-color: #0d2a23;">{{ $d->nama }}</option>
+                            @endforeach
+                        </select>
+                    @endfor
+                </div>
+                @error('dosen_ids') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
+                <div class="mt-2 text-xs text-emerald-100/40 italic">Pilih minimal 1 dosen pembimbing.</div>
             </div>
 
             <div>
