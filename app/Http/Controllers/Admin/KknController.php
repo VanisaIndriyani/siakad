@@ -56,6 +56,18 @@ class KknController extends Controller
         return back()->with('success', 'Status pendaftaran KKN diperbarui.');
     }
 
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return back()->with('error', 'Pilih data yang ingin dihapus.');
+        }
+
+        KknPengajuan::query()->whereIn('id', $ids)->delete();
+
+        return back()->with('success', 'Data pendaftaran KKN berhasil dihapus secara massal.');
+    }
+
     public function poskoIndex(): View
     {
         $poskos = KknPosko::query()->with(['pembimbingS', 'pengajuans'])->orderByDesc('id')->paginate(10);

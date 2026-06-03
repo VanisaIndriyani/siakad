@@ -9,6 +9,13 @@
             <div class="text-sm text-emerald-100/70">Kelola pendaftaran KKN mahasiswa.</div>
         </div>
         <div class="flex items-center gap-2">
+            <button type="button" 
+                    id="btnBulkDelete"
+                    onclick="submitBulkDelete()"
+                    class="h-10 px-4 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 transition text-sm font-medium hidden items-center gap-2 text-red-100">
+                <i class="fa-solid fa-trash"></i>
+                Hapus Terpilih (<span id="selectedCount">0</span>)
+            </button>
             <a href="{{ route('admin.kkn.posko.index') }}" class="h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition text-sm font-medium inline-flex items-center gap-2">
                 <i class="fa-solid fa-tent"></i>
                 Manajemen Posko
@@ -33,61 +40,71 @@
         </form>
     </div>
 
-    <div class="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
-        <div class="overflow-x-auto">
-            <table class="min-w-full text-sm">
-                <thead class="bg-white/5 text-emerald-100/80">
-                    <tr>
-                        <th class="text-left font-medium px-4 py-3">Mahasiswa</th>
-                        <th class="text-left font-medium px-4 py-3">Program Studi</th>
-                        <th class="text-left font-medium px-4 py-3">Status</th>
-                        <th class="text-left font-medium px-4 py-3">Posko</th>
-                        <th class="text-right font-medium px-4 py-3 w-40">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-white/10">
-                    @forelse ($items as $row)
-                        @php
-                            $badge = match ($row->status) {
-                                'approved' => 'bg-emerald-500/15 border-emerald-500/20 text-emerald-100',
-                                'rejected' => 'bg-red-500/15 border-red-500/20 text-red-100',
-                                default => 'bg-yellow-500/15 border-yellow-500/20 text-yellow-100',
-                            };
-                        @endphp
-                        <tr class="hover:bg-white/5">
-                            <td class="px-4 py-3">
-                                <div class="font-medium">{{ $row->mahasiswa?->nama_lengkap ?: '-' }}</div>
-                                <div class="text-xs text-emerald-100/60">{{ $row->mahasiswa?->npm ?: '-' }}</div>
-                            </td>
-                            <td class="px-4 py-3 text-emerald-100/80">{{ $row->mahasiswa?->program_studi ?: '-' }}</td>
-                            <td class="px-4 py-3">
-                                <span class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold {{ $badge }}">
-                                    {{ strtoupper($row->status) }}
-                                </span>
-                            </td>
-                            <td class="px-4 py-3 text-emerald-100/80">
-                                {{ $row->posko?->nama_posko ?: 'Belum diplot' }}
-                            </td>
-                            <td class="px-4 py-3 text-right">
-                                <div class="flex items-center justify-end gap-2">
-                                    <button type="button" 
-                                            onclick="openStatusModal({{ $row->id }}, '{{ $row->status }}', '{{ $row->catatan_admin }}')"
-                                            class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
-                                        <i class="fa-solid fa-pen"></i>
-                                        <span class="text-sm font-medium">Status</span>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
+    <form id="bulkDeleteForm" method="POST" action="{{ route('admin.kkn.bulk-delete') }}">
+        @csrf
+        @method('DELETE')
+        <div class="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-white/5 text-emerald-100/80">
                         <tr>
-                            <td colspan="5" class="px-4 py-10 text-center text-emerald-100/70">Belum ada pendaftaran KKN.</td>
+                            <th class="px-4 py-3 w-10">
+                                <input type="checkbox" id="selectAll" class="rounded border-white/20 bg-white/5 text-emerald-500 focus:ring-emerald-500/30">
+                            </th>
+                            <th class="text-left font-medium px-4 py-3">Mahasiswa</th>
+                            <th class="text-left font-medium px-4 py-3">Program Studi</th>
+                            <th class="text-left font-medium px-4 py-3">Status</th>
+                            <th class="text-left font-medium px-4 py-3">Posko</th>
+                            <th class="text-right font-medium px-4 py-3 w-40">Aksi</th>
                         </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody class="divide-y divide-white/10">
+                        @forelse ($items as $row)
+                            @php
+                                $badge = match ($row->status) {
+                                    'approved' => 'bg-emerald-500/15 border-emerald-500/20 text-emerald-100',
+                                    'rejected' => 'bg-red-500/15 border-red-500/20 text-red-100',
+                                    default => 'bg-yellow-500/15 border-yellow-500/20 text-yellow-100',
+                                };
+                            @endphp
+                            <tr class="hover:bg-white/5">
+                                <td class="px-4 py-3 text-center">
+                                    <input type="checkbox" name="ids[]" value="{{ $row->id }}" class="item-checkbox rounded border-white/20 bg-white/5 text-emerald-500 focus:ring-emerald-500/30">
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="font-medium">{{ $row->mahasiswa?->nama_lengkap ?: '-' }}</div>
+                                    <div class="text-xs text-emerald-100/60">{{ $row->mahasiswa?->npm ?: '-' }}</div>
+                                </td>
+                                <td class="px-4 py-3 text-emerald-100/80">{{ $row->mahasiswa?->program_studi ?: '-' }}</td>
+                                <td class="px-4 py-3">
+                                    <span class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold {{ $badge }}">
+                                        {{ strtoupper($row->status) }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-emerald-100/80">
+                                    {{ $row->posko?->nama_posko ?: 'Belum diplot' }}
+                                </td>
+                                <td class="px-4 py-3 text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button type="button" 
+                                                onclick="openStatusModal({{ $row->id }}, '{{ $row->status }}', '{{ $row->catatan_admin }}')"
+                                                class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                                            <i class="fa-solid fa-pen"></i>
+                                            <span class="text-sm font-medium">Status</span>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="px-4 py-10 text-center text-emerald-100/70">Belum ada pendaftaran KKN.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
+    </form>
 
     <div class="mt-5">
         {{ $items->links() }}
@@ -140,6 +157,45 @@
 
         function closeStatusModal() {
             document.getElementById('statusModal').classList.add('hidden');
+        }
+
+        // Bulk Delete Logic
+        const selectAll = document.getElementById('selectAll');
+        const checkboxes = document.querySelectorAll('.item-checkbox');
+        const btnBulkDelete = document.getElementById('btnBulkDelete');
+        const selectedCount = document.getElementById('selectedCount');
+
+        function updateBulkDeleteButton() {
+            const checkedCount = document.querySelectorAll('.item-checkbox:checked').length;
+            selectedCount.innerText = checkedCount;
+            if (checkedCount > 0) {
+                btnBulkDelete.classList.remove('hidden');
+                btnBulkDelete.classList.add('flex');
+            } else {
+                btnBulkDelete.classList.add('hidden');
+                btnBulkDelete.classList.remove('flex');
+            }
+        }
+
+        if (selectAll) {
+            selectAll.addEventListener('change', function() {
+                checkboxes.forEach(cb => cb.checked = selectAll.checked);
+                updateBulkDeleteButton();
+            });
+        }
+
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', function() {
+                if (!this.checked) selectAll.checked = false;
+                if (document.querySelectorAll('.item-checkbox:checked').length === checkboxes.length) selectAll.checked = true;
+                updateBulkDeleteButton();
+            });
+        });
+
+        function submitBulkDelete() {
+            if (confirm('Apakah Anda yakin ingin menghapus data pendaftaran KKN yang terpilih?')) {
+                document.getElementById('bulkDeleteForm').submit();
+            }
         }
     </script>
 </x-portal-layout>

@@ -210,6 +210,7 @@ Route::prefix('admin')
 
         // KKN Management
         Route::get('/kkn', [AdminKknController::class, 'index'])->name('kkn.index');
+        Route::delete('/kkn/bulk-delete', [AdminKknController::class, 'bulkDestroy'])->name('kkn.bulk-delete');
         Route::patch('/kkn/{kkn}/status', [AdminKknController::class, 'updateStatus'])->name('kkn.status');
         Route::get('/kkn/posko', [AdminKknController::class, 'poskoIndex'])->name('kkn.posko.index');
         Route::get('/kkn/posko/create', [AdminKknController::class, 'poskoCreate'])->name('kkn.posko.create');
