@@ -392,15 +392,17 @@ class PembayaranController extends Controller
             ])->render();
 
             $options = new Options();
-            $options->set('isRemoteEnabled', false); // Tetap false agar lebih stabil
+            $options->set('isRemoteEnabled', false); 
             $options->set('isHtml5ParserEnabled', true);
-            $options->set('defaultFont', 'sans-serif');
+            $options->set('defaultFont', 'Helvetica'); // Gunakan font standar
             $options->set('chroot', base_path());
             $options->set('isFontSubsettingEnabled', false);
 
             $dompdf = new Dompdf($options);
             $dompdf->loadHtml($html);
             $dompdf->setPaper('A4', 'landscape');
+            
+            // Tambahkan timeout yang lebih lama untuk render
             $dompdf->render();
 
             return response($dompdf->output(), 200, [

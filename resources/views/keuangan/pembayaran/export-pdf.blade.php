@@ -46,9 +46,9 @@
     <table style="width: 100%; border-collapse: collapse;">
         <tr>
             <td style="width: 130px; vertical-align: middle; padding-top: 2px;">
-                @if($logoBase64)
+                {{-- @if($logoBase64)
                     <img src="{{ $logoBase64 }}" alt="Logo" style="display: block; width: 125px; height: auto;" />
-                @endif
+                @endif --}}
             </td>
             <td style="text-align: center;">
                 <div class="kop-title-1">{{ $kop1 }}</div>
