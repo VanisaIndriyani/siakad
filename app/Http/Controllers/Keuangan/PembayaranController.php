@@ -16,6 +16,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 
 class PembayaranController extends Controller
 {
@@ -454,6 +455,20 @@ class PembayaranController extends Controller
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->setTitle('Data Pembayaran');
+
+            // TAMBAHKAN LOGO
+            $logoPath = public_path('img/lo.jpeg');
+            if (file_exists($logoPath)) {
+                $drawing = new Drawing();
+                $drawing->setName('Logo');
+                $drawing->setDescription('Logo Sekolah');
+                $drawing->setPath($logoPath);
+                $drawing->setHeight(80); // Tinggi logo
+                $drawing->setCoordinates('A1');
+                $drawing->setOffsetX(10); // Geser sedikit ke kanan
+                $drawing->setOffsetY(5);  // Geser sedikit ke bawah
+                $drawing->setWorksheet($sheet);
+            }
 
             // KOP SURAT
             $sheet->setCellValue('A1', 'INSTITUT AGAMA ISLAM');
