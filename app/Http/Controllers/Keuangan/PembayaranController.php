@@ -455,11 +455,31 @@ class PembayaranController extends Controller
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->setTitle('Data Pembayaran');
 
-            // Header
-            $headers = ['NO', 'NAMA MAHASISWA', 'NPM', 'ANGKATAN', 'JURUSAN', 'SEMESTER', 'TAHUN AJARAN', 'JENIS TAGIHAN', 'TOTAL BIAYA', 'TOTAL DIBAYAR', 'SISA', 'STATUS'];
-            $sheet->fromArray($headers, NULL, 'A1');
+            // KOP SURAT
+            $sheet->setCellValue('A1', 'INSTITUT AGAMA ISLAM');
+            $sheet->setCellValue('A2', "DARUD DA'WAH WAL IRSYAD");
+            $sheet->setCellValue('A3', 'SIDENRENG RAPPANG');
+            $sheet->setCellValue('A4', 'Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang');
+            $sheet->setCellValue('A5', 'E-mail : iaiddisidrap@gmail.com  Website : www.yppddisrapp.ac.id');
+            $sheet->setCellValue('A7', 'REKAP PEMBAYARAN MAHASISWA');
 
-            // Data
+            // Merge & Center KOP
+            $sheet->mergeCells('A1:L1');
+            $sheet->mergeCells('A2:L2');
+            $sheet->mergeCells('A3:L3');
+            $sheet->mergeCells('A4:L4');
+            $sheet->mergeCells('A5:L5');
+            $sheet->mergeCells('A7:L7');
+
+            $sheet->getStyle('A1:A3')->getFont()->setBold(true)->setSize(14);
+            $sheet->getStyle('A7')->getFont()->setBold(true)->setSize(12);
+            $sheet->getStyle('A1:L7')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+            // Header Table di Baris 9
+            $headers = ['NO', 'NAMA MAHASISWA', 'NPM', 'ANGKATAN', 'JURUSAN', 'SEMESTER', 'TAHUN AJARAN', 'JENIS TAGIHAN', 'TOTAL BIAYA', 'TOTAL DIBAYAR', 'SISA', 'STATUS'];
+            $sheet->fromArray($headers, NULL, 'A9');
+
+            // Data mulai Baris 10
             $data = [];
             foreach ($rows as $i => $p) {
                 $total = (float)($p->total_biaya ?? 0);
@@ -479,12 +499,13 @@ class PembayaranController extends Controller
                     $p->status_pembayaran ?? '-'
                 ];
             }
-            $sheet->fromArray($data, NULL, 'A2');
+            $sheet->fromArray($data, NULL, 'A10');
 
-            // Styling
-            $lastRow = count($data) + 1;
-            $sheet->getStyle('A1:L1')->getFont()->setBold(true);
-            $sheet->getStyle('I2:K' . $lastRow)->getNumberFormat()->setFormatCode('#,##0');
+            // Styling Table
+            $lastRow = count($data) + 9;
+            $sheet->getStyle('A9:L9')->getFont()->setBold(true);
+            $sheet->getStyle('A9:L' . $lastRow)->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+            $sheet->getStyle('I10:K' . $lastRow)->getNumberFormat()->setFormatCode('#,##0');
             
             foreach (range('A', 'L') as $col) {
                 $sheet->getColumnDimension($col)->setAutoSize(true);
