@@ -456,16 +456,32 @@ class PembayaranController extends Controller
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->setTitle('Data Pembayaran');
 
-            // TAMBAHKAN LOGO
-            $logoPath = public_path('img/lo.jpeg');
-            if (file_exists($logoPath)) {
+            // TAMBAHKAN LOGO (Gunakan logika pencarian yang lebih kuat)
+            $logoCandidates = [
+                public_path('img/lo.jpeg'),
+                public_path('img/logo.png'),
+                base_path('../img/lo.jpeg'),
+                base_path('../img/logo.png'),
+                base_path('../public/img/lo.jpeg'),
+                base_path('../public/img/logo.png'),
+            ];
+
+            $logoPath = null;
+            foreach ($logoCandidates as $candidate) {
+                if (file_exists($candidate)) {
+                    $logoPath = $candidate;
+                    break;
+                }
+            }
+
+            if ($logoPath) {
                 $drawing = new Drawing();
                 $drawing->setName('Logo');
                 $drawing->setDescription('Logo Sekolah');
                 $drawing->setPath($logoPath);
-                $drawing->setHeight(80); // Tinggi logo
-                $drawing->setCoordinates('B1'); // Geser ke kolom B agar tidak menumpuk di pojok kiri
-                $drawing->setOffsetX(0); 
+                $drawing->setHeight(85); 
+                $drawing->setCoordinates('A1');
+                $drawing->setOffsetX(20); 
                 $drawing->setOffsetY(5);
                 $drawing->setWorksheet($sheet);
             }
