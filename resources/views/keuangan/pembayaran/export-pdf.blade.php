@@ -24,84 +24,53 @@
 </head>
 <body>
     @php
-        $logoBase64 = null;
-        try {
-            $logoPath = public_path('img/lo.jpeg');
-            if (file_exists($logoPath)) {
-                $data = @file_get_contents($logoPath);
-                if ($data !== false) {
-                    $logoBase64 = 'data:image/jpeg;base64,'.base64_encode($data);
-                }
-            }
-        } catch (\Exception $e) {}
-
         $kop1 = 'INSTITUT AGAMA ISLAM';
         $kop2 = "DARUD DA'WAH WAL IRSYAD";
         $kop3 = 'SIDENRENG RAPPANG';
-        $kop4 = 'TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021';
-        $kop5 = 'Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang';
-        $kop6 = 'E-mail : iaiddisidrap@gmail.com  Website : www.yppddisrapp.ac.id';
     @endphp
 
-    <table style="width: 100%; border-collapse: collapse;">
-        <tr>
-            <td style="width: 130px; vertical-align: middle; padding-top: 2px;">
-                @if($logoBase64)
-                    <img src="{{ $logoBase64 }}" alt="Logo" style="display: block; width: 110px; height: auto;" />
-                @endif
-            </td>
-            <td style="text-align: center;">
-                <div class="kop-title-1">{{ $kop1 }}</div>
-                <div class="kop-title-2">{{ $kop2 }}</div>
-                <div class="kop-title-3">{{ $kop3 }}</div>
-                <div class="kop-meta" style="font-weight: 700;">{{ $kop4 }}</div>
-                <div class="kop-meta">{{ $kop5 }}</div>
-                <div class="kop-meta">{{ $kop6 }}</div>
-            </td>
-            <td style="width: 90px;"></td>
-        </tr>
-    </table>
-    <div class="kop-line-1"></div>
-    <div class="kop-line-2"></div>
+    <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px;">
+        <div style="font-size: 16px; font-weight: bold;">{{ $kop1 }}</div>
+        <div style="font-size: 20px; font-weight: bold;">{{ $kop2 }}</div>
+        <div style="font-size: 16px; font-weight: bold;">{{ $kop3 }}</div>
+        <div style="font-size: 12px; margin-top: 5px;">REKAP PEMBAYARAN MAHASISWA</div>
+    </div>
 
-    <div class="doc-title" style="margin-top: 15px;">REKAP PEMBAYARAN</div>
-    <div class="meta">
-        <div>Filter: {{ $q ? 'q='.$q : '-' }} | Semester: {{ $semester ?: '-' }} | Angkatan: {{ $angkatan ?: '-' }} | Jurusan: {{ $jurusan ?: '-' }} | Tagihan: {{ $jenis_tagihan ?: '-' }}</div>
+    <div class="meta" style="margin-bottom: 10px; font-size: 9px;">
+        <div>Filter: {{ $q ? 'q='.$q : '-' }} | Sem: {{ $semester ?: '-' }} | Angk: {{ $angkatan ?: '-' }} | Jur: {{ $jurusan ?: '-' }}</div>
         <div>Dicetak: {{ now()->format('d/m/Y H:i') }}</div>
     </div>
 
-    <table class="tbl">
+    <table class="tbl" style="font-size: 10px;">
         <thead>
         <tr>
-            <th style="width: 26px;">No</th>
-            <th>Mahasiswa</th>
-            <th class="nowrap">NPM</th>
-            <th class="nowrap">Angkatan</th>
-            <th class="nowrap">Semester</th>
-            <th class="nowrap">TA</th>
+            <th style="width: 20px;">No</th>
+            <th>Nama Mahasiswa</th>
+            <th style="width: 80px;">NPM</th>
+            <th style="width: 50px;">Angk</th>
+            <th style="width: 40px;">Sem</th>
             <th>Jenis Tagihan</th>
-            <th class="right nowrap">Total</th>
-            <th class="right nowrap">Dibayar</th>
-            <th class="nowrap">Status</th>
+            <th class="right" style="width: 80px;">Total</th>
+            <th class="right" style="width: 80px;">Dibayar</th>
+            <th style="width: 70px;">Status</th>
         </tr>
         </thead>
         <tbody>
         @forelse($rows as $i => $p)
             <tr>
-                <td class="nowrap">{{ $i + 1 }}</td>
+                <td style="text-align: center;">{{ $i + 1 }}</td>
                 <td>{{ $p->mahasiswa?->nama_lengkap ?? '-' }}</td>
-                <td class="nowrap">{{ $p->mahasiswa?->npm ?? '-' }}</td>
-                <td class="nowrap">{{ $p->mahasiswa?->angkatan ?? '-' }}</td>
-                <td class="nowrap">{{ $p->semester }}</td>
-                <td class="nowrap">{{ $p->tahun_ajaran }}</td>
+                <td>{{ $p->mahasiswa?->npm ?? '-' }}</td>
+                <td style="text-align: center;">{{ $p->mahasiswa?->angkatan ?? '-' }}</td>
+                <td style="text-align: center;">{{ $p->semester }}</td>
                 <td>{{ $p->jenis_tagihan ?? '-' }}</td>
-                <td class="right nowrap">Rp {{ number_format((float) ($p->total_biaya ?? 0), 0, ',', '.') }}</td>
-                <td class="right nowrap">Rp {{ number_format((float) ($p->total_dibayar ?? 0), 0, ',', '.') }}</td>
-                <td class="nowrap">{{ $p->status_pembayaran ?? '-' }}</td>
+                <td class="right">Rp{{ number_format((float)($p->total_biaya ?? 0), 0, ',', '.') }}</td>
+                <td class="right">Rp{{ number_format((float)($p->total_dibayar ?? 0), 0, ',', '.') }}</td>
+                <td>{{ $p->status_pembayaran ?? '-' }}</td>
             </tr>
         @empty
             <tr>
-                <td colspan="10" style="text-align:center; padding: 16px;">Tidak ada data.</td>
+                <td colspan="9" style="text-align:center; padding: 10px;">Tidak ada data.</td>
             </tr>
         @endforelse
         </tbody>

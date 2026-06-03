@@ -339,8 +339,7 @@ class PembayaranController extends Controller
     {
         try {
             @ini_set('memory_limit', '1024M');
-            @set_time_limit(600);
-            @ini_set('pcre.backtrack_limit', '5000000');
+            @set_time_limit(0); // Set unlimited time limit for PHP
 
             $q = trim((string) $request->get('q', ''));
             $semester = (int) $request->get('semester', 0);
@@ -349,9 +348,7 @@ class PembayaranController extends Controller
             $jurusan = trim((string) $request->get('jurusan', ''));
 
             $query = Pembayaran::query()
-                ->with(['mahasiswa' => function($q) {
-                    $q->select('id', 'nama_lengkap', 'npm', 'angkatan', 'program_studi');
-                }])
+                ->with(['mahasiswa:id,nama_lengkap,npm,angkatan,program_studi'])
                 ->orderByDesc('id');
 
             if ($q !== '') {
@@ -395,7 +392,6 @@ class PembayaranController extends Controller
             $options->set('isRemoteEnabled', false); 
             $options->set('isHtml5ParserEnabled', true);
             $options->set('defaultFont', 'Helvetica');
-            $options->set('chroot', base_path());
             $options->set('isFontSubsettingEnabled', false);
 
             $dompdf = new Dompdf($options);
@@ -408,7 +404,7 @@ class PembayaranController extends Controller
                 'Content-Disposition' => 'attachment; filename="pembayaran.pdf"',
             ]);
         } catch (\Throwable $e) {
-            return "Gagal membuat PDF: " . $e->getMessage() . " (L:" . $e->getLine() . ")";
+            return "Gagal membuat PDF: " . $e->getMessage();
         }
     }
 
