@@ -280,10 +280,9 @@ class AbsensiController extends Controller
             }
 
             if (!$file->isValid()) {
-                $errorMsg = 'Gagal upload: ' . $file->getErrorMessage();
-                if ($file->getError() === 1 || $file->getError() === 2) {
-                    $errorMsg = 'File terlalu besar (Melebihi upload_max_filesize). Silakan perkecil ukuran file atau simpan sebagai PDF.';
-                }
+                $errorMsg = 'Gagal upload (Error: ' . $file->getError() . '). ';
+                $errorMsg .= 'Limit Server: upload_max_filesize=' . ini_get('upload_max_filesize') . ', post_max_size=' . ini_get('post_max_size') . '. ';
+                $errorMsg .= 'Silakan perkecil ukuran file atau simpan sebagai PDF.';
                 return back()->withErrors(['materi_file' => $errorMsg])->withInput();
             }
 
