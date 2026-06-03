@@ -337,9 +337,13 @@ class PembayaranController extends Controller
 
     public function exportPdf(Request $request)
     {
+        // Debug: Aktifkan ini jika ingin mengecek apakah controller terpanggil
+        // dd('Controller PDF terpanggil');
+
         try {
             @ini_set('memory_limit', '1024M');
             @set_time_limit(600);
+            @ini_set('pcre.backtrack_limit', '5000000');
 
             $q = trim((string) $request->get('q', ''));
             $semester = (int) $request->get('semester', 0);
@@ -395,7 +399,9 @@ class PembayaranController extends Controller
             $options->set('isHtml5ParserEnabled', true);
             $options->set('defaultFont', 'sans-serif');
             $options->set('chroot', base_path());
-            $options->set('tempDir', storage_path('app/public'));
+            
+            // Nonaktifkan font subsetting jika terjadi error di beberapa server
+            $options->set('isFontSubsettingEnabled', false);
 
             $dompdf = new Dompdf($options);
             $dompdf->loadHtml($html);
@@ -406,12 +412,11 @@ class PembayaranController extends Controller
                 'Content-Type' => 'application/pdf',
                 'Content-Disposition' => 'attachment; filename="pembayaran.pdf"',
             ]);
+        } catch (\Exception $e) {
+            // Jika error, tampilkan pesan error yang jelas
+            return response('Error PDF: ' . $e->getMessage() . ' di file ' . $e->getFile() . ' baris ' . $e->getLine(), 500);
         } catch (\Throwable $e) {
-            return response()->json([
-                'error' => 'Gagal membuat PDF: ' . $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine()
-            ], 500);
+            return response('Error Fatal: ' . $e->getMessage(), 500);
         }
     }
 

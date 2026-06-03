@@ -24,30 +24,16 @@
 </head>
 <body>
     @php
-        $logoCandidates = [
-            public_path('img/lo.jpeg'),
-            public_path('img/logo.png'),
-        ];
-
-        $logoPath = null;
-        foreach ($logoCandidates as $candidate) {
-            if (is_string($candidate) && is_file($candidate) && is_readable($candidate)) {
-                $logoPath = $candidate;
-                break;
-            }
-        }
-
         $logoBase64 = null;
-        if ($logoPath) {
-            try {
+        try {
+            $logoPath = public_path('img/lo.jpeg');
+            if (file_exists($logoPath)) {
                 $data = @file_get_contents($logoPath);
                 if ($data !== false) {
-                    $ext = strtolower((string) pathinfo($logoPath, PATHINFO_EXTENSION));
-                    $ext = $ext === 'jpg' ? 'jpeg' : $ext;
-                    $logoBase64 = 'data:image/'.$ext.';base64,'.base64_encode($data);
+                    $logoBase64 = 'data:image/jpeg;base64,'.base64_encode($data);
                 }
-            } catch (\Exception $e) {}
-        }
+            }
+        } catch (\Exception $e) {}
 
         $kop1 = 'INSTITUT AGAMA ISLAM';
         $kop2 = "DARUD DA'WAH WAL IRSYAD";
