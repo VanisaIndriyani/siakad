@@ -337,80 +337,40 @@ class PembayaranController extends Controller
 
     public function exportPdf(Request $request)
     {
+        // TES KONEKSI: Jika ini muncul, berarti controller aman.
+        // return "Controller Pembayaran Terjangkau!";
+
         try {
-            @ini_set('memory_limit', '1024M');
-            @set_time_limit(600);
-            @ini_set('pcre.backtrack_limit', '5000000');
-
-            $q = trim((string) $request->get('q', ''));
-            $semester = (int) $request->get('semester', 0);
-            $angkatan = (int) $request->get('angkatan', 0);
-            $jenisTagihan = trim((string) $request->get('jenis_tagihan', ''));
-            $jurusan = trim((string) $request->get('jurusan', ''));
-
-            $query = Pembayaran::query()
+            @ini_set('memory_limit', '512M');
+            
+            $rows = Pembayaran::query()
                 ->with(['mahasiswa' => function($q) {
                     $q->select('id', 'nama_lengkap', 'npm', 'angkatan', 'program_studi');
                 }])
-                ->orderByDesc('id');
+                ->orderByDesc('id')
+                ->limit(50) // Kurangi jumlah data untuk tes
+                ->get();
 
-            if ($q !== '') {
-                $query->whereHas('mahasiswa', function ($sub) use ($q) {
-                    $sub->where('nama_lengkap', 'like', "%{$q}%")
-                        ->orWhere('npm', 'like', "%{$q}%");
-                });
-            }
-            if ($semester > 0) {
-                $query->where('semester', $semester);
-            }
-            if ($jenisTagihan !== '') {
-                $query->where('jenis_tagihan', $jenisTagihan);
-            }
-            if ($angkatan > 0) {
-                $query->whereHas('mahasiswa', function ($sub) use ($angkatan) {
-                    $sub->where('angkatan', $angkatan);
-                });
-            }
-            if ($jurusan !== '') {
-                $query->whereHas('mahasiswa', function ($sub) use ($jurusan) {
-                    $sub->where('program_studi', $jurusan);
-                });
-            }
-
-            $rows = $query->get();
             if ($rows->isEmpty()) {
-                return back()->with('error', 'Tidak ada data untuk diekspor.');
+                return "Tidak ada data pembayaran di database.";
             }
 
-            $html = view('keuangan.pembayaran.export-pdf', [
-                'rows' => $rows,
-                'q' => $q,
-                'semester' => $semester ?: null,
-                'angkatan' => $angkatan ?: null,
-                'jurusan' => $jurusan ?: null,
-                'jenis_tagihan' => $jenisTagihan ?: null,
-            ])->render();
+            $html = '<h1>Test PDF</h1><table border="1">';
+            foreach($rows as $p) {
+                $html .= "<tr><td>{$p->mahasiswa?->nama_lengkap}</td><td>{$p->jenis_tagihan}</td></tr>";
+            }
+            $html .= '</table>';
 
-            $options = new Options();
-            $options->set('isRemoteEnabled', false); 
-            $options->set('isHtml5ParserEnabled', true);
-            $options->set('defaultFont', 'Helvetica'); // Gunakan font standar
-            $options->set('chroot', base_path());
-            $options->set('isFontSubsettingEnabled', false);
-
-            $dompdf = new Dompdf($options);
+            $dompdf = new Dompdf();
+            $dompdf->setPaper('A4', 'portrait');
             $dompdf->loadHtml($html);
-            $dompdf->setPaper('A4', 'landscape');
-            
-            // Tambahkan timeout yang lebih lama untuk render
             $dompdf->render();
 
             return response($dompdf->output(), 200, [
                 'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'attachment; filename="pembayaran.pdf"',
             ]);
-        } catch (\Exception $e) {
-            return response('Error PDF: ' . $e->getMessage() . ' di baris ' . $e->getLine(), 500);
+        } catch (\Throwable $e) {
+            return "Terjadi Kesalahan: " . $e->getMessage() . " | Lokasi: " . $e->getFile() . " L:" . $e->getLine();
         }
     }
 
