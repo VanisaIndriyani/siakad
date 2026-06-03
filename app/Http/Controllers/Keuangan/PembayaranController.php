@@ -456,7 +456,30 @@ class PembayaranController extends Controller
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->setTitle('Data Pembayaran');
 
-            // TAMBAHKAN LOGO (Gunakan logika pencarian yang lebih kuat)
+            // KOP SURAT
+            $sheet->setCellValue('A1', 'INSTITUT AGAMA ISLAM');
+            $sheet->setCellValue('A2', "DARUD DA'WAH WAL IRSYAD");
+            $sheet->setCellValue('A3', 'SIDENRENG RAPPANG');
+            $sheet->setCellValue('A4', 'TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021');
+            $sheet->setCellValue('A5', 'Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang');
+            $sheet->setCellValue('A6', 'E-mail : iaiddisidrap@gmail.com  Website : www.yppddisrapp.ac.id');
+            $sheet->setCellValue('A8', 'REKAP PEMBAYARAN MAHASISWA');
+
+            // Merge & Center KOP
+            $sheet->mergeCells('A1:L1');
+            $sheet->mergeCells('A2:L2');
+            $sheet->mergeCells('A3:L3');
+            $sheet->mergeCells('A4:L4');
+            $sheet->mergeCells('A5:L5');
+            $sheet->mergeCells('A6:L6');
+            $sheet->mergeCells('A8:L8');
+
+            $sheet->getStyle('A1:L8')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('A1:A3')->getFont()->setBold(true)->setSize(16);
+            $sheet->getStyle('A4')->getFont()->setBold(true)->setSize(11);
+            $sheet->getStyle('A8')->getFont()->setBold(true)->setSize(12);
+
+            // TAMBAHKAN LOGO (Posisi di Tengah KOP)
             $logoCandidates = [
                 public_path('img/lo.jpeg'),
                 public_path('img/logo.png'),
@@ -477,37 +500,13 @@ class PembayaranController extends Controller
             if ($logoPath) {
                 $drawing = new Drawing();
                 $drawing->setName('Logo');
-                $drawing->setDescription('Logo Sekolah');
                 $drawing->setPath($logoPath);
-                $drawing->setHeight(85); 
+                $drawing->setHeight(80); 
                 $drawing->setCoordinates('A1');
-                $drawing->setOffsetX(20); 
+                $drawing->setOffsetX(40); // Atur agar berada di kiri teks KOP yang di-center
                 $drawing->setOffsetY(5);
                 $drawing->setWorksheet($sheet);
             }
-
-            // KOP SURAT
-            $sheet->setCellValue('A1', 'INSTITUT AGAMA ISLAM');
-            $sheet->setCellValue('A2', "DARUD DA'WAH WAL IRSYAD");
-            $sheet->setCellValue('A3', 'SIDENRENG RAPPANG');
-            $sheet->setCellValue('A4', 'TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021');
-            $sheet->setCellValue('A5', 'Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang');
-            $sheet->setCellValue('A6', 'E-mail : iaiddisidrap@gmail.com  Website : www.yppddisrapp.ac.id');
-            $sheet->setCellValue('A8', 'REKAP PEMBAYARAN MAHASISWA');
-
-            // Merge & Center KOP
-            $sheet->mergeCells('A1:L1');
-            $sheet->mergeCells('A2:L2');
-            $sheet->mergeCells('A3:L3');
-            $sheet->mergeCells('A4:L4');
-            $sheet->mergeCells('A5:L5');
-            $sheet->mergeCells('A6:L6');
-            $sheet->mergeCells('A8:L8');
-
-            $sheet->getStyle('A1:A3')->getFont()->setBold(true)->setSize(14);
-            $sheet->getStyle('A4')->getFont()->setBold(true)->setSize(11);
-            $sheet->getStyle('A8')->getFont()->setBold(true)->setSize(12);
-            $sheet->getStyle('A1:L8')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
             // Garis bawah KOP (Double Line effect)
             $sheet->getStyle('A6:L6')->getBorders()->getBottom()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THICK);

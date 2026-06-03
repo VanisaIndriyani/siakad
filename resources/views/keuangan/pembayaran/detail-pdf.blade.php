@@ -8,9 +8,9 @@
         @page { margin: 16mm 14mm 16mm 17mm; }
         body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #111827; }
         .kop { width: 100%; margin-bottom: 14px; }
-        .kop-title-1 { color: #000; font-size: 20px; font-weight: 800; margin: 0; line-height: 1.12; }
-        .kop-title-2 { color: #000; font-size: 28px; font-weight: 900; margin: 1px 0 0; letter-spacing: 0.4px; line-height: 1.06; }
-        .kop-title-3 { color: #000; font-size: 20px; font-weight: 900; margin: 1px 0 0; line-height: 1.12; }
+        .kop-title-1 { color: #000; font-size: 20px; font-weight: 800; margin: 0; line-height: 1.12; text-transform: uppercase; }
+        .kop-title-2 { color: #000; font-size: 24px; font-weight: 900; margin: 1px 0 0; letter-spacing: 0.4px; line-height: 1.06; text-transform: uppercase; }
+        .kop-title-3 { color: #000; font-size: 20px; font-weight: 900; margin: 1px 0 0; line-height: 1.12; text-transform: uppercase; }
         .kop-meta { color: #000; font-size: 12px; margin-top: 3px; line-height: 1.2; }
         .kop-line-1 { border-top: 4px solid #000; margin-top: 7px; }
         .kop-line-2 { border-top: 2px solid #000; margin-top: 3px; }
