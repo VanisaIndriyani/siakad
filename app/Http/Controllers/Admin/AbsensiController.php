@@ -268,8 +268,8 @@ class AbsensiController extends Controller
             'materi_file' => [
                 'nullable',
                 'file',
-                'max:51200', // Tingkatkan ke 50MB
-                'mimes:pdf,doc,docx,ppt,pptx,pps,ppsx,pot,potx,odp',
+                'max:40960', // Max 40MB (sesuai limit server)
+                'extensions:pdf,doc,docx,ppt,pptx,pps,ppsx,pot,potx,odp',
             ],
             'status' => ['required', 'array'],
             'status.*' => ['nullable', 'in:hadir,izin,sakit,alpha'],
