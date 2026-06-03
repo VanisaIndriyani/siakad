@@ -268,14 +268,27 @@ class AbsensiController extends Controller
             'materi_file' => [
                 'nullable',
                 'file',
-                'max:40960', // Max 40MB (sesuai limit server)
-                'extensions:pdf,doc,docx,ppt,pptx,pps,ppsx,pot,potx,odp',
+                'max:40960', // Max 40MB
             ],
             'status' => ['required', 'array'],
             'status.*' => ['nullable', 'in:hadir,izin,sakit,alpha'],
             'keterangan' => ['nullable', 'array'],
             'keterangan.*' => ['nullable', 'string'],
         ]);
+
+        if ($request->hasFile('materi_file')) {
+            $file = $request->file('materi_file');
+            $ext = strtolower((string) $file->getClientOriginalExtension());
+            $allowedExtensions = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'pps', 'ppsx', 'pot', 'potx', 'odp'];
+            
+            if (!in_array($ext, $allowedExtensions)) {
+                return back()->withErrors(['materi_file' => 'Format file tidak didukung. Gunakan PDF, Word, atau PowerPoint.'])->withInput();
+            }
+
+            if (!$file->isValid()) {
+                return back()->withErrors(['materi_file' => 'File gagal diupload ke server. Periksa ukuran file.'])->withInput();
+            }
+        }
 
         $absensi->update([
             'tanggal' => $validated['tanggal'] ?? null,
