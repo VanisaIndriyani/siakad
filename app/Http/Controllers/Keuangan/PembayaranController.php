@@ -464,9 +464,9 @@ class PembayaranController extends Controller
                 $drawing->setDescription('Logo Sekolah');
                 $drawing->setPath($logoPath);
                 $drawing->setHeight(80); // Tinggi logo
-                $drawing->setCoordinates('A1');
-                $drawing->setOffsetX(10); // Geser sedikit ke kanan
-                $drawing->setOffsetY(5);  // Geser sedikit ke bawah
+                $drawing->setCoordinates('B1'); // Geser ke kolom B agar tidak menumpuk di pojok kiri
+                $drawing->setOffsetX(0); 
+                $drawing->setOffsetY(5);
                 $drawing->setWorksheet($sheet);
             }
 
