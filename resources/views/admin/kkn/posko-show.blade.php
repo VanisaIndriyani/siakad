@@ -31,11 +31,13 @@
                             <label class="block text-xs font-bold text-emerald-100/50 uppercase tracking-wider mb-1">Nama Posko</label>
                             <input name="nama_posko" value="{{ old('nama_posko', $posko->nama_posko) }}" required
                                    class="h-11 w-full rounded-xl bg-white/5 border border-white/10 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition" />
+                            @error('nama_posko') <div class="mt-1 text-[10px] text-red-400">{{ $message }}</div> @enderror
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-emerald-100/50 uppercase tracking-wider mb-1">Lokasi</label>
                             <input name="lokasi" value="{{ old('lokasi', $posko->lokasi) }}"
                                    class="h-11 w-full rounded-xl bg-white/5 border border-white/10 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition" />
+                            @error('lokasi') <div class="mt-1 text-[10px] text-red-400">{{ $message }}</div> @enderror
                         </div>
                         <div class="sm:col-span-2">
                             <label class="block text-xs font-bold text-emerald-100/50 uppercase tracking-wider mb-2">Dosen Pembimbing Lapangan (Maksimal 5)</label>
@@ -55,12 +57,14 @@
                             <label class="block text-xs font-bold text-emerald-100/50 uppercase tracking-wider mb-1">Nomor SK</label>
                             <input name="nomor_sk" value="{{ old('nomor_sk', $posko->nomor_sk) }}"
                                    class="h-11 w-full rounded-xl bg-white/5 border border-white/10 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition" />
+                            @error('nomor_sk') <div class="mt-1 text-[10px] text-red-400">{{ $message }}</div> @enderror
                         </div>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-emerald-100/50 uppercase tracking-wider mb-1">Update SK Pembimbing (Opsional)</label>
                         <input type="file" name="sk_pembimbing_file" accept=".pdf,.jpg,.jpeg,.png"
                                class="w-full h-11 rounded-xl bg-white/5 border border-white/10 text-emerald-100/80 file:mr-4 file:h-11 file:border-0 file:bg-white/10 file:text-white file:px-4 file:cursor-pointer transition" />
+                        @error('sk_pembimbing_file') <div class="mt-1 text-[10px] text-red-400">{{ $message }}</div> @enderror
                     </div>
                     @if ($posko->sk_pembimbing_path)
                         <div class="flex items-center gap-3 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">

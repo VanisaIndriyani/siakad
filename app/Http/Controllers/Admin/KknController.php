@@ -86,6 +86,10 @@ class KknController extends Controller
 
     public function poskoStore(Request $request): RedirectResponse
     {
+        // Filter out empty values from dosen_ids before validation
+        $dosenIds = array_filter($request->input('dosen_ids', []), fn($val) => !empty($val));
+        $request->merge(['dosen_ids' => $dosenIds]);
+
         $validated = $request->validate([
             'nama_posko' => ['required', 'string', 'max:255'],
             'lokasi' => ['nullable', 'string', 'max:255'],
@@ -93,6 +97,9 @@ class KknController extends Controller
             'dosen_ids.*' => ['exists:dosen,id'],
             'nomor_sk' => ['nullable', 'string', 'max:255'],
             'sk_pembimbing_file' => ['nullable', 'file', 'max:10240', 'mimes:pdf,jpg,jpeg,png'],
+        ], [
+            'dosen_ids.required' => 'Pilih minimal 1 dosen pembimbing.',
+            'dosen_ids.min' => 'Pilih minimal 1 dosen pembimbing.',
         ]);
 
         $skPath = null;
@@ -138,6 +145,10 @@ class KknController extends Controller
 
     public function poskoUpdate(Request $request, KknPosko $posko): RedirectResponse
     {
+        // Filter out empty values from dosen_ids before validation
+        $dosenIds = array_filter($request->input('dosen_ids', []), fn($val) => !empty($val));
+        $request->merge(['dosen_ids' => $dosenIds]);
+
         $validated = $request->validate([
             'nama_posko' => ['required', 'string', 'max:255'],
             'lokasi' => ['nullable', 'string', 'max:255'],
@@ -145,6 +156,9 @@ class KknController extends Controller
             'dosen_ids.*' => ['exists:dosen,id'],
             'nomor_sk' => ['nullable', 'string', 'max:255'],
             'sk_pembimbing_file' => ['nullable', 'file', 'max:10240', 'mimes:pdf,jpg,jpeg,png'],
+        ], [
+            'dosen_ids.required' => 'Pilih minimal 1 dosen pembimbing.',
+            'dosen_ids.min' => 'Pilih minimal 1 dosen pembimbing.',
         ]);
 
         if ($request->hasFile('sk_pembimbing_file')) {

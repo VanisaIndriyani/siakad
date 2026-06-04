@@ -77,6 +77,17 @@
                         </div>
                     @endif
 
+                    @if ($errors->any())
+                        <div class="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+                            <div class="font-semibold mb-1">Terjadi kesalahan:</div>
+                            <ul class="list-disc list-inside">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     {{ $slot }}
                 </main>
             </div>

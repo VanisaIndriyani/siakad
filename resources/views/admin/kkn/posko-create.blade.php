@@ -22,6 +22,7 @@
                 <input name="nama_posko" value="{{ old('nama_posko') }}" required
                        placeholder="Contoh: Posko 01 - Desa Makmur"
                        class="h-12 w-full rounded-xl bg-white/5 border border-white/10 px-4 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition" />
+                @error('nama_posko') <div class="mt-1 text-xs text-red-400">{{ $message }}</div> @enderror
             </div>
 
             <div>
@@ -29,6 +30,7 @@
                 <input name="lokasi" value="{{ old('lokasi') }}"
                        placeholder="Contoh: Desa Makmur, Kec. Sidrap"
                        class="h-12 w-full rounded-xl bg-white/5 border border-white/10 px-4 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition" />
+                @error('lokasi') <div class="mt-1 text-xs text-red-400">{{ $message }}</div> @enderror
             </div>
 
             <div class="lg:col-span-2">
@@ -52,12 +54,14 @@
                 <input name="nomor_sk" value="{{ old('nomor_sk') }}"
                        placeholder="Masukkan nomor SK jika ada"
                        class="h-12 w-full rounded-xl bg-white/5 border border-white/10 px-4 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition" />
+                @error('nomor_sk') <div class="mt-1 text-xs text-red-400">{{ $message }}</div> @enderror
             </div>
 
             <div class="lg:col-span-2">
                 <label class="block text-sm font-medium text-emerald-100/80 mb-2">Upload File SK (PDF/Gambar)</label>
                 <input type="file" name="sk_pembimbing_file" accept=".pdf,.jpg,.jpeg,.png"
                        class="w-full h-12 rounded-xl bg-white/5 border border-white/10 text-emerald-100/80 file:mr-4 file:h-12 file:border-0 file:bg-white/10 file:text-white file:px-6 file:cursor-pointer hover:file:bg-white/20 transition" />
+                @error('sk_pembimbing_file') <div class="mt-1 text-xs text-red-400">{{ $message }}</div> @enderror
                 <div class="mt-2 text-xs text-emerald-100/50 italic">Maksimal 10MB. Format yang didukung: PDF, JPG, PNG.</div>
             </div>
         </div>
