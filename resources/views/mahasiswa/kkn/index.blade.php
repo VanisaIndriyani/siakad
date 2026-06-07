@@ -122,7 +122,7 @@
                                             </div>
                                             <div>
                                                 <div class="text-sm font-bold text-white">{{ $dpl->nama }}</div>
-                                                <div class="text-[10px] text-emerald-100/50">NIDN: {{ $dpl->nidn ?: '-' }}</div>
+                                                <div class="text-[10px] text-emerald-100/50">NUPTK: {{ $dpl->nidn ?: '-' }}</div>
                                             </div>
                                         </div>
                                     @endforeach

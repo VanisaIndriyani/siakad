@@ -8,8 +8,8 @@
                                class="h-4 w-4 rounded border-white/20 bg-white/5 text-emerald-500 focus:ring-emerald-500/40" />
                     </th>
                     <th class="text-left font-medium px-4 py-3">Dosen</th>
-                    <th class="text-left font-medium px-4 py-3">NIDN</th>
-                    <th class="text-left font-medium px-4 py-3">NUPTK</th>
+                    <th class="text-left font-medium px-4 py-3 whitespace-nowrap">NIDN</th>
+                    <th class="text-left font-medium px-4 py-3 whitespace-nowrap">NUPTK</th>
                     <th class="text-left font-medium px-4 py-3">Program Studi</th>
                     <th class="text-left font-medium px-4 py-3">Nomor HP</th>
                     <th class="text-left font-medium px-4 py-3">Mata Kuliah</th>
@@ -38,7 +38,7 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="px-4 py-3 text-emerald-100/80">{{ $row->nidn }}</td>
+                        <td class="px-4 py-3 text-emerald-100/80">{{ $row->nidn ?? '-' }}</td>
                         <td class="px-4 py-3 text-emerald-100/80">{{ $row->nuptk ?? '-' }}</td>
                         <td class="px-4 py-3 text-emerald-100/80">{{ $row->program_studi ?? '-' }}</td>
                         <td class="px-4 py-3 text-emerald-100/80">{{ $row->nomor_hp ?? '-' }}</td>

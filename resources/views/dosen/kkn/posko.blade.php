@@ -34,7 +34,7 @@
                             </div>
                             <div class="min-w-0">
                                 <div class="text-sm font-bold text-white truncate">{{ $dpl->nama }}</div>
-                                <div class="text-[10px] text-emerald-100/50 mt-1">NIDN: {{ $dpl->nidn ?: '-' }}</div>
+                                <div class="text-[10px] text-emerald-100/50 mt-1">NUPTK: {{ $dpl->nidn ?: '-' }}</div>
                             </div>
                         </div>
                     @endforeach

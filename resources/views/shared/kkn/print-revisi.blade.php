@@ -101,14 +101,14 @@
                     Ketua Program Studi {{ $posko->pengajuans->first()?->mahasiswa?->program_studi ?? '................' }}
                     <div class="signature-space"></div>
                     ( ........................................... )<br>
-                    NIDN. .....................................
+                    NUPTK. .....................................
                 </td>
                 <td>
                     Sidrap, {{ now()->translatedFormat('d F Y') }}<br>
                     Dosen Pembimbing Lapangan
                     <div class="signature-space"></div>
                     <strong>( {{ $posko->pembimbingS->first()?->nama ?: '...........................................' }} )</strong><br>
-                    NIDN. {{ $posko->pembimbingS->first()?->nidn ?: '.....................................' }}
+                    NUPTK. {{ $posko->pembimbingS->first()?->nidn ?: '.....................................' }}
                 </td>
             </tr>
         </table>

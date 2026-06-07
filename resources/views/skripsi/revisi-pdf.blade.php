@@ -203,14 +203,14 @@
                     Ketua Program Studi {{ $skripsi->mahasiswa?->program_studi ?? '................' }}
                     <div style="height: 80px;"></div>
                     ( ........................................... )<br>
-                    NIDN. .....................................
+                    NUPTK. .....................................
                 </td>
                 <td style="width: 50%; text-align: center; border: none;">
                     Sidrap, {{ now()->translatedFormat('d F Y') }}<br>
                     Dosen Pembimbing Skripsi,
                     <div style="height: 80px;"></div>
                     <strong>( {{ $skripsi->dosenPembimbing?->nama ?: '...........................................' }} )</strong><br>
-                    NIDN. {{ $skripsi->dosenPembimbing?->nidn ?: '.....................................' }}
+                    NUPTK. {{ $skripsi->dosenPembimbing?->nidn ?: '.....................................' }}
                 </td>
             </tr>
         </table>

@@ -11,7 +11,7 @@
 
     <div>
         <label class="text-sm text-emerald-100/80">NIDN (Opsional)</label>
-        <input name="nidn" value="{{ old('nidn', $dosen->nidn ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
+         <input name="nidn" value="{{ old('nidn', $dosen->nidn ?? '') }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
         @error('nidn') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
     </div>
 

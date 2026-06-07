@@ -41,7 +41,7 @@
                     <span class="font-medium text-white">{{ $dosen?->nik ?? '-' }}</span>
                 </div>
                 <div class="flex items-center justify-between">
-                    <span>NIDN</span>
+                    <span>NUPTK</span>
                     <span class="font-medium text-white">{{ $dosen?->nidn ?? '-' }}</span>
                 </div>
                 <div class="flex items-center justify-between">
