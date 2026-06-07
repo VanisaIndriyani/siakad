@@ -195,8 +195,25 @@
         </tbody>
     </table>
 
-    <div class="footer">
-        Dicetak pada: {{ now()->format('d/m/Y H:i') }} • Dokumen ini dihasilkan otomatis oleh Sistem Informasi Akademik.
+    <div class="footer-sign" style="margin-top: 50px; width: 100%;">
+        <table style="width: 100%; border: none;">
+            <tr>
+                <td style="width: 50%; text-align: center; border: none;">
+                    Mengetahui,<br>
+                    Ketua Program Studi {{ $skripsi->mahasiswa?->program_studi ?? '................' }}
+                    <div style="height: 80px;"></div>
+                    ( ........................................... )<br>
+                    NIDN. .....................................
+                </td>
+                <td style="width: 50%; text-align: center; border: none;">
+                    Sidrap, {{ now()->translatedFormat('d F Y') }}<br>
+                    Dosen Pembimbing Skripsi,
+                    <div style="height: 80px;"></div>
+                    <strong>( {{ $skripsi->dosenPembimbing?->nama ?: '...........................................' }} )</strong><br>
+                    NIDN. {{ $skripsi->dosenPembimbing?->nidn ?: '.....................................' }}
+                </td>
+            </tr>
+        </table>
     </div>
 </body>
 </html>

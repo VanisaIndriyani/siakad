@@ -222,8 +222,17 @@ Route::prefix('admin')
         Route::delete('/kkn/pengajuan/{kkn}/remove', [AdminKknController::class, 'removeStudent'])->name('kkn.pengajuan.remove');
 
         Route::get('/laporan', [AdminPengajuanLaporanController::class, 'index'])->name('laporan.index');
+        Route::delete('/laporan/bulk-delete', [AdminPengajuanLaporanController::class, 'bulkDestroy'])->name('laporan.bulk-delete');
         Route::get('/laporan/{laporan}', [AdminPengajuanLaporanController::class, 'show'])->name('laporan.show');
         Route::post('/laporan/{laporan}/pesan', [AdminPengajuanLaporanController::class, 'storeMessage'])->name('laporan.pesan.store');
+
+        Route::get('/publikasi-kk', [\App\Http\Controllers\PublikasiKkController::class, 'index'])->name('publikasi-kk.index');
+        Route::get('/publikasi-kk/create', [\App\Http\Controllers\PublikasiKkController::class, 'create'])->name('publikasi-kk.create');
+        Route::post('/publikasi-kk', [\App\Http\Controllers\PublikasiKkController::class, 'store'])->name('publikasi-kk.store');
+        Route::get('/publikasi-kk/{publikasiKk}/edit', [\App\Http\Controllers\PublikasiKkController::class, 'edit'])->name('publikasi-kk.edit');
+        Route::put('/publikasi-kk/{publikasiKk}', [\App\Http\Controllers\PublikasiKkController::class, 'update'])->name('publikasi-kk.update');
+        Route::delete('/publikasi-kk/{publikasiKk}', [\App\Http\Controllers\PublikasiKkController::class, 'destroy'])->name('publikasi-kk.destroy');
+        Route::get('/publikasi-kk/{publikasiKk}/download', [\App\Http\Controllers\PublikasiKkController::class, 'download'])->name('publikasi-kk.download');
     });
 
 Route::prefix('mahasiswa')
@@ -403,6 +412,14 @@ Route::prefix('dosen')
         Route::delete('/laporan/bulk-delete', [DosenPengajuanLaporanController::class, 'bulkDestroy'])->name('laporan.bulk-delete');
         Route::get('/laporan/{laporan}', [DosenPengajuanLaporanController::class, 'show'])->name('laporan.show');
         Route::post('/laporan/{laporan}/pesan', [DosenPengajuanLaporanController::class, 'storeMessage'])->name('laporan.pesan.store');
+
+        Route::get('/publikasi-kk', [\App\Http\Controllers\PublikasiKkController::class, 'index'])->name('publikasi-kk.index');
+        Route::get('/publikasi-kk/create', [\App\Http\Controllers\PublikasiKkController::class, 'create'])->name('publikasi-kk.create');
+        Route::post('/publikasi-kk', [\App\Http\Controllers\PublikasiKkController::class, 'store'])->name('publikasi-kk.store');
+        Route::get('/publikasi-kk/{publikasiKk}/edit', [\App\Http\Controllers\PublikasiKkController::class, 'edit'])->name('publikasi-kk.edit');
+        Route::put('/publikasi-kk/{publikasiKk}', [\App\Http\Controllers\PublikasiKkController::class, 'update'])->name('publikasi-kk.update');
+        Route::delete('/publikasi-kk/{publikasiKk}', [\App\Http\Controllers\PublikasiKkController::class, 'destroy'])->name('publikasi-kk.destroy');
+        Route::get('/publikasi-kk/{publikasiKk}/download', [\App\Http\Controllers\PublikasiKkController::class, 'download'])->name('publikasi-kk.download');
     });
 
 Route::prefix('keuangan')

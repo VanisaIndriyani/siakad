@@ -96,14 +96,19 @@
     <div class="footer">
         <table>
             <tr>
-                <td></td>
                 <td>
-                    Sidrap, {{ now()->translatedFormat('d F Y') }}<br>
                     Mengetahui,<br>
-                    Dosen Pembimbing Lapangan
+                    Ketua Program Studi {{ $posko->pengajuans->first()?->mahasiswa?->program_studi ?? '................' }}
                     <div class="signature-space"></div>
                     ( ........................................... )<br>
                     NIDN. .....................................
+                </td>
+                <td>
+                    Sidrap, {{ now()->translatedFormat('d F Y') }}<br>
+                    Dosen Pembimbing Lapangan
+                    <div class="signature-space"></div>
+                    <strong>( {{ $posko->pembimbingS->first()?->nama ?: '...........................................' }} )</strong><br>
+                    NIDN. {{ $posko->pembimbingS->first()?->nidn ?: '.....................................' }}
                 </td>
             </tr>
         </table>
