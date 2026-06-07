@@ -21,8 +21,8 @@
     </div>
 
     <div class="mb-6 p-4 rounded-2xl bg-[#0d2a23] border border-white/10 shadow-sm">
-        <form action="{{ route($routePrefix . '.publikasi.index') }}" method="GET" class="flex flex-wrap items-center gap-3">
-            <div class="flex-1 min-w-[200px]">
+        <form action="{{ route($routePrefix . '.publikasi.index') }}" method="GET" class="flex flex-row items-center gap-3">
+            <div class="flex-1">
                 <div class="relative">
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari judul, penulis, atau penerbit..." 
                         style="background-color: #06221c !important;"
@@ -32,7 +32,7 @@
                     </div>
                 </div>
             </div>
-            <div class="w-full md:w-56">
+            <div class="w-48 md:w-56">
                 <div class="relative">
                     <select name="kategori" onchange="this.form.submit()" 
                         style="background-color: #06221c !important; appearance: none !important; -webkit-appearance: none !important; -moz-appearance: none !important;"
@@ -50,7 +50,7 @@
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <button type="submit" class="h-11 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white transition text-sm font-medium">
+                <button type="submit" class="h-11 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white transition text-sm font-medium whitespace-nowrap">
                     Filter
                 </button>
                 @if(request()->anyFilled(['search', 'kategori']))
