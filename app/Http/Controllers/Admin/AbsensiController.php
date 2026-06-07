@@ -130,7 +130,7 @@ class AbsensiController extends Controller
             ->orderBy('npm')
             ->get();
 
-        $kaprodiNama = $this->resolveKaprodiNama($jurusan);
+        $kaprodi = $this->resolveKaprodi($jurusan);
 
         $dosenNama = $dosen?->nama;
         if (! $dosenNama) {
@@ -145,7 +145,8 @@ class AbsensiController extends Controller
             'semester' => $semester,
             'mk' => $mk,
             'mahasiswa' => $mahasiswa,
-            'kaprodiNama' => $kaprodiNama,
+            'kaprodiNama' => $kaprodi?->nama,
+            'kaprodi' => $kaprodi,
             'dosenNama' => $dosenNama,
         ])->render();
 
@@ -163,7 +164,7 @@ class AbsensiController extends Controller
         ]);
     }
 
-    private function resolveKaprodiNama(?string $programStudi): ?string
+    private function resolveKaprodi(?string $programStudi): ?Dosen
     {
         $programStudi = trim((string) $programStudi);
         if ($programStudi === '') {
@@ -174,7 +175,7 @@ class AbsensiController extends Controller
             ->where('program_studi', $programStudi)
             ->where('status_akademik', 'Ketua Prodi')
             ->orderByDesc('id')
-            ->value('nama');
+            ->first();
     }
 
     public function entry(Request $request): View
@@ -414,17 +415,20 @@ class AbsensiController extends Controller
         $absensi->load(['mataKuliah.dosen', 'mataKuliah.dosen2', 'items.mahasiswa']);
         $items = $absensi->items->sortBy(fn ($i) => (string) ($i->mahasiswa?->npm ?? ''))->values();
 
-        $kaprodiNama = $this->resolveKaprodiNama($absensi->jurusan);
-        $dosenNama = $request->user()?->isDosen()
-            ? ($request->user()?->dosen?->nama ?? null)
-            : ($absensi->mataKuliah?->dosen?->nama ?? null);
+        $kaprodi = $this->resolveKaprodi($absensi->jurusan);
+        $dosen = $request->user()?->isDosen()
+            ? $request->user()?->dosen
+            : $absensi->mataKuliah?->dosen;
+        $dosenNama = $dosen?->nama;
 
         $html = view('admin.absensi.export-pdf', [
             'absensi' => $absensi,
             'items' => $items,
             'role' => $routePrefix,
-            'kaprodiNama' => $kaprodiNama,
+            'kaprodiNama' => $kaprodi?->nama,
+            'kaprodi' => $kaprodi,
             'dosenNama' => $dosenNama,
+            'dosen' => $dosen,
         ])->render();
 
         $dompdf = new Dompdf(['isRemoteEnabled' => true]);
@@ -559,7 +563,16 @@ class AbsensiController extends Controller
 
         $finalItems = $itemByMahasiswaId->values();
 
-        $kaprodiNama = $this->resolveKaprodiNama($jurusan);
+        // Ambil materi per pertemuan
+        $materiList = Absensi::query()
+            ->where('jurusan', $jurusan)
+            ->where('semester', $semester)
+            ->where('mata_kuliah_id', $mataKuliahId)
+            ->whereBetween('pertemuan', [1, 16])
+            ->pluck('materi', 'pertemuan')
+            ->toArray();
+
+        $kaprodi = $this->resolveKaprodi($jurusan);
         $dosenNama = $dosen->nama;
 
         $html = view('dosen.absensi.rekap-pdf', [
@@ -567,8 +580,11 @@ class AbsensiController extends Controller
             'semester' => $semester,
             'mk' => $mk,
             'items' => $finalItems,
-            'kaprodiNama' => $kaprodiNama,
+            'materiList' => $materiList,
+            'kaprodiNama' => $kaprodi?->nama,
+            'kaprodi' => $kaprodi,
             'dosenNama' => $dosenNama,
+            'dosen' => $dosen,
         ])->render();
 
         $dompdf = new Dompdf(['isRemoteEnabled' => true]);

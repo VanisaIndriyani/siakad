@@ -111,7 +111,7 @@
                     <tr>
                         <td class="label">Dosen Pengampu</td>
                         <td class="colon">:</td>
-                        <td class="value">{{ $dosenNama }}</td>
+                        <td class="value">{{ $dosenNama }} (NUPTK. {{ $dosen?->nuptk ?? '-' }})</td>
                     </tr>
                 </table>
             </td>
@@ -180,6 +180,30 @@
         </tbody>
     </table>
 
+    <div style="page-break-inside: avoid; margin-top: 15px;">
+        <div style="font-weight: 800; text-transform: uppercase; margin-bottom: 5px; font-size: 9px;">Jurnal Materi Perkuliahan</div>
+        <table class="tbl" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th style="width: 30px;">Prt.</th>
+                    <th style="text-align: left; padding-left: 5px;">Materi Pembelajaran</th>
+                    <th style="width: 30px;">Prt.</th>
+                    <th style="text-align: left; padding-left: 5px;">Materi Pembelajaran</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for ($i = 1; $i <= 8; $i++)
+                    <tr>
+                        <td>{{ $i }}</td>
+                        <td class="text-left" style="font-size: 8px;">{{ $materiList[$i] ?? '-' }}</td>
+                        <td>{{ $i + 8 }}</td>
+                        <td class="text-left" style="font-size: 8px;">{{ $materiList[$i + 8] ?? '-' }}</td>
+                    </tr>
+                @endfor
+            </tbody>
+        </table>
+    </div>
+
     <table class="sign-table">
         <tr>
             <td>
@@ -187,12 +211,14 @@
                 <div style="font-weight: 700;">Ketua Program Studi</div>
                 <div class="sign-space"></div>
                 <div class="sign-name">{{ $kaprodiNama ?? '........................................' }}</div>
+                <div style="font-size: 9px; margin-top: 2px;">NUPTK. {{ $kaprodi?->nuptk ?? '.....................................' }}</div>
             </td>
             <td>
                 <div style="font-weight: 700;">Sidrap, {{ date('d F Y') }}</div>
                 <div style="font-weight: 700;">Dosen Pengampu,</div>
                 <div class="sign-space"></div>
                 <div class="sign-name">{{ $dosenNama }}</div>
+                <div style="font-size: 9px; margin-top: 2px;">NUPTK. {{ $dosen?->nuptk ?? '.....................................' }}</div>
             </td>
         </tr>
     </table>
