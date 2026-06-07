@@ -1,11 +1,11 @@
-<x-portal-layout :title="'Edit Publikasi KK - '.config('app.name')" subtitle="Edit Publikasi">
+<x-portal-layout :title="'Edit Publikasi - '.config('app.name')" subtitle="Edit Publikasi">
     <x-slot:sidebar>
         @include($routePrefix . '.partials.sidebar')
     </x-slot:sidebar>
 
     <div class="flex items-center justify-between gap-3 mb-5">
         <div>
-            <div class="text-xl font-semibold text-white">Edit Publikasi KK</div>
+            <div class="text-xl font-semibold text-white">Edit Publikasi</div>
             <div class="text-sm text-emerald-100/70">Perbarui data publikasi.</div>
         </div>
         <a href="{{ route($routePrefix . '.publikasi-kk.index') }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-white text-sm font-medium">
@@ -52,7 +52,7 @@
                         <select name="kategori" required
                                 style="width: 100%; height: 44px; background-color: rgba(255, 255, 255, 0.05) !important; color: white !important; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 15px; outline: none; appearance: none; -webkit-appearance: none; -moz-appearance: none;">
                             <option value="" disabled style="background-color: #0d2a23;">Pilih Kategori</option>
-                            @foreach(['Penelitian', 'PKM', 'HAKI', 'Buku'] as $kat)
+                            @foreach(['Penelitian', 'PKM', 'HAKI', 'Buku', 'Sertifikat'] as $kat)
                                 <option value="{{ $kat }}" {{ old('kategori', $publikasiKk->kategori) == $kat ? 'selected' : '' }} style="background-color: #0d2a23;">{{ $kat }}</option>
                             @endforeach
                         </select>

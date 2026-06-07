@@ -227,6 +227,7 @@ Route::prefix('admin')
         Route::post('/laporan/{laporan}/pesan', [AdminPengajuanLaporanController::class, 'storeMessage'])->name('laporan.pesan.store');
 
         Route::get('/publikasi-kk', [\App\Http\Controllers\PublikasiKkController::class, 'index'])->name('publikasi-kk.index');
+        Route::get('/publikasi-kk/export-excel', [\App\Http\Controllers\PublikasiKkController::class, 'exportExcel'])->name('publikasi-kk.export-excel');
         Route::get('/publikasi-kk/create', [\App\Http\Controllers\PublikasiKkController::class, 'create'])->name('publikasi-kk.create');
         Route::post('/publikasi-kk', [\App\Http\Controllers\PublikasiKkController::class, 'store'])->name('publikasi-kk.store');
         Route::get('/publikasi-kk/{publikasiKk}/edit', [\App\Http\Controllers\PublikasiKkController::class, 'edit'])->name('publikasi-kk.edit');
@@ -414,6 +415,7 @@ Route::prefix('dosen')
         Route::post('/laporan/{laporan}/pesan', [DosenPengajuanLaporanController::class, 'storeMessage'])->name('laporan.pesan.store');
 
         Route::get('/publikasi-kk', [\App\Http\Controllers\PublikasiKkController::class, 'index'])->name('publikasi-kk.index');
+        Route::get('/publikasi-kk/export-excel', [\App\Http\Controllers\PublikasiKkController::class, 'exportExcel'])->name('publikasi-kk.export-excel');
         Route::get('/publikasi-kk/create', [\App\Http\Controllers\PublikasiKkController::class, 'create'])->name('publikasi-kk.create');
         Route::post('/publikasi-kk', [\App\Http\Controllers\PublikasiKkController::class, 'store'])->name('publikasi-kk.store');
         Route::get('/publikasi-kk/{publikasiKk}/edit', [\App\Http\Controllers\PublikasiKkController::class, 'edit'])->name('publikasi-kk.edit');
