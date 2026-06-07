@@ -78,6 +78,14 @@
                 </div>
             </div>
 
+            <div>
+                <label class="block text-sm font-medium text-emerald-100/80 mb-1.5">URL Link (Opsional)</label>
+                <input type="url" name="url_link" value="{{ old('url_link') }}" placeholder="https://example.com"
+                       style="background-color: #06221c !important;"
+                       class="w-full h-11 px-4 rounded-xl border border-white/10 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition outline-none text-white">
+                @error('url_link') <p class="mt-1 text-xs text-red-400">{{ $message }}</p> @enderror
+            </div>
+
             <div class="md:col-span-3">
                 <label class="block text-sm font-medium text-emerald-100/80 mb-1.5">Upload Dokumen (PDF/DOC/Gambar)</label>
                 <div class="flex items-center gap-4">

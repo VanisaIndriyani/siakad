@@ -68,6 +68,7 @@
                         <th class="text-left font-medium px-4 py-3">Kategori</th>
                         <th class="text-left font-medium px-4 py-3">Tahun</th>
                         <th class="text-left font-medium px-4 py-3">Reputasi</th>
+                        <th class="text-left font-medium px-4 py-3">Link</th>
                         <th class="text-left font-medium px-4 py-3">File</th>
                         <th class="text-right font-medium px-4 py-3 w-32">Aksi</th>
                     </tr>
@@ -91,6 +92,16 @@
                             </td>
                             <td class="px-4 py-3 text-emerald-100/70">{{ $row->tahun_terbit }}</td>
                             <td class="px-4 py-3 text-emerald-100/70 capitalize">{{ $row->reputasi }}</td>
+                            <td class="px-4 py-3">
+                                @if($row->url_link)
+                                    <a href="{{ $row->url_link }}" target="_blank" class="text-blue-400 hover:underline inline-flex items-center gap-1" title="Buka Link">
+                                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                        Link
+                                    </a>
+                                @else
+                                    <span class="text-emerald-100/30">-</span>
+                                @endif
+                            </td>
                             <td class="px-4 py-3">
                                 @if($row->file_path)
                                     <a href="{{ route($routePrefix . '.publikasi.download', $row) }}" class="text-emerald-400 hover:underline inline-flex items-center gap-1">

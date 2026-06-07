@@ -52,6 +52,7 @@ class PublikasiKkController extends Controller
             'kategori' => 'required|in:Penelitian,PKM,HAKI,Buku,Sertifikat',
             'tahun_terbit' => 'required|numeric|digits:4',
             'reputasi' => 'required|in:Internasional,Regional,Nasional,tidakbersinta',
+            'url_link' => 'nullable|url',
             'file' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
         ]);
 
@@ -83,6 +84,7 @@ class PublikasiKkController extends Controller
             'kategori' => 'required|in:Penelitian,PKM,HAKI,Buku,Sertifikat',
             'tahun_terbit' => 'required|numeric|digits:4',
             'reputasi' => 'required|in:Internasional,Regional,Nasional,tidakbersinta',
+            'url_link' => 'nullable|url',
             'file' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
         ]);
 
@@ -146,6 +148,7 @@ class PublikasiKkController extends Controller
         $sheet->setCellValue('E1', 'Kategori');
         $sheet->setCellValue('F1', 'Tahun Terbit');
         $sheet->setCellValue('G1', 'Reputasi');
+        $sheet->setCellValue('H1', 'URL Link');
 
         $rowNum = 2;
         foreach ($items as $index => $item) {
@@ -156,6 +159,7 @@ class PublikasiKkController extends Controller
             $sheet->setCellValue('E' . $rowNum, $item->kategori);
             $sheet->setCellValue('F' . $rowNum, $item->tahun_terbit);
             $sheet->setCellValue('G' . $rowNum, $item->reputasi);
+            $sheet->setCellValue('H' . $rowNum, $item->url_link);
             $rowNum++;
         }
 

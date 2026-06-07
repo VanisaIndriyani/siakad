@@ -16,6 +16,7 @@ class PublikasiKk extends Model
         'kategori',
         'tahun_terbit',
         'reputasi',
+        'url_link',
         'file_path',
         'file_name',
     ];
