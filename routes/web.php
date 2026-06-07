@@ -226,14 +226,14 @@ Route::prefix('admin')
         Route::get('/laporan/{laporan}', [AdminPengajuanLaporanController::class, 'show'])->name('laporan.show');
         Route::post('/laporan/{laporan}/pesan', [AdminPengajuanLaporanController::class, 'storeMessage'])->name('laporan.pesan.store');
 
-        Route::get('/publikasi-kk', [\App\Http\Controllers\PublikasiKkController::class, 'index'])->name('publikasi-kk.index');
-        Route::get('/publikasi-kk/export-excel', [\App\Http\Controllers\PublikasiKkController::class, 'exportExcel'])->name('publikasi-kk.export-excel');
-        Route::get('/publikasi-kk/create', [\App\Http\Controllers\PublikasiKkController::class, 'create'])->name('publikasi-kk.create');
-        Route::post('/publikasi-kk', [\App\Http\Controllers\PublikasiKkController::class, 'store'])->name('publikasi-kk.store');
-        Route::get('/publikasi-kk/{publikasiKk}/edit', [\App\Http\Controllers\PublikasiKkController::class, 'edit'])->name('publikasi-kk.edit');
-        Route::put('/publikasi-kk/{publikasiKk}', [\App\Http\Controllers\PublikasiKkController::class, 'update'])->name('publikasi-kk.update');
-        Route::delete('/publikasi-kk/{publikasiKk}', [\App\Http\Controllers\PublikasiKkController::class, 'destroy'])->name('publikasi-kk.destroy');
-        Route::get('/publikasi-kk/{publikasiKk}/download', [\App\Http\Controllers\PublikasiKkController::class, 'download'])->name('publikasi-kk.download');
+        Route::get('/publikasi', [\App\Http\Controllers\PublikasiKkController::class, 'index'])->name('publikasi.index');
+        Route::get('/publikasi/export-excel', [\App\Http\Controllers\PublikasiKkController::class, 'exportExcel'])->name('publikasi.export-excel');
+        Route::get('/publikasi/create', [\App\Http\Controllers\PublikasiKkController::class, 'create'])->name('publikasi.create');
+        Route::post('/publikasi', [\App\Http\Controllers\PublikasiKkController::class, 'store'])->name('publikasi.store');
+        Route::get('/publikasi/{publikasiKk}/edit', [\App\Http\Controllers\PublikasiKkController::class, 'edit'])->name('publikasi.edit');
+        Route::put('/publikasi/{publikasiKk}', [\App\Http\Controllers\PublikasiKkController::class, 'update'])->name('publikasi.update');
+        Route::delete('/publikasi/{publikasiKk}', [\App\Http\Controllers\PublikasiKkController::class, 'destroy'])->name('publikasi.destroy');
+        Route::get('/publikasi/{publikasiKk}/download', [\App\Http\Controllers\PublikasiKkController::class, 'download'])->name('publikasi.download');
     });
 
 Route::prefix('mahasiswa')
@@ -414,14 +414,14 @@ Route::prefix('dosen')
         Route::get('/laporan/{laporan}', [DosenPengajuanLaporanController::class, 'show'])->name('laporan.show');
         Route::post('/laporan/{laporan}/pesan', [DosenPengajuanLaporanController::class, 'storeMessage'])->name('laporan.pesan.store');
 
-        Route::get('/publikasi-kk', [\App\Http\Controllers\PublikasiKkController::class, 'index'])->name('publikasi-kk.index');
-        Route::get('/publikasi-kk/export-excel', [\App\Http\Controllers\PublikasiKkController::class, 'exportExcel'])->name('publikasi-kk.export-excel');
-        Route::get('/publikasi-kk/create', [\App\Http\Controllers\PublikasiKkController::class, 'create'])->name('publikasi-kk.create');
-        Route::post('/publikasi-kk', [\App\Http\Controllers\PublikasiKkController::class, 'store'])->name('publikasi-kk.store');
-        Route::get('/publikasi-kk/{publikasiKk}/edit', [\App\Http\Controllers\PublikasiKkController::class, 'edit'])->name('publikasi-kk.edit');
-        Route::put('/publikasi-kk/{publikasiKk}', [\App\Http\Controllers\PublikasiKkController::class, 'update'])->name('publikasi-kk.update');
-        Route::delete('/publikasi-kk/{publikasiKk}', [\App\Http\Controllers\PublikasiKkController::class, 'destroy'])->name('publikasi-kk.destroy');
-        Route::get('/publikasi-kk/{publikasiKk}/download', [\App\Http\Controllers\PublikasiKkController::class, 'download'])->name('publikasi-kk.download');
+        Route::get('/publikasi', [\App\Http\Controllers\PublikasiKkController::class, 'index'])->name('publikasi.index');
+        Route::get('/publikasi/export-excel', [\App\Http\Controllers\PublikasiKkController::class, 'exportExcel'])->name('publikasi.export-excel');
+        Route::get('/publikasi/create', [\App\Http\Controllers\PublikasiKkController::class, 'create'])->name('publikasi.create');
+        Route::post('/publikasi', [\App\Http\Controllers\PublikasiKkController::class, 'store'])->name('publikasi.store');
+        Route::get('/publikasi/{publikasiKk}/edit', [\App\Http\Controllers\PublikasiKkController::class, 'edit'])->name('publikasi.edit');
+        Route::put('/publikasi/{publikasiKk}', [\App\Http\Controllers\PublikasiKkController::class, 'update'])->name('publikasi.update');
+        Route::delete('/publikasi/{publikasiKk}', [\App\Http\Controllers\PublikasiKkController::class, 'destroy'])->name('publikasi.destroy');
+        Route::get('/publikasi/{publikasiKk}/download', [\App\Http\Controllers\PublikasiKkController::class, 'download'])->name('publikasi.download');
     });
 
 Route::prefix('keuangan')

@@ -64,7 +64,7 @@ class PublikasiKkController extends Controller
         $validated['user_id'] = Auth::id();
         PublikasiKk::create($validated);
 
-        return redirect()->route($routePrefix . '.publikasi-kk.index')->with('success', 'Data publikasi berhasil ditambahkan.');
+        return redirect()->route($routePrefix . '.publikasi.index')->with('success', 'Data publikasi berhasil ditambahkan.');
     }
 
     public function edit(Request $request, PublikasiKk $publikasiKk)
@@ -97,7 +97,7 @@ class PublikasiKkController extends Controller
 
         $publikasiKk->update($validated);
 
-        return redirect()->route($routePrefix . '.publikasi-kk.index')->with('success', 'Data publikasi berhasil diperbarui.');
+        return redirect()->route($routePrefix . '.publikasi.index')->with('success', 'Data publikasi berhasil diperbarui.');
     }
 
     public function destroy(Request $request, PublikasiKk $publikasiKk)
@@ -108,7 +108,7 @@ class PublikasiKkController extends Controller
         }
         $publikasiKk->delete();
 
-        return redirect()->route($routePrefix . '.publikasi-kk.index')->with('success', 'Data publikasi berhasil dihapus.');
+        return redirect()->route($routePrefix . '.publikasi.index')->with('success', 'Data publikasi berhasil dihapus.');
     }
 
     public function download(PublikasiKk $publikasiKk)

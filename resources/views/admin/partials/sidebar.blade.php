@@ -86,8 +86,8 @@
         <i class="fa-solid fa-tent text-emerald-300"></i>
         <span class="text-sm font-medium">KKN</span>
     </a>
-    <a href="{{ route('admin.publikasi-kk.index') }}"
-       class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('admin.publikasi-kk.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+    <a href="{{ route('admin.publikasi.index') }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('admin.publikasi.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
         <i class="fa-solid fa-newspaper text-emerald-300"></i>
         <span class="text-sm font-medium">Publikasi</span>
     </a>

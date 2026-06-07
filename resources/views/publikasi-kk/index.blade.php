@@ -9,11 +9,11 @@
             <div class="text-sm text-emerald-100/70">Kelola data publikasi (Penelitian, PKM, HAKI, Buku, Sertifikat).</div>
         </div>
         <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
-            <a href="{{ route($routePrefix . '.publikasi-kk.create') }}" class="h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition text-sm font-medium inline-flex items-center gap-2 text-white">
+            <a href="{{ route($routePrefix . '.publikasi.create') }}" class="h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition text-sm font-medium inline-flex items-center gap-2 text-white">
                 <i class="fa-solid fa-plus"></i>
                 Tambah Publikasi
             </a>
-            <a href="{{ route($routePrefix . '.publikasi-kk.export-excel', request()->all()) }}" class="h-10 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 active:bg-blue-700 transition text-sm font-medium inline-flex items-center gap-2 text-white">
+            <a href="{{ route($routePrefix . '.publikasi.export-excel', request()->all()) }}" class="h-10 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 active:bg-blue-700 transition text-sm font-medium inline-flex items-center gap-2 text-white">
                 <i class="fa-solid fa-file-excel"></i>
                 Download Excel
             </a>
@@ -21,8 +21,8 @@
     </div>
 
     <div class="mb-6 p-4 rounded-2xl bg-[#0d2a23] border border-white/10 shadow-sm">
-        <form action="{{ route($routePrefix . '.publikasi-kk.index') }}" method="GET" class="flex flex-col md:flex-row gap-4">
-            <div class="flex-1">
+        <form action="{{ route($routePrefix . '.publikasi.index') }}" method="GET" class="flex flex-col md:flex-row items-center gap-3">
+            <div class="flex-1 w-full">
                 <div class="relative">
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari judul, penulis, atau penerbit..." 
                         style="background-color: #06221c !important;"
@@ -32,26 +32,33 @@
                     </div>
                 </div>
             </div>
-            <div class="w-full md:w-48">
-                <select name="kategori" onchange="this.form.submit()" 
-                    style="background-color: #06221c !important;"
-                    class="w-full h-11 px-4 rounded-xl border border-white/10 text-white focus:border-emerald-500/50 focus:ring-0 transition text-sm appearance-none cursor-pointer">
-                    <option value="" class="bg-[#0d2a23]">Semua Kategori</option>
-                    <option value="Penelitian" {{ request('kategori') == 'Penelitian' ? 'selected' : '' }} class="bg-[#0d2a23]">Penelitian</option>
-                    <option value="PKM" {{ request('kategori') == 'PKM' ? 'selected' : '' }} class="bg-[#0d2a23]">PKM</option>
-                    <option value="HAKI" {{ request('kategori') == 'HAKI' ? 'selected' : '' }} class="bg-[#0d2a23]">HAKI</option>
-                    <option value="Buku" {{ request('kategori') == 'Buku' ? 'selected' : '' }} class="bg-[#0d2a23]">Buku</option>
-                    <option value="Sertifikat" {{ request('kategori') == 'Sertifikat' ? 'selected' : '' }} class="bg-[#0d2a23]">Sertifikat</option>
-                </select>
+            <div class="w-full md:w-56">
+                <div class="relative">
+                    <select name="kategori" onchange="this.form.submit()" 
+                        style="background-color: #06221c !important;"
+                        class="w-full h-11 pl-4 pr-10 rounded-xl border border-white/10 text-white focus:border-emerald-500/50 focus:ring-0 transition text-sm appearance-none cursor-pointer">
+                        <option value="" class="bg-[#0d2a23]">Semua Kategori</option>
+                        <option value="Penelitian" {{ request('kategori') == 'Penelitian' ? 'selected' : '' }} class="bg-[#0d2a23]">Penelitian</option>
+                        <option value="PKM" {{ request('kategori') == 'PKM' ? 'selected' : '' }} class="bg-[#0d2a23]">PKM</option>
+                        <option value="HAKI" {{ request('kategori') == 'HAKI' ? 'selected' : '' }} class="bg-[#0d2a23]">HAKI</option>
+                        <option value="Buku" {{ request('kategori') == 'Buku' ? 'selected' : '' }} class="bg-[#0d2a23]">Buku</option>
+                        <option value="Sertifikat" {{ request('kategori') == 'Sertifikat' ? 'selected' : '' }} class="bg-[#0d2a23]">Sertifikat</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-emerald-100/30">
+                        <i class="fa-solid fa-chevron-down text-xs"></i>
+                    </div>
+                </div>
             </div>
-            <button type="submit" class="h-11 px-6 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/20 transition text-sm font-medium">
-                Filter
-            </button>
-            @if(request()->anyFilled(['search', 'kategori']))
-                <a href="{{ route($routePrefix . '.publikasi-kk.index') }}" class="h-11 px-6 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition text-sm font-medium inline-flex items-center justify-center">
-                    Reset
-                </a>
-            @endif
+            <div class="flex items-center gap-2 w-full md:w-auto">
+                <button type="submit" class="h-11 flex-1 md:flex-none px-6 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white transition text-sm font-medium">
+                    Filter
+                </button>
+                @if(request()->anyFilled(['search', 'kategori']))
+                    <a href="{{ route($routePrefix . '.publikasi.index') }}" class="h-11 px-4 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition text-sm font-medium inline-flex items-center justify-center" title="Reset Filter">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </a>
+                @endif
+            </div>
         </form>
     </div>
 
@@ -91,7 +98,7 @@
                             <td class="px-4 py-3 text-emerald-100/70 capitalize">{{ $row->reputasi }}</td>
                             <td class="px-4 py-3">
                                 @if($row->file_path)
-                                    <a href="{{ route($routePrefix . '.publikasi-kk.download', $row) }}" class="text-emerald-400 hover:underline inline-flex items-center gap-1">
+                                    <a href="{{ route($routePrefix . '.publikasi.download', $row) }}" class="text-emerald-400 hover:underline inline-flex items-center gap-1">
                                         <i class="fa-solid fa-file-arrow-down"></i>
                                         Download
                                     </a>
@@ -101,10 +108,10 @@
                             </td>
                             <td class="px-4 py-3">
                                 <div class="flex items-center justify-end gap-2">
-                                    <a href="{{ route($routePrefix . '.publikasi-kk.edit', $row) }}" class="h-9 w-9 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition" title="Edit">
+                                    <a href="{{ route($routePrefix . '.publikasi.edit', $row) }}" class="h-9 w-9 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition" title="Edit">
                                         <i class="fa-solid fa-pen"></i>
                                     </a>
-                                    <form method="POST" action="{{ route($routePrefix . '.publikasi-kk.destroy', $row) }}" onsubmit="return confirm('Apakah kamu yakin ingin menghapus data ini?')">
+                                    <form method="POST" action="{{ route($routePrefix . '.publikasi.destroy', $row) }}" onsubmit="return confirm('Apakah kamu yakin ingin menghapus data ini?')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="h-9 w-9 inline-flex items-center justify-center rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/20 transition text-red-100" title="Hapus">
