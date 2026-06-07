@@ -25,7 +25,8 @@
             <div class="flex-1">
                 <div class="relative">
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari judul, penulis, atau penerbit..." 
-                        class="w-full h-11 pl-11 pr-4 rounded-xl bg-[#06221c] border border-white/10 text-white placeholder:text-emerald-100/30 focus:border-emerald-500/50 focus:ring-0 transition text-sm">
+                        style="background-color: #06221c !important;"
+                        class="w-full h-11 pl-11 pr-4 rounded-xl border border-white/10 text-white placeholder:text-emerald-100/30 focus:border-emerald-500/50 focus:ring-0 transition text-sm">
                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-emerald-100/30">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </div>
@@ -33,7 +34,8 @@
             </div>
             <div class="w-full md:w-48">
                 <select name="kategori" onchange="this.form.submit()" 
-                    class="w-full h-11 px-4 rounded-xl bg-[#06221c] border border-white/10 text-white focus:border-emerald-500/50 focus:ring-0 transition text-sm appearance-none cursor-pointer">
+                    style="background-color: #06221c !important;"
+                    class="w-full h-11 px-4 rounded-xl border border-white/10 text-white focus:border-emerald-500/50 focus:ring-0 transition text-sm appearance-none cursor-pointer">
                     <option value="" class="bg-[#0d2a23]">Semua Kategori</option>
                     <option value="Penelitian" {{ request('kategori') == 'Penelitian' ? 'selected' : '' }} class="bg-[#0d2a23]">Penelitian</option>
                     <option value="PKM" {{ request('kategori') == 'PKM' ? 'selected' : '' }} class="bg-[#0d2a23]">PKM</option>
