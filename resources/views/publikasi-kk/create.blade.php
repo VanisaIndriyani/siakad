@@ -71,6 +71,7 @@
                                     class="w-full h-11 px-4 rounded-xl bg-[#06221c] border border-white/10 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition outline-none text-white appearance-none cursor-pointer">
                                 <option value="" disabled selected class="bg-[#0d2a23]">Pilih Reputasi</option>
                                 <option value="Internasional" {{ old('reputasi') == 'Internasional' ? 'selected' : '' }} class="bg-[#0d2a23]">Internasional</option>
+                                <option value="Regional" {{ old('reputasi') == 'Regional' ? 'selected' : '' }} class="bg-[#0d2a23]">Regional</option>
                                 <option value="Nasional" {{ old('reputasi') == 'Nasional' ? 'selected' : '' }} class="bg-[#0d2a23]">Nasional</option>
                                 <option value="tidakbersinta" {{ old('reputasi') == 'tidakbersinta' ? 'selected' : '' }} class="bg-[#0d2a23]">Tidak Bersinta</option>
                             </select>

@@ -51,7 +51,7 @@ class PublikasiKkController extends Controller
             'penerbit' => 'required|string|max:255',
             'kategori' => 'required|in:Penelitian,PKM,HAKI,Buku,Sertifikat',
             'tahun_terbit' => 'required|numeric|digits:4',
-            'reputasi' => 'required|in:Internasional,Nasional,tidakbersinta',
+            'reputasi' => 'required|in:Internasional,Regional,Nasional,tidakbersinta',
             'file' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
         ]);
 
@@ -82,7 +82,7 @@ class PublikasiKkController extends Controller
             'penerbit' => 'required|string|max:255',
             'kategori' => 'required|in:Penelitian,PKM,HAKI,Buku,Sertifikat',
             'tahun_terbit' => 'required|numeric|digits:4',
-            'reputasi' => 'required|in:Internasional,Nasional,tidakbersinta',
+            'reputasi' => 'required|in:Internasional,Regional,Nasional,tidakbersinta',
             'file' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
         ]);
 
