@@ -30,8 +30,8 @@
                 <label class="block text-sm font-medium text-emerald-100/80 mb-1.5">Kategori</label>
                 <div class="relative">
                     <select name="kategori" required
-                            style="background-color: #06221c !important;"
-                            class="w-full h-11 px-4 rounded-xl border border-white/10 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition outline-none text-white appearance-none cursor-pointer">
+                            style="background-color: #06221c !important; appearance: none !important; -webkit-appearance: none !important; -moz-appearance: none !important;"
+                            class="w-full h-11 px-4 pr-10 rounded-xl border border-white/10 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition outline-none text-white cursor-pointer">
                         <option value="" disabled selected class="bg-[#0d2a23]">Pilih Kategori</option>
                         @foreach(['Penelitian', 'PKM', 'HAKI', 'Buku', 'Sertifikat'] as $kat)
                             <option value="{{ $kat }}" {{ old('kategori') == $kat ? 'selected' : '' }} class="bg-[#0d2a23]">{{ $kat }}</option>
@@ -70,8 +70,8 @@
                     <label class="block text-sm font-medium text-emerald-100/80 mb-1.5">Reputasi</label>
                     <div class="relative">
                         <select name="reputasi" required
-                                style="background-color: #06221c !important;"
-                                class="w-full h-11 px-4 rounded-xl border border-white/10 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition outline-none text-white appearance-none cursor-pointer">
+                                style="background-color: #06221c !important; appearance: none !important; -webkit-appearance: none !important; -moz-appearance: none !important;"
+                                class="w-full h-11 px-4 pr-10 rounded-xl border border-white/10 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition outline-none text-white cursor-pointer">
                             <option value="" disabled selected class="bg-[#0d2a23]">Pilih Reputasi</option>
                             <option value="Internasional" {{ old('reputasi') == 'Internasional' ? 'selected' : '' }} class="bg-[#0d2a23]">Internasional</option>
                             <option value="Regional" {{ old('reputasi') == 'Regional' ? 'selected' : '' }} class="bg-[#0d2a23]">Regional</option>

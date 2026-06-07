@@ -21,8 +21,8 @@
     </div>
 
     <div class="mb-6 p-4 rounded-2xl bg-[#0d2a23] border border-white/10 shadow-sm">
-        <form action="{{ route($routePrefix . '.publikasi.index') }}" method="GET" class="flex flex-col md:flex-row items-center gap-3">
-            <div class="flex-1 w-full">
+        <form action="{{ route($routePrefix . '.publikasi.index') }}" method="GET" class="flex flex-wrap items-center gap-3">
+            <div class="flex-1 min-w-[200px]">
                 <div class="relative">
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari judul, penulis, atau penerbit..." 
                         style="background-color: #06221c !important;"
@@ -35,8 +35,8 @@
             <div class="w-full md:w-56">
                 <div class="relative">
                     <select name="kategori" onchange="this.form.submit()" 
-                        style="background-color: #06221c !important;"
-                        class="w-full h-11 pl-4 pr-10 rounded-xl border border-white/10 text-white focus:border-emerald-500/50 focus:ring-0 transition text-sm appearance-none cursor-pointer">
+                        style="background-color: #06221c !important; appearance: none !important; -webkit-appearance: none !important; -moz-appearance: none !important;"
+                        class="w-full h-11 pl-4 pr-10 rounded-xl border border-white/10 text-white focus:border-emerald-500/50 focus:ring-0 transition text-sm cursor-pointer">
                         <option value="" class="bg-[#0d2a23]">Semua Kategori</option>
                         <option value="Penelitian" {{ request('kategori') == 'Penelitian' ? 'selected' : '' }} class="bg-[#0d2a23]">Penelitian</option>
                         <option value="PKM" {{ request('kategori') == 'PKM' ? 'selected' : '' }} class="bg-[#0d2a23]">PKM</option>
@@ -49,8 +49,8 @@
                     </div>
                 </div>
             </div>
-            <div class="flex items-center gap-2 w-full md:w-auto">
-                <button type="submit" class="h-11 flex-1 md:flex-none px-6 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white transition text-sm font-medium">
+            <div class="flex items-center gap-2">
+                <button type="submit" class="h-11 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white transition text-sm font-medium">
                     Filter
                 </button>
                 @if(request()->anyFilled(['search', 'kategori']))
