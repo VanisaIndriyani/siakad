@@ -20,12 +20,12 @@
         </div>
     </div>
 
-    <div class="mb-6 p-4 rounded-2xl bg-white/5 border border-white/10 shadow-sm">
+    <div class="mb-6 p-4 rounded-2xl bg-[#0d2a23] border border-white/10 shadow-sm">
         <form action="{{ route($routePrefix . '.publikasi-kk.index') }}" method="GET" class="flex flex-col md:flex-row gap-4">
             <div class="flex-1">
                 <div class="relative">
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari judul, penulis, atau penerbit..." 
-                        class="w-full h-11 pl-11 pr-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-emerald-100/30 focus:border-emerald-500/50 focus:ring-0 transition text-sm">
+                        class="w-full h-11 pl-11 pr-4 rounded-xl bg-[#06221c] border border-white/10 text-white placeholder:text-emerald-100/30 focus:border-emerald-500/50 focus:ring-0 transition text-sm">
                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-emerald-100/30">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </div>
@@ -33,13 +33,13 @@
             </div>
             <div class="w-full md:w-48">
                 <select name="kategori" onchange="this.form.submit()" 
-                    class="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-white focus:border-emerald-500/50 focus:ring-0 transition text-sm appearance-none cursor-pointer">
-                    <option value="" class="bg-slate-900">Semua Kategori</option>
-                    <option value="Penelitian" {{ request('kategori') == 'Penelitian' ? 'selected' : '' }} class="bg-slate-900">Penelitian</option>
-                    <option value="PKM" {{ request('kategori') == 'PKM' ? 'selected' : '' }} class="bg-slate-900">PKM</option>
-                    <option value="HAKI" {{ request('kategori') == 'HAKI' ? 'selected' : '' }} class="bg-slate-900">HAKI</option>
-                    <option value="Buku" {{ request('kategori') == 'Buku' ? 'selected' : '' }} class="bg-slate-900">Buku</option>
-                    <option value="Sertifikat" {{ request('kategori') == 'Sertifikat' ? 'selected' : '' }} class="bg-slate-900">Sertifikat</option>
+                    class="w-full h-11 px-4 rounded-xl bg-[#06221c] border border-white/10 text-white focus:border-emerald-500/50 focus:ring-0 transition text-sm appearance-none cursor-pointer">
+                    <option value="" class="bg-[#0d2a23]">Semua Kategori</option>
+                    <option value="Penelitian" {{ request('kategori') == 'Penelitian' ? 'selected' : '' }} class="bg-[#0d2a23]">Penelitian</option>
+                    <option value="PKM" {{ request('kategori') == 'PKM' ? 'selected' : '' }} class="bg-[#0d2a23]">PKM</option>
+                    <option value="HAKI" {{ request('kategori') == 'HAKI' ? 'selected' : '' }} class="bg-[#0d2a23]">HAKI</option>
+                    <option value="Buku" {{ request('kategori') == 'Buku' ? 'selected' : '' }} class="bg-[#0d2a23]">Buku</option>
+                    <option value="Sertifikat" {{ request('kategori') == 'Sertifikat' ? 'selected' : '' }} class="bg-[#0d2a23]">Sertifikat</option>
                 </select>
             </div>
             <button type="submit" class="h-11 px-6 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/20 transition text-sm font-medium">
