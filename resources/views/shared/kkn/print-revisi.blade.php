@@ -5,37 +5,102 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kartu Kontrol Bimbingan KKN - {{ $posko->nama_posko }}</title>
     <style>
-        body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.5; color: #000; padding: 40px; }
-        .header { text-align: center; margin-bottom: 30px; border-bottom: 3px double #000; padding-bottom: 10px; }
-        .header h1 { font-size: 16pt; margin: 0; text-transform: uppercase; }
-        .header h2 { font-size: 14pt; margin: 5px 0 0; text-transform: uppercase; }
+        @page { margin: 16mm 14mm 16mm 17mm; }
+        body { font-family: 'Times New Roman', Times, serif; font-size: 11pt; line-height: 1.5; color: #000; padding: 0; }
+        
+        /* Kop Surat Styles */
+        table { width: 100%; border-collapse: collapse; }
+        .kop-title-1 { color: #000; font-size: 16pt; font-weight: 800; margin: 0; line-height: 1.12; text-align: center; }
+        .kop-title-2 { color: #000; font-size: 22pt; font-weight: 900; margin: 1px 0 0; letter-spacing: 0.4px; line-height: 1.06; text-align: center; }
+        .kop-title-3 { color: #000; font-size: 16pt; font-weight: 900; margin: 1px 0 0; line-height: 1.12; text-align: center; }
+        .kop-meta { color: #000; font-size: 10pt; margin-top: 3px; line-height: 1.2; text-align: center; }
+        .kop-line-1 { border-top: 4px solid #000; margin-top: 7px; }
+        .kop-line-2 { border-top: 2px solid #000; margin-top: 3px; }
+        
+        .doc-title { text-align: center; font-size: 14pt; font-weight: 900; margin: 20px 0 15px; text-decoration: underline; text-transform: uppercase; }
+        
         .info-table { width: 100%; margin-bottom: 25px; }
-        .info-table td { vertical-align: top; padding: 3px 0; }
+        .info-table td { vertical-align: top; padding: 3px 0; font-size: 11pt; }
         .info-table td:first-child { width: 150px; font-weight: bold; }
         .info-table td:nth-child(2) { width: 20px; text-align: center; }
+        
         .revisi-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .revisi-table th, .revisi-table td { border: 1px solid #000; padding: 10px; text-align: left; }
-        .revisi-table th { background-color: #f2f2f2; text-align: center; text-transform: uppercase; font-size: 10pt; }
+        .revisi-table th, .revisi-table td { border: 1px solid #000; padding: 10px; text-align: left; font-size: 10pt; }
+        .revisi-table th { background-color: #f2f2f2; text-align: center; text-transform: uppercase; font-weight: bold; }
+        
         .footer { margin-top: 50px; width: 100%; }
         .footer table { width: 100%; }
-        .footer td { width: 50%; text-align: center; }
+        .footer td { width: 50%; text-align: center; font-size: 11pt; }
         .signature-space { height: 80px; }
+        
         @media print {
-            body { padding: 0; }
             .no-print { display: none; }
-            @page { margin: 2cm; }
         }
     </style>
 </head>
 <body>
-    <div class="no-print" style="margin-bottom: 20px; text-align: right;">
+    @php
+        $logoCandidates = [
+            public_path('img/lo.jpeg'),
+            public_path('img/logo.png'),
+            base_path('../img/lo.jpeg'),
+            base_path('../img/logo.png'),
+            base_path('../public/img/lo.jpeg'),
+            base_path('../public/img/logo.png'),
+        ];
+
+        $logoPath = null;
+        foreach ($logoCandidates as $candidate) {
+            if (is_string($candidate) && is_file($candidate) && is_readable($candidate)) {
+                $logoPath = $candidate;
+                break;
+            }
+        }
+
+        $logoBase64 = null;
+        if ($logoPath) {
+            $data = @file_get_contents($logoPath);
+            if ($data !== false) {
+                $ext = strtolower((string) pathinfo($logoPath, PATHINFO_EXTENSION));
+                $ext = $ext === 'jpg' ? 'jpeg' : $ext;
+                $logoBase64 = 'data:image/'.$ext.';base64,'.base64_encode($data);
+            }
+        }
+
+        $kop1 = 'INSTITUT AGAMA ISLAM';
+        $kop2 = "DARUD DA'WAH WAL IRSYAD";
+        $kop3 = 'SIDENRENG RAPPANG';
+        $kop4 = 'TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021';
+        $kop5 = 'Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang';
+        $kop6 = 'E-mail : iaiddisidrap@gmail.com  Website : www.yppddisrapp.ac.id';
+    @endphp
+
+    <div class="no-print" style="margin-bottom: 20px; text-align: right; padding: 20px;">
         <button onclick="window.print()" style="padding: 10px 20px; cursor: pointer; background: #10b981; color: white; border: none; border-radius: 5px; font-weight: bold;">CETAK LAPORAN</button>
     </div>
 
-    <div class="header">
-        <h1>SIAKAD IAI DDI SIDRAP</h1>
-        <h2>Kartu Kontrol Bimbingan Kuliah Kerja Nyata (KKN)</h2>
-    </div>
+    <table>
+        <tr>
+            <td style="width: 120px; vertical-align: middle; padding-top: 2px;">
+                @if($logoBase64)
+                    <img src="{{ $logoBase64 }}" alt="Logo" style="display: block; width: 110px; height: auto;" />
+                @endif
+            </td>
+            <td style="text-align: center;">
+                <div class="kop-title-1">{{ $kop1 }}</div>
+                <div class="kop-title-2">{{ $kop2 }}</div>
+                <div class="kop-title-3">{{ $kop3 }}</div>
+                <div class="kop-meta" style="font-weight: 700;">{{ $kop4 }}</div>
+                <div class="kop-meta">{{ $kop5 }}</div>
+                <div class="kop-meta">{{ $kop6 }}</div>
+            </td>
+            <td style="width: 100px;"></td>
+        </tr>
+    </table>
+    <div class="kop-line-1"></div>
+    <div class="kop-line-2"></div>
+
+    <div class="doc-title">Kartu Kontrol Bimbingan Kuliah Kerja Nyata (KKN)</div>
 
     <table class="info-table">
         <tr>
