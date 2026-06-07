@@ -28,19 +28,14 @@
 
             <div>
                 <label class="block text-sm font-medium text-emerald-100/80 mb-1.5">Kategori</label>
-                <div class="relative">
-                    <select name="kategori" required
-                            style="background-color: #06221c !important; appearance: none !important; -webkit-appearance: none !important; -moz-appearance: none !important;"
-                            class="w-full h-11 pl-4 pr-10 rounded-xl border border-white/10 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition outline-none text-white cursor-pointer">
-                        <option value="" disabled selected class="bg-[#0d2a23]">Pilih Kategori</option>
-                        @foreach(['Penelitian', 'PKM', 'HAKI', 'Buku', 'Sertifikat'] as $kat)
-                            <option value="{{ $kat }}" {{ old('kategori') == $kat ? 'selected' : '' }} class="bg-[#0d2a23]">{{ $kat }}</option>
-                        @endforeach
-                    </select>
-                    <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-emerald-100/30">
-                        <i class="fa-solid fa-chevron-down text-xs"></i>
-                    </div>
-                </div>
+                <select name="kategori" required
+                        style="background-color: #06221c !important;"
+                        class="w-full h-11 px-4 rounded-xl border border-white/10 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition outline-none text-white cursor-pointer">
+                    <option value="" disabled selected class="bg-[#0d2a23]">Pilih Kategori</option>
+                    @foreach(['Penelitian', 'PKM', 'HAKI', 'Buku', 'Sertifikat'] as $kat)
+                        <option value="{{ $kat }}" {{ old('kategori') == $kat ? 'selected' : '' }} class="bg-[#0d2a23]">{{ $kat }}</option>
+                    @endforeach
+                </select>
                 @error('kategori') <p class="mt-1 text-xs text-red-400">{{ $message }}</p> @enderror
             </div>
 
@@ -70,20 +65,15 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-emerald-100/80 mb-1.5">Reputasi</label>
-                    <div class="relative">
-                        <select name="reputasi" required
-                                style="background-color: #06221c !important; appearance: none !important; -webkit-appearance: none !important; -moz-appearance: none !important;"
-                                class="w-full h-11 pl-4 pr-10 rounded-xl border border-white/10 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition outline-none text-white cursor-pointer">
-                            <option value="" disabled selected class="bg-[#0d2a23]">Pilih Reputasi</option>
-                            <option value="Internasional" {{ old('reputasi') == 'Internasional' ? 'selected' : '' }} class="bg-[#0d2a23]">Internasional</option>
-                            <option value="Regional" {{ old('reputasi') == 'Regional' ? 'selected' : '' }} class="bg-[#0d2a23]">Regional</option>
-                            <option value="Nasional" {{ old('reputasi') == 'Nasional' ? 'selected' : '' }} class="bg-[#0d2a23]">Nasional</option>
-                            <option value="tidakbersinta" {{ old('reputasi') == 'tidakbersinta' ? 'selected' : '' }} class="bg-[#0d2a23]">Tidak Bersinta</option>
-                        </select>
-                        <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-emerald-100/30">
-                            <i class="fa-solid fa-chevron-down text-xs"></i>
-                        </div>
-                    </div>
+                    <select name="reputasi" required
+                            style="background-color: #06221c !important;"
+                            class="w-full h-11 px-4 rounded-xl border border-white/10 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition outline-none text-white cursor-pointer">
+                        <option value="" disabled selected class="bg-[#0d2a23]">Pilih Reputasi</option>
+                        <option value="Internasional" {{ old('reputasi') == 'Internasional' ? 'selected' : '' }} class="bg-[#0d2a23]">Internasional</option>
+                        <option value="Regional" {{ old('reputasi') == 'Regional' ? 'selected' : '' }} class="bg-[#0d2a23]">Regional</option>
+                        <option value="Nasional" {{ old('reputasi') == 'Nasional' ? 'selected' : '' }} class="bg-[#0d2a23]">Nasional</option>
+                        <option value="tidakbersinta" {{ old('reputasi') == 'tidakbersinta' ? 'selected' : '' }} class="bg-[#0d2a23]">Tidak Bersinta</option>
+                    </select>
                     @error('reputasi') <p class="mt-1 text-xs text-red-400">{{ $message }}</p> @enderror
                 </div>
             </div>

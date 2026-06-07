@@ -33,21 +33,16 @@
                 </div>
             </div>
             <div class="w-48 md:w-56">
-                <div class="relative">
-                    <select name="kategori" onchange="this.form.submit()" 
-                        style="background-color: #06221c !important; appearance: none !important; -webkit-appearance: none !important; -moz-appearance: none !important;"
-                        class="w-full h-11 pl-4 pr-10 rounded-xl border border-white/10 text-white focus:border-emerald-500/50 focus:ring-0 transition text-sm cursor-pointer">
-                        <option value="" class="bg-[#0d2a23]">Semua Kategori</option>
-                        <option value="Penelitian" {{ request('kategori') == 'Penelitian' ? 'selected' : '' }} class="bg-[#0d2a23]">Penelitian</option>
-                        <option value="PKM" {{ request('kategori') == 'PKM' ? 'selected' : '' }} class="bg-[#0d2a23]">PKM</option>
-                        <option value="HAKI" {{ request('kategori') == 'HAKI' ? 'selected' : '' }} class="bg-[#0d2a23]">HAKI</option>
-                        <option value="Buku" {{ request('kategori') == 'Buku' ? 'selected' : '' }} class="bg-[#0d2a23]">Buku</option>
-                        <option value="Sertifikat" {{ request('kategori') == 'Sertifikat' ? 'selected' : '' }} class="bg-[#0d2a23]">Sertifikat</option>
-                    </select>
-                    <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-emerald-100/30">
-                        <i class="fa-solid fa-chevron-down text-xs"></i>
-                    </div>
-                </div>
+                <select name="kategori" onchange="this.form.submit()" 
+                    style="background-color: #06221c !important;"
+                    class="w-full h-11 px-4 rounded-xl border border-white/10 text-white focus:border-emerald-500/50 focus:ring-0 transition text-sm cursor-pointer">
+                    <option value="" class="bg-[#0d2a23]">Semua Kategori</option>
+                    <option value="Penelitian" {{ request('kategori') == 'Penelitian' ? 'selected' : '' }} class="bg-[#0d2a23]">Penelitian</option>
+                    <option value="PKM" {{ request('kategori') == 'PKM' ? 'selected' : '' }} class="bg-[#0d2a23]">PKM</option>
+                    <option value="HAKI" {{ request('kategori') == 'HAKI' ? 'selected' : '' }} class="bg-[#0d2a23]">HAKI</option>
+                    <option value="Buku" {{ request('kategori') == 'Buku' ? 'selected' : '' }} class="bg-[#0d2a23]">Buku</option>
+                    <option value="Sertifikat" {{ request('kategori') == 'Sertifikat' ? 'selected' : '' }} class="bg-[#0d2a23]">Sertifikat</option>
+                </select>
             </div>
             <div class="flex items-center gap-2">
                 <button type="submit" class="h-11 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white transition text-sm font-medium whitespace-nowrap">
