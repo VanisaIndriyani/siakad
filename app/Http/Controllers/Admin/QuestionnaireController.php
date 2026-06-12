@@ -110,7 +110,8 @@ class QuestionnaireController extends Controller
             $drawing->setPath($logoPath);
             $drawing->setHeight(100);
             $drawing->setCoordinates('A1');
-            $drawing->setOffsetX(350); // Adjust this value to center the logo
+            $drawing->setOffsetX(10);
+            $drawing->setOffsetY(5);
             $drawing->setWorksheet($sheet);
             // Set row height for logo
             $sheet->getRowDimension(1)->setRowHeight(80);
@@ -119,38 +120,40 @@ class QuestionnaireController extends Controller
             $sheet->getRowDimension(4)->setRowHeight(20);
             $sheet->getRowDimension(5)->setRowHeight(20);
             $sheet->getRowDimension(6)->setRowHeight(20);
+            // Set column A width for logo
+            $sheet->getColumnDimension('A')->setWidth(20);
         }
 
         // Set cell values and merge cells for kop surat
-        $sheet->setCellValue('A1', 'INSTITUT AGAMA ISLAM');
-        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(20);
-        $sheet->mergeCells('A1:M1');
-        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->setCellValue('B1', 'INSTITUT AGAMA ISLAM');
+        $sheet->getStyle('B1')->getFont()->setBold(true)->setSize(20);
+        $sheet->mergeCells('B1:L1');
+        $sheet->getStyle('B1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
-        $sheet->setCellValue('A2', 'DARUD DA\'WAH WAL IRSYAD');
-        $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(28);
-        $sheet->mergeCells('A2:M2');
-        $sheet->getStyle('A2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->setCellValue('B2', 'DARUD DA\'WAH WAL IRSYAD');
+        $sheet->getStyle('B2')->getFont()->setBold(true)->setSize(28);
+        $sheet->mergeCells('B2:L2');
+        $sheet->getStyle('B2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
-        $sheet->setCellValue('A3', 'SIDENRENG RAPPANG');
-        $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(20);
-        $sheet->mergeCells('A3:M3');
-        $sheet->getStyle('A3')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->setCellValue('B3', 'SIDENRENG RAPPANG');
+        $sheet->getStyle('B3')->getFont()->setBold(true)->setSize(20);
+        $sheet->mergeCells('B3:L3');
+        $sheet->getStyle('B3')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
-        $sheet->setCellValue('A4', 'TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021');
-        $sheet->getStyle('A4')->getFont()->setBold(true)->setSize(12);
-        $sheet->mergeCells('A4:M4');
-        $sheet->getStyle('A4')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->setCellValue('B4', 'TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021');
+        $sheet->getStyle('B4')->getFont()->setBold(true)->setSize(12);
+        $sheet->mergeCells('B4:L4');
+        $sheet->getStyle('B4')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
-        $sheet->setCellValue('A5', 'Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang');
-        $sheet->getStyle('A5')->getFont()->setSize(12);
-        $sheet->mergeCells('A5:M5');
-        $sheet->getStyle('A5')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->setCellValue('B5', 'Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang');
+        $sheet->getStyle('B5')->getFont()->setSize(12);
+        $sheet->mergeCells('B5:L5');
+        $sheet->getStyle('B5')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
-        $sheet->setCellValue('A6', 'E-mail : iaiddisidrap@gmail.com  Website : www.yppddisrapp.ac.id');
-        $sheet->getStyle('A6')->getFont()->setSize(12);
-        $sheet->mergeCells('A6:M6');
-        $sheet->getStyle('A6')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->setCellValue('B6', 'E-mail : iaiddisidrap@gmail.com  Website : www.yppddisrapp.ac.id');
+        $sheet->getStyle('B6')->getFont()->setSize(12);
+        $sheet->mergeCells('B6:L6');
+        $sheet->getStyle('B6')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         
         // Add a thick line separator
         $styleArray = [
@@ -161,13 +164,13 @@ class QuestionnaireController extends Controller
                 ],
             ],
         ];
-        $sheet->getStyle('A7:N7')->applyFromArray($styleArray);
+        $sheet->getStyle('A7:L7')->applyFromArray($styleArray);
         $sheet->getRowDimension(7)->setRowHeight(2);
 
         // Document title
         $sheet->setCellValue('A9', 'REKAP KUESIONER MAHASISWA');
         $sheet->getStyle('A9')->getFont()->setBold(true)->setSize(14);
-        $sheet->mergeCells('A9:N9');
+        $sheet->mergeCells('A9:L9');
         $sheet->getStyle('A9')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
         // Summary info
