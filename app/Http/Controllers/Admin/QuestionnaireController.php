@@ -88,108 +88,28 @@ class QuestionnaireController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Rekap Kuesioner');
 
-        // Add logo if available
-        $logoCandidates = [
-            public_path('img/lo.jpeg'),
-            public_path('img/logo.png'),
-            base_path('../img/lo.jpeg'),
-            base_path('../img/logo.png'),
-            base_path('../public/img/lo.jpeg'),
-            base_path('../public/img/logo.png'),
-        ];
-        $logoPath = null;
-        foreach ($logoCandidates as $candidate) {
-            if (is_string($candidate) && is_file($candidate) && is_readable($candidate)) {
-                $logoPath = $candidate;
-                break;
-            }
-        }
-
-        if ($logoPath) {
-            $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
-            $drawing->setPath($logoPath);
-            $drawing->setHeight(100);
-            $drawing->setCoordinates('A1');
-            $drawing->setOffsetX(10);
-            $drawing->setOffsetY(5);
-            $drawing->setWorksheet($sheet);
-            // Set row height for logo
-            $sheet->getRowDimension(1)->setRowHeight(80);
-            $sheet->getRowDimension(2)->setRowHeight(30);
-            $sheet->getRowDimension(3)->setRowHeight(25);
-            $sheet->getRowDimension(4)->setRowHeight(20);
-            $sheet->getRowDimension(5)->setRowHeight(20);
-            $sheet->getRowDimension(6)->setRowHeight(20);
-            // Set column A width for logo
-            $sheet->getColumnDimension('A')->setWidth(20);
-        }
-
-        // Set cell values and merge cells for kop surat
-        $sheet->setCellValue('B1', 'INSTITUT AGAMA ISLAM');
-        $sheet->getStyle('B1')->getFont()->setBold(true)->setSize(20);
-        $sheet->mergeCells('B1:L1');
-        $sheet->getStyle('B1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-
-        $sheet->setCellValue('B2', 'DARUD DA\'WAH WAL IRSYAD');
-        $sheet->getStyle('B2')->getFont()->setBold(true)->setSize(28);
-        $sheet->mergeCells('B2:L2');
-        $sheet->getStyle('B2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-
-        $sheet->setCellValue('B3', 'SIDENRENG RAPPANG');
-        $sheet->getStyle('B3')->getFont()->setBold(true)->setSize(20);
-        $sheet->mergeCells('B3:L3');
-        $sheet->getStyle('B3')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-
-        $sheet->setCellValue('B4', 'TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021');
-        $sheet->getStyle('B4')->getFont()->setBold(true)->setSize(12);
-        $sheet->mergeCells('B4:L4');
-        $sheet->getStyle('B4')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-
-        $sheet->setCellValue('B5', 'Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang');
-        $sheet->getStyle('B5')->getFont()->setSize(12);
-        $sheet->mergeCells('B5:L5');
-        $sheet->getStyle('B5')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-
-        $sheet->setCellValue('B6', 'E-mail : iaiddisidrap@gmail.com  Website : www.yppddisrapp.ac.id');
-        $sheet->getStyle('B6')->getFont()->setSize(12);
-        $sheet->mergeCells('B6:L6');
-        $sheet->getStyle('B6')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-        
-        // Add a thick line separator
-        $styleArray = [
-            'borders' => [
-                'bottom' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THICK,
-                    'color' => ['argb' => '00000000'],
-                ],
-            ],
-        ];
-        $sheet->getStyle('A7:L7')->applyFromArray($styleArray);
-        $sheet->getRowDimension(7)->setRowHeight(2);
-
-        // Document title
-        $sheet->setCellValue('A9', 'REKAP KUESIONER MAHASISWA');
-        $sheet->getStyle('A9')->getFont()->setBold(true)->setSize(14);
-        $sheet->mergeCells('A9:L9');
-        $sheet->getStyle('A9')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-
         // Summary info
-        $sheet->setCellValue('A11', 'Filter Pencarian');
-        $sheet->setCellValue('B11', $data['q'] !== '' ? $data['q'] : 'Semua data');
-        $sheet->setCellValue('A12', 'Total Respon');
-        $sheet->setCellValue('B12', $data['summary']['responses_count']);
-        $sheet->setCellValue('A13', 'Mahasiswa Mengisi');
-        $sheet->setCellValue('B13', $data['summary']['students_count']);
-        $sheet->setCellValue('A14', 'Pertanyaan Aktif');
-        $sheet->setCellValue('B14', $data['summary']['questions_count']);
-        $sheet->setCellValue('A15', 'Rata-rata Skor');
-        $sheet->setCellValue('B15', $data['summary']['average_score'] !== null ? round((float) $data['summary']['average_score'], 2) : '-');
+        $sheet->setCellValue('A1', 'REKAP KUESIONER MAHASISWA');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->mergeCells('A1:L1');
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        $sheet->setCellValue('A3', 'Filter Pencarian');
+        $sheet->setCellValue('B3', $data['q'] !== '' ? $data['q'] : 'Semua data');
+        $sheet->setCellValue('A4', 'Total Respon');
+        $sheet->setCellValue('B4', $data['summary']['responses_count']);
+        $sheet->setCellValue('A5', 'Mahasiswa Mengisi');
+        $sheet->setCellValue('B5', $data['summary']['students_count']);
+        $sheet->setCellValue('A6', 'Pertanyaan Aktif');
+        $sheet->setCellValue('B6', $data['summary']['questions_count']);
+        $sheet->setCellValue('A7', 'Rata-rata Skor');
+        $sheet->setCellValue('B7', $data['summary']['average_score'] !== null ? round((float) $data['summary']['average_score'], 2) : '-');
 
         // Make summary labels bold
-        $sheet->getStyle('A11:A15')->getFont()->setBold(true);
+        $sheet->getStyle('A3:A7')->getFont()->setBold(true);
 
         // Table headers
-        $row = 17;
+        $row = 9;
         $sheet->setCellValue('A'.$row, 'No');
         $sheet->setCellValue('B'.$row, 'Kode Mata Kuliah');
         $sheet->setCellValue('C'.$row, 'Nama Mata Kuliah');
@@ -213,6 +133,10 @@ class QuestionnaireController extends Controller
                 ],
             ],
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['argb' => 'FFCCCCCC']
+            ]
         ];
         $sheet->getStyle('A'.$row.':L'.$row)->applyFromArray($headerStyle);
 
