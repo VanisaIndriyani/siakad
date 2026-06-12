@@ -110,6 +110,7 @@ class QuestionnaireController extends Controller
             $drawing->setPath($logoPath);
             $drawing->setHeight(100);
             $drawing->setCoordinates('A1');
+            $drawing->setOffsetX(350); // Adjust this value to center the logo
             $drawing->setWorksheet($sheet);
             // Set row height for logo
             $sheet->getRowDimension(1)->setRowHeight(80);
@@ -151,12 +152,6 @@ class QuestionnaireController extends Controller
         $sheet->mergeCells('A6:M6');
         $sheet->getStyle('A6')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         
-        // Now adjust logo position to be centered - let's set offset X after knowing width
-        if ($logoPath) {
-            // Calculate center offset
-            $drawing->setOffsetX(300);
-        }
-
         // Add a thick line separator
         $styleArray = [
             'borders' => [
@@ -247,17 +242,6 @@ class QuestionnaireController extends Controller
         // Auto-size columns
         foreach (range('A', 'L') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
-        }
-        
-        // Now adjust logo offset to center
-        if ($logoPath) {
-            // Get total width of columns A-L to calculate center
-            $totalWidth = 0;
-            foreach (range('A', 'L') as $column) {
-                $totalWidth += $sheet->getColumnDimension($column)->getWidth() * 7; // approx pixels
-            }
-            // Center logo
-            $drawing->setOffsetX(($totalWidth - $drawing->getWidth()) / 2);
         }
 
         $writer = new Xlsx($spreadsheet);
