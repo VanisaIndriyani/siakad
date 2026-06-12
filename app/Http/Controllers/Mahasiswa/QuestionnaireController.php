@@ -154,15 +154,6 @@ class QuestionnaireController extends Controller
             ->with(['khs', 'mataKuliah.dosen', 'mataKuliah.dosen2'])
             ->where('khs_id', $khs->id)
             ->where('mata_kuliah_id', $mataKuliah->id)
-            ->whereExists(function ($query) use ($mahasiswa) {
-                $query->selectRaw('1')
-                    ->from('krs_items')
-                    ->join('krs', 'krs.id', '=', 'krs_items.krs_id')
-                    ->where('krs.mahasiswa_id', $mahasiswa->id)
-                    ->where('krs.status_approval', 'approved')
-                    ->whereColumn('krs.semester', 'khs.semester')
-                    ->whereColumn('krs_items.mata_kuliah_id', 'khs_items.mata_kuliah_id');
-            })
             ->first();
     }
 

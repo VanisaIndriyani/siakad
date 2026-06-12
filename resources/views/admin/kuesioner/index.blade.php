@@ -52,19 +52,19 @@
             @if (! $showAllCourses)
                 <a href="{{ route('admin.kuesioner.index', array_filter(['q' => $q, 'all' => 1])) }}" class="h-11 px-4 inline-flex items-center justify-center rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/20 transition text-emerald-100">Buka Semua</a>
             @else
-                <a href="{{ route('admin.kuesioner.index', array_filter(['q' => $q])) }}" class="h-11 px-4 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">Kembali ke Pagination</a>
+                <a href="{{ route('admin.kuesioner.index', array_filter(['q' => $q])) }}" class="h-11 px-4 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">Tutup Semua</a>
             @endif
         </form>
 
         <div class="flex items-center gap-2">
-            <a href="{{ route('admin.kuesioner.summary.excel', array_filter(['q' => $q, 'all' => $showAllCourses ? 1 : null, 'page' => ! $showAllCourses ? request()->get('page') : null])) }}" class="h-11 px-4 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/20 transition text-emerald-100">
+            <button type="submit" form="export-form" formaction="{{ route('admin.kuesioner.summary.excel') }}" class="h-11 px-4 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/20 transition text-emerald-100">
                 <i class="fa-solid fa-file-excel"></i>
                 Excel
-            </a>
-            <a href="{{ route('admin.kuesioner.summary.pdf', array_filter(['q' => $q, 'all' => $showAllCourses ? 1 : null, 'page' => ! $showAllCourses ? request()->get('page') : null])) }}" class="h-11 px-4 inline-flex items-center justify-center gap-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/20 transition text-red-100">
+            </button>
+            <button type="submit" form="export-form" formaction="{{ route('admin.kuesioner.summary.pdf') }}" class="h-11 px-4 inline-flex items-center justify-center gap-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/20 transition text-red-100">
                 <i class="fa-solid fa-file-pdf"></i>
                 PDF
-            </a>
+            </button>
         </div>
     </div>
 
@@ -94,6 +94,16 @@
             selectAll.indeterminate = checkedCount > 0 && checkedCount < rows.length;
         }
     }">
+        <form id="export-form" method="GET">
+            <input type="hidden" name="q" value="{{ $q }}" />
+            <input type="hidden" name="all" value="{{ $showAllCourses ? 1 : null }}" />
+            @if (! $showAllCourses)
+                <input type="hidden" name="page" value="{{ request()->get('page') }}" />
+            @endif
+            <template x-for="id in selectedIds" :key="id">
+                <input type="hidden" name="mata_kuliah_ids[]" :value="id" />
+            </template>
+        </form>
         <form x-ref="bulkCourseForm" method="POST" action="{{ route('admin.kuesioner.bulk-delete-course') }}" @change="onBulkChange($event)"
               data-confirm="Apakah kamu yakin ingin menghapus hasil kuesioner untuk mata kuliah yang dipilih?">
             @csrf

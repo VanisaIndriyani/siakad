@@ -372,23 +372,44 @@ class QuestionnaireController extends Controller
         if ($page < 1) {
             $page = 1;
         }
+        $selectedMataKuliahIds = $request->input('mata_kuliah_ids', []);
+        if (!is_array($selectedMataKuliahIds)) {
+            $selectedMataKuliahIds = [];
+        }
+        $selectedMataKuliahIds = array_filter(array_map('intval', $selectedMataKuliahIds));
 
         $courseQuery = $this->buildCourseSummaryQuery($q)
             ->orderByDesc('responses_count')
             ->orderBy('mata_kuliah.kode');
 
+        if (!empty($selectedMataKuliahIds)) {
+            $courseQuery->whereIn('mata_kuliah.id', $selectedMataKuliahIds);
+        }
+
         $courseSummaries = $showAll
             ? $courseQuery->get()
             : collect($courseQuery->paginate(10, ['*'], 'page', $page)->items());
 
+        // Build summary stats, filtered if selected courses are provided
+        $responseQuery = QuestionnaireResponse::query();
+        $answerQuery = QuestionnaireAnswer::query();
+
+        if (!empty($selectedMataKuliahIds)) {
+            $responseQuery->whereIn('mata_kuliah_id', $selectedMataKuliahIds);
+            $answerQuery->whereHas('response', function ($q) use ($selectedMataKuliahIds) {
+                $q->whereIn('mata_kuliah_id', $selectedMataKuliahIds);
+            });
+        }
+
         return [
             'q' => $q,
+            'selectedMataKuliahIds' => $selectedMataKuliahIds,
             'courseSummaries' => $courseSummaries,
             'summary' => [
-                'responses_count' => QuestionnaireResponse::query()->count(),
-                'students_count' => QuestionnaireResponse::query()->distinct('mahasiswa_id')->count('mahasiswa_id'),
+                'responses_count' => $responseQuery->count(),
+                'students_count' => $responseQuery->distinct('mahasiswa_id')->count('mahasiswa_id'),
                 'questions_count' => QuestionnaireQuestion::query()->where('is_active', true)->count(),
-                'average_score' => QuestionnaireAnswer::query()->avg('score'),
+                'average_score' => $answerQuery->avg('score'),
             ],
         ];
     }

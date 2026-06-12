@@ -54,15 +54,6 @@ class QuestionnaireService
             ->select('khs_items.*')
             ->join('khs', 'khs.id', '=', 'khs_items.khs_id')
             ->where('khs.mahasiswa_id', $mahasiswa->id)
-            ->whereExists(function ($query) use ($mahasiswa) {
-                $query->selectRaw('1')
-                    ->from('krs_items')
-                    ->join('krs', 'krs.id', '=', 'krs_items.krs_id')
-                    ->where('krs.mahasiswa_id', $mahasiswa->id)
-                    ->where('krs.status_approval', 'approved')
-                    ->whereColumn('krs.semester', 'khs.semester')
-                    ->whereColumn('krs_items.mata_kuliah_id', 'khs_items.mata_kuliah_id');
-            })
             ->whereNotExists(function ($query) use ($mahasiswa) {
                 $query->selectRaw('1')
                     ->from('questionnaire_responses')
@@ -100,15 +91,6 @@ class QuestionnaireService
     {
         return KhsItem::query()
             ->where('khs_id', $khs->id)
-            ->whereExists(function ($query) use ($mahasiswaId) {
-                $query->selectRaw('1')
-                    ->from('krs_items')
-                    ->join('krs', 'krs.id', '=', 'krs_items.krs_id')
-                    ->where('krs.mahasiswa_id', $mahasiswaId)
-                    ->where('krs.status_approval', 'approved')
-                    ->whereColumn('krs.semester', 'khs.semester')
-                    ->whereColumn('krs_items.mata_kuliah_id', 'khs_items.mata_kuliah_id');
-            })
             ->whereNotExists(function ($query) use ($mahasiswaId) {
                 $query->selectRaw('1')
                     ->from('questionnaire_responses')
