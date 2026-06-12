@@ -88,36 +88,125 @@ class QuestionnaireController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Rekap Kuesioner');
 
-        $sheet->fromArray([
-            ['Rekap Kuesioner Mahasiswa'],
-            ['Filter Pencarian', $data['q'] !== '' ? $data['q'] : 'Semua data'],
-            ['Total Respon', $data['summary']['responses_count']],
-            ['Mahasiswa Mengisi', $data['summary']['students_count']],
-            ['Pertanyaan Aktif', $data['summary']['questions_count']],
-            ['Rata-rata Skor', $data['summary']['average_score'] !== null ? round((float) $data['summary']['average_score'], 2) : '-'],
-            [],
-            ['No', 'Kode Mata Kuliah', 'Nama Mata Kuliah', 'Semester', 'Dosen 1', 'Dosen 2', 'Respon', 'Rata-rata', 'Kurang (%)', 'Cukup (%)', 'Baik (%)', 'Sangat Baik (%)'],
-        ]);
+        // Set cell values and merge cells for kop surat
+        $sheet->setCellValue('A1', 'INSTITUT AGAMA ISLAM');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(20);
+        $sheet->mergeCells('A1:L1');
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
-        $row = 9;
+        $sheet->setCellValue('A2', 'DARUD DA\'WAH WAL IRSYAD');
+        $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(28);
+        $sheet->mergeCells('A2:L2');
+        $sheet->getStyle('A2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        $sheet->setCellValue('A3', 'SIDENRENG RAPPANG');
+        $sheet->getStyle('A3')->getFont()->setBold(true)->setSize(20);
+        $sheet->mergeCells('A3:L3');
+        $sheet->getStyle('A3')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        $sheet->setCellValue('A4', 'TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021');
+        $sheet->getStyle('A4')->getFont()->setBold(true)->setSize(12);
+        $sheet->mergeCells('A4:L4');
+        $sheet->getStyle('A4')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        $sheet->setCellValue('A5', 'Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang');
+        $sheet->getStyle('A5')->getFont()->setSize(12);
+        $sheet->mergeCells('A5:L5');
+        $sheet->getStyle('A5')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        $sheet->setCellValue('A6', 'E-mail : iaiddisidrap@gmail.com  Website : www.yppddisrapp.ac.id');
+        $sheet->getStyle('A6')->getFont()->setSize(12);
+        $sheet->mergeCells('A6:L6');
+        $sheet->getStyle('A6')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Add a thick line separator
+        $styleArray = [
+            'borders' => [
+                'bottom' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THICK,
+                    'color' => ['argb' => '00000000'],
+                ],
+            ],
+        ];
+        $sheet->getStyle('A7:L7')->applyFromArray($styleArray);
+        $sheet->getRowDimension(7)->setRowHeight(2);
+
+        // Document title
+        $sheet->setCellValue('A9', 'REKAP KUESIONER MAHASISWA');
+        $sheet->getStyle('A9')->getFont()->setBold(true)->setSize(14);
+        $sheet->mergeCells('A9:L9');
+        $sheet->getStyle('A9')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        // Summary info
+        $sheet->setCellValue('A11', 'Filter Pencarian');
+        $sheet->setCellValue('B11', $data['q'] !== '' ? $data['q'] : 'Semua data');
+        $sheet->setCellValue('A12', 'Total Respon');
+        $sheet->setCellValue('B12', $data['summary']['responses_count']);
+        $sheet->setCellValue('A13', 'Mahasiswa Mengisi');
+        $sheet->setCellValue('B13', $data['summary']['students_count']);
+        $sheet->setCellValue('A14', 'Pertanyaan Aktif');
+        $sheet->setCellValue('B14', $data['summary']['questions_count']);
+        $sheet->setCellValue('A15', 'Rata-rata Skor');
+        $sheet->setCellValue('B15', $data['summary']['average_score'] !== null ? round((float) $data['summary']['average_score'], 2) : '-');
+
+        // Make summary labels bold
+        $sheet->getStyle('A11:A15')->getFont()->setBold(true);
+
+        // Table headers
+        $row = 17;
+        $sheet->setCellValue('A'.$row, 'No');
+        $sheet->setCellValue('B'.$row, 'Kode Mata Kuliah');
+        $sheet->setCellValue('C'.$row, 'Nama Mata Kuliah');
+        $sheet->setCellValue('D'.$row, 'Semester');
+        $sheet->setCellValue('E'.$row, 'Dosen 1');
+        $sheet->setCellValue('F'.$row, 'Dosen 2');
+        $sheet->setCellValue('G'.$row, 'Respon');
+        $sheet->setCellValue('H'.$row, 'Rata-rata');
+        $sheet->setCellValue('I'.$row, 'Kurang (%)');
+        $sheet->setCellValue('J'.$row, 'Cukup (%)');
+        $sheet->setCellValue('K'.$row, 'Baik (%)');
+        $sheet->setCellValue('L'.$row, 'Sangat Baik (%)');
+        
+        // Make table headers bold and with borders
+        $headerStyle = [
+            'font' => ['bold' => true],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['argb' => '00000000'],
+                ],
+            ],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+        ];
+        $sheet->getStyle('A'.$row.':L'.$row)->applyFromArray($headerStyle);
+
+        $row++;
         foreach ($data['courseSummaries'] as $index => $course) {
-            $sheet->fromArray([[
-                $index + 1,
-                $course->kode,
-                $course->nama,
-                $course->semester,
-                $course->dosen_1 ?? '-',
-                $course->dosen_2 ?? '-',
-                $course->responses_count,
-                $course->average_score !== null ? (float) $course->average_score : '-',
-                $course->score_1_pct !== null ? (float) $course->score_1_pct : '-',
-                $course->score_2_pct !== null ? (float) $course->score_2_pct : '-',
-                $course->score_3_pct !== null ? (float) $course->score_3_pct : '-',
-                $course->score_4_pct !== null ? (float) $course->score_4_pct : '-',
-            ]], null, 'A'.$row);
+            $sheet->setCellValue('A'.$row, $index + 1);
+            $sheet->setCellValue('B'.$row, $course->kode);
+            $sheet->setCellValue('C'.$row, $course->nama);
+            $sheet->setCellValue('D'.$row, $course->semester);
+            $sheet->setCellValue('E'.$row, $course->dosen_1 ?? '-');
+            $sheet->setCellValue('F'.$row, $course->dosen_2 ?? '-');
+            $sheet->setCellValue('G'.$row, $course->responses_count);
+            $sheet->setCellValue('H'.$row, $course->average_score !== null ? (float) $course->average_score : '-');
+            $sheet->setCellValue('I'.$row, $course->score_1_pct !== null ? (float) $course->score_1_pct : '-');
+            $sheet->setCellValue('J'.$row, $course->score_2_pct !== null ? (float) $course->score_2_pct : '-');
+            $sheet->setCellValue('K'.$row, $course->score_3_pct !== null ? (float) $course->score_3_pct : '-');
+            $sheet->setCellValue('L'.$row, $course->score_4_pct !== null ? (float) $course->score_4_pct : '-');
+            
+            // Add borders to the row
+            $sheet->getStyle('A'.$row.':L'.$row)->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+            
+            // Center align appropriate columns
+            $sheet->getStyle('A'.$row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('D'.$row.':G'.$row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('H'.$row.':L'.$row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            
             $row++;
         }
 
+        // Auto-size columns
         foreach (range('A', 'L') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
