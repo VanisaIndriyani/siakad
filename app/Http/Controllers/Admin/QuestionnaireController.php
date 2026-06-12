@@ -59,19 +59,26 @@ class QuestionnaireController extends Controller
 
     public function exportSummaryPdf(Request $request)
     {
-        $data = $this->buildSummaryExportData($request);
+        try {
+            $data = $this->buildSummaryExportData($request);
+            $html = view('questionnaire.summary-pdf', $data)->render();
 
-        $html = view('questionnaire.summary-pdf', $data)->render();
+            $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+            $dompdf->loadHtml($html);
+            $dompdf->setPaper('A4', 'landscape');
+            $dompdf->render();
 
-        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
-        $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'landscape');
-        $dompdf->render();
+            return response($dompdf->output(), 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="rekap-kuesioner.pdf"',
+            ]);
+        } catch (\Throwable $e) {
+            report($e);
 
-        return response($dompdf->output(), 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="rekap-kuesioner.pdf"',
-        ]);
+            return redirect()
+                ->route('admin.kuesioner.index', $request->only(['q', 'all', 'page']))
+                ->with('error', 'Gagal generate PDF rekap kuesioner. Coba perkecil data dengan filter atau gunakan pagination.');
+        }
     }
 
     public function exportSummaryExcel(Request $request)
@@ -360,10 +367,23 @@ class QuestionnaireController extends Controller
     private function buildSummaryExportData(Request $request): array
     {
         $q = trim((string) $request->get('q', ''));
+        $showAll = $request->boolean('all');
+        $page = (int) $request->get('page', 1);
+        if ($page < 1) {
+            $page = 1;
+        }
+
+        $courseQuery = $this->buildCourseSummaryQuery($q)
+            ->orderByDesc('responses_count')
+            ->orderBy('mata_kuliah.kode');
+
+        $courseSummaries = $showAll
+            ? $courseQuery->get()
+            : collect($courseQuery->paginate(10, ['*'], 'page', $page)->items());
 
         return [
             'q' => $q,
-            'courseSummaries' => $this->buildCourseSummaryQuery($q)->get(),
+            'courseSummaries' => $courseSummaries,
             'summary' => [
                 'responses_count' => QuestionnaireResponse::query()->count(),
                 'students_count' => QuestionnaireResponse::query()->distinct('mahasiswa_id')->count('mahasiswa_id'),

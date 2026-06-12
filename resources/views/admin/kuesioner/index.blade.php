@@ -57,11 +57,11 @@
         </form>
 
         <div class="flex items-center gap-2">
-            <a href="{{ route('admin.kuesioner.summary.excel', array_filter(['q' => $q])) }}" class="h-11 px-4 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/20 transition text-emerald-100">
+            <a href="{{ route('admin.kuesioner.summary.excel', array_filter(['q' => $q, 'all' => $showAllCourses ? 1 : null, 'page' => ! $showAllCourses ? request()->get('page') : null])) }}" class="h-11 px-4 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/20 transition text-emerald-100">
                 <i class="fa-solid fa-file-excel"></i>
                 Excel
             </a>
-            <a href="{{ route('admin.kuesioner.summary.pdf', array_filter(['q' => $q])) }}" class="h-11 px-4 inline-flex items-center justify-center gap-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/20 transition text-red-100">
+            <a href="{{ route('admin.kuesioner.summary.pdf', array_filter(['q' => $q, 'all' => $showAllCourses ? 1 : null, 'page' => ! $showAllCourses ? request()->get('page') : null])) }}" class="h-11 px-4 inline-flex items-center justify-center gap-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/20 transition text-red-100">
                 <i class="fa-solid fa-file-pdf"></i>
                 PDF
             </a>

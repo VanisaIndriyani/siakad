@@ -71,19 +71,26 @@ class QuestionnaireController extends Controller
 
         abort_unless($dosen, 404);
 
-        $data = $this->buildSummaryExportData((int) $dosen->id, $dosen->nama ?? null, $q);
+        try {
+            $data = $this->buildSummaryExportData((int) $dosen->id, $dosen->nama ?? null, $q);
+            $html = view('questionnaire.summary-pdf-dosen', $data)->render();
 
-        $html = view('questionnaire.summary-pdf-dosen', $data)->render();
+            $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+            $dompdf->loadHtml($html);
+            $dompdf->setPaper('A4', 'landscape');
+            $dompdf->render();
 
-        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
-        $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'landscape');
-        $dompdf->render();
+            return response($dompdf->output(), 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="rekap-kuesioner-dosen.pdf"',
+            ]);
+        } catch (\Throwable $e) {
+            report($e);
 
-        return response($dompdf->output(), 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="rekap-kuesioner-dosen.pdf"',
-        ]);
+            return redirect()
+                ->route('dosen.kuesioner.index', $request->only(['q']))
+                ->with('error', 'Gagal generate PDF rekap kuesioner.');
+        }
     }
 
     public function exportSummaryExcel(Request $request)
