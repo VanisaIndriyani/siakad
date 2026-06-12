@@ -61,10 +61,7 @@
                 <i class="fa-solid fa-file-excel"></i>
                 Excel
             </button>
-            <button type="submit" form="export-form" formaction="{{ route('admin.kuesioner.summary.pdf') }}" class="h-11 px-4 inline-flex items-center justify-center gap-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/20 transition text-red-100">
-                <i class="fa-solid fa-file-pdf"></i>
-                PDF
-            </button>
+           
         </div>
     </div>
 
