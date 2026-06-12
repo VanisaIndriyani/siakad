@@ -4,7 +4,7 @@
     <span class="text-sm font-medium">Dashboard</span>
 </a>
 
-@if (auth()->user()->role === 'admin')
+@if (in_array(auth()->user()->role, ['admin', 'akademik'], true))
     <a href="{{ route('admin.mahasiswa.index') }}"
        class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('admin.mahasiswa.*') && request()->get('status') !== 'Alumni' ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
         <i class="fa-solid fa-user-graduate text-emerald-300"></i>
@@ -60,42 +60,6 @@
         <i class="fa-solid fa-calendar-days text-emerald-300"></i>
         <span class="text-sm font-medium">Kalender Akademik</span>
     </a>
-    <a href="{{ route('admin.skripsi.index') }}"
-       class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('admin.skripsi.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
-        <i class="fa-solid fa-graduation-cap text-emerald-300"></i>
-        <span class="text-sm font-medium">Skripsi</span>
-        @php
-            $unreadSkripsiCount = auth()->user()->unreadSkripsiCount();
-        @endphp
-        @if ($unreadSkripsiCount > 0)
-            <span class="ml-auto inline-flex items-center justify-center min-w-7 h-7 px-2 rounded-full text-xs font-semibold bg-rose-500/15 border border-rose-500/25 text-rose-100">
-                {{ $unreadSkripsiCount }}
-            </span>
-        @endif
-    </a>
-    <a href="{{ route('admin.ppl.index') }}"
-       class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('admin.ppl.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
-        <i class="fa-solid fa-briefcase text-emerald-300"></i>
-        <span class="text-sm font-medium">PPL</span>
-        @php
-            $unreadPplCount = auth()->user()->unreadPplCount();
-        @endphp
-        @if ($unreadPplCount > 0)
-            <span class="ml-auto inline-flex items-center justify-center min-w-7 h-7 px-2 rounded-full text-xs font-semibold bg-rose-500/15 border border-rose-500/25 text-rose-100">
-                {{ $unreadPplCount }}
-            </span>
-        @endif
-    </a>
-    <a href="{{ route('admin.kkn.index') }}"
-       class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('admin.kkn.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
-        <i class="fa-solid fa-tent text-emerald-300"></i>
-        <span class="text-sm font-medium">KKN</span>
-    </a>
-    <a href="{{ route('admin.publikasi.index') }}"
-       class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('admin.publikasi.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
-        <i class="fa-solid fa-newspaper text-emerald-300"></i>
-        <span class="text-sm font-medium">Publikasi</span>
-    </a>
     <a href="{{ route('admin.laporan.index') }}"
        class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('admin.laporan.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
         <i class="fa-solid fa-comments text-emerald-300"></i>
@@ -122,16 +86,54 @@
             </span>
         @endif
     </a>
-    <a href="{{ route('keuangan.pembayaran.index') }}"
-       class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('keuangan.pembayaran.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
-        <i class="fa-solid fa-money-bill-wave text-emerald-300"></i>
-        <span class="text-sm font-medium">Pembayaran</span>
-    </a>
-    <a href="{{ route('admin.user.index') }}"
-       class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('admin.user.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
-        <i class="fa-solid fa-users-gear text-emerald-300"></i>
-        <span class="text-sm font-medium">Manajemen User</span>
-    </a>
+    @if (auth()->user()->role === 'admin')
+        <a href="{{ route('admin.skripsi.index') }}"
+           class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('admin.skripsi.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+            <i class="fa-solid fa-graduation-cap text-emerald-300"></i>
+            <span class="text-sm font-medium">Skripsi</span>
+            @php
+                $unreadSkripsiCount = auth()->user()->unreadSkripsiCount();
+            @endphp
+            @if ($unreadSkripsiCount > 0)
+                <span class="ml-auto inline-flex items-center justify-center min-w-7 h-7 px-2 rounded-full text-xs font-semibold bg-rose-500/15 border border-rose-500/25 text-rose-100">
+                    {{ $unreadSkripsiCount }}
+                </span>
+            @endif
+        </a>
+        <a href="{{ route('admin.ppl.index') }}"
+           class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('admin.ppl.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+            <i class="fa-solid fa-briefcase text-emerald-300"></i>
+            <span class="text-sm font-medium">PPL</span>
+            @php
+                $unreadPplCount = auth()->user()->unreadPplCount();
+            @endphp
+            @if ($unreadPplCount > 0)
+                <span class="ml-auto inline-flex items-center justify-center min-w-7 h-7 px-2 rounded-full text-xs font-semibold bg-rose-500/15 border border-rose-500/25 text-rose-100">
+                    {{ $unreadPplCount }}
+                </span>
+            @endif
+        </a>
+        <a href="{{ route('admin.kkn.index') }}"
+           class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('admin.kkn.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+            <i class="fa-solid fa-tent text-emerald-300"></i>
+            <span class="text-sm font-medium">KKN</span>
+        </a>
+        <a href="{{ route('admin.publikasi.index') }}"
+           class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('admin.publikasi.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+            <i class="fa-solid fa-newspaper text-emerald-300"></i>
+            <span class="text-sm font-medium">Publikasi</span>
+        </a>
+        <a href="{{ route('keuangan.pembayaran.index') }}"
+           class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('keuangan.pembayaran.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+            <i class="fa-solid fa-money-bill-wave text-emerald-300"></i>
+            <span class="text-sm font-medium">Pembayaran</span>
+        </a>
+        <a href="{{ route('admin.user.index') }}"
+           class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('admin.user.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+            <i class="fa-solid fa-users-gear text-emerald-300"></i>
+            <span class="text-sm font-medium">Manajemen User</span>
+        </a>
+    @endif
 @endif
 
 @if (auth()->user()->role === 'keuangan')

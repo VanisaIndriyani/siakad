@@ -1,10 +1,13 @@
-<x-portal-layout :title="(auth()->user()->role === 'keuangan' ? 'Dashboard Keuangan' : 'Dashboard Admin') . ' - '.config('app.name')" :subtitle="auth()->user()->role === 'keuangan' ? 'Dashboard Keuangan' : 'Dashboard Admin'">
+<x-portal-layout
+    :title="((auth()->user()->role === 'keuangan') ? 'Dashboard Keuangan' : (auth()->user()->role === 'akademik' ? 'Dashboard Akademik' : 'Dashboard Admin')) . ' - ' . config('app.name')"
+    :subtitle="(auth()->user()->role === 'keuangan') ? 'Dashboard Keuangan' : (auth()->user()->role === 'akademik' ? 'Dashboard Akademik' : 'Dashboard Admin')"
+>
     <x-slot:sidebar>
         @include('admin.partials.sidebar')
     </x-slot:sidebar>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        @if (auth()->user()->role === 'admin')
+        @if (in_array(auth()->user()->role, ['admin', 'akademik'], true))
             <div class="rounded-2xl bg-emerald-500/10 border border-emerald-400/15 p-5">
                 <div class="text-emerald-100/70 text-sm">Total Mahasiswa</div>
                 <div class="mt-2 text-3xl font-semibold">{{ number_format($totalMahasiswa) }}</div>

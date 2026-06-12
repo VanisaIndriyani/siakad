@@ -22,33 +22,7 @@ class QuestionnaireController extends Controller
     {
         $q = trim((string) $request->get('q', ''));
         $showAllCourses = $request->boolean('all');
-
-        $courseStats = $this->courseStatsSubquery();
-
-        $courseSummaries = MataKuliah::query()
-            ->leftJoinSub($courseStats, 'stats', function ($join) {
-                $join->on('mata_kuliah.id', '=', 'stats.mata_kuliah_id');
-            })
-            ->leftJoin('dosen as dosen1', 'mata_kuliah.dosen_id', '=', 'dosen1.id')
-            ->leftJoin('dosen as dosen2', 'mata_kuliah.dosen_id_2', '=', 'dosen2.id')
-            ->select('mata_kuliah.*')
-            ->selectRaw('dosen1.nama as dosen_1')
-            ->selectRaw('dosen2.nama as dosen_2')
-            ->selectRaw('COALESCE(stats.responses_count, 0) as responses_count')
-            ->selectRaw('stats.average_score')
-            ->selectRaw('stats.score_1_pct')
-            ->selectRaw('stats.score_2_pct')
-            ->selectRaw('stats.score_3_pct')
-            ->selectRaw('stats.score_4_pct');
-
-        if ($q !== '') {
-            $courseSummaries->where(function ($query) use ($q) {
-                $query->where('mata_kuliah.kode', 'like', "%{$q}%")
-                    ->orWhere('mata_kuliah.nama', 'like', "%{$q}%")
-                    ->orWhere('dosen1.nama', 'like', "%{$q}%")
-                    ->orWhere('dosen2.nama', 'like', "%{$q}%");
-            });
-        }
+        $courseSummaries = $this->buildCourseSummaryQuery($q);
 
         return view('admin.kuesioner.index', [
             'questions' => QuestionnaireQuestion::query()
@@ -81,6 +55,71 @@ class QuestionnaireController extends Controller
     public function create(): View
     {
         return view('admin.kuesioner.create');
+    }
+
+    public function exportSummaryPdf(Request $request)
+    {
+        $data = $this->buildSummaryExportData($request);
+
+        $html = view('questionnaire.summary-pdf', $data)->render();
+
+        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->render();
+
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="rekap-kuesioner.pdf"',
+        ]);
+    }
+
+    public function exportSummaryExcel(Request $request)
+    {
+        $data = $this->buildSummaryExportData($request);
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Rekap Kuesioner');
+
+        $sheet->fromArray([
+            ['Rekap Kuesioner Mahasiswa'],
+            ['Filter Pencarian', $data['q'] !== '' ? $data['q'] : 'Semua data'],
+            ['Total Respon', $data['summary']['responses_count']],
+            ['Mahasiswa Mengisi', $data['summary']['students_count']],
+            ['Pertanyaan Aktif', $data['summary']['questions_count']],
+            ['Rata-rata Skor', $data['summary']['average_score'] !== null ? round((float) $data['summary']['average_score'], 2) : '-'],
+            [],
+            ['No', 'Kode Mata Kuliah', 'Nama Mata Kuliah', 'Semester', 'Dosen 1', 'Dosen 2', 'Respon', 'Rata-rata', 'Kurang (%)', 'Cukup (%)', 'Baik (%)', 'Sangat Baik (%)'],
+        ]);
+
+        $row = 9;
+        foreach ($data['courseSummaries'] as $index => $course) {
+            $sheet->fromArray([[
+                $index + 1,
+                $course->kode,
+                $course->nama,
+                $course->semester,
+                $course->dosen_1 ?? '-',
+                $course->dosen_2 ?? '-',
+                $course->responses_count,
+                $course->average_score !== null ? (float) $course->average_score : '-',
+                $course->score_1_pct !== null ? (float) $course->score_1_pct : '-',
+                $course->score_2_pct !== null ? (float) $course->score_2_pct : '-',
+                $course->score_3_pct !== null ? (float) $course->score_3_pct : '-',
+                $course->score_4_pct !== null ? (float) $course->score_4_pct : '-',
+            ]], null, 'A'.$row);
+            $row++;
+        }
+
+        foreach (range('A', 'L') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        $tempFile = tempnam(sys_get_temp_dir(), 'questionnaire-summary');
+        $writer->save($tempFile);
+
+        return response()->download($tempFile, 'rekap-kuesioner.xlsx')->deleteFileAfterSend(true);
     }
 
     public function store(Request $request): RedirectResponse
@@ -284,6 +323,54 @@ class QuestionnaireController extends Controller
             ->selectRaw('ROUND(100 * SUM(CASE WHEN questionnaire_answers.score = 3 THEN 1 ELSE 0 END) / NULLIF(COUNT(questionnaire_answers.id), 0), 2) as score_3_pct')
             ->selectRaw('ROUND(100 * SUM(CASE WHEN questionnaire_answers.score = 4 THEN 1 ELSE 0 END) / NULLIF(COUNT(questionnaire_answers.id), 0), 2) as score_4_pct')
             ->groupBy('questionnaire_responses.mata_kuliah_id');
+    }
+
+    private function buildCourseSummaryQuery(string $q)
+    {
+        $courseStats = $this->courseStatsSubquery();
+
+        $courseSummaries = MataKuliah::query()
+            ->leftJoinSub($courseStats, 'stats', function ($join) {
+                $join->on('mata_kuliah.id', '=', 'stats.mata_kuliah_id');
+            })
+            ->leftJoin('dosen as dosen1', 'mata_kuliah.dosen_id', '=', 'dosen1.id')
+            ->leftJoin('dosen as dosen2', 'mata_kuliah.dosen_id_2', '=', 'dosen2.id')
+            ->select('mata_kuliah.*')
+            ->selectRaw('dosen1.nama as dosen_1')
+            ->selectRaw('dosen2.nama as dosen_2')
+            ->selectRaw('COALESCE(stats.responses_count, 0) as responses_count')
+            ->selectRaw('stats.average_score')
+            ->selectRaw('stats.score_1_pct')
+            ->selectRaw('stats.score_2_pct')
+            ->selectRaw('stats.score_3_pct')
+            ->selectRaw('stats.score_4_pct');
+
+        if ($q !== '') {
+            $courseSummaries->where(function ($query) use ($q) {
+                $query->where('mata_kuliah.kode', 'like', "%{$q}%")
+                    ->orWhere('mata_kuliah.nama', 'like', "%{$q}%")
+                    ->orWhere('dosen1.nama', 'like', "%{$q}%")
+                    ->orWhere('dosen2.nama', 'like', "%{$q}%");
+            });
+        }
+
+        return $courseSummaries->orderByDesc('responses_count')->orderBy('mata_kuliah.kode');
+    }
+
+    private function buildSummaryExportData(Request $request): array
+    {
+        $q = trim((string) $request->get('q', ''));
+
+        return [
+            'q' => $q,
+            'courseSummaries' => $this->buildCourseSummaryQuery($q)->get(),
+            'summary' => [
+                'responses_count' => QuestionnaireResponse::query()->count(),
+                'students_count' => QuestionnaireResponse::query()->distinct('mahasiswa_id')->count('mahasiswa_id'),
+                'questions_count' => QuestionnaireQuestion::query()->where('is_active', true)->count(),
+                'average_score' => QuestionnaireAnswer::query()->avg('score'),
+            ],
+        ];
     }
 
     private function buildShowData(MataKuliah $mataKuliah): array

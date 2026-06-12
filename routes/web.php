@@ -121,13 +121,9 @@ Route::middleware('auth')->group(function () {
 
 Route::prefix('admin')
     ->name('admin.')
-    ->middleware(['auth', 'role:admin'])
+    ->middleware(['auth', 'role:admin,akademik'])
     ->group(function () {
         Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
-        
-        // User Management
-        Route::get('/user', [AdminUserController::class, 'index'])->name('user.index');
-        Route::get('/user/pdf', [AdminUserController::class, 'exportPdf'])->name('user.pdf');
 
         Route::get('/mahasiswa/export/pdf', [AdminMahasiswaController::class, 'exportPdf'])->name('mahasiswa.export.pdf');
         Route::get('/mahasiswa/export/excel', [AdminMahasiswaController::class, 'exportExcel'])->name('mahasiswa.export.excel');
@@ -176,6 +172,8 @@ Route::prefix('admin')
         Route::post('/kuesioner', [AdminQuestionnaireController::class, 'store'])->name('kuesioner.store');
         Route::delete('/kuesioner/bulk-delete', [AdminQuestionnaireController::class, 'bulkDestroy'])->name('kuesioner.bulk-delete');
         Route::delete('/kuesioner/bulk-delete-course', [AdminQuestionnaireController::class, 'bulkDestroyCourses'])->name('kuesioner.bulk-delete-course');
+        Route::get('/kuesioner/rekap/pdf', [AdminQuestionnaireController::class, 'exportSummaryPdf'])->name('kuesioner.summary.pdf');
+        Route::get('/kuesioner/rekap/excel', [AdminQuestionnaireController::class, 'exportSummaryExcel'])->name('kuesioner.summary.excel');
         Route::get('/kuesioner/mata-kuliah/{mataKuliah}', [AdminQuestionnaireController::class, 'show'])->name('kuesioner.show');
         Route::get('/kuesioner/mata-kuliah/{mataKuliah}/pdf', [AdminQuestionnaireController::class, 'exportPdf'])->name('kuesioner.export.pdf');
         Route::get('/kuesioner/mata-kuliah/{mataKuliah}/excel', [AdminQuestionnaireController::class, 'exportExcel'])->name('kuesioner.export.excel');
@@ -199,56 +197,60 @@ Route::prefix('admin')
             ->except(['show']);
         Route::get('/kalender-akademik/pdf', [AdminAcademicCalendarController::class, 'pdf'])->name('kalender-akademik.pdf');
 
-        Route::get('/skripsi', [AdminSkripsiController::class, 'index'])->name('skripsi.index');
-        Route::get('/skripsi/{skripsi}', [AdminSkripsiController::class, 'show'])->name('skripsi.show');
-        Route::get('/skripsi/{skripsi}/pdf', [AdminSkripsiController::class, 'downloadPdf'])->name('skripsi.pdf');
-        Route::patch('/skripsi/{skripsi}/status', [AdminSkripsiController::class, 'updateStatus'])->name('skripsi.status');
-        Route::patch('/skripsi/{skripsi}/assign', [AdminSkripsiController::class, 'assign'])->name('skripsi.assign');
-        Route::get('/skripsi/{skripsi}/sk-pembimbing', [AdminSkripsiController::class, 'downloadSkPembimbing'])->name('skripsi.sk.download');
-        Route::get('/skripsi/{skripsi}/sk-pembimbing/preview', [AdminSkripsiController::class, 'previewSkPembimbing'])->name('skripsi.sk.preview');
-        Route::delete('/skripsi/{skripsi}/sk-pembimbing', [AdminSkripsiController::class, 'destroySkPembimbing'])->name('skripsi.sk.destroy');
-        Route::delete('/skripsi/{skripsi}/pembimbing', [AdminSkripsiController::class, 'resetPembimbing'])->name('skripsi.pembimbing.reset');
-        Route::delete('/skripsi/bulk-delete', [AdminSkripsiController::class, 'bulkDestroy'])->name('skripsi.bulk-delete');
-        Route::delete('/skripsi/{skripsi}', [AdminSkripsiController::class, 'destroy'])->name('skripsi.destroy');
-        Route::delete('/skripsi-files/{file}', [AdminSkripsiController::class, 'destroyFile'])->name('skripsi-files.destroy');
-
-        Route::get('/ppl', [AdminPplController::class, 'index'])->name('ppl.index');
-        Route::get('/ppl/{ppl}', [AdminPplController::class, 'show'])->name('ppl.show');
-        Route::get('/ppl/{ppl}/pdf', [AdminPplController::class, 'downloadPdf'])->name('ppl.pdf');
-        Route::patch('/ppl/{ppl}/status', [AdminPplController::class, 'updateStatus'])->name('ppl.status');
-        Route::patch('/ppl/{ppl}/assign', [AdminPplController::class, 'assign'])->name('ppl.assign');
-        Route::get('/ppl/{ppl}/sk-pembimbing', [AdminPplController::class, 'downloadSkPembimbing'])->name('ppl.sk.download');
-        Route::get('/ppl/{ppl}/sk-pembimbing/preview', [AdminPplController::class, 'previewSkPembimbing'])->name('ppl.sk.preview');
-        Route::delete('/ppl/bulk-delete', [AdminPplController::class, 'bulkDestroy'])->name('ppl.bulk-delete');
-        Route::delete('/ppl/{ppl}', [AdminPplController::class, 'destroy'])->name('ppl.destroy');
-        Route::delete('/ppl-files/{file}', [AdminPplController::class, 'destroyFile'])->name('ppl-files.destroy');
-
-        // KKN Management
-        Route::get('/kkn', [AdminKknController::class, 'index'])->name('kkn.index');
-        Route::delete('/kkn/bulk-delete', [AdminKknController::class, 'bulkDestroy'])->name('kkn.bulk-delete');
-        Route::patch('/kkn/{kkn}/status', [AdminKknController::class, 'updateStatus'])->name('kkn.status');
-        Route::get('/kkn/posko', [AdminKknController::class, 'poskoIndex'])->name('kkn.posko.index');
-        Route::get('/kkn/posko/create', [AdminKknController::class, 'poskoCreate'])->name('kkn.posko.create');
-        Route::post('/kkn/posko', [AdminKknController::class, 'poskoStore'])->name('kkn.posko.store');
-        Route::get('/kkn/posko/{posko}', [AdminKknController::class, 'poskoShow'])->name('kkn.posko.show');
-        Route::put('/kkn/posko/{posko}', [AdminKknController::class, 'poskoUpdate'])->name('kkn.posko.update');
-        Route::delete('/kkn/posko/{posko}', [AdminKknController::class, 'poskoDestroy'])->name('kkn.posko.destroy');
-        Route::post('/kkn/posko/{posko}/assign', [AdminKknController::class, 'assignStudent'])->name('kkn.posko.assign');
-        Route::delete('/kkn/pengajuan/{kkn}/remove', [AdminKknController::class, 'removeStudent'])->name('kkn.pengajuan.remove');
-
         Route::get('/laporan', [AdminPengajuanLaporanController::class, 'index'])->name('laporan.index');
         Route::delete('/laporan/bulk-delete', [AdminPengajuanLaporanController::class, 'bulkDestroy'])->name('laporan.bulk-delete');
         Route::get('/laporan/{laporan}', [AdminPengajuanLaporanController::class, 'show'])->name('laporan.show');
         Route::post('/laporan/{laporan}/pesan', [AdminPengajuanLaporanController::class, 'storeMessage'])->name('laporan.pesan.store');
 
-        Route::get('/publikasi', [\App\Http\Controllers\PublikasiKkController::class, 'index'])->name('publikasi.index');
-        Route::get('/publikasi/export-excel', [\App\Http\Controllers\PublikasiKkController::class, 'exportExcel'])->name('publikasi.export-excel');
-        Route::get('/publikasi/create', [\App\Http\Controllers\PublikasiKkController::class, 'create'])->name('publikasi.create');
-        Route::post('/publikasi', [\App\Http\Controllers\PublikasiKkController::class, 'store'])->name('publikasi.store');
-        Route::get('/publikasi/{publikasiKk}/edit', [\App\Http\Controllers\PublikasiKkController::class, 'edit'])->name('publikasi.edit');
-        Route::put('/publikasi/{publikasiKk}', [\App\Http\Controllers\PublikasiKkController::class, 'update'])->name('publikasi.update');
-        Route::delete('/publikasi/{publikasiKk}', [\App\Http\Controllers\PublikasiKkController::class, 'destroy'])->name('publikasi.destroy');
-        Route::get('/publikasi/{publikasiKk}/download', [\App\Http\Controllers\PublikasiKkController::class, 'download'])->name('publikasi.download');
+        Route::middleware(['role:admin'])->group(function () {
+            Route::get('/user', [AdminUserController::class, 'index'])->name('user.index');
+            Route::get('/user/pdf', [AdminUserController::class, 'exportPdf'])->name('user.pdf');
+
+            Route::get('/skripsi', [AdminSkripsiController::class, 'index'])->name('skripsi.index');
+            Route::get('/skripsi/{skripsi}', [AdminSkripsiController::class, 'show'])->name('skripsi.show');
+            Route::get('/skripsi/{skripsi}/pdf', [AdminSkripsiController::class, 'downloadPdf'])->name('skripsi.pdf');
+            Route::patch('/skripsi/{skripsi}/status', [AdminSkripsiController::class, 'updateStatus'])->name('skripsi.status');
+            Route::patch('/skripsi/{skripsi}/assign', [AdminSkripsiController::class, 'assign'])->name('skripsi.assign');
+            Route::get('/skripsi/{skripsi}/sk-pembimbing', [AdminSkripsiController::class, 'downloadSkPembimbing'])->name('skripsi.sk.download');
+            Route::get('/skripsi/{skripsi}/sk-pembimbing/preview', [AdminSkripsiController::class, 'previewSkPembimbing'])->name('skripsi.sk.preview');
+            Route::delete('/skripsi/{skripsi}/sk-pembimbing', [AdminSkripsiController::class, 'destroySkPembimbing'])->name('skripsi.sk.destroy');
+            Route::delete('/skripsi/{skripsi}/pembimbing', [AdminSkripsiController::class, 'resetPembimbing'])->name('skripsi.pembimbing.reset');
+            Route::delete('/skripsi/bulk-delete', [AdminSkripsiController::class, 'bulkDestroy'])->name('skripsi.bulk-delete');
+            Route::delete('/skripsi/{skripsi}', [AdminSkripsiController::class, 'destroy'])->name('skripsi.destroy');
+            Route::delete('/skripsi-files/{file}', [AdminSkripsiController::class, 'destroyFile'])->name('skripsi-files.destroy');
+
+            Route::get('/ppl', [AdminPplController::class, 'index'])->name('ppl.index');
+            Route::get('/ppl/{ppl}', [AdminPplController::class, 'show'])->name('ppl.show');
+            Route::get('/ppl/{ppl}/pdf', [AdminPplController::class, 'downloadPdf'])->name('ppl.pdf');
+            Route::patch('/ppl/{ppl}/status', [AdminPplController::class, 'updateStatus'])->name('ppl.status');
+            Route::patch('/ppl/{ppl}/assign', [AdminPplController::class, 'assign'])->name('ppl.assign');
+            Route::get('/ppl/{ppl}/sk-pembimbing', [AdminPplController::class, 'downloadSkPembimbing'])->name('ppl.sk.download');
+            Route::get('/ppl/{ppl}/sk-pembimbing/preview', [AdminPplController::class, 'previewSkPembimbing'])->name('ppl.sk.preview');
+            Route::delete('/ppl/bulk-delete', [AdminPplController::class, 'bulkDestroy'])->name('ppl.bulk-delete');
+            Route::delete('/ppl/{ppl}', [AdminPplController::class, 'destroy'])->name('ppl.destroy');
+            Route::delete('/ppl-files/{file}', [AdminPplController::class, 'destroyFile'])->name('ppl-files.destroy');
+
+            Route::get('/kkn', [AdminKknController::class, 'index'])->name('kkn.index');
+            Route::delete('/kkn/bulk-delete', [AdminKknController::class, 'bulkDestroy'])->name('kkn.bulk-delete');
+            Route::patch('/kkn/{kkn}/status', [AdminKknController::class, 'updateStatus'])->name('kkn.status');
+            Route::get('/kkn/posko', [AdminKknController::class, 'poskoIndex'])->name('kkn.posko.index');
+            Route::get('/kkn/posko/create', [AdminKknController::class, 'poskoCreate'])->name('kkn.posko.create');
+            Route::post('/kkn/posko', [AdminKknController::class, 'poskoStore'])->name('kkn.posko.store');
+            Route::get('/kkn/posko/{posko}', [AdminKknController::class, 'poskoShow'])->name('kkn.posko.show');
+            Route::put('/kkn/posko/{posko}', [AdminKknController::class, 'poskoUpdate'])->name('kkn.posko.update');
+            Route::delete('/kkn/posko/{posko}', [AdminKknController::class, 'poskoDestroy'])->name('kkn.posko.destroy');
+            Route::post('/kkn/posko/{posko}/assign', [AdminKknController::class, 'assignStudent'])->name('kkn.posko.assign');
+            Route::delete('/kkn/pengajuan/{kkn}/remove', [AdminKknController::class, 'removeStudent'])->name('kkn.pengajuan.remove');
+
+            Route::get('/publikasi', [\App\Http\Controllers\PublikasiKkController::class, 'index'])->name('publikasi.index');
+            Route::get('/publikasi/export-excel', [\App\Http\Controllers\PublikasiKkController::class, 'exportExcel'])->name('publikasi.export-excel');
+            Route::get('/publikasi/create', [\App\Http\Controllers\PublikasiKkController::class, 'create'])->name('publikasi.create');
+            Route::post('/publikasi', [\App\Http\Controllers\PublikasiKkController::class, 'store'])->name('publikasi.store');
+            Route::get('/publikasi/{publikasiKk}/edit', [\App\Http\Controllers\PublikasiKkController::class, 'edit'])->name('publikasi.edit');
+            Route::put('/publikasi/{publikasiKk}', [\App\Http\Controllers\PublikasiKkController::class, 'update'])->name('publikasi.update');
+            Route::delete('/publikasi/{publikasiKk}', [\App\Http\Controllers\PublikasiKkController::class, 'destroy'])->name('publikasi.destroy');
+            Route::get('/publikasi/{publikasiKk}/download', [\App\Http\Controllers\PublikasiKkController::class, 'download'])->name('publikasi.download');
+        });
     });
 
 Route::prefix('mahasiswa')
@@ -355,6 +357,8 @@ Route::prefix('dosen')
         Route::put('/nilai/{mataKuliah}/{semester}', [DosenNilaiController::class, 'update'])->name('nilai.update');
 
         Route::get('/kuesioner', [DosenQuestionnaireController::class, 'index'])->name('kuesioner.index');
+        Route::get('/kuesioner/rekap/pdf', [DosenQuestionnaireController::class, 'exportSummaryPdf'])->name('kuesioner.summary.pdf');
+        Route::get('/kuesioner/rekap/excel', [DosenQuestionnaireController::class, 'exportSummaryExcel'])->name('kuesioner.summary.excel');
         Route::get('/kuesioner/{mataKuliah}', [DosenQuestionnaireController::class, 'show'])->name('kuesioner.show');
         Route::get('/kuesioner/{mataKuliah}/pdf', [DosenQuestionnaireController::class, 'exportPdf'])->name('kuesioner.export.pdf');
         Route::get('/kuesioner/{mataKuliah}/excel', [DosenQuestionnaireController::class, 'exportExcel'])->name('kuesioner.export.excel');

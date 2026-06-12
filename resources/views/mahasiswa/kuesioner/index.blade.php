@@ -16,7 +16,7 @@
 
     <div class="mt-5">
         <div class="text-lg font-semibold">Perlu Diisi</div>
-        <div class="mt-1 text-sm text-emerald-100/70">Daftar mata kuliah yang sudah memiliki nilai tetapi belum diisi kuesionernya.</div>
+        <div class="mt-1 text-sm text-emerald-100/70">Daftar mata kuliah pada KRS yang sudah disetujui tetapi belum diisi kuesionernya.</div>
     </div>
 
     <div class="mt-4 grid grid-cols-1 xl:grid-cols-2 gap-4">

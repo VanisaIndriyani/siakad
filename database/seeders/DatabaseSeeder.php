@@ -35,12 +35,23 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        User::factory()->create([
-            'name' => 'Staf Keuangan',
-            'email' => 'keuangan@iaiddisidrap.ac.id',
-            'password' => Hash::make('password'),
-            'role' => User::ROLE_KEUANGAN,
-        ]);
+        User::query()->firstOrCreate(
+            ['email' => 'akademik@iaiddisidrap.ac.id'],
+            [
+                'name' => 'Staf Akademik',
+                'role' => User::ROLE_AKADEMIK,
+                'password' => Hash::make('password'),
+            ]
+        );
+
+        User::query()->firstOrCreate(
+            ['email' => 'keuangan@iaiddisidrap.ac.id'],
+            [
+                'name' => 'Staf Keuangan',
+                'role' => User::ROLE_KEUANGAN,
+                'password' => Hash::make('password'),
+            ]
+        );
 
         $dosenRows = [
             ['email' => 'dosen@gmail.com', 'nama' => 'Dosen Demo', 'nidn' => '1234567890', 'mata_kuliah' => 'Pemrograman Web'],

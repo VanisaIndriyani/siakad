@@ -52,6 +52,8 @@ class QuestionnaireController extends Controller
             return redirect()->route('mahasiswa.kuesioner.index')->with('error', 'Profil mahasiswa belum tersedia.');
         }
 
+        QuestionnaireService::ensureKhsItemsFromApprovedKrs($mahasiswa);
+
         $item = $this->resolveEligibleItem($mahasiswa, $khs, $mataKuliah);
         if (! $item) {
             return redirect()->route('mahasiswa.kuesioner.index')->with('error', 'Data kuesioner tidak valid atau sudah tidak tersedia.');
@@ -87,6 +89,8 @@ class QuestionnaireController extends Controller
         if (! $mahasiswa) {
             return redirect()->route('mahasiswa.kuesioner.index')->with('error', 'Profil mahasiswa belum tersedia.');
         }
+
+        QuestionnaireService::ensureKhsItemsFromApprovedKrs($mahasiswa);
 
         $item = $this->resolveEligibleItem($mahasiswa, $khs, $mataKuliah);
         if (! $item) {
@@ -150,9 +154,14 @@ class QuestionnaireController extends Controller
             ->with(['khs', 'mataKuliah.dosen', 'mataKuliah.dosen2'])
             ->where('khs_id', $khs->id)
             ->where('mata_kuliah_id', $mataKuliah->id)
-            ->where(function ($query) {
-                $query->whereNotNull('nilai_huruf')
-                    ->orWhereNotNull('nilai_angka');
+            ->whereExists(function ($query) use ($mahasiswa) {
+                $query->selectRaw('1')
+                    ->from('krs_items')
+                    ->join('krs', 'krs.id', '=', 'krs_items.krs_id')
+                    ->where('krs.mahasiswa_id', $mahasiswa->id)
+                    ->where('krs.status_approval', 'approved')
+                    ->whereColumn('krs.semester', 'khs.semester')
+                    ->whereColumn('krs_items.mata_kuliah_id', 'khs_items.mata_kuliah_id');
             })
             ->first();
     }

@@ -14,11 +14,24 @@
         <div class="text-sm text-emerald-100/70">Lihat hasil evaluasi mahasiswa pada mata kuliah yang Anda ampu.</div>
     </div>
 
-    <form method="GET" class="mt-5 flex flex-col sm:flex-row gap-3">
-        <input name="q" value="{{ $q }}" class="w-full sm:max-w-lg h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" placeholder="Cari kode atau mata kuliah..." />
-        <button class="h-11 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">Cari</button>
-        <a href="{{ route('dosen.kuesioner.index') }}" class="h-11 px-4 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">Reset</a>
-    </form>
+    <div class="mt-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+        <form method="GET" class="flex flex-col sm:flex-row gap-3">
+            <input name="q" value="{{ $q }}" class="w-full sm:max-w-lg h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" placeholder="Cari kode atau mata kuliah..." />
+            <button class="h-11 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">Cari</button>
+            <a href="{{ route('dosen.kuesioner.index') }}" class="h-11 px-4 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">Reset</a>
+        </form>
+
+        <div class="flex items-center gap-2">
+            <a href="{{ route('dosen.kuesioner.summary.excel', array_filter(['q' => $q])) }}" class="h-11 px-4 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/20 transition text-emerald-100">
+                <i class="fa-solid fa-file-excel"></i>
+                Excel
+            </a>
+            <a href="{{ route('dosen.kuesioner.summary.pdf', array_filter(['q' => $q])) }}" class="h-11 px-4 inline-flex items-center justify-center gap-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/20 transition text-red-100">
+                <i class="fa-solid fa-file-pdf"></i>
+                PDF
+            </a>
+        </div>
+    </div>
 
     <div class="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
         <div class="overflow-x-auto">

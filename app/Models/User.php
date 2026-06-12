@@ -18,6 +18,7 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     public const ROLE_ADMIN = 'admin';
+    public const ROLE_AKADEMIK = 'akademik';
     public const ROLE_MAHASISWA = 'mahasiswa';
     public const ROLE_DOSEN = 'dosen';
     public const ROLE_KEUANGAN = 'keuangan';
@@ -73,6 +74,16 @@ class User extends Authenticatable
         return $this->role === self::ROLE_ADMIN;
     }
 
+    public function isAkademik(): bool
+    {
+        return $this->role === self::ROLE_AKADEMIK;
+    }
+
+    public function isStaffAkademik(): bool
+    {
+        return $this->isAdmin() || $this->isAkademik();
+    }
+
     public function isMahasiswa(): bool
     {
         return $this->role === self::ROLE_MAHASISWA;
@@ -109,7 +120,7 @@ class User extends Authenticatable
                 ->count();
         }
 
-        if ($this->isAdmin()) {
+        if ($this->isStaffAkademik()) {
             return PengajuanLaporan::query()
                 ->where(function ($q) {
                     $q->whereNull('staff_last_read_at')
@@ -182,7 +193,7 @@ class User extends Authenticatable
                 ->count();
         }
 
-        if ($this->isAdmin()) {
+        if ($this->isStaffAkademik()) {
             return PplPengajuan::query()
                 ->whereHas('latestMessage', function ($q) {
                     $q->where('sender_user_id', '!=', $this->id)
@@ -237,7 +248,7 @@ class User extends Authenticatable
                 ->count();
         }
 
-        if ($this->isAdmin()) {
+        if ($this->isStaffAkademik()) {
             return SkripsiPengajuan::query()
                 ->whereHas('latestMessage', function ($q) {
                     $q->where('sender_user_id', '!=', $this->id)
@@ -315,7 +326,7 @@ class User extends Authenticatable
      */
     public function pendingCutiCount(): int
     {
-        if ($this->isAdmin()) {
+        if ($this->isStaffAkademik()) {
             return CutiPengajuan::query()->where('status', 'pending')->count();
         }
 
