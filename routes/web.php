@@ -177,6 +177,8 @@ Route::prefix('admin')
         Route::delete('/kuesioner/bulk-delete', [AdminQuestionnaireController::class, 'bulkDestroy'])->name('kuesioner.bulk-delete');
         Route::delete('/kuesioner/bulk-delete-course', [AdminQuestionnaireController::class, 'bulkDestroyCourses'])->name('kuesioner.bulk-delete-course');
         Route::get('/kuesioner/mata-kuliah/{mataKuliah}', [AdminQuestionnaireController::class, 'show'])->name('kuesioner.show');
+        Route::get('/kuesioner/mata-kuliah/{mataKuliah}/pdf', [AdminQuestionnaireController::class, 'exportPdf'])->name('kuesioner.export.pdf');
+        Route::get('/kuesioner/mata-kuliah/{mataKuliah}/excel', [AdminQuestionnaireController::class, 'exportExcel'])->name('kuesioner.export.excel');
         Route::get('/kuesioner/{question}/edit', [AdminQuestionnaireController::class, 'edit'])->name('kuesioner.edit');
         Route::put('/kuesioner/{question}', [AdminQuestionnaireController::class, 'update'])->name('kuesioner.update');
         Route::delete('/kuesioner/{question}', [AdminQuestionnaireController::class, 'destroy'])->name('kuesioner.destroy');
@@ -354,6 +356,8 @@ Route::prefix('dosen')
 
         Route::get('/kuesioner', [DosenQuestionnaireController::class, 'index'])->name('kuesioner.index');
         Route::get('/kuesioner/{mataKuliah}', [DosenQuestionnaireController::class, 'show'])->name('kuesioner.show');
+        Route::get('/kuesioner/{mataKuliah}/pdf', [DosenQuestionnaireController::class, 'exportPdf'])->name('kuesioner.export.pdf');
+        Route::get('/kuesioner/{mataKuliah}/excel', [DosenQuestionnaireController::class, 'exportExcel'])->name('kuesioner.export.excel');
 
         Route::get('/mata-kuliah', [\App\Http\Controllers\Dosen\MataKuliahController::class, 'index'])->name('mata-kuliah.index');
         Route::post('/mata-kuliah/{mataKuliah}/rps', [\App\Http\Controllers\Dosen\MataKuliahController::class, 'uploadRps'])->name('mata-kuliah.rps.upload');

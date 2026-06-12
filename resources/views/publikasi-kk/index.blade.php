@@ -6,7 +6,7 @@
     <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
         <div>
             <div class="text-xl font-semibold text-white">Publikasi</div>
-            <div class="text-sm text-emerald-100/70">Kelola data publikasi (Penelitian, PKM, HAKI, Buku, Sertifikat).</div>
+            <div class="text-sm text-emerald-100/70">Kelola data publikasi (Penelitian, PKM, HAKI, Buku, Sertifikat, Opini, SK).</div>
         </div>
         <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
             <a href="{{ route($routePrefix . '.publikasi.create') }}" class="h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition text-sm font-medium inline-flex items-center gap-2 text-white">
@@ -37,11 +37,9 @@
                     style="background-color: #06221c !important;"
                     class="w-full h-11 px-4 rounded-xl border border-white/10 text-white focus:border-emerald-500/50 focus:ring-0 transition text-sm cursor-pointer">
                     <option value="" class="bg-[#0d2a23]">Semua Kategori</option>
-                    <option value="Penelitian" {{ request('kategori') == 'Penelitian' ? 'selected' : '' }} class="bg-[#0d2a23]">Penelitian</option>
-                    <option value="PKM" {{ request('kategori') == 'PKM' ? 'selected' : '' }} class="bg-[#0d2a23]">PKM</option>
-                    <option value="HAKI" {{ request('kategori') == 'HAKI' ? 'selected' : '' }} class="bg-[#0d2a23]">HAKI</option>
-                    <option value="Buku" {{ request('kategori') == 'Buku' ? 'selected' : '' }} class="bg-[#0d2a23]">Buku</option>
-                    <option value="Sertifikat" {{ request('kategori') == 'Sertifikat' ? 'selected' : '' }} class="bg-[#0d2a23]">Sertifikat</option>
+                    @foreach ($kategoriList as $kategori)
+                        <option value="{{ $kategori }}" {{ request('kategori') == $kategori ? 'selected' : '' }} class="bg-[#0d2a23]">{{ $kategori }}</option>
+                    @endforeach
                 </select>
             </div>
             <div class="flex items-center gap-2">
@@ -85,6 +83,8 @@
                                     @elseif($row->kategori == 'PKM') bg-purple-500/10 text-purple-400 border border-purple-500/20
                                     @elseif($row->kategori == 'HAKI') bg-orange-500/10 text-orange-400 border border-orange-500/20
                                     @elseif($row->kategori == 'Sertifikat') bg-cyan-500/10 text-cyan-400 border border-cyan-500/20
+                                    @elseif($row->kategori == 'Opini') bg-fuchsia-500/10 text-fuchsia-400 border border-fuchsia-500/20
+                                    @elseif($row->kategori == 'SK') bg-amber-500/10 text-amber-400 border border-amber-500/20
                                     @else bg-emerald-500/10 text-emerald-400 border border-emerald-500/20
                                     @endif">
                                     {{ $row->kategori }}

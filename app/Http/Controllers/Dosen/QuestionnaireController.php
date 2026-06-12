@@ -8,9 +8,12 @@ use App\Models\QuestionnaireQuestion;
 use App\Models\QuestionnaireResponse;
 use App\Models\User;
 use App\Support\QuestionnaireService;
+use Dompdf\Dompdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class QuestionnaireController extends Controller
 {
@@ -61,54 +64,109 @@ class QuestionnaireController extends Controller
 
     public function show(Request $request, MataKuliah $mataKuliah): View
     {
+        $this->authorizeCourse($request->user(), $mataKuliah);
+
+        return view('dosen.kuesioner.show', $this->buildShowData($mataKuliah));
+    }
+
+    public function exportPdf(Request $request, MataKuliah $mataKuliah)
+    {
+        $this->authorizeCourse($request->user(), $mataKuliah);
+        $report = $this->buildReportData($mataKuliah);
+
+        $html = view('questionnaire.pdf', $report)->render();
+
+        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->render();
+
+        $filename = 'kuesioner-'.$mataKuliah->kode.'-'.$mataKuliah->id.'.pdf';
+
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ]);
+    }
+
+    public function exportExcel(Request $request, MataKuliah $mataKuliah)
+    {
+        $this->authorizeCourse($request->user(), $mataKuliah);
+        $report = $this->buildReportData($mataKuliah);
+        $spreadsheet = new Spreadsheet();
+
+        $statsSheet = $spreadsheet->getActiveSheet();
+        $statsSheet->setTitle('Statistik');
+        $statsSheet->fromArray([
+            ['Laporan Kuesioner Mata Kuliah'],
+            ['Kode Mata Kuliah', $mataKuliah->kode],
+            ['Nama Mata Kuliah', $mataKuliah->nama],
+            ['Dosen 1', $mataKuliah->dosen?->nama ?? '-'],
+            ['Dosen 2', $mataKuliah->dosen2?->nama ?? '-'],
+            ['Total Respon', $report['responses']->count()],
+            [],
+            ['No', 'Pertanyaan', 'Jawaban', 'Rata-rata', 'Kurang (%)', 'Cukup (%)', 'Baik (%)', 'Sangat Baik (%)'],
+        ]);
+
+        $row = 9;
+        foreach ($report['questionStats'] as $index => $stat) {
+            $totalAnswers = (int) $stat->answers_count;
+            $statsSheet->fromArray([[
+                $index + 1,
+                $stat->question,
+                $totalAnswers,
+                $stat->average_score !== null ? (float) $stat->average_score : '-',
+                $totalAnswers > 0 ? round(($stat->score_1_total / $totalAnswers) * 100, 2) : '-',
+                $totalAnswers > 0 ? round(($stat->score_2_total / $totalAnswers) * 100, 2) : '-',
+                $totalAnswers > 0 ? round(($stat->score_3_total / $totalAnswers) * 100, 2) : '-',
+                $totalAnswers > 0 ? round(($stat->score_4_total / $totalAnswers) * 100, 2) : '-',
+            ]], null, 'A'.$row);
+            $row++;
+        }
+
+        $commentSheet = $spreadsheet->createSheet();
+        $commentSheet->setTitle('Komentar');
+        $commentSheet->fromArray([
+            ['No', 'Nama Mahasiswa', 'NPM', 'Tanggal', 'Rata-rata', 'Komentar'],
+        ]);
+
+        $row = 2;
+        foreach ($report['responses'] as $index => $response) {
+            $commentSheet->fromArray([[
+                $index + 1,
+                $response->mahasiswa?->nama_lengkap ?? '-',
+                $response->mahasiswa?->npm ?? '-',
+                $response->created_at?->format('d/m/Y H:i'),
+                round((float) $response->answers->avg('score'), 2),
+                $response->komentar ?: '-',
+            ]], null, 'A'.$row);
+            $row++;
+        }
+
+        foreach (range('A', 'H') as $column) {
+            $statsSheet->getColumnDimension($column)->setAutoSize(true);
+        }
+        foreach (range('A', 'F') as $column) {
+            $commentSheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        $filename = 'kuesioner-'.$mataKuliah->kode.'-'.$mataKuliah->id.'.xlsx';
+        $tempFile = tempnam(sys_get_temp_dir(), 'questionnaire');
+        $writer->save($tempFile);
+
+        return response()->download($tempFile, $filename)->deleteFileAfterSend(true);
+    }
+
+    private function authorizeCourse(User $user, MataKuliah $mataKuliah): void
+    {
         /** @var User $user */
-        $user = $request->user();
         $dosen = $user->dosen;
 
         abort_unless(
             $dosen && in_array((int) $dosen->id, [(int) $mataKuliah->dosen_id, (int) $mataKuliah->dosen_id_2], true),
             403
         );
-
-        $mataKuliah->load(['dosen', 'dosen2']);
-
-        $questionStatsSubquery = DB::table('questionnaire_answers')
-            ->join('questionnaire_responses', 'questionnaire_responses.id', '=', 'questionnaire_answers.questionnaire_response_id')
-            ->where('questionnaire_responses.mata_kuliah_id', $mataKuliah->id)
-            ->select('questionnaire_answers.questionnaire_question_id')
-            ->selectRaw('COUNT(*) as answers_count')
-            ->selectRaw('ROUND(AVG(questionnaire_answers.score), 2) as average_score')
-            ->selectRaw('SUM(CASE WHEN questionnaire_answers.score = 1 THEN 1 ELSE 0 END) as score_1_total')
-            ->selectRaw('SUM(CASE WHEN questionnaire_answers.score = 2 THEN 1 ELSE 0 END) as score_2_total')
-            ->selectRaw('SUM(CASE WHEN questionnaire_answers.score = 3 THEN 1 ELSE 0 END) as score_3_total')
-            ->selectRaw('SUM(CASE WHEN questionnaire_answers.score = 4 THEN 1 ELSE 0 END) as score_4_total')
-            ->groupBy('questionnaire_answers.questionnaire_question_id');
-
-        $questionStats = QuestionnaireQuestion::query()
-            ->leftJoinSub($questionStatsSubquery, 'stats', function ($join) {
-                $join->on('questionnaire_questions.id', '=', 'stats.questionnaire_question_id');
-            })
-            ->select('questionnaire_questions.*')
-            ->selectRaw('COALESCE(stats.answers_count, 0) as answers_count')
-            ->selectRaw('stats.average_score')
-            ->selectRaw('COALESCE(stats.score_1_total, 0) as score_1_total')
-            ->selectRaw('COALESCE(stats.score_2_total, 0) as score_2_total')
-            ->selectRaw('COALESCE(stats.score_3_total, 0) as score_3_total')
-            ->selectRaw('COALESCE(stats.score_4_total, 0) as score_4_total')
-            ->orderBy('questionnaire_questions.sort_order')
-            ->orderBy('questionnaire_questions.id')
-            ->get();
-
-        return view('dosen.kuesioner.show', [
-            'mataKuliah' => $mataKuliah,
-            'questionStats' => $questionStats,
-            'responses' => QuestionnaireResponse::query()
-                ->with(['mahasiswa', 'answers'])
-                ->where('mata_kuliah_id', $mataKuliah->id)
-                ->latest()
-                ->paginate(10),
-            'scoreLabels' => QuestionnaireService::SCORE_LABELS,
-        ]);
     }
 
     private function courseStatsSubquery()
@@ -123,5 +181,62 @@ class QuestionnaireController extends Controller
             ->selectRaw('ROUND(100 * SUM(CASE WHEN questionnaire_answers.score = 3 THEN 1 ELSE 0 END) / NULLIF(COUNT(questionnaire_answers.id), 0), 2) as score_3_pct')
             ->selectRaw('ROUND(100 * SUM(CASE WHEN questionnaire_answers.score = 4 THEN 1 ELSE 0 END) / NULLIF(COUNT(questionnaire_answers.id), 0), 2) as score_4_pct')
             ->groupBy('questionnaire_responses.mata_kuliah_id');
+    }
+
+    private function buildShowData(MataKuliah $mataKuliah): array
+    {
+        $report = $this->buildReportData($mataKuliah);
+
+        return [
+            'mataKuliah' => $report['mataKuliah'],
+            'questionStats' => $report['questionStats'],
+            'responses' => QuestionnaireResponse::query()
+                ->with(['mahasiswa', 'answers'])
+                ->where('mata_kuliah_id', $mataKuliah->id)
+                ->latest()
+                ->paginate(10),
+            'scoreLabels' => $report['scoreLabels'],
+        ];
+    }
+
+    private function buildReportData(MataKuliah $mataKuliah): array
+    {
+        $mataKuliah->load(['dosen', 'dosen2']);
+
+        $questionStatsSubquery = DB::table('questionnaire_answers')
+            ->join('questionnaire_responses', 'questionnaire_responses.id', '=', 'questionnaire_answers.questionnaire_response_id')
+            ->where('questionnaire_responses.mata_kuliah_id', $mataKuliah->id)
+            ->select('questionnaire_answers.questionnaire_question_id')
+            ->selectRaw('COUNT(*) as answers_count')
+            ->selectRaw('ROUND(AVG(questionnaire_answers.score), 2) as average_score')
+            ->selectRaw('SUM(CASE WHEN questionnaire_answers.score = 1 THEN 1 ELSE 0 END) as score_1_total')
+            ->selectRaw('SUM(CASE WHEN questionnaire_answers.score = 2 THEN 1 ELSE 0 END) as score_2_total')
+            ->selectRaw('SUM(CASE WHEN questionnaire_answers.score = 3 THEN 1 ELSE 0 END) as score_3_total')
+            ->selectRaw('SUM(CASE WHEN questionnaire_answers.score = 4 THEN 1 ELSE 0 END) as score_4_total')
+            ->groupBy('questionnaire_answers.questionnaire_question_id');
+
+        return [
+            'mataKuliah' => $mataKuliah,
+            'questionStats' => QuestionnaireQuestion::query()
+                ->leftJoinSub($questionStatsSubquery, 'stats', function ($join) {
+                    $join->on('questionnaire_questions.id', '=', 'stats.questionnaire_question_id');
+                })
+                ->select('questionnaire_questions.*')
+                ->selectRaw('COALESCE(stats.answers_count, 0) as answers_count')
+                ->selectRaw('stats.average_score')
+                ->selectRaw('COALESCE(stats.score_1_total, 0) as score_1_total')
+                ->selectRaw('COALESCE(stats.score_2_total, 0) as score_2_total')
+                ->selectRaw('COALESCE(stats.score_3_total, 0) as score_3_total')
+                ->selectRaw('COALESCE(stats.score_4_total, 0) as score_4_total')
+                ->orderBy('questionnaire_questions.sort_order')
+                ->orderBy('questionnaire_questions.id')
+                ->get(),
+            'responses' => QuestionnaireResponse::query()
+                ->with(['mahasiswa', 'answers'])
+                ->where('mata_kuliah_id', $mataKuliah->id)
+                ->latest()
+                ->get(),
+            'scoreLabels' => QuestionnaireService::SCORE_LABELS,
+        ];
     }
 }

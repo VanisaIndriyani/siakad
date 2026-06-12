@@ -12,6 +12,16 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class PublikasiKkController extends Controller
 {
+    private const KATEGORI = [
+        'Penelitian',
+        'PKM',
+        'HAKI',
+        'Buku',
+        'Sertifikat',
+        'Opini',
+        'SK',
+    ];
+
     public function index(Request $request)
     {
         $routePrefix = $request->is('admin/*') ? 'admin' : 'dosen';
@@ -33,13 +43,17 @@ class PublikasiKkController extends Controller
 
         $items = $query->paginate(10)->withQueryString();
 
-        return view('publikasi-kk.index', compact('items', 'routePrefix'));
+        $kategoriList = self::KATEGORI;
+
+        return view('publikasi-kk.index', compact('items', 'routePrefix', 'kategoriList'));
     }
 
     public function create(Request $request)
     {
         $routePrefix = $request->is('admin/*') ? 'admin' : 'dosen';
-        return view('publikasi-kk.create', compact('routePrefix'));
+        $kategoriList = self::KATEGORI;
+
+        return view('publikasi-kk.create', compact('routePrefix', 'kategoriList'));
     }
 
     public function store(Request $request)
@@ -49,7 +63,7 @@ class PublikasiKkController extends Controller
             'penulis' => 'required|string|max:255',
             'judul' => 'required|string|max:255',
             'penerbit' => 'required|string|max:255',
-            'kategori' => 'required|in:Penelitian,PKM,HAKI,Buku,Sertifikat',
+            'kategori' => 'required|in:' . implode(',', self::KATEGORI),
             'tahun_terbit' => 'required|numeric|digits:4',
             'reputasi' => 'required|in:Internasional,Regional,Nasional,tidakbersinta',
             'url_link' => 'nullable|url',
@@ -71,7 +85,9 @@ class PublikasiKkController extends Controller
     public function edit(Request $request, PublikasiKk $publikasiKk)
     {
         $routePrefix = $request->is('admin/*') ? 'admin' : 'dosen';
-        return view('publikasi-kk.edit', compact('publikasiKk', 'routePrefix'));
+        $kategoriList = self::KATEGORI;
+
+        return view('publikasi-kk.edit', compact('publikasiKk', 'routePrefix', 'kategoriList'));
     }
 
     public function update(Request $request, PublikasiKk $publikasiKk)
@@ -81,7 +97,7 @@ class PublikasiKkController extends Controller
             'penulis' => 'required|string|max:255',
             'judul' => 'required|string|max:255',
             'penerbit' => 'required|string|max:255',
-            'kategori' => 'required|in:Penelitian,PKM,HAKI,Buku,Sertifikat',
+            'kategori' => 'required|in:' . implode(',', self::KATEGORI),
             'tahun_terbit' => 'required|numeric|digits:4',
             'reputasi' => 'required|in:Internasional,Regional,Nasional,tidakbersinta',
             'url_link' => 'nullable|url',

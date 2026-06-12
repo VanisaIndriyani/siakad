@@ -33,7 +33,7 @@
                         style="background-color: #06221c !important;"
                         class="w-full h-11 px-4 rounded-xl border border-white/10 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition outline-none text-white cursor-pointer">
                     <option value="" disabled class="bg-[#0d2a23]">Pilih Kategori</option>
-                    @foreach(['Penelitian', 'PKM', 'HAKI', 'Buku', 'Sertifikat'] as $kat)
+                    @foreach($kategoriList as $kat)
                         <option value="{{ $kat }}" {{ old('kategori', $publikasiKk->kategori) == $kat ? 'selected' : '' }} class="bg-[#0d2a23]">{{ $kat }}</option>
                     @endforeach
                 </select>
