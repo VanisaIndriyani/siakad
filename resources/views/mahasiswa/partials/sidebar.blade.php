@@ -72,6 +72,21 @@
     <i class="fa-solid fa-clipboard-list text-emerald-300"></i>
     <span class="text-sm font-medium">KRS</span>
 </a>
+@php
+    $pendingQuestionnaireCount = auth()->user()->mahasiswa
+        ? \App\Support\QuestionnaireService::pendingCount(auth()->user()->mahasiswa)
+        : 0;
+@endphp
+<a href="{{ route('mahasiswa.kuesioner.index') }}"
+   class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('mahasiswa.kuesioner.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+    <i class="fa-solid fa-square-poll-vertical text-emerald-300"></i>
+    <span class="text-sm font-medium">Kuesioner</span>
+    @if ($pendingQuestionnaireCount > 0)
+        <span class="ml-auto inline-flex items-center justify-center min-w-7 h-7 px-2 rounded-full text-xs font-semibold bg-yellow-500/15 border border-yellow-500/25 text-yellow-100">
+            {{ $pendingQuestionnaireCount }}
+        </span>
+    @endif
+</a>
 <a href="{{ route('mahasiswa.khs.index') }}"
    class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('mahasiswa.khs.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
     <i class="fa-solid fa-award text-emerald-300"></i>

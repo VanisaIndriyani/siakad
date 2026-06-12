@@ -83,4 +83,9 @@ class Mahasiswa extends Model
     {
         return $this->hasMany(Khs::class);
     }
+
+    public function questionnaireResponses(): HasMany
+    {
+        return $this->hasMany(QuestionnaireResponse::class);
+    }
 }

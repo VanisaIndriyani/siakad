@@ -7,18 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Khs extends Model
+class QuestionnaireResponse extends Model
 {
     use HasFactory;
 
-    protected $table = 'khs';
-
     protected $fillable = [
         'mahasiswa_id',
+        'khs_id',
+        'mata_kuliah_id',
         'semester',
         'tahun_ajaran',
-        'ips',
-        'ipk',
+        'komentar',
     ];
 
     public function mahasiswa(): BelongsTo
@@ -26,13 +25,18 @@ class Khs extends Model
         return $this->belongsTo(Mahasiswa::class);
     }
 
-    public function items(): HasMany
+    public function khs(): BelongsTo
     {
-        return $this->hasMany(KhsItem::class);
+        return $this->belongsTo(Khs::class);
     }
 
-    public function questionnaireResponses(): HasMany
+    public function mataKuliah(): BelongsTo
     {
-        return $this->hasMany(QuestionnaireResponse::class);
+        return $this->belongsTo(MataKuliah::class);
+    }
+
+    public function answers(): HasMany
+    {
+        return $this->hasMany(QuestionnaireAnswer::class);
     }
 }

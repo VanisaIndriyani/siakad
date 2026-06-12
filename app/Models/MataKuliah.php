@@ -46,4 +46,9 @@ class MataKuliah extends Model
     {
         return $this->hasMany(KhsItem::class);
     }
+
+    public function questionnaireResponses(): HasMany
+    {
+        return $this->hasMany(QuestionnaireResponse::class);
+    }
 }

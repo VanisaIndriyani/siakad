@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Dosen;
 use App\Models\Khs;
 use App\Models\User;
+use App\Support\QuestionnaireService;
 use Dompdf\Dompdf;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class KhsController extends Controller
@@ -26,7 +28,7 @@ class KhsController extends Controller
             ->value('nama');
     }
 
-    public function index(Request $request): View
+    public function index(Request $request): View|RedirectResponse
     {
         /** @var User $user */
         $user = $request->user();
@@ -43,6 +45,12 @@ class KhsController extends Controller
                 'mahasiswa_id' => $mahasiswa->id,
                 'semester' => $semester,
             ]);
+        }
+
+        if (QuestionnaireService::hasPendingForMahasiswa($mahasiswa)) {
+            return redirect()
+                ->route('mahasiswa.kuesioner.index')
+                ->with('error', 'Sebelum melihat KHS, silakan isi semua kuesioner mata kuliah yang tersedia terlebih dahulu.');
         }
 
         $khs = Khs::query()
@@ -63,7 +71,7 @@ class KhsController extends Controller
         ]);
     }
 
-    public function show(Request $request, Khs $khs): View
+    public function show(Request $request, Khs $khs): View|RedirectResponse
     {
         /** @var User $user */
         $user = $request->user();
@@ -72,6 +80,12 @@ class KhsController extends Controller
         }
         if ((int) $khs->mahasiswa_id !== (int) $user->mahasiswa->id) {
             return redirect()->route('mahasiswa.khs.index')->with('error', 'Akses ditolak.');
+        }
+
+        if (QuestionnaireService::hasPendingForKhs($khs, (int) $user->mahasiswa->id)) {
+            return redirect()
+                ->route('mahasiswa.kuesioner.index')
+                ->with('error', 'Semester ini masih memiliki kuesioner yang belum diisi.');
         }
 
         $khs->load(['items.mataKuliah.dosen', 'mahasiswa']);
@@ -93,6 +107,12 @@ class KhsController extends Controller
         }
         if ((int) $khs->mahasiswa_id !== (int) $user->mahasiswa->id) {
             return redirect()->route('mahasiswa.khs.index')->with('error', 'Akses ditolak.');
+        }
+
+        if (QuestionnaireService::hasPendingForKhs($khs, (int) $user->mahasiswa->id)) {
+            return redirect()
+                ->route('mahasiswa.kuesioner.index')
+                ->with('error', 'Semester ini masih memiliki kuesioner yang belum diisi.');
         }
 
         $khs->load(['items.mataKuliah.dosen', 'mahasiswa']);

@@ -66,4 +66,9 @@ class Dosen extends Model
     {
         return $this->belongsToMany(KknPosko::class, 'kkn_posko_dosen', 'dosen_id', 'kkn_posko_id')->withTimestamps();
     }
+
+    public function mataKuliahTambahan(): HasMany
+    {
+        return $this->hasMany(MataKuliah::class, 'dosen_id_2');
+    }
 }

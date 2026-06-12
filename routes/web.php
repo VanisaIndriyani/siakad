@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\DosenController as AdminDosenController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\KhsController as AdminKhsController;
+use App\Http\Controllers\Admin\QuestionnaireController as AdminQuestionnaireController;
 use App\Http\Controllers\Admin\KrsController as AdminKrsController;
 use App\Http\Controllers\Admin\MahasiswaController as AdminMahasiswaController;
 use App\Http\Controllers\Admin\MataKuliahController as AdminMataKuliahController;
@@ -27,6 +28,7 @@ use App\Http\Controllers\Dosen\MahasiswaController as DosenMahasiswaController;
 use App\Http\Controllers\Dosen\NilaiController as DosenNilaiController;
 use App\Http\Controllers\Dosen\PengajuanLaporanController as DosenPengajuanLaporanController;
 use App\Http\Controllers\Dosen\PplBimbinganController as DosenPplBimbinganController;
+use App\Http\Controllers\Dosen\QuestionnaireController as DosenQuestionnaireController;
 use App\Http\Controllers\Dosen\PplRevisiController as DosenPplRevisiController;
 use App\Http\Controllers\Dosen\ProfilController as DosenProfilController;
 use App\Http\Controllers\Dosen\SkripsiBimbinganController as DosenSkripsiBimbinganController;
@@ -43,6 +45,7 @@ use App\Http\Controllers\Mahasiswa\PplController as MahasiswaPplController;
 use App\Http\Controllers\Mahasiswa\PplFileController as MahasiswaPplFileController;
 use App\Http\Controllers\Mahasiswa\PplRevisiController as MahasiswaPplRevisiController;
 use App\Http\Controllers\Mahasiswa\ProfilController as MahasiswaProfilController;
+use App\Http\Controllers\Mahasiswa\QuestionnaireController as MahasiswaQuestionnaireController;
 use App\Http\Controllers\Mahasiswa\SkripsiBimbinganController as MahasiswaSkripsiBimbinganController;
 use App\Http\Controllers\Mahasiswa\SkripsiController as MahasiswaSkripsiController;
 use App\Http\Controllers\Mahasiswa\SkripsiFileController as MahasiswaSkripsiFileController;
@@ -168,6 +171,16 @@ Route::prefix('admin')
         Route::put('/khs/{khs}', [AdminKhsController::class, 'update'])->name('khs.update');
         Route::delete('/khs/{khs}', [AdminKhsController::class, 'destroy'])->name('khs.destroy');
 
+        Route::get('/kuesioner', [AdminQuestionnaireController::class, 'index'])->name('kuesioner.index');
+        Route::get('/kuesioner/create', [AdminQuestionnaireController::class, 'create'])->name('kuesioner.create');
+        Route::post('/kuesioner', [AdminQuestionnaireController::class, 'store'])->name('kuesioner.store');
+        Route::delete('/kuesioner/bulk-delete', [AdminQuestionnaireController::class, 'bulkDestroy'])->name('kuesioner.bulk-delete');
+        Route::delete('/kuesioner/bulk-delete-course', [AdminQuestionnaireController::class, 'bulkDestroyCourses'])->name('kuesioner.bulk-delete-course');
+        Route::get('/kuesioner/mata-kuliah/{mataKuliah}', [AdminQuestionnaireController::class, 'show'])->name('kuesioner.show');
+        Route::get('/kuesioner/{question}/edit', [AdminQuestionnaireController::class, 'edit'])->name('kuesioner.edit');
+        Route::put('/kuesioner/{question}', [AdminQuestionnaireController::class, 'update'])->name('kuesioner.update');
+        Route::delete('/kuesioner/{question}', [AdminQuestionnaireController::class, 'destroy'])->name('kuesioner.destroy');
+
         Route::get('/absensi', [AdminAbsensiController::class, 'index'])->name('absensi.index');
         Route::get('/absensi/manual', [AdminAbsensiController::class, 'downloadManual'])->name('absensi.manual');
         Route::get('/absensi/rekap', [AdminAbsensiController::class, 'exportRekapPdf'])->name('absensi.rekap');
@@ -264,6 +277,10 @@ Route::prefix('mahasiswa')
         Route::get('/khs/{khs}', [MahasiswaKhsController::class, 'show'])->name('khs.show');
         Route::get('/khs/{khs}/pdf', [MahasiswaKhsController::class, 'pdf'])->name('khs.pdf');
 
+        Route::get('/kuesioner', [MahasiswaQuestionnaireController::class, 'index'])->name('kuesioner.index');
+        Route::get('/kuesioner/{khs}/{mataKuliah}', [MahasiswaQuestionnaireController::class, 'show'])->name('kuesioner.show');
+        Route::post('/kuesioner/{khs}/{mataKuliah}', [MahasiswaQuestionnaireController::class, 'store'])->name('kuesioner.store');
+
         Route::get('/absensi', [MahasiswaAbsensiController::class, 'index'])->name('absensi.index');
         Route::get('/absensi/materi/{absensi}', [MahasiswaAbsensiController::class, 'materi'])->name('absensi.materi');
         Route::get('/absensi/{mataKuliah}/{semester}', [MahasiswaAbsensiController::class, 'show'])->name('absensi.show');
@@ -334,6 +351,9 @@ Route::prefix('dosen')
         Route::get('/nilai', [DosenNilaiController::class, 'index'])->name('nilai.index');
         Route::get('/nilai/{mataKuliah}/{semester}', [DosenNilaiController::class, 'edit'])->name('nilai.edit');
         Route::put('/nilai/{mataKuliah}/{semester}', [DosenNilaiController::class, 'update'])->name('nilai.update');
+
+        Route::get('/kuesioner', [DosenQuestionnaireController::class, 'index'])->name('kuesioner.index');
+        Route::get('/kuesioner/{mataKuliah}', [DosenQuestionnaireController::class, 'show'])->name('kuesioner.show');
 
         Route::get('/mata-kuliah', [\App\Http\Controllers\Dosen\MataKuliahController::class, 'index'])->name('mata-kuliah.index');
         Route::post('/mata-kuliah/{mataKuliah}/rps', [\App\Http\Controllers\Dosen\MataKuliahController::class, 'uploadRps'])->name('mata-kuliah.rps.upload');
