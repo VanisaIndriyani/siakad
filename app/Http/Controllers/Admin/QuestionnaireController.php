@@ -21,6 +21,7 @@ class QuestionnaireController extends Controller
     public function index(Request $request): View
     {
         $q = trim((string) $request->get('q', ''));
+        $showAllCourses = $request->boolean('all');
 
         $courseStats = $this->courseStatsSubquery();
 
@@ -55,12 +56,18 @@ class QuestionnaireController extends Controller
                 ->orderBy('sort_order')
                 ->orderBy('id')
                 ->get(),
-            'courseSummaries' => $courseSummaries
-                ->orderByDesc('responses_count')
-                ->orderBy('mata_kuliah.kode')
-                ->paginate(10)
-                ->withQueryString(),
+            'courseSummaries' => $showAllCourses
+                ? $courseSummaries
+                    ->orderByDesc('responses_count')
+                    ->orderBy('mata_kuliah.kode')
+                    ->get()
+                : $courseSummaries
+                    ->orderByDesc('responses_count')
+                    ->orderBy('mata_kuliah.kode')
+                    ->paginate(10)
+                    ->withQueryString(),
             'q' => $q,
+            'showAllCourses' => $showAllCourses,
             'summary' => [
                 'responses_count' => QuestionnaireResponse::query()->count(),
                 'students_count' => QuestionnaireResponse::query()->distinct('mahasiswa_id')->count('mahasiswa_id'),

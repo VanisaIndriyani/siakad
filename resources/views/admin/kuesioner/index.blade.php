@@ -48,6 +48,11 @@
         <input name="q" value="{{ $q }}" class="w-full sm:max-w-lg h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" placeholder="Cari kode, mata kuliah, atau dosen..." />
         <button class="h-11 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">Cari</button>
         <a href="{{ route('admin.kuesioner.index') }}" class="h-11 px-4 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">Reset</a>
+        @if (! $showAllCourses)
+            <a href="{{ route('admin.kuesioner.index', array_filter(['q' => $q, 'all' => 1])) }}" class="h-11 px-4 inline-flex items-center justify-center rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/20 transition text-emerald-100">Buka Semua</a>
+        @else
+            <a href="{{ route('admin.kuesioner.index', array_filter(['q' => $q])) }}" class="h-11 px-4 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">Kembali ke Pagination</a>
+        @endif
     </form>
 
     <div class="mt-4" x-data="{
@@ -165,9 +170,15 @@
         @endforeach
     </div>
 
-    <div class="mt-4">
-        {{ $courseSummaries->links() }}
-    </div>
+    @if (! $showAllCourses)
+        <div class="mt-4">
+            {{ $courseSummaries->links() }}
+        </div>
+    @else
+        <div class="mt-4 text-sm text-emerald-100/70">
+            Menampilkan semua {{ $courseSummaries->count() }} data mata kuliah.
+        </div>
+    @endif
 
     <div class="mt-8">
         <div class="text-lg font-semibold">Daftar Pertanyaan</div>

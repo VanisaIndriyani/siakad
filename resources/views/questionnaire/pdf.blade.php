@@ -8,13 +8,13 @@
         @page { margin: 12mm 10mm 12mm 12mm; }
         body { font-family: DejaVu Sans, sans-serif; font-size: 10px; color: #111827; }
         table { width: 100%; border-collapse: collapse; }
-        .kop-title-1 { color: #000; font-size: 20px; font-weight: 800; margin: 0; line-height: 1.12; }
-        .kop-title-2 { color: #000; font-size: 28px; font-weight: 900; margin: 1px 0 0; letter-spacing: 0.4px; line-height: 1.06; }
-        .kop-title-3 { color: #000; font-size: 20px; font-weight: 900; margin: 1px 0 0; line-height: 1.12; }
-        .kop-meta { color: #000; font-size: 12px; margin-top: 3px; line-height: 1.2; }
-        .kop-line-1 { border-top: 4px solid #000; margin-top: 7px; }
-        .kop-line-2 { border-top: 2px solid #000; margin-top: 3px; }
-        .doc-title { text-align: center; font-size: 13px; font-weight: 900; margin: 10px 0 5px; }
+        .kop-title-1 { color: #000; font-size: 24px; font-weight: 800; margin: 0; line-height: 1.1; }
+        .kop-title-2 { color: #000; font-size: 36px; font-weight: 900; margin: 1px 0 0; letter-spacing: 0.4px; line-height: 1.04; }
+        .kop-title-3 { color: #000; font-size: 24px; font-weight: 900; margin: 1px 0 0; line-height: 1.1; }
+        .kop-meta { color: #000; font-size: 13px; margin-top: 4px; line-height: 1.2; }
+        .kop-line-1 { border-top: 4px solid #000; margin-top: 9px; }
+        .kop-line-2 { border-top: 2px solid #000; margin-top: 4px; }
+        .doc-title { text-align: center; font-size: 13px; font-weight: 900; margin: 12px 0 5px; }
         .kv2 { width: 100%; border-collapse: collapse; }
         .kv2 td { padding: 2px 0; font-size: 10px; vertical-align: top; }
         .kv2 .label { width: 110px; }
@@ -68,9 +68,9 @@
 
     <table>
         <tr>
-            <td style="width: 130px; vertical-align: middle; padding-top: 2px;">
+            <td style="width: 170px; vertical-align: middle; padding-top: 2px;">
                 @if($logoBase64)
-                    <img src="{{ $logoBase64 }}" alt="Logo" style="display: block; width: 125px; height: auto;" />
+                    <img src="{{ $logoBase64 }}" alt="Logo" style="display: block; width: 155px; height: auto;" />
                 @endif
             </td>
             <td style="text-align: center;">
@@ -81,7 +81,7 @@
                 <div class="kop-meta">{{ $kop5 }}</div>
                 <div class="kop-meta">{{ $kop6 }}</div>
             </td>
-            <td style="width: 90px;"></td>
+            <td style="width: 110px;"></td>
         </tr>
     </table>
     <div class="kop-line-1"></div>
