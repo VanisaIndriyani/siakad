@@ -38,8 +38,8 @@ class KrsController extends Controller
             ->first();
 
         return [
-            'kaprodi' => $kaprodi?->nama,
-            'sekprodi' => $sekprodi?->nama,
+            'kaprodi' => $kaprodi,
+            'sekprodi' => $sekprodi,
         ];
     }
 
@@ -200,8 +200,8 @@ class KrsController extends Controller
 
         return view('mahasiswa.krs.show', [
             'krs' => $krs,
-            'kaprodiNama' => $signers['kaprodi'],
-            'sekprodiNama' => $signers['sekprodi'],
+            'kaprodi' => $signers['kaprodi'],
+            'sekprodi' => $signers['sekprodi'],
         ]);
     }
 
@@ -223,8 +223,8 @@ class KrsController extends Controller
 
         $html = view('mahasiswa.krs.pdf', [
             'krs' => $krs,
-            'kaprodiNama' => $signers['kaprodi'],
-            'sekprodiNama' => $signers['sekprodi'],
+            'kaprodi' => $signers['kaprodi'],
+            'sekprodi' => $signers['sekprodi'],
         ])->render();
 
         $dompdf = new Dompdf(['isRemoteEnabled' => true]);

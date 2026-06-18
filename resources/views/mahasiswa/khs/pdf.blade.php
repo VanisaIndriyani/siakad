@@ -70,7 +70,6 @@
         $ps = strtoupper((string) ($mahasiswa?->program_studi ?? ''));
         $jenjang = str_contains($ps, 'S2') ? 'S2' : (str_contains($ps, 'S3') ? 'S3' : ($ps !== '' ? 'S1' : '-'));
 
-        $kaprodiNama = $kaprodiNama ?? null;
         $kotaTtd = env('KAMPUS_KOTA') ?: 'Majelling Watang';
         $tanggalTtd = now()->format('d-m-Y');
     @endphp
@@ -180,7 +179,10 @@
         <div style="font-size: 11px;">{{ $kotaTtd }}, {{ $tanggalTtd }}</div>
         <div style="font-size: 11px; font-weight: 700; margin-top: 2px;">Ketua Prodi {{ $mahasiswa?->program_studi ?? '-' }}</div>
         <div style="height: 70px;"></div>
-        <div style="font-size: 11px; font-weight: 800;">{{ $kaprodiNama ?: '-' }}</div>
+        <div style="font-size: 11px; font-weight: 800;">{{ $kaprodi?->nama ?: '-' }}</div>
+        @if($kaprodi?->nuptk)
+            <div style="font-size: 10px;">NUPTK. {{ $kaprodi->nuptk }}</div>
+        @endif
     </div>
 </body>
 </html>

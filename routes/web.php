@@ -135,6 +135,7 @@ Route::prefix('admin')
         Route::delete('/dosen/bulk-delete', [AdminDosenController::class, 'bulkDestroy'])->name('dosen.bulk-delete');
         Route::resource('dosen', AdminDosenController::class);
 
+        Route::delete('/mata-kuliah/bulk-delete', [AdminMataKuliahController::class, 'bulkDestroy'])->name('mata-kuliah.bulk-delete');
         Route::resource('mata-kuliah', AdminMataKuliahController::class)->except(['show']);
         Route::post('/mata-kuliah/{mataKuliah}/rps-admin', [AdminMataKuliahController::class, 'uploadRpsAdmin'])->name('mata-kuliah.rps-admin.upload');
         Route::get('/mata-kuliah/{mataKuliah}/rps-admin', [AdminMataKuliahController::class, 'downloadRpsAdmin'])->name('mata-kuliah.rps-admin.download');

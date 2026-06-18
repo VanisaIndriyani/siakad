@@ -210,4 +210,21 @@ class MataKuliahController extends Controller
 
         return redirect()->route('admin.mata-kuliah.index')->with('success', 'Mata kuliah berhasil dihapus.');
     }
+
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer'],
+        ]);
+
+        $ids = array_values(array_unique(array_map('intval', (array) $validated['ids'])));
+        if (count($ids) === 0) {
+            return back()->with('error', 'Tidak ada data yang dipilih.');
+        }
+
+        MataKuliah::query()->whereIn('id', $ids)->delete();
+
+        return redirect()->route('admin.mata-kuliah.index')->with('success', 'Mata kuliah terpilih berhasil dihapus.');
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Mahasiswa;
 
 use App\Http\Controllers\Controller;
+use App\Models\Dosen;
 use App\Models\PplPengajuan;
 use Dompdf\Dompdf;
 use Illuminate\Http\Request;
@@ -15,6 +16,20 @@ class PplRevisiController extends Controller
         $mahasiswa = $request->user()?->mahasiswa;
         abort_unless($mahasiswa, 403);
         abort_unless((int) $ppl->mahasiswa_id === (int) $mahasiswa->id, 404);
+    }
+
+    private function resolveKaprodi(?string $programStudi): ?Dosen
+    {
+        $programStudi = trim((string) $programStudi);
+        if ($programStudi === '') {
+            return null;
+        }
+
+        return Dosen::query()
+            ->where('program_studi', $programStudi)
+            ->where('status_akademik', 'Ketua Prodi')
+            ->orderByDesc('id')
+            ->first();
     }
 
     public function index(Request $request, PplPengajuan $ppl): View
@@ -38,6 +53,7 @@ class PplRevisiController extends Controller
             'ppl' => $ppl,
             'revisis' => $ppl->revisis->sortBy('id')->values(),
             'printedBy' => $request->user()?->name,
+            'kaprodi' => $this->resolveKaprodi($ppl->mahasiswa?->program_studi),
         ])->render();
 
         $dompdf = new Dompdf(['isRemoteEnabled' => true]);

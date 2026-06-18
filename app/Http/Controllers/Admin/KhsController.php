@@ -52,13 +52,29 @@ class KhsController extends Controller
         ]);
     }
 
+    private function resolveKaprodi(?string $programStudi): ?\App\Models\Dosen
+    {
+        $programStudi = trim((string) $programStudi);
+        if ($programStudi === '') {
+            return null;
+        }
+
+        return \App\Models\Dosen::query()
+            ->where('program_studi', $programStudi)
+            ->where('status_akademik', 'Ketua Prodi')
+            ->orderByDesc('id')
+            ->first();
+    }
+
     public function downloadPdf(Khs $khs)
     {
         $khs->load(['mahasiswa', 'items.mataKuliah']);
         
+        $kaprodi = $this->resolveKaprodi($khs->mahasiswa->program_studi ?? null);
+
         $html = view('mahasiswa.khs.pdf', [
             'khs' => $khs,
-            'kaprodiNama' => null, 
+            'kaprodi' => $kaprodi, 
         ])->render();
 
         $dompdf = new Dompdf(['isRemoteEnabled' => true]);

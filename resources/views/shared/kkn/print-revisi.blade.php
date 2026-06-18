@@ -162,18 +162,25 @@
         <table>
             <tr>
                 <td>
+                    @php
+                        $kaprodi = $kaprodi ?? null;
+                        $kaprodiNama = $kaprodi?->nama ?: null;
+                        $kaprodiNuptk = $kaprodi?->nuptk ?: null;
+                        $dplTtd = $posko->pembimbingS->first();
+                        $dplNuptk = $dplTtd?->nuptk ?: ($dplTtd?->nidn ?: ($dplTtd?->nip ?: null));
+                    @endphp
                     Mengetahui,<br>
                     Ketua Program Studi {{ $posko->pengajuans->first()?->mahasiswa?->program_studi ?? '................' }}
                     <div class="signature-space"></div>
-                    ( ........................................... )<br>
-                    NUPTK. .....................................
+                    <strong>( {{ $kaprodiNama ?: '...........................................' }} )</strong><br>
+                    NUPTK. {{ $kaprodiNuptk ?: '.....................................' }}
                 </td>
                 <td>
                     Sidrap, {{ now()->translatedFormat('d F Y') }}<br>
                     Dosen Pembimbing Lapangan
                     <div class="signature-space"></div>
-                    <strong>( {{ $posko->pembimbingS->first()?->nama ?: '...........................................' }} )</strong><br>
-                    NUPTK. {{ $posko->pembimbingS->first()?->nidn ?: '.....................................' }}
+                    <strong>( {{ $dplTtd?->nama ?: '...........................................' }} )</strong><br>
+                    NUPTK. {{ $dplNuptk ?: '.....................................' }}
                 </td>
             </tr>
         </table>

@@ -72,9 +72,6 @@
         $semesterLabel = ((int) $krs->semester % 2 === 0) ? 'GENAP' : 'GANJIL';
         $tahunAjaran = trim((string) ($krs->tahun_ajaran ?? ''));
         $semesterHeader = $semesterLabel.($tahunAjaran !== '' ? '-'.$tahunAjaran : '');
-
-        $kaprodiNama = $kaprodiNama ?? null;
-        $sekprodiNama = $sekprodiNama ?? null;
     @endphp
 
     <table>
@@ -183,19 +180,28 @@
                 <div style="font-size: 11px; font-weight: 700;">Ketua Prodi</div>
                 <div style="font-size: 11px; font-weight: 700;">{{ $mahasiswa?->program_studi ?? '-' }}</div>
                 <div style="height: 64px;"></div>
-                <div style="font-size: 11px; font-weight: 800;">{{ $kaprodiNama ? trim($kaprodiNama) : '-' }}</div>
+                <div style="font-size: 11px; font-weight: 800;">{{ $kaprodi?->nama ? trim($kaprodi->nama) : '-' }}</div>
+                @if($kaprodi?->nuptk)
+                    <div style="font-size: 10px;">NUPTK. {{ $kaprodi->nuptk }}</div>
+                @endif
             </td>
             <td style="width: 33.33%; text-align: center; vertical-align: top;">
                 <div style="font-size: 11px; font-weight: 700;">Sekretaris Prodi</div>
                 <div style="font-size: 11px; font-weight: 700;">{{ $mahasiswa?->program_studi ?? '-' }}</div>
                 <div style="height: 64px;"></div>
-                <div style="font-size: 11px; font-weight: 800;">{{ $sekprodiNama ? trim($sekprodiNama) : '-' }}</div>
+                <div style="font-size: 11px; font-weight: 800;">{{ $sekprodi?->nama ? trim($sekprodi->nama) : '-' }}</div>
+                @if($sekprodi?->nuptk)
+                    <div style="font-size: 10px;">NUPTK. {{ $sekprodi->nuptk }}</div>
+                @endif
             </td>
             <td style="width: 33.33%; text-align: center; vertical-align: top;">
                 <div style="font-size: 11px; font-weight: 700;">Mahasiswa</div>
                 <div style="font-size: 11px; font-weight: 700;">&nbsp;</div>
                 <div style="height: 64px;"></div>
                 <div style="font-size: 11px; font-weight: 800;">{{ trim((string) ($mahasiswa?->nama_lengkap ?? auth()->user()->name)) }}</div>
+                @if($mahasiswa?->npm)
+                    <div style="font-size: 10px;">NPM. {{ $mahasiswa->npm }}</div>
+                @endif
             </td>
         </tr>
     </table>

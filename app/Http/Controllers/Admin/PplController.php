@@ -47,6 +47,20 @@ class PplController extends Controller
         abort(403);
     }
 
+    private function resolveKaprodi(?string $programStudi): ?Dosen
+    {
+        $programStudi = trim((string) $programStudi);
+        if ($programStudi === '') {
+            return null;
+        }
+
+        return Dosen::query()
+            ->where('program_studi', $programStudi)
+            ->where('status_akademik', 'Ketua Prodi')
+            ->orderByDesc('id')
+            ->first();
+    }
+
     public function index(Request $request): View
     {
         $context = $this->resolveContext($request);
@@ -120,11 +134,13 @@ class PplController extends Controller
         }
 
         $ppl->load(['mahasiswa', 'dosenPembimbing', 'dosenPembimbing2', 'revisis.creator']);
+        $kaprodi = $this->resolveKaprodi($ppl->mahasiswa?->program_studi);
 
         $html = view('ppl.revisi-pdf', [
             'ppl' => $ppl,
             'revisis' => $ppl->revisis->sortBy('id')->values(),
             'printedBy' => $request->user()?->name,
+            'kaprodi' => $kaprodi,
         ])->render();
 
         $dompdf = new Dompdf(['isRemoteEnabled' => true]);

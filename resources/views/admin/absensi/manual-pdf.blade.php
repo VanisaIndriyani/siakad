@@ -177,12 +177,21 @@
                 <div style="font-weight: 700;">Ketua Program Studi</div>
                 <div class="sign-space"></div>
                 <div class="sign-name">{{ $kaprodiNama ?? '........................................' }}</div>
+                @if($kaprodi?->nuptk)
+                    <div style="font-size: 9px;">NUPTK. {{ $kaprodi->nuptk }}</div>
+                @endif
             </td>
             <td>
                 <div style="font-weight: 700;">Sidrap, {{ date('d F Y') }}</div>
                 <div style="font-weight: 700;">Dosen Pengampu,</div>
                 <div class="sign-space"></div>
                 <div class="sign-name">{{ $dosenNama }}</div>
+                @php
+                    $dosenObj = $dosen ?? $mk->dosen;
+                @endphp
+                @if($dosenObj?->nuptk)
+                    <div style="font-size: 9px;">NUPTK. {{ $dosenObj->nuptk }}</div>
+                @endif
             </td>
         </tr>
     </table>

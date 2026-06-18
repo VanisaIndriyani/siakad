@@ -14,7 +14,7 @@ use Illuminate\View\View;
 
 class KhsController extends Controller
 {
-    private function resolveKaprodiName(?string $programStudi): ?string
+    private function resolveKaprodi(?string $programStudi): ?Dosen
     {
         $programStudi = trim((string) $programStudi);
         if ($programStudi === '') {
@@ -25,7 +25,7 @@ class KhsController extends Controller
             ->where('program_studi', $programStudi)
             ->where('status_akademik', 'Ketua Prodi')
             ->orderByDesc('id')
-            ->value('nama');
+            ->first();
     }
 
     public function index(Request $request): View|RedirectResponse
@@ -90,11 +90,11 @@ class KhsController extends Controller
 
         $khs->load(['items.mataKuliah.dosen', 'mahasiswa']);
 
-        $kaprodiNama = $this->resolveKaprodiName($user->mahasiswa->program_studi ?? null);
+        $kaprodi = $this->resolveKaprodi($user->mahasiswa->program_studi ?? null);
 
         return view('mahasiswa.khs.show', [
             'khs' => $khs,
-            'kaprodiNama' => $kaprodiNama,
+            'kaprodi' => $kaprodi,
         ]);
     }
 
@@ -117,11 +117,11 @@ class KhsController extends Controller
 
         $khs->load(['items.mataKuliah.dosen', 'mahasiswa']);
 
-        $kaprodiNama = $this->resolveKaprodiName($user->mahasiswa->program_studi ?? null);
+        $kaprodi = $this->resolveKaprodi($user->mahasiswa->program_studi ?? null);
 
         $html = view('mahasiswa.khs.pdf', [
             'khs' => $khs,
-            'kaprodiNama' => $kaprodiNama,
+            'kaprodi' => $kaprodi,
         ])->render();
 
         $dompdf = new Dompdf(['isRemoteEnabled' => true]);

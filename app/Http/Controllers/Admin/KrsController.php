@@ -73,8 +73,8 @@ class KrsController extends Controller
             ->first();
 
         return [
-            'kaprodi' => $kaprodi?->nama,
-            'sekprodi' => $sekprodi?->nama,
+            'kaprodi' => $kaprodi,
+            'sekprodi' => $sekprodi,
         ];
     }
 
@@ -86,8 +86,8 @@ class KrsController extends Controller
 
         $html = view('mahasiswa.krs.pdf', [
             'krs' => $krs,
-            'kaprodiNama' => $signers['kaprodi'],
-            'sekprodiNama' => $signers['sekprodi'],
+            'kaprodi' => $signers['kaprodi'],
+            'sekprodi' => $signers['sekprodi'],
         ])->render();
 
         $dompdf = new Dompdf(['isRemoteEnabled' => true]);
@@ -175,8 +175,50 @@ class KrsController extends Controller
         return redirect()->route('admin.krs.show', $krs)->with('success', 'Status KRS berhasil diperbarui.');
     }
 
+    private function cleanupDerivedRecordsForKrs(Krs $krs): void
+    {
+        $krs->loadMissing(['items', 'mahasiswa']);
+
+        $semester = (int) $krs->semester;
+        $jurusan = trim((string) ($krs->mahasiswa?->program_studi ?? ''));
+        $mkIds = $krs->items
+            ->pluck('mata_kuliah_id')
+            ->map(fn ($v) => (int) $v)
+            ->unique()
+            ->values()
+            ->all();
+
+        if ($jurusan !== '' && count($mkIds) > 0) {
+            AbsensiItem::query()
+                ->where('mahasiswa_id', (int) $krs->mahasiswa_id)
+                ->whereHas('absensi', function ($q) use ($jurusan, $semester, $mkIds) {
+                    $q->where('jurusan', $jurusan)
+                        ->where('semester', $semester)
+                        ->whereIn('mata_kuliah_id', $mkIds);
+                })
+                ->delete();
+        }
+
+        if (count($mkIds) > 0) {
+            $khs = Khs::query()
+                ->where('mahasiswa_id', (int) $krs->mahasiswa_id)
+                ->where('semester', $semester)
+                ->first();
+
+            if ($khs) {
+                KhsItem::query()
+                    ->where('khs_id', (int) $khs->id)
+                    ->whereIn('mata_kuliah_id', $mkIds)
+                    ->whereNull('nilai_angka')
+                    ->whereNull('nilai_huruf')
+                    ->delete();
+            }
+        }
+    }
+
     public function destroy(Krs $krs): RedirectResponse
     {
+        $this->cleanupDerivedRecordsForKrs($krs);
         $krs->delete();
         cache()->forget('admin_pending_krs_count');
 
@@ -190,7 +232,13 @@ class KrsController extends Controller
             'ids.*' => ['integer', 'exists:krs,id'],
         ]);
 
-        Krs::query()->whereIn('id', $validated['ids'])->delete();
+        $ids = array_values(array_unique(array_map('intval', (array) $validated['ids'])));
+        $rows = Krs::query()->with(['items', 'mahasiswa'])->whereIn('id', $ids)->get();
+        foreach ($rows as $krs) {
+            $this->cleanupDerivedRecordsForKrs($krs);
+        }
+
+        Krs::query()->whereIn('id', $ids)->delete();
         cache()->forget('admin_pending_krs_count');
 
         return back()->with('success', 'Data KRS terpilih berhasil dihapus.');

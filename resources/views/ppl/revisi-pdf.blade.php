@@ -195,6 +195,14 @@
         </tbody>
     </table>
 
+    @php
+        $kaprodi = $kaprodi ?? null;
+        $kaprodiNama = $kaprodi?->nama ?: null;
+        $kaprodiNuptk = $kaprodi?->nuptk ?: null;
+        $pembimbing = $ppl->dosenPembimbing;
+        $pembimbingNuptk = $pembimbing?->nuptk ?: ($pembimbing?->nidn ?: ($pembimbing?->nip ?: null));
+    @endphp
+
     <div class="footer-sign" style="margin-top: 50px; width: 100%;">
         <table style="width: 100%; border: none;">
             <tr>
@@ -202,15 +210,15 @@
                     Mengetahui,<br>
                     Ketua Program Studi {{ $ppl->mahasiswa?->program_studi ?? '................' }}
                     <div style="height: 80px;"></div>
-                    ( ........................................... )<br>
-                    NUPTK. .....................................
+                    <strong>( {{ $kaprodiNama ?: '...........................................' }} )</strong><br>
+                    NUPTK. {{ $kaprodiNuptk ?: '.....................................' }}
                 </td>
                 <td style="width: 50%; text-align: center; border: none;">
                     Sidrap, {{ now()->translatedFormat('d F Y') }}<br>
                     Dosen Pembimbing PPL,
                     <div style="height: 80px;"></div>
                     <strong>( {{ $ppl->dosenPembimbing?->nama ?: '...........................................' }} )</strong><br>
-                    NUPTK. {{ $ppl->dosenPembimbing?->nidn ?: '.....................................' }}
+                    NUPTK. {{ $pembimbingNuptk ?: '.....................................' }}
                 </td>
             </tr>
         </table>

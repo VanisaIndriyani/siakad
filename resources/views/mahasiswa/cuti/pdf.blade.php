@@ -166,8 +166,11 @@
                     <div class="sig-title">Ketua Prodi</div>
                 </div>
                 <div class="sig-space"></div>
+                @php
+                    $kaprodiNuptk = $kaprodi?->nuptk ?: ($kaprodi?->nidn ?: ($kaprodi?->nip ?: null));
+                @endphp
                 <div class="sig-name">{{ $kaprodi?->nama ?? '........................................' }}</div>
-                <div style="font-size: 10px;">NUPTK. {{ $kaprodi?->nuptk ?? '................................' }}</div>
+                <div style="font-size: 10px;">NUPTK. {{ $kaprodiNuptk ?: '................................' }}</div>
             </td>
             <td>
                 <div class="sig-head">
@@ -175,8 +178,11 @@
                     <div class="sig-title">Sekretaris Prodi</div>
                 </div>
                 <div class="sig-space"></div>
+                @php
+                    $sekprodiNuptk = $sekprodi?->nuptk ?: ($sekprodi?->nidn ?: ($sekprodi?->nip ?: null));
+                @endphp
                 <div class="sig-name">{{ $sekprodi?->nama ?? '........................................' }}</div>
-                <div style="font-size: 10px;">NUPTK. {{ $sekprodi?->nuptk ?? '................................' }}</div>
+                <div style="font-size: 10px;">NUPTK. {{ $sekprodiNuptk ?: '................................' }}</div>
             </td>
             <td>
                 <div class="sig-head">

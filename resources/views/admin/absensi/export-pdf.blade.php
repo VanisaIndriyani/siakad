@@ -199,12 +199,18 @@
                 <div class="sign-label">{{ $absensi->jurusan }}</div>
                 <div class="sign-space"></div>
                 <div class="sign-name">{{ $kaprodiNama ?: '________________________' }}</div>
+                @if($kaprodi?->nuptk)
+                    <div style="font-size: 10px;">NUPTK. {{ $kaprodi->nuptk }}</div>
+                @endif
             </td>
             <td>
                 <div class="sign-label">Sidrap, {{ now()->translatedFormat('d F Y') }}</div>
                 <div class="sign-label">Dosen Pengampu,</div>
                 <div class="sign-space"></div>
                 <div class="sign-name">{{ $dosenNama ?: '________________________' }}</div>
+                @if($dosen?->nuptk)
+                    <div style="font-size: 10px;">NUPTK. {{ $dosen->nuptk }}</div>
+                @endif
             </td>
         </tr>
     </table>

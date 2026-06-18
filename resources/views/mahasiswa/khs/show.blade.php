@@ -79,7 +79,6 @@
         $kopLine5 = 'Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang';
         $kopLine6 = 'E-mail : iaiddisidrap@gmail.com  Website : www.yppddisrapp.ac.id';
 
-        $kaprodiNama = $kaprodiNama ?? null;
         $kotaTtd = env('KAMPUS_KOTA') ?: 'Majelling Watang';
         $tanggalTtd = now()->format('d-m-Y');
     @endphp
@@ -245,6 +244,9 @@
         <div>{{ $kotaTtd }}, {{ $tanggalTtd }}</div>
         <div style="margin-top: 2px; font-weight: 700;">Ketua Prodi {{ $mahasiswa?->program_studi ?? '-' }}</div>
         <div style="height: 70px;"></div>
-        <div style="font-weight: 800;">{{ $kaprodiNama ?: '-' }}</div>
+        <div style="font-weight: 800;">{{ $kaprodi?->nama ?: '-' }}</div>
+        @if($kaprodi?->nuptk)
+            <div style="font-size: 10px;">NUPTK. {{ $kaprodi->nuptk }}</div>
+        @endif
     </div>
 </x-portal-layout>

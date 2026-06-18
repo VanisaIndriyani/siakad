@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Dosen;
 use App\Models\KknBimbinganMessage;
 use App\Models\KknFile;
 use App\Models\KknPosko;
@@ -31,6 +32,20 @@ class KknBimbinganController extends Controller
         }
 
         abort(403);
+    }
+
+    private function resolveKaprodi(?string $programStudi): ?Dosen
+    {
+        $programStudi = trim((string) $programStudi);
+        if ($programStudi === '') {
+            return null;
+        }
+
+        return Dosen::query()
+            ->where('program_studi', $programStudi)
+            ->where('status_akademik', 'Ketua Prodi')
+            ->orderByDesc('id')
+            ->first();
     }
 
     public function sendMessage(Request $request, KknPosko $posko): RedirectResponse
@@ -133,9 +148,11 @@ class KknBimbinganController extends Controller
     {
         $this->checkAccess($request, $posko);
         $posko->load(['pembimbingS', 'pengajuans.mahasiswa', 'revisis.user']);
+        $programStudi = $posko->pengajuans->first()?->mahasiswa?->program_studi;
 
         return view('shared.kkn.print-revisi', [
             'posko' => $posko,
+            'kaprodi' => $this->resolveKaprodi($programStudi),
         ]);
     }
 }

@@ -34,7 +34,7 @@
                             </div>
                             <div class="min-w-0">
                                 <div class="text-sm font-bold text-white truncate">{{ $dpl->nama }}</div>
-                                <div class="text-[10px] text-emerald-100/50 mt-1">NUPTK: {{ $dpl->nidn ?: '-' }}</div>
+                                <div class="text-[10px] text-emerald-100/50 mt-1">NUPTK: {{ $dpl->nuptk ?: ($dpl->nidn ?: ($dpl->nip ?: '-')) }}</div>
                             </div>
                         </div>
                     @endforeach
@@ -207,7 +207,8 @@
                         @csrf
                         <textarea name="pesan" rows="1" required placeholder="Tulis bimbingan atau pesan diskusi..." 
                                   oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"
-                                  class="flex-1 bg-transparent border-0 px-3 py-2.5 text-sm text-white focus:ring-0 focus:outline-none resize-none max-h-32 custom-scrollbar placeholder:text-white/20"></textarea>
+                                  style="background: rgba(0,0,0,0.25) !important; color: #ffffff !important;"
+                                  class="flex-1 border-0 px-3 py-2.5 text-sm focus:ring-0 focus:outline-none resize-none max-h-32 custom-scrollbar placeholder:text-white/30 rounded-xl"></textarea>
                         <button class="h-11 w-11 rounded-xl bg-emerald-600 text-white flex items-center justify-center hover:bg-emerald-500 transition shadow-lg shadow-emerald-900/40 transform active:scale-95 group">
                             <i class="fa-solid fa-paper-plane group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
                         </button>
