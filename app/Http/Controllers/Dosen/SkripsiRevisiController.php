@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dosen;
 
 use App\Http\Controllers\Controller;
+use App\Models\Dosen;
 use App\Models\SkripsiPengajuan;
 use Dompdf\Dompdf;
 use Illuminate\Http\RedirectResponse;
@@ -11,6 +12,20 @@ use Illuminate\View\View;
 
 class SkripsiRevisiController extends Controller
 {
+    private function resolveKaprodi(?string $programStudi): ?Dosen
+    {
+        $programStudi = trim((string) $programStudi);
+        if ($programStudi === '') {
+            return null;
+        }
+
+        return Dosen::query()
+            ->where('program_studi', $programStudi)
+            ->where('status_akademik', 'Ketua Prodi')
+            ->orderByDesc('id')
+            ->first();
+    }
+
     private function authorizeSkripsi(Request $request, SkripsiPengajuan $skripsi): void
     {
         $dosen = $request->user()?->dosen;
@@ -54,11 +69,13 @@ class SkripsiRevisiController extends Controller
         $this->authorizeSkripsi($request, $skripsi);
 
         $skripsi->load(['mahasiswa', 'dosenPembimbing', 'dosenPembimbing2', 'revisis.creator']);
+        $kaprodi = $this->resolveKaprodi($skripsi->mahasiswa?->program_studi);
 
         $html = view('skripsi.revisi-pdf', [
             'skripsi' => $skripsi,
             'revisis' => $skripsi->revisis->sortBy('id')->values(),
             'printedBy' => $request->user()?->name,
+            'kaprodi' => $kaprodi,
         ])->render();
 
         $dompdf = new Dompdf(['isRemoteEnabled' => true]);
@@ -74,4 +91,3 @@ class SkripsiRevisiController extends Controller
         ]);
     }
 }
-

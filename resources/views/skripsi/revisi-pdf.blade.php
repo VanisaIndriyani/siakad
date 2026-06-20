@@ -195,6 +195,25 @@
         </tbody>
     </table>
 
+    @php
+        $pickNomor = function ($dosen) {
+            foreach ([$dosen?->nuptk, $dosen?->nidn, $dosen?->nip] as $nomor) {
+                $nomor = trim((string) $nomor);
+                if ($nomor !== '') {
+                    return $nomor;
+                }
+            }
+
+            return null;
+        };
+
+        $kaprodi = $kaprodi ?? null;
+        $kaprodiNama = $kaprodi?->nama ?: null;
+        $kaprodiNuptk = $pickNomor($kaprodi);
+        $pembimbing = $skripsi->dosenPembimbing;
+        $pembimbingNuptk = $pickNomor($pembimbing);
+    @endphp
+
     <div class="footer-sign" style="margin-top: 50px; width: 100%;">
         <table style="width: 100%; border: none;">
             <tr>
@@ -202,15 +221,15 @@
                     Mengetahui,<br>
                     Ketua Program Studi {{ $skripsi->mahasiswa?->program_studi ?? '................' }}
                     <div style="height: 80px;"></div>
-                    ( ........................................... )<br>
-                    NUPTK. .....................................
+                    <strong>( {{ $kaprodiNama ?: '...........................................' }} )</strong><br>
+                    NUPTK. {{ $kaprodiNuptk ?: '.....................................' }}
                 </td>
                 <td style="width: 50%; text-align: center; border: none;">
                     Sidrap, {{ now()->translatedFormat('d F Y') }}<br>
                     Dosen Pembimbing Skripsi,
                     <div style="height: 80px;"></div>
-                    <strong>( {{ $skripsi->dosenPembimbing?->nama ?: '...........................................' }} )</strong><br>
-                    NUPTK. {{ $skripsi->dosenPembimbing?->nidn ?: '.....................................' }}
+                    <strong>( {{ $pembimbing?->nama ?: '...........................................' }} )</strong><br>
+                    NUPTK. {{ $pembimbingNuptk ?: '.....................................' }}
                 </td>
             </tr>
         </table>

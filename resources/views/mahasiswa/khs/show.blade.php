@@ -81,6 +81,7 @@
 
         $kotaTtd = env('KAMPUS_KOTA') ?: 'Majelling Watang';
         $tanggalTtd = now()->format('d-m-Y');
+        $kaprodiNuptk = $kaprodi?->nuptk ?: ($kaprodi?->nidn ?: ($kaprodi?->nip ?: null));
     @endphp
 
     <div class="print-only" style="margin-bottom: 14px;">
@@ -245,8 +246,8 @@
         <div style="margin-top: 2px; font-weight: 700;">Ketua Prodi {{ $mahasiswa?->program_studi ?? '-' }}</div>
         <div style="height: 70px;"></div>
         <div style="font-weight: 800;">{{ $kaprodi?->nama ?: '-' }}</div>
-        @if($kaprodi?->nuptk)
-            <div style="font-size: 10px;">NUPTK. {{ $kaprodi->nuptk }}</div>
+        @if($kaprodiNuptk)
+            <div style="font-size: 10px;">NUPTK. {{ $kaprodiNuptk }}</div>
         @endif
     </div>
 </x-portal-layout>

@@ -163,11 +163,22 @@
             <tr>
                 <td>
                     @php
+                        $pickNomor = function ($dosen) {
+                            foreach ([$dosen?->nuptk, $dosen?->nidn, $dosen?->nip] as $nomor) {
+                                $nomor = trim((string) $nomor);
+                                if ($nomor !== '') {
+                                    return $nomor;
+                                }
+                            }
+
+                            return null;
+                        };
+
                         $kaprodi = $kaprodi ?? null;
                         $kaprodiNama = $kaprodi?->nama ?: null;
-                        $kaprodiNuptk = $kaprodi?->nuptk ?: null;
+                        $kaprodiNuptk = $pickNomor($kaprodi);
                         $dplTtd = $posko->pembimbingS->first();
-                        $dplNuptk = $dplTtd?->nuptk ?: ($dplTtd?->nidn ?: ($dplTtd?->nip ?: null));
+                        $dplNuptk = $pickNomor($dplTtd);
                     @endphp
                     Mengetahui,<br>
                     Ketua Program Studi {{ $posko->pengajuans->first()?->mahasiswa?->program_studi ?? '................' }}

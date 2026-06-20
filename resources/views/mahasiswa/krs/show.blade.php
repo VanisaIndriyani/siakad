@@ -47,6 +47,8 @@
         $kopLine4 = 'TERAKREDITASI INSTITUSI • SK: 576/SK/BAN-PT/Akred/PT/IV/2021';
         $kopLine5 = 'Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang';
         $kopLine6 = 'E-mail : iaiddisidrap@gmail.com  Website : www.yppddisrapp.ac.id';
+        $kaprodiNuptk = $kaprodi?->nuptk ?: ($kaprodi?->nidn ?: ($kaprodi?->nip ?: null));
+        $sekprodiNuptk = $sekprodi?->nuptk ?: ($sekprodi?->nidn ?: ($sekprodi?->nip ?: null));
     @endphp
 
     <div class="print-only" style="margin-bottom: 14px;">
@@ -213,8 +215,8 @@
                         <div style="font-size: 11px; font-weight: 700;">{{ $mahasiswa?->program_studi ?? '-' }}</div>
                         <div style="height: 64px;"></div>
                         <div style="font-size: 11px; font-weight: 800;">{{ $kaprodi?->nama ? trim($kaprodi->nama) : '-' }}</div>
-                        @if($kaprodi?->nuptk)
-                            <div style="font-size: 10px;">NUPTK. {{ $kaprodi->nuptk }}</div>
+                        @if($kaprodiNuptk)
+                            <div style="font-size: 10px;">NUPTK. {{ $kaprodiNuptk }}</div>
                         @endif
                     </td>
                     <td style="width: 33.33%; text-align: center; vertical-align: top;">
@@ -222,8 +224,8 @@
                         <div style="font-size: 11px; font-weight: 700;">{{ $mahasiswa?->program_studi ?? '-' }}</div>
                         <div style="height: 64px;"></div>
                         <div style="font-size: 11px; font-weight: 800;">{{ $sekprodi?->nama ? trim($sekprodi->nama) : '-' }}</div>
-                        @if($sekprodi?->nuptk)
-                            <div style="font-size: 10px;">NUPTK. {{ $sekprodi->nuptk }}</div>
+                        @if($sekprodiNuptk)
+                            <div style="font-size: 10px;">NUPTK. {{ $sekprodiNuptk }}</div>
                         @endif
                     </td>
                     <td style="width: 33.33%; text-align: center; vertical-align: top;">

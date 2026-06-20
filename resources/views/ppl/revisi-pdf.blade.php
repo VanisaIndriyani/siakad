@@ -196,11 +196,22 @@
     </table>
 
     @php
+        $pickNomor = function ($dosen) {
+            foreach ([$dosen?->nuptk, $dosen?->nidn, $dosen?->nip] as $nomor) {
+                $nomor = trim((string) $nomor);
+                if ($nomor !== '') {
+                    return $nomor;
+                }
+            }
+
+            return null;
+        };
+
         $kaprodi = $kaprodi ?? null;
         $kaprodiNama = $kaprodi?->nama ?: null;
-        $kaprodiNuptk = $kaprodi?->nuptk ?: null;
+        $kaprodiNuptk = $pickNomor($kaprodi);
         $pembimbing = $ppl->dosenPembimbing;
-        $pembimbingNuptk = $pembimbing?->nuptk ?: ($pembimbing?->nidn ?: ($pembimbing?->nip ?: null));
+        $pembimbingNuptk = $pickNomor($pembimbing);
     @endphp
 
     <div class="footer-sign" style="margin-top: 50px; width: 100%;">

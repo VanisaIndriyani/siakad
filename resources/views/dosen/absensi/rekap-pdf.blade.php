@@ -68,12 +68,26 @@
             }
         }
 
+        $pickNomor = function ($dosen) {
+            foreach ([$dosen?->nuptk, $dosen?->nidn, $dosen?->nip] as $nomor) {
+                $nomor = trim((string) $nomor);
+                if ($nomor !== '') {
+                    return $nomor;
+                }
+            }
+
+            return null;
+        };
+
         $kop1 = 'INSTITUT AGAMA ISLAM';
         $kop2 = "DARUD DA'WAH WAL IRSYAD";
         $kop3 = 'SIDENRENG RAPPANG';
         $kop4 = 'TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021';
         $kop5 = 'Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang';
         $kop6 = 'E-mail : iaiddisidrap@gmail.com  Website : www.yppddisrapp.ac.id';
+
+        $kaprodiNuptk = $pickNomor($kaprodi ?? null);
+        $dosenNuptk = $pickNomor($dosen ?? null);
     @endphp
 
     <table style="border: none;">
@@ -111,7 +125,7 @@
                     <tr>
                         <td class="label">Dosen Pengampu</td>
                         <td class="colon">:</td>
-                        <td class="value">{{ $dosenNama }} (NUPTK. {{ $dosen?->nuptk ?? '-' }})</td>
+                        <td class="value">{{ $dosenNama }} (NUPTK. {{ $dosenNuptk ?: '-' }})</td>
                     </tr>
                 </table>
             </td>
@@ -211,14 +225,14 @@
                 <div style="font-weight: 700;">Ketua Program Studi</div>
                 <div class="sign-space"></div>
                 <div class="sign-name">{{ $kaprodiNama ?? '........................................' }}</div>
-                <div style="font-size: 9px; margin-top: 2px;">NUPTK. {{ $kaprodi?->nuptk ?? '.....................................' }}</div>
+                <div style="font-size: 9px; margin-top: 2px;">NUPTK. {{ $kaprodiNuptk ?? '.....................................' }}</div>
             </td>
             <td>
                 <div style="font-weight: 700;">Sidrap, {{ date('d F Y') }}</div>
                 <div style="font-weight: 700;">Dosen Pengampu,</div>
                 <div class="sign-space"></div>
                 <div class="sign-name">{{ $dosenNama }}</div>
-                <div style="font-size: 9px; margin-top: 2px;">NUPTK. {{ $dosen?->nuptk ?? '.....................................' }}</div>
+                <div style="font-size: 9px; margin-top: 2px;">NUPTK. {{ $dosenNuptk ?? '.....................................' }}</div>
             </td>
         </tr>
     </table>

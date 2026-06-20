@@ -19,6 +19,20 @@ class SkripsiController extends Controller
 {
     private const PRODI_APPROVER_STATUS = ['Ketua Prodi', 'Sekretaris Prodi'];
 
+    private function resolveKaprodi(?string $programStudi): ?Dosen
+    {
+        $programStudi = trim((string) $programStudi);
+        if ($programStudi === '') {
+            return null;
+        }
+
+        return Dosen::query()
+            ->where('program_studi', $programStudi)
+            ->where('status_akademik', 'Ketua Prodi')
+            ->orderByDesc('id')
+            ->first();
+    }
+
     private function resolveContext(Request $request): array
     {
         $user = $request->user();
@@ -109,11 +123,13 @@ class SkripsiController extends Controller
         }
 
         $skripsi->load(['mahasiswa', 'dosenPembimbing', 'dosenPembimbing2', 'revisis.creator']);
+        $kaprodi = $this->resolveKaprodi($skripsi->mahasiswa?->program_studi);
 
         $html = view('skripsi.revisi-pdf', [
             'skripsi' => $skripsi,
             'revisis' => $skripsi->revisis->sortBy('id')->values(),
             'printedBy' => $request->user()?->name,
+            'kaprodi' => $kaprodi,
         ])->render();
 
         $dompdf = new Dompdf(['isRemoteEnabled' => true]);

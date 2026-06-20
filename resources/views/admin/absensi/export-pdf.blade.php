@@ -70,6 +70,17 @@
             }
         }
 
+        $pickNomor = function ($dosen) {
+            foreach ([$dosen?->nuptk, $dosen?->nidn, $dosen?->nip] as $nomor) {
+                $nomor = trim((string) $nomor);
+                if ($nomor !== '') {
+                    return $nomor;
+                }
+            }
+
+            return null;
+        };
+
         $kop1 = 'INSTITUT AGAMA ISLAM';
         $kop2 = "DARUD DA'WAH WAL IRSYAD";
         $kop3 = 'SIDENRENG RAPPANG';
@@ -80,6 +91,8 @@
         
         $semesterLabel = ((int) $absensi->semester % 2 === 0) ? 'GENAP' : 'GANJIL';
         $ta = date('Y') . '/' . (date('Y') + 1);
+        $kaprodiNuptk = $pickNomor($kaprodi ?? null);
+        $dosenNuptk = $pickNomor($dosen ?? null);
     @endphp
 
     <table style="border: none;">
@@ -199,8 +212,8 @@
                 <div class="sign-label">{{ $absensi->jurusan }}</div>
                 <div class="sign-space"></div>
                 <div class="sign-name">{{ $kaprodiNama ?: '________________________' }}</div>
-                @if($kaprodi?->nuptk)
-                    <div style="font-size: 10px;">NUPTK. {{ $kaprodi->nuptk }}</div>
+                @if($kaprodiNuptk)
+                    <div style="font-size: 10px;">NUPTK. {{ $kaprodiNuptk }}</div>
                 @endif
             </td>
             <td>
@@ -208,8 +221,8 @@
                 <div class="sign-label">Dosen Pengampu,</div>
                 <div class="sign-space"></div>
                 <div class="sign-name">{{ $dosenNama ?: '________________________' }}</div>
-                @if($dosen?->nuptk)
-                    <div style="font-size: 10px;">NUPTK. {{ $dosen->nuptk }}</div>
+                @if($dosenNuptk)
+                    <div style="font-size: 10px;">NUPTK. {{ $dosenNuptk }}</div>
                 @endif
             </td>
         </tr>

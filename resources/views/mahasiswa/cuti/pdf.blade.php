@@ -76,6 +76,16 @@
         ];
         $now = now();
         $tanggalIndo = $now->format('d') . ' ' . ($indoMonths[(int) $now->format('n')] ?? $now->format('F')) . ' ' . $now->format('Y');
+        $pickNomor = function ($dosen) {
+            foreach ([$dosen?->nuptk, $dosen?->nidn, $dosen?->nip] as $nomor) {
+                $nomor = trim((string) $nomor);
+                if ($nomor !== '') {
+                    return $nomor;
+                }
+            }
+
+            return null;
+        };
     @endphp
 
     <table>
@@ -166,9 +176,7 @@
                     <div class="sig-title">Ketua Prodi</div>
                 </div>
                 <div class="sig-space"></div>
-                @php
-                    $kaprodiNuptk = $kaprodi?->nuptk ?: ($kaprodi?->nidn ?: ($kaprodi?->nip ?: null));
-                @endphp
+                @php $kaprodiNuptk = $pickNomor($kaprodi); @endphp
                 <div class="sig-name">{{ $kaprodi?->nama ?? '........................................' }}</div>
                 <div style="font-size: 10px;">NUPTK. {{ $kaprodiNuptk ?: '................................' }}</div>
             </td>
@@ -178,9 +186,7 @@
                     <div class="sig-title">Sekretaris Prodi</div>
                 </div>
                 <div class="sig-space"></div>
-                @php
-                    $sekprodiNuptk = $sekprodi?->nuptk ?: ($sekprodi?->nidn ?: ($sekprodi?->nip ?: null));
-                @endphp
+                @php $sekprodiNuptk = $pickNomor($sekprodi); @endphp
                 <div class="sig-name">{{ $sekprodi?->nama ?? '........................................' }}</div>
                 <div style="font-size: 10px;">NUPTK. {{ $sekprodiNuptk ?: '................................' }}</div>
             </td>
