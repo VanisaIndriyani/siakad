@@ -128,6 +128,8 @@ Route::prefix('admin')
         
         Route::get('/penasehat-akademik', [\App\Http\Controllers\Admin\PenasehatAkademikController::class, 'index'])->name('penasehat-akademik.index');
         Route::get('/penasehat-akademik/{mahasiswa}', [\App\Http\Controllers\Admin\PenasehatAkademikController::class, 'show'])->name('penasehat-akademik.show');
+        Route::get('/penasehat-akademik/{mahasiswa}/print', [\App\Http\Controllers\Admin\PenasehatAkademikController::class, 'printRiwayat'])->name('penasehat-akademik.print');
+        Route::get('/penasehat-akademik/{mahasiswa}/pdf', [\App\Http\Controllers\Admin\PenasehatAkademikController::class, 'exportRiwayatPdf'])->name('penasehat-akademik.pdf');
         Route::post('/penasehat-akademik/{mahasiswa}/assign', [\App\Http\Controllers\Admin\PenasehatAkademikController::class, 'assign'])->name('penasehat-akademik.assign');
         Route::delete('/penasehat-akademik/{mahasiswa}/sk', [\App\Http\Controllers\Admin\PenasehatAkademikController::class, 'destroySkPenasehat'])->name('penasehat-akademik.destroy-sk');
         Route::post('/penasehat-akademik/{mahasiswa}/reset', [\App\Http\Controllers\Admin\PenasehatAkademikController::class, 'resetPenasehat'])->name('penasehat-akademik.reset');
@@ -272,6 +274,14 @@ Route::prefix('mahasiswa')
         
         Route::get('/penasehat-akademik', [\App\Http\Controllers\Mahasiswa\PenasehatAkademikController::class, 'show'])->name('penasehat-akademik.show');
         Route::post('/penasehat-akademik/message', [\App\Http\Controllers\Mahasiswa\PenasehatAkademikController::class, 'sendMessage'])->name('penasehat-akademik.message');
+        Route::get('/penasehat-akademik/print', function (Request $request) {
+            $mahasiswa = $request->user()->mahasiswa;
+            return app(\App\Http\Controllers\Admin\PenasehatAkademikController::class)->printRiwayat($request, $mahasiswa);
+        })->name('penasehat-akademik.print');
+        Route::get('/penasehat-akademik/pdf', function (Request $request) {
+            $mahasiswa = $request->user()->mahasiswa;
+            return app(\App\Http\Controllers\Admin\PenasehatAkademikController::class)->exportRiwayatPdf($request, $mahasiswa);
+        })->name('penasehat-akademik.pdf');
         
         // Reuse admin routes for sk download/preview
         Route::get('/penasehat-akademik/sk/download', function (Request $request) {
@@ -385,6 +395,8 @@ Route::prefix('dosen')
         
         Route::get('/penasehat-akademik', [\App\Http\Controllers\Dosen\PenasehatAkademikController::class, 'index'])->name('penasehat-akademik.index');
         Route::get('/penasehat-akademik/{mahasiswa}', [\App\Http\Controllers\Dosen\PenasehatAkademikController::class, 'show'])->name('penasehat-akademik.show');
+        Route::get('/penasehat-akademik/{mahasiswa}/print', [\App\Http\Controllers\Admin\PenasehatAkademikController::class, 'printRiwayat'])->name('penasehat-akademik.print');
+        Route::get('/penasehat-akademik/{mahasiswa}/pdf', [\App\Http\Controllers\Admin\PenasehatAkademikController::class, 'exportRiwayatPdf'])->name('penasehat-akademik.pdf');
         Route::post('/penasehat-akademik/{mahasiswa}/message', [\App\Http\Controllers\Dosen\PenasehatAkademikController::class, 'sendMessage'])->name('penasehat-akademik.message');
         
         // Reuse admin routes for assign, reset, sk download/preview

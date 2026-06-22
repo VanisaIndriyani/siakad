@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Dosen;
+use App\Models\Krs;
 use App\Models\Mahasiswa;
+use Dompdf\Dompdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -15,6 +17,31 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 class PenasehatAkademikController extends Controller
 {
     private const PRODI_APPROVER_STATUS = ['Ketua Prodi', 'Sekretaris Prodi'];
+
+    private function resolveProdiSigners(?string $programStudi): array
+    {
+        $programStudi = trim((string) $programStudi);
+        if ($programStudi === '') {
+            return ['kaprodi' => null, 'sekprodi' => null];
+        }
+
+        $kaprodi = Dosen::query()
+            ->where('program_studi', $programStudi)
+            ->where('status_akademik', 'Ketua Prodi')
+            ->orderByDesc('id')
+            ->first();
+
+        $sekprodi = Dosen::query()
+            ->where('program_studi', $programStudi)
+            ->where('status_akademik', 'Sekretaris Prodi')
+            ->orderByDesc('id')
+            ->first();
+
+        return [
+            'kaprodi' => $kaprodi,
+            'sekprodi' => $sekprodi,
+        ];
+    }
 
     private function resolveContext(Request $request): array
     {
@@ -36,16 +63,78 @@ class PenasehatAkademikController extends Controller
         abort(403);
     }
 
+    private function authorizeRiwayatAccess(Request $request, Mahasiswa $mahasiswa): void
+    {
+        $user = $request->user();
+        abort_unless($user, 403);
+
+        if ($user->isStaffAkademik()) {
+            return;
+        }
+
+        if ($user->isMahasiswa()) {
+            abort_unless((int) $mahasiswa->id === (int) ($user->mahasiswa?->id ?? 0), 404);
+            return;
+        }
+
+        if ($user->isDosen()) {
+            $dosen = $user->dosen;
+            $statusAkademik = (string) ($dosen?->status_akademik ?? '');
+            $isPenasehat = (int) ($mahasiswa->dosen_penasehat_id ?? 0) === (int) ($dosen?->id ?? 0);
+            $isProdiApprover = in_array($statusAkademik, self::PRODI_APPROVER_STATUS, true)
+                && (string) ($mahasiswa->program_studi ?? '') === (string) ($dosen?->program_studi ?? '');
+
+            abort_unless($isPenasehat || $isProdiApprover, 403);
+            return;
+        }
+
+        abort(403);
+    }
+
+    private function buildRiwayatPayload(Mahasiswa $mahasiswa, ?string $printedBy = null): array
+    {
+        $mahasiswa->loadMissing(['dosenPenasehat', 'bimbinganAkademikMessages.sender']);
+
+        $messages = $mahasiswa->bimbinganAkademikMessages->sortBy('id')->values();
+        $signers = $this->resolveProdiSigners($mahasiswa->program_studi);
+        $semesterAktif = Krs::query()
+            ->where('mahasiswa_id', $mahasiswa->id)
+            ->max('semester');
+
+        return [
+            'mahasiswa' => $mahasiswa,
+            'messages' => $messages,
+            'kaprodi' => $signers['kaprodi'],
+            'sekprodi' => $signers['sekprodi'],
+            'semesterAktif' => $semesterAktif,
+            'printedBy' => $printedBy,
+        ];
+    }
+
     public function index(Request $request): View
     {
         $context = $this->resolveContext($request);
         $q = trim((string) $request->get('q', ''));
+        $jurusan = trim((string) $request->get('jurusan', ''));
+        $semester = trim((string) $request->get('semester', ''));
 
-        $query = Mahasiswa::query()->with(['user', 'dosenPenasehat']);
+        $query = Mahasiswa::query()
+            ->with(['user', 'dosenPenasehat'])
+            ->withMax('krs as semester_terbaru', 'semester');
 
         if ($context['programStudi']) {
             $programStudi = $context['programStudi'];
             $query->where('program_studi', $programStudi);
+        }
+
+        if ($jurusan !== '') {
+            $query->where('program_studi', $jurusan);
+        }
+
+        if ($semester !== '') {
+            $query->whereHas('krs', function ($sub) use ($semester) {
+                $sub->where('semester', (int) $semester);
+            });
         }
 
         if ($q !== '') {
@@ -57,9 +146,35 @@ class PenasehatAkademikController extends Controller
 
         $items = $query->orderByDesc('id')->paginate(10)->withQueryString();
 
+        $jurusanList = Mahasiswa::query()
+            ->when($context['programStudi'], function ($sub) use ($context) {
+                $sub->where('program_studi', $context['programStudi']);
+            })
+            ->whereNotNull('program_studi')
+            ->where('program_studi', '!=', '')
+            ->select('program_studi')
+            ->distinct()
+            ->orderBy('program_studi')
+            ->pluck('program_studi');
+
+        $semesterList = Krs::query()
+            ->when($context['programStudi'], function ($sub) use ($context) {
+                $sub->whereHas('mahasiswa', function ($mahasiswaQuery) use ($context) {
+                    $mahasiswaQuery->where('program_studi', $context['programStudi']);
+                });
+            })
+            ->select('semester')
+            ->distinct()
+            ->orderBy('semester')
+            ->pluck('semester');
+
         return view('admin.penasehat-akademik.index', [
             'items' => $items,
             'q' => $q,
+            'jurusan' => $jurusan,
+            'semester' => $semester,
+            'jurusanList' => $jurusanList,
+            'semesterList' => $semesterList,
             'routePrefix' => $context['routePrefix'],
             'canAssign' => $context['canAssign'],
         ]);
@@ -248,6 +363,36 @@ class PenasehatAkademikController extends Controller
         $downloadName = $mahasiswa->sk_penasehat_name ?? basename($mahasiswa->sk_penasehat_path);
         return response()->file(storage_path('app/public/' . $mahasiswa->sk_penasehat_path), [
             'Content-Disposition' => 'inline; filename="' . $downloadName . '"',
+        ]);
+    }
+
+    public function printRiwayat(Request $request, Mahasiswa $mahasiswa): View
+    {
+        $this->authorizeRiwayatAccess($request, $mahasiswa);
+
+        return view('penasehat-akademik.riwayat-print', $this->buildRiwayatPayload($mahasiswa, $request->user()?->name) + [
+            'autoPrint' => true,
+        ]);
+    }
+
+    public function exportRiwayatPdf(Request $request, Mahasiswa $mahasiswa)
+    {
+        $this->authorizeRiwayatAccess($request, $mahasiswa);
+
+        $html = view('penasehat-akademik.riwayat-print', $this->buildRiwayatPayload($mahasiswa, $request->user()?->name) + [
+            'autoPrint' => false,
+        ])->render();
+
+        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $filename = 'riwayat-bimbingan-akademik-' . ($mahasiswa->npm ?: $mahasiswa->id) . '.pdf';
+
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ]);
     }
 }

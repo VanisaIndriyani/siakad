@@ -5,6 +5,7 @@
 
     @php
         $isAdminView = ($routePrefix ?? 'admin') === 'admin';
+        $indexRoute = $isAdminView ? route('admin.penasehat-akademik.index') : route('dosen.penasehat-akademik.index');
     @endphp
 
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -15,12 +16,24 @@
     </div>
 
     <div class="mt-5 rounded-2xl bg-white/5 border border-white/10 p-5">
-        <form method="GET" action="{{ ($routePrefix ?? 'admin') === 'admin' ? route('admin.penasehat-akademik.index') : route('dosen.penasehat-akademik.index') }}" class="flex flex-col lg:flex-row gap-3">
+        <form method="GET" action="{{ $indexRoute }}" class="flex flex-col lg:flex-row gap-3">
             <input name="q" value="{{ $q }}" placeholder="Cari nama / NPM..."
                    class="h-11 w-full rounded-xl bg-white/5 border border-white/10 px-4 text-sm text-white placeholder:text-emerald-100/40 focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
+            <select name="jurusan" class="h-11 w-full lg:w-72 rounded-xl bg-white/5 border border-white/10 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+                <option value="" style="background-color: #0d2a23; color: #fff;">Semua Jurusan</option>
+                @foreach (($jurusanList ?? collect()) as $jurusanOption)
+                    <option value="{{ $jurusanOption }}" @selected(($jurusan ?? '') === $jurusanOption) style="background-color: #0d2a23; color: #fff;">{{ $jurusanOption }}</option>
+                @endforeach
+            </select>
+            <select name="semester" class="h-11 w-full lg:w-44 rounded-xl bg-white/5 border border-white/10 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+                <option value="" style="background-color: #0d2a23; color: #fff;">Semua Semester</option>
+                @foreach (($semesterList ?? collect()) as $semesterOption)
+                    <option value="{{ $semesterOption }}" @selected((string) ($semester ?? '') === (string) $semesterOption) style="background-color: #0d2a23; color: #fff;">Semester {{ $semesterOption }}</option>
+                @endforeach
+            </select>
             <div class="flex items-center gap-2">
                 <button class="h-11 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-sm font-medium">Cari</button>
-                <a href="{{ ($routePrefix ?? 'admin') === 'admin' ? route('admin.penasehat-akademik.index') : route('dosen.penasehat-akademik.index') }}" class="h-11 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-sm font-medium inline-flex items-center">Reset</a>
+                <a href="{{ $indexRoute }}" class="h-11 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-sm font-medium inline-flex items-center">Reset</a>
             </div>
         </form>
     </div>
@@ -33,6 +46,7 @@
                         <th class="text-left font-medium px-4 py-3">Mahasiswa</th>
                         <th class="text-left font-medium px-4 py-3">NPM</th>
                         <th class="text-left font-medium px-4 py-3">Program Studi</th>
+                        <th class="text-left font-medium px-4 py-3">Semester</th>
                         <th class="text-left font-medium px-4 py-3">Penasehat Akademik</th>
                         <th class="text-right font-medium px-4 py-3 w-40">Aksi</th>
                     </tr>
@@ -45,6 +59,7 @@
                             </td>
                             <td class="px-4 py-3 text-emerald-100/80">{{ $row->npm ?: '-' }}</td>
                             <td class="px-4 py-3 text-emerald-100/80">{{ $row->program_studi ?: '-' }}</td>
+                            <td class="px-4 py-3 text-emerald-100/80">{{ $row->semester_terbaru ?: '-' }}</td>
                             <td class="px-4 py-3 text-emerald-100/80">
                                 <div>{{ $row->dosenPenasehat?->nama ?: '-' }}</div>
                             </td>
@@ -59,7 +74,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-4 py-10 text-center text-emerald-100/70">Belum ada data mahasiswa.</td>
+                            <td colspan="6" class="px-4 py-10 text-center text-emerald-100/70">Belum ada data mahasiswa.</td>
                         </tr>
                     @endforelse
                 </tbody>

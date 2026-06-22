@@ -17,6 +17,8 @@
             ? route('admin.penasehat-akademik.sk.download', $mahasiswa)
             : route('dosen.penasehat-akademik.sk.download', $mahasiswa);
         $messageAction = $prefix === 'admin' ? route('admin.penasehat-akademik.message', $mahasiswa) : route('dosen.penasehat-akademik.message', $mahasiswa);
+        $printUrl = $prefix === 'admin' ? route('admin.penasehat-akademik.print', $mahasiswa) : route('dosen.penasehat-akademik.print', $mahasiswa);
+        $pdfUrl = $prefix === 'admin' ? route('admin.penasehat-akademik.pdf', $mahasiswa) : route('dosen.penasehat-akademik.pdf', $mahasiswa);
     @endphp
 
     <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
@@ -28,6 +30,14 @@
             </div>
         </div>
         <div class="flex items-center gap-2">
+            <a href="{{ $printUrl }}" target="_blank" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                <i class="fa-solid fa-print"></i>
+                <span class="text-sm font-medium">Print</span>
+            </a>
+            <a href="{{ $pdfUrl }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                <i class="fa-solid fa-file-pdf"></i>
+                <span class="text-sm font-medium">PDF</span>
+            </a>
             <a href="{{ $indexUrl }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                 <i class="fa-solid fa-arrow-left"></i>
                 <span class="text-sm font-medium">Kembali</span>

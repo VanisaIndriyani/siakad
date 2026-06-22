@@ -10,6 +10,16 @@
                 Bimbingan dan komunikasi dengan dosen penasehat akademik.
             </div>
         </div>
+        <div class="flex items-center gap-2">
+            <a href="{{ route('mahasiswa.penasehat-akademik.print') }}" target="_blank" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                <i class="fa-solid fa-print"></i>
+                <span class="text-sm font-medium">Print</span>
+            </a>
+            <a href="{{ route('mahasiswa.penasehat-akademik.pdf') }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                <i class="fa-solid fa-file-pdf"></i>
+                <span class="text-sm font-medium">PDF</span>
+            </a>
+        </div>
     </div>
 
     <div class="mt-5 grid grid-cols-1 lg:grid-cols-3 gap-4">
