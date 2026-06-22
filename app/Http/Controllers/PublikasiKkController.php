@@ -22,11 +22,34 @@ class PublikasiKkController extends Controller
         'SK',
     ];
 
+    private function resolveRoutePrefix(Request $request): string
+    {
+        return $request->is('admin/*') ? 'admin' : ($request->is('mahasiswa/*') ? 'mahasiswa' : 'dosen');
+    }
+
+    private function canManageAll(Request $request): bool
+    {
+        return (bool) $request->user()?->isStaffAkademik();
+    }
+
+    private function authorizePublikasiAccess(Request $request, PublikasiKk $publikasiKk): void
+    {
+        if ($this->canManageAll($request)) {
+            return;
+        }
+
+        abort_unless((int) $publikasiKk->user_id === (int) $request->user()?->id, 403);
+    }
+
     public function index(Request $request)
     {
-        $routePrefix = $request->is('admin/*') ? 'admin' : ($request->is('mahasiswa/*') ? 'mahasiswa' : 'dosen');
+        $routePrefix = $this->resolveRoutePrefix($request);
         
         $query = PublikasiKk::with('user')->orderByDesc('created_at');
+
+        if (! $this->canManageAll($request)) {
+            $query->where('user_id', $request->user()->id);
+        }
 
         if ($request->has('search')) {
             $search = $request->get('search');
@@ -50,7 +73,7 @@ class PublikasiKkController extends Controller
 
     public function create(Request $request)
     {
-        $routePrefix = $request->is('admin/*') ? 'admin' : ($request->is('mahasiswa/*') ? 'mahasiswa' : 'dosen');
+        $routePrefix = $this->resolveRoutePrefix($request);
         $kategoriList = self::KATEGORI;
 
         return view('publikasi-kk.create', compact('routePrefix', 'kategoriList'));
@@ -58,7 +81,7 @@ class PublikasiKkController extends Controller
 
     public function store(Request $request)
     {
-        $routePrefix = $request->is('admin/*') ? 'admin' : ($request->is('mahasiswa/*') ? 'mahasiswa' : 'dosen');
+        $routePrefix = $this->resolveRoutePrefix($request);
         $validated = $request->validate([
             'penulis' => 'required|string|max:255',
             'judul' => 'required|string|max:255',
@@ -84,7 +107,9 @@ class PublikasiKkController extends Controller
 
     public function edit(Request $request, PublikasiKk $publikasiKk)
     {
-        $routePrefix = $request->is('admin/*') ? 'admin' : ($request->is('mahasiswa/*') ? 'mahasiswa' : 'dosen');
+        $this->authorizePublikasiAccess($request, $publikasiKk);
+
+        $routePrefix = $this->resolveRoutePrefix($request);
         $kategoriList = self::KATEGORI;
 
         return view('publikasi-kk.edit', compact('publikasiKk', 'routePrefix', 'kategoriList'));
@@ -92,7 +117,9 @@ class PublikasiKkController extends Controller
 
     public function update(Request $request, PublikasiKk $publikasiKk)
     {
-        $routePrefix = $request->is('admin/*') ? 'admin' : ($request->is('mahasiswa/*') ? 'mahasiswa' : 'dosen');
+        $this->authorizePublikasiAccess($request, $publikasiKk);
+
+        $routePrefix = $this->resolveRoutePrefix($request);
         $validated = $request->validate([
             'penulis' => 'required|string|max:255',
             'judul' => 'required|string|max:255',
@@ -120,7 +147,9 @@ class PublikasiKkController extends Controller
 
     public function destroy(Request $request, PublikasiKk $publikasiKk)
     {
-        $routePrefix = $request->is('admin/*') ? 'admin' : ($request->is('mahasiswa/*') ? 'mahasiswa' : 'dosen');
+        $this->authorizePublikasiAccess($request, $publikasiKk);
+
+        $routePrefix = $this->resolveRoutePrefix($request);
         if ($publikasiKk->file_path) {
             Storage::disk('public')->delete($publikasiKk->file_path);
         }
@@ -129,14 +158,20 @@ class PublikasiKkController extends Controller
         return redirect()->route($routePrefix . '.publikasi.index')->with('success', 'Data publikasi berhasil dihapus.');
     }
 
-    public function download(PublikasiKk $publikasiKk)
+    public function download(Request $request, PublikasiKk $publikasiKk)
     {
+        $this->authorizePublikasiAccess($request, $publikasiKk);
+
         return Storage::disk('public')->download($publikasiKk->file_path, $publikasiKk->file_name);
     }
 
     public function exportExcel(Request $request)
     {
         $query = PublikasiKk::query();
+
+        if (! $this->canManageAll($request)) {
+            $query->where('user_id', $request->user()->id);
+        }
 
         if ($request->has('kategori') && $request->get('kategori') != '') {
             $query->where('kategori', $request->get('kategori'));
