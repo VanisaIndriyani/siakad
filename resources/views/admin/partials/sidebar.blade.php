@@ -86,6 +86,11 @@
             </span>
         @endif
     </a>
+    <a href="{{ route('admin.penasehat-akademik.index') }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('admin.penasehat-akademik.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+        <i class="fa-solid fa-user-tie text-emerald-300"></i>
+        <span class="text-sm font-medium">Penasehat Akademik</span>
+    </a>
     @if (auth()->user()->role === 'admin')
         <a href="{{ route('admin.skripsi.index') }}"
            class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('admin.skripsi.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">

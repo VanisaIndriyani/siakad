@@ -54,6 +54,24 @@
     <i class="fa-solid fa-tent text-emerald-300"></i>
     <span class="text-sm font-medium">KKN</span>
 </a>
+<a href="{{ route('mahasiswa.publikasi.index') }}"
+   class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('mahasiswa.publikasi.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+    <i class="fa-solid fa-book text-emerald-300"></i>
+    <span class="text-sm font-medium">Publikasi</span>
+</a>
+<a href="{{ route('mahasiswa.penasehat-akademik.show') }}"
+   class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('mahasiswa.penasehat-akademik.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+    <i class="fa-solid fa-user-tie text-emerald-300"></i>
+    <span class="text-sm font-medium">Penasehat Akademik</span>
+    @php
+        $unreadBimbinganAkademikCount = auth()->user()->unreadBimbinganAkademikCount();
+    @endphp
+    @if ($unreadBimbinganAkademikCount > 0)
+        <span class="ml-auto inline-flex items-center justify-center min-w-7 h-7 px-2 rounded-full text-xs font-semibold bg-rose-500/15 border border-rose-500/25 text-rose-100">
+            {{ $unreadBimbinganAkademikCount }}
+        </span>
+    @endif
+</a>
 <a href="{{ route('mahasiswa.laporan.index') }}"
    class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('mahasiswa.laporan.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
     <i class="fa-solid fa-comments text-emerald-300"></i>

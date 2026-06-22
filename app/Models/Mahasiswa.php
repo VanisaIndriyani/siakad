@@ -58,6 +58,13 @@ class Mahasiswa extends Model
         'ibu_pendidikan',
         'ibu_pekerjaan',
         'ibu_penghasilan',
+        'dosen_penasehat_id',
+        'nomor_sk_penasehat',
+        'tanggal_sk_penasehat',
+        'sk_penasehat_path',
+        'sk_penasehat_name',
+        'mahasiswa_last_read_at',
+        'dosen_last_read_at',
     ];
 
     protected function casts(): array
@@ -66,7 +73,25 @@ class Mahasiswa extends Model
             'tanggal_lahir' => 'date',
             'ayah_tanggal_lahir' => 'date',
             'ibu_tanggal_lahir' => 'date',
+            'tanggal_sk_penasehat' => 'date',
+            'mahasiswa_last_read_at' => 'datetime',
+            'dosen_last_read_at' => 'datetime',
         ];
+    }
+
+    public function dosenPenasehat(): BelongsTo
+    {
+        return $this->belongsTo(Dosen::class, 'dosen_penasehat_id');
+    }
+
+    public function bimbinganAkademikMessages(): HasMany
+    {
+        return $this->hasMany(BimbinganAkademikMessage::class)->orderByDesc('id');
+    }
+
+    public function latestBimbinganAkademikMessage(): HasOne
+    {
+        return $this->hasOne(BimbinganAkademikMessage::class)->latestOfMany();
     }
 
     public function user(): BelongsTo

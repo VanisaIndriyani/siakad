@@ -71,4 +71,9 @@ class Dosen extends Model
     {
         return $this->hasMany(MataKuliah::class, 'dosen_id_2');
     }
+
+    public function mahasiswaBimbinganAkademik(): HasMany
+    {
+        return $this->hasMany(Mahasiswa::class, 'dosen_penasehat_id');
+    }
 }

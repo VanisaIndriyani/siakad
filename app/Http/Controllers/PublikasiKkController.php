@@ -24,7 +24,7 @@ class PublikasiKkController extends Controller
 
     public function index(Request $request)
     {
-        $routePrefix = $request->is('admin/*') ? 'admin' : 'dosen';
+        $routePrefix = $request->is('admin/*') ? 'admin' : ($request->is('mahasiswa/*') ? 'mahasiswa' : 'dosen');
         
         $query = PublikasiKk::with('user')->orderByDesc('created_at');
 
@@ -50,7 +50,7 @@ class PublikasiKkController extends Controller
 
     public function create(Request $request)
     {
-        $routePrefix = $request->is('admin/*') ? 'admin' : 'dosen';
+        $routePrefix = $request->is('admin/*') ? 'admin' : ($request->is('mahasiswa/*') ? 'mahasiswa' : 'dosen');
         $kategoriList = self::KATEGORI;
 
         return view('publikasi-kk.create', compact('routePrefix', 'kategoriList'));
@@ -58,7 +58,7 @@ class PublikasiKkController extends Controller
 
     public function store(Request $request)
     {
-        $routePrefix = $request->is('admin/*') ? 'admin' : 'dosen';
+        $routePrefix = $request->is('admin/*') ? 'admin' : ($request->is('mahasiswa/*') ? 'mahasiswa' : 'dosen');
         $validated = $request->validate([
             'penulis' => 'required|string|max:255',
             'judul' => 'required|string|max:255',
@@ -84,7 +84,7 @@ class PublikasiKkController extends Controller
 
     public function edit(Request $request, PublikasiKk $publikasiKk)
     {
-        $routePrefix = $request->is('admin/*') ? 'admin' : 'dosen';
+        $routePrefix = $request->is('admin/*') ? 'admin' : ($request->is('mahasiswa/*') ? 'mahasiswa' : 'dosen');
         $kategoriList = self::KATEGORI;
 
         return view('publikasi-kk.edit', compact('publikasiKk', 'routePrefix', 'kategoriList'));
@@ -92,7 +92,7 @@ class PublikasiKkController extends Controller
 
     public function update(Request $request, PublikasiKk $publikasiKk)
     {
-        $routePrefix = $request->is('admin/*') ? 'admin' : 'dosen';
+        $routePrefix = $request->is('admin/*') ? 'admin' : ($request->is('mahasiswa/*') ? 'mahasiswa' : 'dosen');
         $validated = $request->validate([
             'penulis' => 'required|string|max:255',
             'judul' => 'required|string|max:255',
@@ -120,7 +120,7 @@ class PublikasiKkController extends Controller
 
     public function destroy(Request $request, PublikasiKk $publikasiKk)
     {
-        $routePrefix = $request->is('admin/*') ? 'admin' : 'dosen';
+        $routePrefix = $request->is('admin/*') ? 'admin' : ($request->is('mahasiswa/*') ? 'mahasiswa' : 'dosen');
         if ($publikasiKk->file_path) {
             Storage::disk('public')->delete($publikasiKk->file_path);
         }

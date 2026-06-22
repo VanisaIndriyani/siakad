@@ -344,4 +344,44 @@ class User extends Authenticatable
 
         return 0;
     }
+
+    /**
+     * Count unread notifications for Bimbingan Akademik
+     */
+    public function unreadBimbinganAkademikCount(): int
+    {
+        if ($this->isMahasiswa()) {
+            $mahasiswa = $this->mahasiswa;
+            if (!$mahasiswa) return 0;
+
+            return \App\Models\Mahasiswa::query()
+                ->where('id', $mahasiswa->id)
+                ->whereHas('latestBimbinganAkademikMessage', function ($q) {
+                    $q->where('sender_user_id', '!=', $this->id)
+                      ->where(function ($sub) {
+                          $sub->whereNull('mahasiswa.mahasiswa_last_read_at')
+                              ->orWhereColumn('bimbingan_akademik_messages.created_at', '>', 'mahasiswa.mahasiswa_last_read_at');
+                      });
+                })
+                ->count();
+        }
+
+        if ($this->isDosen()) {
+            $dosen = $this->dosen;
+            if (!$dosen) return 0;
+
+            return \App\Models\Mahasiswa::query()
+                ->where('dosen_penasehat_id', $dosen->id)
+                ->whereHas('latestBimbinganAkademikMessage', function ($q) {
+                    $q->where('sender_user_id', '!=', $this->id)
+                      ->where(function ($sub) {
+                          $sub->whereNull('mahasiswa.dosen_last_read_at')
+                              ->orWhereColumn('bimbingan_akademik_messages.created_at', '>', 'mahasiswa.dosen_last_read_at');
+                      });
+                })
+                ->count();
+        }
+
+        return 0;
+    }
 }
