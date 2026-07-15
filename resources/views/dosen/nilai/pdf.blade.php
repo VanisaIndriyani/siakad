@@ -128,11 +128,6 @@
                         <td class="colon">:</td>
                         <td class="value">{{ $mataKuliah->dosen2?->nama ?? '-' }}</td>
                     </tr>
-                    <tr>
-                        <td class="label">Filter</td>
-                        <td class="colon">:</td>
-                        <td class="value">{{ $q !== '' ? $q : 'Semua mahasiswa pada halaman ini' }}</td>
-                    </tr>
                 </table>
             </td>
         </tr>
