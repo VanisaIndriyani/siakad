@@ -183,18 +183,14 @@
                 <div style="font-size: 11px; font-weight: 700;">{{ $mahasiswa?->program_studi ?? '-' }}</div>
                 <div style="height: 64px;"></div>
                 <div style="font-size: 11px; font-weight: 800;">{{ $kaprodi?->nama ? trim($kaprodi->nama) : '-' }}</div>
-                @if($kaprodiNuptk)
-                    <div style="font-size: 10px;">NUPTK. {{ $kaprodiNuptk }}</div>
-                @endif
+                <div style="font-size: 10px;">NUPTK. {{ $kaprodiNuptk ?: '.....................................' }}</div>
             </td>
             <td style="width: 33.33%; text-align: center; vertical-align: top;">
                 <div style="font-size: 11px; font-weight: 700;">Sekretaris Prodi</div>
                 <div style="font-size: 11px; font-weight: 700;">{{ $mahasiswa?->program_studi ?? '-' }}</div>
                 <div style="height: 64px;"></div>
                 <div style="font-size: 11px; font-weight: 800;">{{ $sekprodi?->nama ? trim($sekprodi->nama) : '-' }}</div>
-                @if($sekprodiNuptk)
-                    <div style="font-size: 10px;">NUPTK. {{ $sekprodiNuptk }}</div>
-                @endif
+                <div style="font-size: 10px;">NUPTK. {{ $sekprodiNuptk ?: '.....................................' }}</div>
             </td>
             <td style="width: 33.33%; text-align: center; vertical-align: top;">
                 <div style="font-size: 11px; font-weight: 700;">Mahasiswa</div>
