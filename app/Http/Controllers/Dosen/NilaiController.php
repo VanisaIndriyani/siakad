@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Khs;
 use App\Models\Krs;
 use App\Models\MataKuliah;
+use Dompdf\Dompdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -56,55 +57,43 @@ class NilaiController extends Controller
 
     public function edit(Request $request, MataKuliah $mataKuliah, int $semester): View
     {
-        $q = trim((string) $request->get('q', ''));
-
         $dosen = $request->user()?->dosen;
         abort_unless($dosen && in_array((int) $dosen->id, [(int) $mataKuliah->dosen_id, (int) $mataKuliah->dosen_id_2], true), 403);
 
-        $krsQuery = Krs::query()
-            ->with(['mahasiswa', 'mahasiswa.user'])
-            ->where('status_approval', 'approved')
-            ->where('semester', $semester)
-            ->whereHas('items', function ($sub) use ($mataKuliah) {
-                $sub->where('mata_kuliah_id', $mataKuliah->id);
-            });
-
-        if ($q !== '') {
-            $krsQuery->whereHas('mahasiswa', function ($sub) use ($q) {
-                $sub->where('nama_lengkap', 'like', "%{$q}%")
-                    ->orWhere('npm', 'like', "%{$q}%");
-            });
-        }
-
-        $krs = $krsQuery->orderBy('mahasiswa_id')->paginate(15)->withQueryString();
-
-        $mahasiswaIds = $krs
-            ->getCollection()
-            ->pluck('mahasiswa_id')
-            ->map(fn ($v) => (int) $v)
-            ->unique()
-            ->values()
-            ->all();
-
-        $khsList = Khs::query()
-            ->with(['items' => function ($sub) use ($mataKuliah) {
-                $sub->where('mata_kuliah_id', $mataKuliah->id);
-            }])
-            ->where('semester', $semester)
-            ->whereIn('mahasiswa_id', $mahasiswaIds)
-            ->get();
-
-        $existing = $khsList->mapWithKeys(function ($khs) {
-            $item = $khs->items->first();
-            return [(int) $khs->mahasiswa_id => $item];
-        });
-
-        return view('dosen.nilai.edit', [
+        return view('dosen.nilai.edit', array_merge(
+            $this->buildEditData($request, $mataKuliah, $semester),
+            [
             'mataKuliah' => $mataKuliah,
             'semester' => $semester,
-            'krs' => $krs,
-            'existing' => $existing,
-            'q' => $q,
+            ]
+        ));
+    }
+
+    public function exportPdf(Request $request, MataKuliah $mataKuliah, int $semester)
+    {
+        $dosen = $request->user()?->dosen;
+        abort_unless($dosen && in_array((int) $dosen->id, [(int) $mataKuliah->dosen_id, (int) $mataKuliah->dosen_id_2], true), 403);
+
+        $data = $this->buildEditData($request, $mataKuliah, $semester, false);
+
+        $html = view('dosen.nilai.pdf', [
+            'mataKuliah' => $mataKuliah,
+            'semester' => $semester,
+            'krs' => $data['krs'],
+            'existing' => $data['existing'],
+            'q' => $data['q'],
+        ])->render();
+
+        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->render();
+
+        $filename = 'nilai-'.$mataKuliah->kode.'-semester-'.$semester.'.pdf';
+
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ]);
     }
 
@@ -354,5 +343,59 @@ class NilaiController extends Controller
             $ipk = $cumulativeSks > 0 ? round($cumulativeBobot / $cumulativeSks, 2) : null;
             $khs->update(['ipk' => $ipk]);
         }
+    }
+
+    private function buildEditData(Request $request, MataKuliah $mataKuliah, int $semester, bool $paginate = true): array
+    {
+        $q = trim((string) $request->get('q', ''));
+        $page = max(1, (int) $request->get('page', 1));
+
+        $krsQuery = Krs::query()
+            ->with(['mahasiswa', 'mahasiswa.user'])
+            ->where('status_approval', 'approved')
+            ->where('semester', $semester)
+            ->whereHas('items', function ($sub) use ($mataKuliah) {
+                $sub->where('mata_kuliah_id', $mataKuliah->id);
+            });
+
+        if ($q !== '') {
+            $krsQuery->whereHas('mahasiswa', function ($sub) use ($q) {
+                $sub->where('nama_lengkap', 'like', "%{$q}%")
+                    ->orWhere('npm', 'like', "%{$q}%");
+            });
+        }
+
+        $orderedQuery = $krsQuery->orderBy('mahasiswa_id');
+        $krs = $paginate
+            ? $orderedQuery->paginate(15)->withQueryString()
+            : $orderedQuery->paginate(15, ['*'], 'page', $page);
+
+        $rows = $krs->getCollection();
+
+        $mahasiswaIds = $rows
+            ->pluck('mahasiswa_id')
+            ->map(fn ($v) => (int) $v)
+            ->unique()
+            ->values()
+            ->all();
+
+        $khsList = Khs::query()
+            ->with(['items' => function ($sub) use ($mataKuliah) {
+                $sub->where('mata_kuliah_id', $mataKuliah->id);
+            }])
+            ->where('semester', $semester)
+            ->whereIn('mahasiswa_id', $mahasiswaIds)
+            ->get();
+
+        $existing = $khsList->mapWithKeys(function ($khs) {
+            $item = $khs->items->first();
+            return [(int) $khs->mahasiswa_id => $item];
+        });
+
+        return [
+            'krs' => $krs,
+            'existing' => $existing,
+            'q' => $q,
+        ];
     }
 }

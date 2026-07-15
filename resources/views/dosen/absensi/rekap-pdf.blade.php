@@ -200,8 +200,10 @@
             <thead>
                 <tr>
                     <th style="width: 30px;">Prt.</th>
+                    <th style="width: 62px;">Tanggal</th>
                     <th style="text-align: left; padding-left: 5px;">Materi Pembelajaran</th>
                     <th style="width: 30px;">Prt.</th>
+                    <th style="width: 62px;">Tanggal</th>
                     <th style="text-align: left; padding-left: 5px;">Materi Pembelajaran</th>
                 </tr>
             </thead>
@@ -209,8 +211,10 @@
                 @for ($i = 1; $i <= 8; $i++)
                     <tr>
                         <td>{{ $i }}</td>
+                        <td style="font-size: 8px;">{{ $tanggalList[$i] ?? '-' }}</td>
                         <td class="text-left" style="font-size: 8px;">{{ $materiList[$i] ?? '-' }}</td>
                         <td>{{ $i + 8 }}</td>
+                        <td style="font-size: 8px;">{{ $tanggalList[$i + 8] ?? '-' }}</td>
                         <td class="text-left" style="font-size: 8px;">{{ $materiList[$i + 8] ?? '-' }}</td>
                     </tr>
                 @endfor

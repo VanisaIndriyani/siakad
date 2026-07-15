@@ -410,6 +410,7 @@ Route::prefix('dosen')
 
         Route::get('/nilai', [DosenNilaiController::class, 'index'])->name('nilai.index');
         Route::get('/nilai/{mataKuliah}/{semester}', [DosenNilaiController::class, 'edit'])->name('nilai.edit');
+        Route::get('/nilai/{mataKuliah}/{semester}/pdf', [DosenNilaiController::class, 'exportPdf'])->name('nilai.pdf');
         Route::put('/nilai/{mataKuliah}/{semester}', [DosenNilaiController::class, 'update'])->name('nilai.update');
 
         Route::get('/kuesioner', [DosenQuestionnaireController::class, 'index'])->name('kuesioner.index');

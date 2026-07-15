@@ -14,11 +14,18 @@
         </a>
     </div>
 
-    <form method="GET" action="{{ route('dosen.nilai.edit', [$mataKuliah, $semester]) }}" class="mb-4 flex flex-col sm:flex-row gap-3">
-        <input name="q" value="{{ $q ?? '' }}" class="w-full sm:max-w-md h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" placeholder="Cari nama / NPM..." />
-        <button class="h-11 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">Cari</button>
-        <a href="{{ route('dosen.nilai.edit', [$mataKuliah, $semester]) }}" class="h-11 px-4 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">Reset</a>
-    </form>
+    <div class="mb-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+        <form method="GET" action="{{ route('dosen.nilai.edit', [$mataKuliah, $semester]) }}" class="flex flex-col sm:flex-row gap-3">
+            <input name="q" value="{{ $q ?? '' }}" class="w-full sm:max-w-md h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" placeholder="Cari nama / NPM..." />
+            <button class="h-11 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">Cari</button>
+            <a href="{{ route('dosen.nilai.edit', [$mataKuliah, $semester]) }}" class="h-11 px-4 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">Reset</a>
+        </form>
+
+        <a href="{{ route('dosen.nilai.pdf', [$mataKuliah, $semester] + array_filter(['q' => $q, 'page' => request()->get('page')])) }}" class="h-11 px-4 inline-flex items-center justify-center gap-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/20 transition text-red-100">
+            <i class="fa-solid fa-file-pdf"></i>
+            PDF
+        </a>
+    </div>
 
     <form method="POST" action="{{ route('dosen.nilai.update', [$mataKuliah, $semester]) }}" class="rounded-2xl bg-white/5 border border-white/10 p-5">
         @csrf

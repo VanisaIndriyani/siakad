@@ -563,14 +563,22 @@ class AbsensiController extends Controller
 
         $finalItems = $itemByMahasiswaId->values();
 
-        // Ambil materi per pertemuan
-        $materiList = Absensi::query()
+        // Ambil jurnal per pertemuan
+        $journalEntries = Absensi::query()
             ->where('jurusan', $jurusan)
             ->where('semester', $semester)
             ->where('mata_kuliah_id', $mataKuliahId)
             ->whereBetween('pertemuan', [1, 16])
-            ->pluck('materi', 'pertemuan')
-            ->toArray();
+            ->get(['pertemuan', 'tanggal', 'materi'])
+            ->keyBy('pertemuan');
+
+        $materiList = [];
+        $tanggalList = [];
+        foreach (range(1, 16) as $pertemuan) {
+            $entry = $journalEntries->get($pertemuan);
+            $materiList[$pertemuan] = $entry?->materi ?: '-';
+            $tanggalList[$pertemuan] = $entry?->tanggal?->format('d/m/Y') ?: '-';
+        }
 
         $kaprodi = $this->resolveKaprodi($jurusan);
         $dosenNama = $dosen->nama;
@@ -581,6 +589,7 @@ class AbsensiController extends Controller
             'mk' => $mk,
             'items' => $finalItems,
             'materiList' => $materiList,
+            'tanggalList' => $tanggalList,
             'kaprodiNama' => $kaprodi?->nama,
             'kaprodi' => $kaprodi,
             'dosenNama' => $dosenNama,
