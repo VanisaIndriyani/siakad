@@ -42,7 +42,7 @@
                 </div>
                 <div class="flex items-center justify-between">
                     <span>NUPTK</span>
-                    <span class="font-medium text-white">{{ $dosen?->nidn ?? '-' }}</span>
+                    <span class="font-medium text-white">{{ $dosen?->nuptk ?: ($dosen?->nidn ?? '-') }}</span>
                 </div>
                 <div class="flex items-center justify-between">
                     <span>Nomor SK</span>

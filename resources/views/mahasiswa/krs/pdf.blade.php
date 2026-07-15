@@ -72,8 +72,10 @@
         $semesterLabel = ((int) $krs->semester % 2 === 0) ? 'GENAP' : 'GANJIL';
         $tahunAjaran = trim((string) ($krs->tahun_ajaran ?? ''));
         $semesterHeader = $semesterLabel.($tahunAjaran !== '' ? '-'.$tahunAjaran : '');
-        $kaprodiNuptk = $kaprodi?->nuptk ?: null;
-        $sekprodiNuptk = $sekprodi?->nuptk ?: null;
+        // Tetap prioritaskan NUPTK, namun baca NIDN sebagai fallback untuk data lama
+        // yang sempat tersimpan tertukar di form profil dosen.
+        $kaprodiNuptk = $kaprodi?->nuptk ?: ($kaprodi?->nidn ?: null);
+        $sekprodiNuptk = $sekprodi?->nuptk ?: ($sekprodi?->nidn ?: null);
     @endphp
 
     <table>
