@@ -167,7 +167,6 @@
     <div class="sign-wrap">
         <div class="sign-box">
             <div style="font-weight: 700;">Sidrap, {{ date('d F Y') }}</div>
-            <div style="font-weight: 700;">Dosen Terkait,</div>
             <div class="sign-space"></div>
             <div class="sign-name">{{ $relatedDosen?->nama ?? '-' }}</div>
             @if($relatedDosenNomor)
