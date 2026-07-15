@@ -26,7 +26,7 @@
         .sign-wrap { width: 100%; margin-top: 18px; }
         .sign-box { width: 42%; margin-left: auto; text-align: center; }
         .sign-space { height: 62px; }
-        .sign-name { font-weight: 800; text-decoration: underline; }
+        .sign-name { font-weight: 800; }
     </style>
 </head>
 <body>
