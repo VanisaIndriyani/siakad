@@ -47,8 +47,8 @@
         $kopLine4 = 'TERAKREDITASI INSTITUSI • SK: 576/SK/BAN-PT/Akred/PT/IV/2021';
         $kopLine5 = 'Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang';
         $kopLine6 = 'E-mail : iaiddisidrap@gmail.com  Website : www.yppddisrapp.ac.id';
-        $kaprodiNuptk = $kaprodi?->nuptk ?: ($kaprodi?->nidn ?: ($kaprodi?->nip ?: null));
-        $sekprodiNuptk = $sekprodi?->nuptk ?: ($sekprodi?->nidn ?: ($sekprodi?->nip ?: null));
+        $kaprodiNuptk = $kaprodi?->nuptk ?: null;
+        $sekprodiNuptk = $sekprodi?->nuptk ?: null;
     @endphp
 
     <div class="print-only" style="margin-bottom: 14px;">

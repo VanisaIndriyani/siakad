@@ -72,8 +72,8 @@
         $semesterLabel = ((int) $krs->semester % 2 === 0) ? 'GENAP' : 'GANJIL';
         $tahunAjaran = trim((string) ($krs->tahun_ajaran ?? ''));
         $semesterHeader = $semesterLabel.($tahunAjaran !== '' ? '-'.$tahunAjaran : '');
-        $kaprodiNuptk = $kaprodi?->nuptk ?: ($kaprodi?->nidn ?: ($kaprodi?->nip ?: null));
-        $sekprodiNuptk = $sekprodi?->nuptk ?: ($sekprodi?->nidn ?: ($sekprodi?->nip ?: null));
+        $kaprodiNuptk = $kaprodi?->nuptk ?: null;
+        $sekprodiNuptk = $sekprodi?->nuptk ?: null;
     @endphp
 
     <table>
