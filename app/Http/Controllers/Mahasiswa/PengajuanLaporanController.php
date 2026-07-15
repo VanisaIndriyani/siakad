@@ -8,6 +8,7 @@ use App\Models\PplPengajuan;
 use App\Models\SkripsiPengajuan;
 use App\Models\Krs;
 use App\Models\Khs;
+use App\Models\Pembayaran;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -61,11 +62,17 @@ class PengajuanLaporanController extends Controller
             ->orderByDesc('id')
             ->get();
 
+        $pendingPembayaran = Pembayaran::query()
+            ->where('mahasiswa_id', $mahasiswa->id)
+            ->orderByDesc('id')
+            ->get();
+
         return view('mahasiswa.laporan.create', [
             'pendingSkripsi' => $pendingSkripsi,
             'pendingPpl' => $pendingPpl,
             'pendingKrs' => $pendingKrs,
             'pendingKhs' => $pendingKhs,
+            'pendingPembayaran' => $pendingPembayaran,
         ]);
     }
 
@@ -75,7 +82,7 @@ class PengajuanLaporanController extends Controller
         abort_unless($mahasiswa, 403);
 
         $validated = $request->validate([
-            'jenis' => ['required', 'string', Rule::in(['skripsi', 'ppl', 'krs', 'khs'])],
+            'jenis' => ['required', 'string', Rule::in(['skripsi', 'ppl', 'krs', 'khs', 'pembayaran'])],
             'pengajuan_id' => ['required', 'integer', 'min:1'],
             'judul' => ['required', 'string', 'max:255'],
             'pesan' => ['required', 'string'],
@@ -99,8 +106,13 @@ class PengajuanLaporanController extends Controller
                 ->where('mahasiswa_id', $mahasiswa->id)
                 ->where('status_approval', 'pending')
                 ->firstOrFail();
-        } else {
+        } elseif ($validated['jenis'] === 'khs') {
             Khs::query()
+                ->where('id', (int) $validated['pengajuan_id'])
+                ->where('mahasiswa_id', $mahasiswa->id)
+                ->firstOrFail();
+        } else {
+            Pembayaran::query()
                 ->where('id', (int) $validated['pengajuan_id'])
                 ->where('mahasiswa_id', $mahasiswa->id)
                 ->firstOrFail();
@@ -166,4 +178,3 @@ class PengajuanLaporanController extends Controller
         return back()->with('success', 'Pesan laporan terkirim.');
     }
 }
-

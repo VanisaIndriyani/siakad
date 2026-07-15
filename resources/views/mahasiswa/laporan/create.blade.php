@@ -6,7 +6,7 @@
     <div class="flex items-center justify-between gap-3 flex-wrap">
         <div>
             <div class="text-xl font-semibold">Buat Laporan</div>
-            <div class="text-sm text-emerald-100/70">Pilih pengajuan yang masih Pending, lalu tulis pesan untuk Admin/Prodi.</div>
+            <div class="text-sm text-emerald-100/70">Pilih pengajuan atau tagihan terkait, lalu tulis pesan untuk Admin/Prodi.</div>
         </div>
         <a href="{{ route('mahasiswa.laporan.index') }}"
            class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-sm font-medium">
@@ -20,13 +20,14 @@
         $hasPpl = $pendingPpl->count() > 0;
         $hasKrs = $pendingKrs->count() > 0;
         $hasKhs = $pendingKhs->count() > 0;
-        $hasPending = $hasSkripsi || $hasPpl || $hasKrs || $hasKhs;
-        $defaultJenis = old('jenis') ?: ($hasSkripsi ? 'skripsi' : ($hasPpl ? 'ppl' : ($hasKrs ? 'krs' : 'khs')));
+        $hasPembayaran = $pendingPembayaran->count() > 0;
+        $hasPending = $hasSkripsi || $hasPpl || $hasKrs || $hasKhs || $hasPembayaran;
+        $defaultJenis = old('jenis') ?: ($hasSkripsi ? 'skripsi' : ($hasPpl ? 'ppl' : ($hasKrs ? 'krs' : ($hasKhs ? 'khs' : 'pembayaran'))));
     @endphp
 
     @if (! $hasPending)
         <div class="mt-5 rounded-2xl bg-yellow-500/10 border border-yellow-500/20 p-5 text-yellow-100">
-            Tidak ada pengajuan yang bisa dibuat laporan saat ini.
+            Tidak ada pengajuan atau tagihan yang bisa dibuat laporan saat ini.
         </div>
     @else
         <div class="mt-5 rounded-2xl bg-white/5 border border-white/10 p-5">
@@ -42,12 +43,13 @@
                             <option value="ppl" @selected($defaultJenis === 'ppl') {{ $hasPpl ? '' : 'disabled' }} style="background-color: #0d2a23; color: #fff;">PPL</option>
                             <option value="krs" @selected($defaultJenis === 'krs') {{ $hasKrs ? '' : 'disabled' }} style="background-color: #0d2a23; color: #fff;">KRS</option>
                             <option value="khs" @selected($defaultJenis === 'khs') {{ $hasKhs ? '' : 'disabled' }} style="background-color: #0d2a23; color: #fff;">KHS</option>
+                            <option value="pembayaran" @selected($defaultJenis === 'pembayaran') {{ $hasPembayaran ? '' : 'disabled' }} style="background-color: #0d2a23; color: #fff;">Pembayaran</option>
                         </select>
                         @error('jenis') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-emerald-100/70 mb-1">Pilih Data Pengajuan</label>
+                        <label class="block text-xs font-semibold text-emerald-100/70 mb-1">Pilih Data</label>
 
                         <div id="pengajuanSkripsiWrap">
                             <select name="pengajuan_id"
@@ -93,6 +95,17 @@
                             </select>
                         </div>
 
+                        <div id="pengajuanPembayaranWrap" style="display:none;">
+                            <select name="pengajuan_id"
+                                    class="h-11 w-full rounded-xl bg-white/5 border border-white/10 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+                                @foreach ($pendingPembayaran as $pembayaran)
+                                    <option value="{{ $pembayaran->id }}" @selected((string) old('pengajuan_id') === (string) $pembayaran->id) style="background-color: #0d2a23; color: #fff;">
+                                        #{{ $pembayaran->id }} • {{ $pembayaran->jenis_tagihan ?? 'Tagihan' }} • Semester {{ $pembayaran->semester }} ({{ $pembayaran->tahun_ajaran }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
                         @error('pengajuan_id') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
                     </div>
                 </div>
@@ -128,11 +141,13 @@
             const pplWrap = document.getElementById('pengajuanPplWrap');
             const krsWrap = document.getElementById('pengajuanKrsWrap');
             const khsWrap = document.getElementById('pengajuanKhsWrap');
-            if (!jenisSelect || !skripsiWrap || !pplWrap || !krsWrap || !khsWrap) return;
+            const pembayaranWrap = document.getElementById('pengajuanPembayaranWrap');
+            if (!jenisSelect || !skripsiWrap || !pplWrap || !krsWrap || !khsWrap || !pembayaranWrap) return;
             const skripsiSelect = skripsiWrap.querySelector('select');
             const pplSelect = pplWrap.querySelector('select');
             const krsSelect = krsWrap.querySelector('select');
             const khsSelect = khsWrap.querySelector('select');
+            const pembayaranSelect = pembayaranWrap.querySelector('select');
 
             function render() {
                 const v = (jenisSelect.value || 'skripsi').toLowerCase();
@@ -141,11 +156,13 @@
                 pplWrap.style.display = v === 'ppl' ? '' : 'none';
                 krsWrap.style.display = v === 'krs' ? '' : 'none';
                 khsWrap.style.display = v === 'khs' ? '' : 'none';
+                pembayaranWrap.style.display = v === 'pembayaran' ? '' : 'none';
 
                 if (skripsiSelect) skripsiSelect.disabled = v !== 'skripsi';
                 if (pplSelect) pplSelect.disabled = v !== 'ppl';
                 if (krsSelect) krsSelect.disabled = v !== 'krs';
                 if (khsSelect) khsSelect.disabled = v !== 'khs';
+                if (pembayaranSelect) pembayaranSelect.disabled = v !== 'pembayaran';
             }
 
             render();

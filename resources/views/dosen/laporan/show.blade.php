@@ -31,6 +31,8 @@
             'skripsi' => 'Skripsi',
             'ppl' => 'PPL',
             'krs' => 'KRS',
+            'khs' => 'KHS',
+            'pembayaran' => 'Pembayaran',
             default => strtoupper($laporan->jenis)
         };
         $canSend = $laporan->status === 'open';
@@ -103,4 +105,3 @@
         })();
     </script>
 </x-portal-layout>
-

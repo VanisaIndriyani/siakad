@@ -22,6 +22,8 @@ class PembayaranController extends Controller
 {
     private const JENIS_TAGIHAN = [
         'SPP',
+        'KIP',
+        'Kelas Pekerja',
         'Herregistrasi',
         'Ujian Semester',
         'Pembangunan',

@@ -82,6 +82,7 @@ class NilaiController extends Controller
             'krs' => $data['krs'],
             'existing' => $data['existing'],
             'q' => $data['q'],
+            'relatedDosen' => $dosen,
         ])->render();
 
         $dompdf = new Dompdf(['isRemoteEnabled' => true]);

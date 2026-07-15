@@ -23,6 +23,10 @@
         .tbl th { font-size: 9px; text-transform: uppercase; letter-spacing: 0.4px; }
         .center { text-align: center; }
         .nowrap { white-space: nowrap; }
+        .sign-wrap { width: 100%; margin-top: 18px; }
+        .sign-box { width: 42%; margin-left: auto; text-align: center; }
+        .sign-space { height: 62px; }
+        .sign-name { font-weight: 800; text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -53,6 +57,19 @@
                 $logoBase64 = 'data:image/'.$ext.';base64,'.base64_encode($data);
             }
         }
+
+        $pickNomor = function ($dosen) {
+            foreach ([$dosen?->nuptk, $dosen?->nidn, $dosen?->nip] as $nomor) {
+                $nomor = trim((string) $nomor);
+                if ($nomor !== '') {
+                    return $nomor;
+                }
+            }
+
+            return null;
+        };
+
+        $relatedDosenNomor = $pickNomor($relatedDosen ?? null);
     @endphp
 
     <table>
@@ -129,7 +146,6 @@
                 <th style="width: 120px;">NPM</th>
                 <th style="width: 90px;" class="center">Nilai Angka</th>
                 <th style="width: 90px;" class="center">Nilai Huruf</th>
-                <th style="width: 140px;" class="center">Status KHS</th>
             </tr>
         </thead>
         <tbody>
@@ -137,7 +153,6 @@
                 @php
                     $mhs = $row->mahasiswa;
                     $existingItem = $existing->get($row->mahasiswa_id);
-                    $isReady = (bool) $existingItem;
                 @endphp
                 <tr>
                     <td class="center">{{ $loop->iteration }}</td>
@@ -145,14 +160,25 @@
                     <td class="nowrap">{{ $mhs?->npm ?? '-' }}</td>
                     <td class="center">{{ $existingItem?->nilai_angka !== null ? number_format((float) $existingItem->nilai_angka, 2) : '-' }}</td>
                     <td class="center">{{ $existingItem?->nilai_huruf ?? '-' }}</td>
-                    <td class="center">{{ $isReady ? 'Siap Input' : 'KHS Belum Disiapkan' }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" class="center">Tidak ada mahasiswa pada mata kuliah ini.</td>
+                    <td colspan="5" class="center">Tidak ada mahasiswa pada mata kuliah ini.</td>
                 </tr>
             @endforelse
         </tbody>
     </table>
+
+    <div class="sign-wrap">
+        <div class="sign-box">
+            <div style="font-weight: 700;">Sidrap, {{ date('d F Y') }}</div>
+            <div style="font-weight: 700;">Dosen Terkait,</div>
+            <div class="sign-space"></div>
+            <div class="sign-name">{{ $relatedDosen?->nama ?? '-' }}</div>
+            @if($relatedDosenNomor)
+                <div style="font-size: 9px; margin-top: 2px;">NUPTK. {{ $relatedDosenNomor }}</div>
+            @endif
+        </div>
+    </div>
 </body>
 </html>

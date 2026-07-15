@@ -103,6 +103,8 @@
                                         'skripsi' => 'Skripsi',
                                         'ppl' => 'PPL',
                                         'krs' => 'KRS',
+                                        'khs' => 'KHS',
+                                        'pembayaran' => 'Pembayaran',
                                         default => strtoupper($row->jenis)
                                     };
                                 @endphp
@@ -155,4 +157,3 @@
         {{ $items->links() }}
     </div>
 </x-portal-layout>
-
