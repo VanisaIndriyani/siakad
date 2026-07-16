@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\DosenController as AdminDosenController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\KhsController as AdminKhsController;
+use App\Http\Controllers\Admin\NilaiMonitoringController as AdminNilaiMonitoringController;
 use App\Http\Controllers\Admin\QuestionnaireController as AdminQuestionnaireController;
 use App\Http\Controllers\Admin\KrsController as AdminKrsController;
 use App\Http\Controllers\Admin\MahasiswaController as AdminMahasiswaController;
@@ -179,6 +180,9 @@ Route::prefix('admin')
         Route::get('/khs/{khs}/edit', [AdminKhsController::class, 'edit'])->name('khs.edit');
         Route::put('/khs/{khs}', [AdminKhsController::class, 'update'])->name('khs.update');
         Route::delete('/khs/{khs}', [AdminKhsController::class, 'destroy'])->name('khs.destroy');
+
+        Route::get('/nilai-monitoring', [AdminNilaiMonitoringController::class, 'index'])->name('nilai-monitoring.index');
+        Route::get('/nilai-monitoring/pdf', [AdminNilaiMonitoringController::class, 'exportPdf'])->name('nilai-monitoring.pdf');
 
         Route::get('/kuesioner', [AdminQuestionnaireController::class, 'index'])->name('kuesioner.index');
         Route::get('/kuesioner/create', [AdminQuestionnaireController::class, 'create'])->name('kuesioner.create');
