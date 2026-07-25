@@ -99,6 +99,61 @@ class PplController extends Controller
             'status' => $status,
             'routePrefix' => $context['routePrefix'],
             'canAssign' => $context['canAssign'],
+            'canManage' => $context['canAssign'],
+        ]);
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $context = $this->resolveContext($request);
+        $q = trim((string) $request->get('q', ''));
+        $status = trim((string) $request->get('status', ''));
+
+        $query = PplPengajuan::query()->with(['mahasiswa', 'dosenPembimbing', 'dosenPembimbing2']);
+
+        if ($context['programStudi']) {
+            $programStudi = $context['programStudi'];
+            $query->whereHas('mahasiswa', function ($sub) use ($programStudi) {
+                $sub->where('program_studi', $programStudi);
+            });
+        }
+
+        if ($q !== '') {
+            $query->where(function ($sub) use ($q) {
+                $sub->where('instansi_nama', 'like', "%{$q}%")
+                    ->orWhereHas('mahasiswa', function ($m) use ($q) {
+                        $m->where('nama_lengkap', 'like', "%{$q}%")
+                            ->orWhere('npm', 'like', "%{$q}%");
+                    });
+            });
+        }
+
+        if ($status !== '') {
+            $query->where('status', $status);
+        }
+
+        $items = $query->orderByDesc('id')->get();
+        $kaprodi = $this->resolveKaprodi($context['programStudi']);
+
+        $html = view('ppl.index-pdf', [
+            'items' => $items,
+            'q' => $q,
+            'status' => $status,
+            'programStudi' => $context['programStudi'],
+            'printedBy' => $request->user()?->name,
+            'kaprodi' => $kaprodi,
+        ])->render();
+
+        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->render();
+
+        $filename = 'daftar-pengajuan-ppl-'.now()->format('YmdHis').'.pdf';
+
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ]);
     }
 
@@ -352,7 +407,13 @@ class PplController extends Controller
 
     public function destroy(Request $request, PplPengajuan $ppl): RedirectResponse
     {
-        abort_unless($request->user()?->isAdmin(), 403);
+        $context = $this->resolveContext($request);
+        abort_unless($context['canAssign'], 403);
+
+        if ($context['programStudi']) {
+            $ppl->loadMissing('mahasiswa');
+            abort_unless((string) ($ppl->mahasiswa?->program_studi ?? '') === $context['programStudi'], 403);
+        }
 
         if ($ppl->sk_pembimbing_path) {
             Storage::disk('public')->delete($ppl->sk_pembimbing_path);
@@ -360,12 +421,15 @@ class PplController extends Controller
 
         $ppl->delete();
 
-        return redirect()->route('admin.ppl.index')->with('success', 'Data PPL berhasil dihapus.');
+        $routeBack = ($context['routePrefix'] ?? 'admin') === 'admin' ? 'admin.ppl.index' : 'dosen.ppl-pengajuan.index';
+
+        return redirect()->route($routeBack)->with('success', 'Data PPL berhasil dihapus.');
     }
 
     public function bulkDestroy(Request $request): RedirectResponse
     {
-        abort_unless($request->user()?->isAdmin(), 403);
+        $context = $this->resolveContext($request);
+        abort_unless($context['canAssign'], 403);
 
         $validated = $request->validate([
             'ids' => ['required', 'array', 'min:1'],
@@ -374,7 +438,15 @@ class PplController extends Controller
 
         $ids = array_values(array_unique(array_map('intval', $validated['ids'])));
 
-        $items = PplPengajuan::query()->whereIn('id', $ids)->get();
+        $query = PplPengajuan::query()->whereIn('id', $ids);
+        if ($context['programStudi']) {
+            $programStudi = $context['programStudi'];
+            $query->whereHas('mahasiswa', function ($sub) use ($programStudi) {
+                $sub->where('program_studi', $programStudi);
+            });
+        }
+
+        $items = $query->get();
 
         if ($items->isEmpty()) {
             return back()->with('error', 'Tidak ada data PPL yang ditemukan untuk dihapus.');

@@ -1,30 +1,52 @@
 <x-portal-layout :title="'Pendaftaran KKN - '.config('app.name')" subtitle="KKN">
     <x-slot:sidebar>
-        @include('admin.partials.sidebar')
+        @include(($routePrefix ?? 'admin') === 'admin' ? 'admin.partials.sidebar' : 'dosen.partials.sidebar')
     </x-slot:sidebar>
+
+    @php
+        $isAdminView = ($routePrefix ?? 'admin') === 'admin';
+        $canManage = $canManage ?? ($canAssign ?? false);
+        $rPrefix = $routePrefix ?? 'admin';
+        $routeGroup = $rPrefix === 'admin' ? 'admin.kkn' : 'dosen.kkn-pengajuan';
+    @endphp
 
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
             <div class="text-xl font-semibold">Pendaftaran KKN</div>
-            <div class="text-sm text-emerald-100/70">Kelola pendaftaran KKN mahasiswa.</div>
+            <div class="text-sm text-emerald-100/70">Kelola pendaftaran KKN mahasiswa{{ !$isAdminView ? ' (Prodi '.($routePrefix ? '' : '').')' : '' }}.</div>
         </div>
-        <div class="flex items-center gap-2">
-            <button type="button" 
-                    id="btnBulkDelete"
-                    onclick="submitBulkDelete()"
-                    class="h-10 px-4 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 transition text-sm font-medium hidden items-center gap-2 text-red-100">
-                <i class="fa-solid fa-trash"></i>
-                Hapus Terpilih (<span id="selectedCount">0</span>)
+        <div class="flex flex-wrap items-center gap-2">
+            <button type="button"
+                    id="btnBukaSemuaKkn"
+                    class="h-10 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-sm font-medium inline-flex items-center gap-2">
+                <i class="fa-solid fa-up-right-from-square"></i>
+                Buka Semua
             </button>
-            <a href="{{ route('admin.kkn.posko.index') }}" class="h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition text-sm font-medium inline-flex items-center gap-2">
-                <i class="fa-solid fa-tent"></i>
-                Manajemen Posko
+            <a href="{{ route($routeGroup.'.export-pdf', array_filter(['q' => $q, 'status' => $status])) }}"
+               class="h-10 px-4 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 transition text-sm font-medium inline-flex items-center gap-2 text-emerald-100">
+                <i class="fa-solid fa-file-pdf"></i>
+                PDF
             </a>
+            @if ($canManage)
+                <button type="button"
+                        id="btnBulkDelete"
+                        onclick="submitBulkDelete()"
+                        class="h-10 px-4 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 transition text-sm font-medium hidden items-center gap-2 text-red-100">
+                    <i class="fa-solid fa-trash"></i>
+                    Hapus Terpilih (<span id="selectedCount">0</span>)
+                </button>
+            @endif
+            @if ($isAdminView)
+                <a href="{{ route('admin.kkn.posko.index') }}" class="h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition text-sm font-medium inline-flex items-center gap-2">
+                    <i class="fa-solid fa-tent"></i>
+                    Manajemen Posko
+                </a>
+            @endif
         </div>
     </div>
 
     <div class="mt-5 rounded-2xl bg-white/5 border border-white/10 p-5">
-        <form method="GET" action="{{ route('admin.kkn.index') }}" class="flex flex-col lg:flex-row gap-3">
+        <form method="GET" action="{{ $isAdminView ? route('admin.kkn.index') : route('dosen.kkn-pengajuan.index') }}" class="flex flex-col lg:flex-row gap-3">
             <input name="q" value="{{ $q }}" placeholder="Cari nama / NPM..."
                    class="h-11 w-full rounded-xl bg-white/5 border border-white/10 px-4 text-sm text-white placeholder:text-emerald-100/40 focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
             <select name="status" class="h-11 w-full lg:w-56 rounded-xl bg-white/5 border border-white/10 px-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
@@ -35,12 +57,12 @@
             </select>
             <div class="flex items-center gap-2">
                 <button class="h-11 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-sm font-medium">Cari</button>
-                <a href="{{ route('admin.kkn.index') }}" class="h-11 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-sm font-medium inline-flex items-center">Reset</a>
+                <a href="{{ $isAdminView ? route('admin.kkn.index') : route('dosen.kkn-pengajuan.index') }}" class="h-11 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-sm font-medium inline-flex items-center">Reset</a>
             </div>
         </form>
     </div>
 
-    <form id="bulkDeleteForm" method="POST" action="{{ route('admin.kkn.bulk-delete') }}">
+    <form id="bulkDeleteForm" method="POST" action="{{ route($routeGroup.'.bulk-delete') }}">
         @csrf
         @method('DELETE')
         <div class="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
@@ -48,9 +70,11 @@
                 <table class="min-w-full text-sm">
                     <thead class="bg-white/5 text-emerald-100/80">
                         <tr>
-                            <th class="px-4 py-3 w-10">
-                                <input type="checkbox" id="selectAll" class="rounded border-white/20 bg-white/5 text-emerald-500 focus:ring-emerald-500/30">
-                            </th>
+                            @if ($canManage)
+                                <th class="px-4 py-3 w-10">
+                                    <input type="checkbox" id="selectAll" class="rounded border-white/20 bg-white/5 text-emerald-500 focus:ring-emerald-500/30">
+                                </th>
+                            @endif
                             <th class="text-left font-medium px-4 py-3">Mahasiswa</th>
                             <th class="text-left font-medium px-4 py-3">Program Studi</th>
                             <th class="text-left font-medium px-4 py-3">Status</th>
@@ -66,11 +90,14 @@
                                     'rejected' => 'bg-red-500/15 border-red-500/20 text-red-100',
                                     default => 'bg-yellow-500/15 border-yellow-500/20 text-yellow-100',
                                 };
+                                $showUrl = route($routeGroup.'.show', $row);
                             @endphp
-                            <tr class="hover:bg-white/5">
-                                <td class="px-4 py-3 text-center">
-                                    <input type="checkbox" name="ids[]" value="{{ $row->id }}" class="item-checkbox rounded border-white/20 bg-white/5 text-emerald-500 focus:ring-emerald-500/30">
-                                </td>
+                            <tr class="hover:bg-white/5" data-show-url="{{ $showUrl }}">
+                                @if ($canManage)
+                                    <td class="px-4 py-3 text-center">
+                                        <input type="checkbox" name="ids[]" value="{{ $row->id }}" class="item-checkbox rounded border-white/20 bg-white/5 text-emerald-500 focus:ring-emerald-500/30">
+                                    </td>
+                                @endif
                                 <td class="px-4 py-3">
                                     <div class="font-medium">{{ $row->mahasiswa?->nama_lengkap ?: '-' }}</div>
                                     <div class="text-xs text-emerald-100/60">{{ $row->mahasiswa?->npm ?: '-' }}</div>
@@ -86,18 +113,32 @@
                                 </td>
                                 <td class="px-4 py-3 text-right">
                                     <div class="flex items-center justify-end gap-2">
-                                        <button type="button" 
-                                                onclick="openStatusModal({{ $row->id }}, '{{ $row->status }}', '{{ $row->catatan_admin }}')"
-                                                class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
-                                            <i class="fa-solid fa-pen"></i>
-                                            <span class="text-sm font-medium">Status</span>
-                                        </button>
+                                        <a href="{{ $showUrl }}" class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                                            <i class="fa-solid fa-eye"></i>
+                                            <span class="text-sm font-medium">Detail</span>
+                                        </a>
+                                        @if ($canManage)
+                                            <button type="button"
+                                                    onclick="openStatusModal({{ $row->id }}, '{{ $row->status }}', '{{ $row->catatan_admin }}')"
+                                                    class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                                                <i class="fa-solid fa-pen"></i>
+                                                <span class="text-sm font-medium">Status</span>
+                                            </button>
+                                            <form method="POST" action="{{ route($routeGroup.'.destroy', $row) }}" data-confirm="Hapus data pendaftaran KKN ini?">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-red-500/15 hover:bg-red-500/20 border border-red-500/25 transition text-red-100">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                    <span class="text-sm font-medium">Hapus</span>
+                                                </button>
+                                            </form>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-4 py-10 text-center text-emerald-100/70">Belum ada pendaftaran KKN.</td>
+                                <td colspan="{{ $canManage ? 6 : 5 }}" class="px-4 py-10 text-center text-emerald-100/70">Belum ada pendaftaran KKN.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -149,7 +190,8 @@
     <script>
         function openStatusModal(id, status, catatan) {
             const form = document.getElementById('statusForm');
-            form.action = `/admin/kkn/${id}/status`;
+            const prefix = @json($rPrefix);
+            form.action = prefix === 'admin' ? `/admin/kkn/${id}/status` : `/dosen/kkn/pengajuan/${id}/status`;
             document.getElementById('modalStatus').value = status === 'pending' ? 'approved' : status;
             document.getElementById('modalCatatan').value = catatan || '';
             document.getElementById('statusModal').classList.remove('hidden');
@@ -166,6 +208,7 @@
         const selectedCount = document.getElementById('selectedCount');
 
         function updateBulkDeleteButton() {
+            if (!btnBulkDelete || !selectedCount) return;
             const checkedCount = document.querySelectorAll('.item-checkbox:checked').length;
             selectedCount.innerText = checkedCount;
             if (checkedCount > 0) {
@@ -186,8 +229,8 @@
 
         checkboxes.forEach(cb => {
             cb.addEventListener('change', function() {
-                if (!this.checked) selectAll.checked = false;
-                if (document.querySelectorAll('.item-checkbox:checked').length === checkboxes.length) selectAll.checked = true;
+                if (!this.checked && selectAll) selectAll.checked = false;
+                if (selectAll && document.querySelectorAll('.item-checkbox:checked').length === checkboxes.length) selectAll.checked = true;
                 updateBulkDeleteButton();
             });
         });
@@ -196,6 +239,30 @@
             if (confirm('Apakah Anda yakin ingin menghapus data pendaftaran KKN yang terpilih?')) {
                 document.getElementById('bulkDeleteForm').submit();
             }
+        }
+
+        // Buka Semua
+        const btnBukaSemua = document.getElementById('btnBukaSemuaKkn');
+        const rows = document.querySelectorAll('[data-show-url]');
+
+        if (btnBukaSemua) {
+            btnBukaSemua.addEventListener('click', () => {
+                if (!rows || rows.length === 0) {
+                    alert('Tidak ada data pendaftaran KKN untuk dibuka.');
+                    return;
+                }
+                const urls = Array.from(rows).map(r => r.getAttribute('data-show-url')).filter(Boolean);
+                if (urls.length === 0) {
+                    alert('Tidak ada data pendaftaran KKN untuk dibuka.');
+                    return;
+                }
+                if (!confirm(`Buka ${urls.length} halaman detail pendaftaran KKN di tab baru?`)) {
+                    return;
+                }
+                urls.forEach((u, i) => {
+                    setTimeout(() => window.open(u, '_blank'), i * 80);
+                });
+            });
         }
     </script>
 </x-portal-layout>

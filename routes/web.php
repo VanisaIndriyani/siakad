@@ -241,6 +241,7 @@ Route::prefix('admin')
             Route::get('/user/pdf', [AdminUserController::class, 'exportPdf'])->name('user.pdf');
 
             Route::get('/skripsi', [AdminSkripsiController::class, 'index'])->name('skripsi.index');
+            Route::get('/skripsi/export-pdf', [AdminSkripsiController::class, 'exportPdf'])->name('skripsi.export-pdf');
             Route::get('/skripsi/{skripsi}', [AdminSkripsiController::class, 'show'])->name('skripsi.show');
             Route::get('/skripsi/{skripsi}/pdf', [AdminSkripsiController::class, 'downloadPdf'])->name('skripsi.pdf');
             Route::patch('/skripsi/{skripsi}/status', [AdminSkripsiController::class, 'updateStatus'])->name('skripsi.status');
@@ -254,6 +255,7 @@ Route::prefix('admin')
             Route::delete('/skripsi-files/{file}', [AdminSkripsiController::class, 'destroyFile'])->name('skripsi-files.destroy');
 
             Route::get('/ppl', [AdminPplController::class, 'index'])->name('ppl.index');
+            Route::get('/ppl/export-pdf', [AdminPplController::class, 'exportPdf'])->name('ppl.export-pdf');
             Route::get('/ppl/{ppl}', [AdminPplController::class, 'show'])->name('ppl.show');
             Route::get('/ppl/{ppl}/pdf', [AdminPplController::class, 'downloadPdf'])->name('ppl.pdf');
             Route::patch('/ppl/{ppl}/status', [AdminPplController::class, 'updateStatus'])->name('ppl.status');
@@ -265,7 +267,10 @@ Route::prefix('admin')
             Route::delete('/ppl-files/{file}', [AdminPplController::class, 'destroyFile'])->name('ppl-files.destroy');
 
             Route::get('/kkn', [AdminKknController::class, 'index'])->name('kkn.index');
+            Route::get('/kkn/export-pdf', [AdminKknController::class, 'exportPdf'])->name('kkn.export-pdf');
+            Route::get('/kkn/{kkn}', [AdminKknController::class, 'show'])->name('kkn.show');
             Route::delete('/kkn/bulk-delete', [AdminKknController::class, 'bulkDestroy'])->name('kkn.bulk-delete');
+            Route::delete('/kkn/{kkn}', [AdminKknController::class, 'destroy'])->name('kkn.destroy');
             Route::patch('/kkn/{kkn}/status', [AdminKknController::class, 'updateStatus'])->name('kkn.status');
             Route::get('/kkn/posko', [AdminKknController::class, 'poskoIndex'])->name('kkn.posko.index');
             Route::get('/kkn/posko/create', [AdminKknController::class, 'poskoCreate'])->name('kkn.posko.create');
@@ -486,12 +491,15 @@ Route::prefix('dosen')
         Route::get('/skripsi/{skripsi}/revisi/pdf', [DosenSkripsiRevisiController::class, 'pdf'])->name('skripsi.revisi.pdf');
 
         Route::get('/skripsi/pengajuan', [AdminSkripsiController::class, 'index'])->name('skripsi-pengajuan.index');
+        Route::get('/skripsi/pengajuan/export-pdf', [AdminSkripsiController::class, 'exportPdf'])->name('skripsi-pengajuan.export-pdf');
         Route::get('/skripsi/pengajuan/{skripsi}', [AdminSkripsiController::class, 'show'])->name('skripsi.show');
         Route::get('/skripsi/pengajuan/{skripsi}/pdf', [AdminSkripsiController::class, 'downloadPdf'])->name('skripsi.pdf');
         Route::patch('/skripsi/pengajuan/{skripsi}/status', [AdminSkripsiController::class, 'updateStatus'])->name('skripsi-pengajuan.status');
         Route::patch('/skripsi/pengajuan/{skripsi}/assign', [AdminSkripsiController::class, 'assign'])->name('skripsi-pengajuan.assign');
         Route::delete('/skripsi/pengajuan/{skripsi}/sk-pembimbing', [AdminSkripsiController::class, 'destroySkPembimbing'])->name('skripsi-pengajuan.sk.destroy');
         Route::delete('/skripsi/pengajuan/{skripsi}/pembimbing', [AdminSkripsiController::class, 'resetPembimbing'])->name('skripsi-pengajuan.pembimbing.reset');
+        Route::delete('/skripsi/pengajuan/bulk-delete', [AdminSkripsiController::class, 'bulkDestroy'])->name('skripsi-pengajuan.bulk-delete');
+        Route::delete('/skripsi/pengajuan/{skripsi}', [AdminSkripsiController::class, 'destroy'])->name('skripsi-pengajuan.destroy');
         Route::get('/skripsi/pengajuan/{skripsi}/sk-pembimbing', [AdminSkripsiController::class, 'downloadSkPembimbing'])->name('skripsi-pengajuan.sk.download');
         Route::get('/skripsi/pengajuan/{skripsi}/sk-pembimbing/preview', [AdminSkripsiController::class, 'previewSkPembimbing'])->name('skripsi-pengajuan.sk.preview');
 
@@ -505,16 +513,26 @@ Route::prefix('dosen')
         Route::get('/ppl/{ppl}/revisi/pdf', [DosenPplRevisiController::class, 'pdf'])->name('ppl.revisi.pdf');
 
         Route::get('/ppl/pengajuan', [AdminPplController::class, 'index'])->name('ppl-pengajuan.index');
+        Route::get('/ppl/pengajuan/export-pdf', [AdminPplController::class, 'exportPdf'])->name('ppl-pengajuan.export-pdf');
         Route::get('/ppl/pengajuan/{ppl}', [AdminPplController::class, 'show'])->name('ppl.show');
         Route::get('/ppl/pengajuan/{ppl}/pdf', [AdminPplController::class, 'downloadPdf'])->name('ppl.pdf');
         Route::patch('/ppl/pengajuan/{ppl}/status', [AdminPplController::class, 'updateStatus'])->name('ppl-pengajuan.status');
         Route::patch('/ppl/pengajuan/{ppl}/assign', [AdminPplController::class, 'assign'])->name('ppl-pengajuan.assign');
+        Route::delete('/ppl/pengajuan/bulk-delete', [AdminPplController::class, 'bulkDestroy'])->name('ppl-pengajuan.bulk-delete');
+        Route::delete('/ppl/pengajuan/{ppl}', [AdminPplController::class, 'destroy'])->name('ppl-pengajuan.destroy');
         Route::get('/ppl/pengajuan/{ppl}/sk-pembimbing', [AdminPplController::class, 'downloadSkPembimbing'])->name('ppl-pengajuan.sk.download');
         Route::get('/ppl/pengajuan/{ppl}/sk-pembimbing/preview', [AdminPplController::class, 'previewSkPembimbing'])->name('ppl-pengajuan.sk.preview');
 
         // KKN
         Route::get('/kkn', [DosenKknController::class, 'index'])->name('kkn.index');
         Route::get('/kkn/posko/{posko}', [DosenKknController::class, 'showPosko'])->name('kkn.posko');
+
+        Route::get('/kkn/pengajuan', [AdminKknController::class, 'index'])->name('kkn-pengajuan.index');
+        Route::get('/kkn/pengajuan/export-pdf', [AdminKknController::class, 'exportPdf'])->name('kkn-pengajuan.export-pdf');
+        Route::get('/kkn/pengajuan/{kkn}', [AdminKknController::class, 'show'])->name('kkn.show');
+        Route::patch('/kkn/pengajuan/{kkn}/status', [AdminKknController::class, 'updateStatus'])->name('kkn-pengajuan.status');
+        Route::delete('/kkn/pengajuan/bulk-delete', [AdminKknController::class, 'bulkDestroy'])->name('kkn-pengajuan.bulk-delete');
+        Route::delete('/kkn/pengajuan/{kkn}', [AdminKknController::class, 'destroy'])->name('kkn-pengajuan.destroy');
 
         Route::get('/laporan', [DosenPengajuanLaporanController::class, 'index'])->name('laporan.index');
         Route::delete('/laporan/bulk-delete', [DosenPengajuanLaporanController::class, 'bulkDestroy'])->name('laporan.bulk-delete');

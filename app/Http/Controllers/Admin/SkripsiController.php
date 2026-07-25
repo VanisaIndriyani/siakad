@@ -88,6 +88,59 @@ class SkripsiController extends Controller
             'status' => $status,
             'routePrefix' => $context['routePrefix'],
             'canAssign' => $context['canAssign'],
+            'canManage' => $context['canAssign'],
+        ]);
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $context = $this->resolveContext($request);
+        $q = trim((string) $request->get('q', ''));
+        $status = trim((string) $request->get('status', ''));
+
+        $query = SkripsiPengajuan::query()->with(['mahasiswa', 'dosenPembimbing', 'dosenPembimbing2']);
+
+        if ($context['programStudi']) {
+            $programStudi = $context['programStudi'];
+            $query->whereHas('mahasiswa', function ($sub) use ($programStudi) {
+                $sub->where('program_studi', $programStudi);
+            });
+        }
+
+        if ($q !== '') {
+            $query->where('judul', 'like', "%{$q}%")
+                ->orWhereHas('mahasiswa', function ($sub) use ($q) {
+                    $sub->where('nama_lengkap', 'like', "%{$q}%")
+                        ->orWhere('npm', 'like', "%{$q}%");
+                });
+        }
+
+        if ($status !== '') {
+            $query->where('status', $status);
+        }
+
+        $items = $query->orderByDesc('id')->get();
+        $kaprodi = $this->resolveKaprodi($context['programStudi']);
+
+        $html = view('skripsi.index-pdf', [
+            'items' => $items,
+            'q' => $q,
+            'status' => $status,
+            'programStudi' => $context['programStudi'],
+            'printedBy' => $request->user()?->name,
+            'kaprodi' => $kaprodi,
+        ])->render();
+
+        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->render();
+
+        $filename = 'daftar-pengajuan-skripsi-'.now()->format('YmdHis').'.pdf';
+
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ]);
     }
 
@@ -278,7 +331,13 @@ class SkripsiController extends Controller
 
     public function destroy(Request $request, SkripsiPengajuan $skripsi): RedirectResponse
     {
-        abort_unless($request->user()?->isAdmin(), 403);
+        $context = $this->resolveContext($request);
+        abort_unless($context['canAssign'], 403);
+
+        if ($context['programStudi']) {
+            $skripsi->loadMissing('mahasiswa');
+            abort_unless((string) ($skripsi->mahasiswa?->program_studi ?? '') === $context['programStudi'], 403);
+        }
 
         if ($skripsi->sk_pembimbing_path) {
             Storage::disk('public')->delete($skripsi->sk_pembimbing_path);
@@ -286,12 +345,15 @@ class SkripsiController extends Controller
 
         $skripsi->delete();
 
-        return redirect()->route('admin.skripsi.index')->with('success', 'Data skripsi berhasil dihapus.');
+        $routeBack = ($context['routePrefix'] ?? 'admin') === 'admin' ? 'admin.skripsi.index' : 'dosen.skripsi-pengajuan.index';
+
+        return redirect()->route($routeBack)->with('success', 'Data skripsi berhasil dihapus.');
     }
 
     public function bulkDestroy(Request $request): RedirectResponse
     {
-        abort_unless($request->user()?->isAdmin(), 403);
+        $context = $this->resolveContext($request);
+        abort_unless($context['canAssign'], 403);
 
         $validated = $request->validate([
             'ids' => ['required', 'array', 'min:1'],
@@ -300,7 +362,15 @@ class SkripsiController extends Controller
 
         $ids = array_values(array_unique(array_map('intval', $validated['ids'])));
 
-        $items = SkripsiPengajuan::query()->whereIn('id', $ids)->get();
+        $query = SkripsiPengajuan::query()->whereIn('id', $ids);
+        if ($context['programStudi']) {
+            $programStudi = $context['programStudi'];
+            $query->whereHas('mahasiswa', function ($sub) use ($programStudi) {
+                $sub->where('program_studi', $programStudi);
+            });
+        }
+
+        $items = $query->get();
 
         if ($items->isEmpty()) {
             return back()->with('error', 'Tidak ada data skripsi yang ditemukan untuk dihapus.');

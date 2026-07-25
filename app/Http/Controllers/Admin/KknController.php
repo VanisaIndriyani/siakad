@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Dosen;
 use App\Models\KknPengajuan;
 use App\Models\KknPosko;
+use Dompdf\Dompdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -14,12 +15,56 @@ use Illuminate\View\View;
 
 class KknController extends Controller
 {
+    private const PRODI_APPROVER_STATUS = ['Ketua Prodi', 'Sekretaris Prodi'];
+
+    private function resolveKaprodi(?string $programStudi): ?Dosen
+    {
+        $programStudi = trim((string) $programStudi);
+        if ($programStudi === '') {
+            return null;
+        }
+
+        return Dosen::query()
+            ->where('program_studi', $programStudi)
+            ->where('status_akademik', 'Ketua Prodi')
+            ->orderByDesc('id')
+            ->first();
+    }
+
+    private function resolveContext(Request $request): array
+    {
+        $user = $request->user();
+        if ($user?->isAdmin()) {
+            return ['routePrefix' => 'admin', 'canAssign' => true, 'programStudi' => null];
+        }
+
+        if ($user?->isDosen()) {
+            $dosen = $user->dosen;
+            $programStudi = trim((string) ($dosen?->program_studi ?? ''));
+            $statusAkademik = (string) ($dosen?->status_akademik ?? '');
+
+            $canAssign = in_array($statusAkademik, self::PRODI_APPROVER_STATUS, true);
+
+            return ['routePrefix' => 'dosen', 'canAssign' => $canAssign, 'programStudi' => $programStudi ?: '---'];
+        }
+
+        abort(403);
+    }
+
     public function index(Request $request): View
     {
+        $context = $this->resolveContext($request);
         $q = trim((string) $request->get('q', ''));
         $status = trim((string) $request->get('status', ''));
 
         $query = KknPengajuan::query()->with(['mahasiswa', 'posko']);
+
+        if ($context['programStudi']) {
+            $programStudi = $context['programStudi'];
+            $query->whereHas('mahasiswa', function ($sub) use ($programStudi) {
+                $sub->where('program_studi', $programStudi);
+            });
+        }
 
         if ($q !== '') {
             $query->whereHas('mahasiswa', function ($sub) use ($q) {
@@ -38,11 +83,91 @@ class KknController extends Controller
             'items' => $items,
             'q' => $q,
             'status' => $status,
+            'routePrefix' => $context['routePrefix'],
+            'canAssign' => $context['canAssign'],
+            'canManage' => $context['canAssign'],
+        ]);
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $context = $this->resolveContext($request);
+        $q = trim((string) $request->get('q', ''));
+        $status = trim((string) $request->get('status', ''));
+
+        $query = KknPengajuan::query()->with(['mahasiswa', 'posko']);
+
+        if ($context['programStudi']) {
+            $programStudi = $context['programStudi'];
+            $query->whereHas('mahasiswa', function ($sub) use ($programStudi) {
+                $sub->where('program_studi', $programStudi);
+            });
+        }
+
+        if ($q !== '') {
+            $query->whereHas('mahasiswa', function ($sub) use ($q) {
+                $sub->where('nama_lengkap', 'like', "%{$q}%")
+                    ->orWhere('npm', 'like', "%{$q}%");
+            });
+        }
+
+        if ($status !== '') {
+            $query->where('status', $status);
+        }
+
+        $items = $query->orderByDesc('id')->get();
+        $kaprodi = $this->resolveKaprodi($context['programStudi']);
+
+        $html = view('kkn.index-pdf', [
+            'items' => $items,
+            'q' => $q,
+            'status' => $status,
+            'programStudi' => $context['programStudi'],
+            'printedBy' => $request->user()?->name,
+            'kaprodi' => $kaprodi,
+        ])->render();
+
+        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->render();
+
+        $filename = 'daftar-pendaftaran-kkn-'.now()->format('YmdHis').'.pdf';
+
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ]);
+    }
+
+    public function show(Request $request, KknPengajuan $kkn): View
+    {
+        $context = $this->resolveContext($request);
+
+        if ($context['programStudi']) {
+            $kkn->loadMissing('mahasiswa');
+            abort_unless((string) ($kkn->mahasiswa?->program_studi ?? '') === $context['programStudi'], 403);
+        }
+
+        $kkn->load(['mahasiswa', 'posko.pembimbingS']);
+
+        return view('admin.kkn.show', [
+            'kkn' => $kkn,
+            'routePrefix' => $context['routePrefix'],
+            'canAssign' => $context['canAssign'],
         ]);
     }
 
     public function updateStatus(Request $request, KknPengajuan $kkn): RedirectResponse
     {
+        $context = $this->resolveContext($request);
+        abort_unless($context['canAssign'], 403);
+
+        if ($context['programStudi']) {
+            $kkn->loadMissing('mahasiswa');
+            abort_unless((string) ($kkn->mahasiswa?->program_studi ?? '') === $context['programStudi'], 403);
+        }
+
         $validated = $request->validate([
             'status' => ['required', 'in:approved,rejected'],
             'catatan_admin' => ['nullable', 'string'],
@@ -56,28 +181,72 @@ class KknController extends Controller
         return back()->with('success', 'Status pendaftaran KKN diperbarui.');
     }
 
-    public function bulkDestroy(Request $request): RedirectResponse
+    public function destroy(Request $request, KknPengajuan $kkn): RedirectResponse
     {
-        $ids = $request->input('ids', []);
-        if (empty($ids)) {
-            return back()->with('error', 'Pilih data yang ingin dihapus.');
+        $context = $this->resolveContext($request);
+        abort_unless($context['canAssign'], 403);
+
+        if ($context['programStudi']) {
+            $kkn->loadMissing('mahasiswa');
+            abort_unless((string) ($kkn->mahasiswa?->program_studi ?? '') === $context['programStudi'], 403);
         }
 
-        KknPengajuan::query()->whereIn('id', $ids)->delete();
+        $kkn->delete();
 
-        return back()->with('success', 'Data pendaftaran KKN berhasil dihapus secara massal.');
+        $routeBack = ($context['routePrefix'] ?? 'admin') === 'admin' ? 'admin.kkn.index' : 'dosen.kkn-pengajuan.index';
+
+        return redirect()->route($routeBack)->with('success', 'Data pendaftaran KKN berhasil dihapus.');
     }
 
-    public function poskoIndex(): View
+    public function bulkDestroy(Request $request): RedirectResponse
     {
+        $context = $this->resolveContext($request);
+        abort_unless($context['canAssign'], 403);
+
+        $validated = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer'],
+        ]);
+
+        $ids = array_values(array_unique(array_map('intval', $validated['ids'])));
+
+        $query = KknPengajuan::query()->whereIn('id', $ids);
+        if ($context['programStudi']) {
+            $programStudi = $context['programStudi'];
+            $query->whereHas('mahasiswa', function ($sub) use ($programStudi) {
+                $sub->where('program_studi', $programStudi);
+            });
+        }
+
+        $items = $query->get();
+
+        if ($items->isEmpty()) {
+            return back()->with('error', 'Tidak ada data KKN yang ditemukan untuk dihapus.');
+        }
+
+        foreach ($items as $it) {
+            $it->delete();
+        }
+
+        return back()->with('success', 'Data pendaftaran KKN terpilih berhasil dihapus.');
+    }
+
+    public function poskoIndex(Request $request): View
+    {
+        $context = $this->resolveContext($request);
+        abort_unless($context['routePrefix'] === 'admin', 403);
+
         $poskos = KknPosko::query()->with(['pembimbingS', 'pengajuans'])->orderByDesc('id')->paginate(10);
         return view('admin.kkn.posko-index', [
             'poskos' => $poskos,
         ]);
     }
 
-    public function poskoCreate(): View
+    public function poskoCreate(Request $request): View
     {
+        $context = $this->resolveContext($request);
+        abort_unless($context['routePrefix'] === 'admin', 403);
+
         $dosenList = Dosen::query()->orderBy('nama')->get();
         return view('admin.kkn.posko-create', [
             'dosenList' => $dosenList,
@@ -86,7 +255,9 @@ class KknController extends Controller
 
     public function poskoStore(Request $request): RedirectResponse
     {
-        // Filter out empty values from dosen_ids before validation
+        $context = $this->resolveContext($request);
+        abort_unless($context['routePrefix'] === 'admin', 403);
+
         $dosenIds = array_filter($request->input('dosen_ids', []), fn($val) => !empty($val));
         $request->merge(['dosen_ids' => $dosenIds]);
 
@@ -124,12 +295,14 @@ class KknController extends Controller
         return redirect()->route('admin.kkn.posko.index')->with('success', 'Posko KKN berhasil dibuat.');
     }
 
-    public function poskoShow(KknPosko $posko): View
+    public function poskoShow(Request $request, KknPosko $posko): View
     {
+        $context = $this->resolveContext($request);
+        abort_unless($context['routePrefix'] === 'admin', 403);
+
         $posko->load(['pembimbingS', 'pengajuans.mahasiswa', 'messages.sender', 'files.user']);
         $dosenList = Dosen::query()->orderBy('nama')->get();
-        
-        // Students who are approved but not yet in a posko
+
         $availableStudents = KknPengajuan::query()
             ->where('status', 'approved')
             ->whereNull('kkn_posko_id')
@@ -145,7 +318,9 @@ class KknController extends Controller
 
     public function poskoUpdate(Request $request, KknPosko $posko): RedirectResponse
     {
-        // Filter out empty values from dosen_ids before validation
+        $context = $this->resolveContext($request);
+        abort_unless($context['routePrefix'] === 'admin', 403);
+
         $dosenIds = array_filter($request->input('dosen_ids', []), fn($val) => !empty($val));
         $request->merge(['dosen_ids' => $dosenIds]);
 
@@ -183,6 +358,9 @@ class KknController extends Controller
 
     public function assignStudent(Request $request, KknPosko $posko): RedirectResponse
     {
+        $context = $this->resolveContext($request);
+        abort_unless($context['routePrefix'] === 'admin', 403);
+
         $validated = $request->validate([
             'kkn_pengajuan_ids' => ['required', 'array'],
             'kkn_pengajuan_ids.*' => ['exists:kkn_pengajuans,id'],
@@ -195,19 +373,24 @@ class KknController extends Controller
         return back()->with('success', 'Mahasiswa berhasil ditambahkan ke posko.');
     }
 
-    public function removeStudent(KknPengajuan $kkn): RedirectResponse
+    public function removeStudent(Request $request, KknPengajuan $kkn): RedirectResponse
     {
+        $context = $this->resolveContext($request);
+        abort_unless($context['routePrefix'] === 'admin', 403);
+
         $kkn->update(['kkn_posko_id' => null]);
         return back()->with('success', 'Mahasiswa dikeluarkan dari posko.');
     }
 
-    public function poskoDestroy(KknPosko $posko): RedirectResponse
+    public function poskoDestroy(Request $request, KknPosko $posko): RedirectResponse
     {
+        $context = $this->resolveContext($request);
+        abort_unless($context['routePrefix'] === 'admin', 403);
+
         if ($posko->sk_pembimbing_path) {
             Storage::disk('public')->delete($posko->sk_pembimbing_path);
         }
-        
-        // Members become unassigned
+
         $posko->pengajuans()->update(['kkn_posko_id' => null]);
         $posko->delete();
 
