@@ -216,6 +216,7 @@ Route::prefix('admin')
         Route::delete('/absensi/{absensi}/materi', [AdminAbsensiController::class, 'destroyMateriFile'])->name('absensi.materi.destroy');
         Route::get('/absensi/{absensi}/export/excel', [AdminAbsensiController::class, 'exportExcel'])->name('absensi.export.excel');
         Route::get('/absensi/rekap', [AdminAbsensiController::class, 'exportRekapPdf'])->name('absensi.rekap');
+        Route::delete('/absensi-items/{absensiItem}', [AdminAbsensiController::class, 'destroyItem'])->name('absensi.items.destroy');
 
         Route::resource('kalender-akademik', AdminAcademicCalendarController::class)
             ->parameters(['kalender-akademik' => 'kalender_akademik'])
@@ -458,6 +459,7 @@ Route::prefix('dosen')
         Route::delete('/absensi/{absensi}/materi', [AdminAbsensiController::class, 'destroyMateriFile'])->name('absensi.materi.destroy');
         Route::get('/absensi/{absensi}/export/excel', [AdminAbsensiController::class, 'exportExcel'])->name('absensi.export.excel');
         Route::get('/absensi/rekap/pdf', [AdminAbsensiController::class, 'exportRekapPdf'])->name('absensi.rekap');
+        Route::delete('/absensi-items/{absensiItem}', [AdminAbsensiController::class, 'destroyItem'])->name('absensi.items.destroy');
 
         Route::get('/krs/approval', [DosenKrsApprovalController::class, 'index'])->name('krs.approval');
         Route::get('/krs/{krs}', [DosenKrsApprovalController::class, 'show'])->name('krs.show');

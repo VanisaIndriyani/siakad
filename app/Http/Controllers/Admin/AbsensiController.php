@@ -241,6 +241,13 @@ class AbsensiController extends Controller
             );
         }
 
+        AbsensiItem::query()
+            ->where('absensi_id', $absensi->id)
+            ->when(count($mahasiswaIds) > 0, function ($sub) use ($mahasiswaIds) {
+                $sub->whereNotIn('mahasiswa_id', $mahasiswaIds);
+            })
+            ->delete();
+
         $absensi->load(['mataKuliah', 'items.mahasiswa']);
 
         return view('admin.absensi.entry', [
@@ -677,5 +684,34 @@ class AbsensiController extends Controller
         }, $filename, [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ]);
+    }
+
+    public function destroyItem(Request $request, AbsensiItem $absensiItem): RedirectResponse
+    {
+        $routePrefix = $request->user()?->isDosen() ? 'dosen' : 'admin';
+
+        if ($request->user()?->isDosen()) {
+            $dosen = $request->user()?->dosen;
+            if (! $dosen) {
+                abort(403);
+            }
+            $absensiItem->loadMissing('absensi.mataKuliah');
+            $mataKuliah = $absensiItem->absensi?->mataKuliah;
+            abort_unless($mataKuliah && in_array((int) $dosen->id, [(int) ($mataKuliah?->dosen_id ?? 0), (int) ($mataKuliah?->dosen_id_2 ?? 0)], true), 403);
+        }
+
+        $absensi = $absensiItem->absensi;
+        $absensiItem->delete();
+
+        if (! $absensi) {
+            return redirect()->route($routePrefix.'.absensi.index')->with('success', 'Data absensi berhasil dihapus.');
+        }
+
+        return redirect()->route($routePrefix.'.absensi.entry', [
+            'jurusan' => $absensi->jurusan,
+            'semester' => $absensi->semester,
+            'mata_kuliah_id' => $absensi->mata_kuliah_id,
+            'pertemuan' => $absensi->pertemuan,
+        ])->with('success', 'Mahasiswa berhasil dihapus dari daftar absensi.');
     }
 }

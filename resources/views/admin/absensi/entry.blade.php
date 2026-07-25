@@ -104,6 +104,7 @@
                             <th class="text-left font-medium px-4 py-3">NPM</th>
                             <th class="text-left font-medium px-4 py-3">Status</th>
                             <th class="text-left font-medium px-4 py-3">Keterangan</th>
+                            <th class="text-right font-medium px-4 py-3">Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="absensiTbody" class="divide-y divide-white/10">
@@ -126,10 +127,21 @@
                                 <td class="px-4 py-3">
                                     <input name="keterangan[{{ $item->id }}]" value="{{ old('keterangan.'.$item->id, $item->keterangan) }}" class="w-full h-10 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" placeholder="Opsional" />
                                 </td>
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center justify-end">
+                                        <form method="POST" action="{{ route(($routePrefix ?? 'admin').'.absensi.items.destroy', $item) }}" onsubmit="return confirm('Hapus mahasiswa ini dari daftar absensi?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" title="Hapus dari daftar absensi" class="h-9 w-9 inline-flex items-center justify-center rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-200 transition">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="px-4 py-10 text-center text-emerald-100/70">Belum ada mahasiswa untuk daftar hadir ini.</td>
+                                <td colspan="5" class="px-4 py-10 text-center text-emerald-100/70">Belum ada mahasiswa untuk daftar hadir ini.</td>
                             </tr>
                         @endforelse
                     </tbody>
