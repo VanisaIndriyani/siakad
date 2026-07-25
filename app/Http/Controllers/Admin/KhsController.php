@@ -147,6 +147,8 @@ class KhsController extends Controller
         ]);
 
         $mkIds = $validated['mata_kuliah_id'] ?? [];
+        $mkIds = array_values(array_map('intval', (array) $mkIds));
+
         foreach ($mkIds as $mkId) {
             $angka = $validated['nilai_angka'][$mkId] ?? null;
             $huruf = $validated['nilai_huruf'][$mkId] ?? null;
@@ -162,6 +164,13 @@ class KhsController extends Controller
                 ]
             );
         }
+
+        KhsItem::query()
+            ->where('khs_id', $khs->id)
+            ->when(count($mkIds) > 0, function ($sub) use ($mkIds) {
+                $sub->whereNotIn('mata_kuliah_id', $mkIds);
+            })
+            ->delete();
 
         return redirect()->route('admin.khs.show', $khs)->with('success', 'KHS berhasil diperbarui.');
     }

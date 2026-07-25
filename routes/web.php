@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\AbsensiController as AdminAbsensiController;
 use App\Http\Controllers\Admin\DosenController as AdminDosenController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\InformasiController as AdminInformasiController;
 use App\Http\Controllers\Admin\KhsController as AdminKhsController;
 use App\Http\Controllers\Admin\NilaiMonitoringController as AdminNilaiMonitoringController;
 use App\Http\Controllers\Admin\QuestionnaireController as AdminQuestionnaireController;
@@ -64,6 +65,13 @@ Route::any('/', function () {
         ? redirect()->route('dashboard')
         : redirect()->route('login');
 });
+
+Route::get('/informasi/{informasi}', function (\App\Models\Informasi $informasi) {
+    abort_unless($informasi->is_aktif, 404);
+    return view('informasi.publik', [
+        'item' => $informasi,
+    ]);
+})->name('informasi.publik');
 
 Route::get('/sitemap.xml', function () {
     $sitemap = Sitemap::create();
@@ -213,6 +221,14 @@ Route::prefix('admin')
             ->parameters(['kalender-akademik' => 'kalender_akademik'])
             ->except(['show']);
         Route::get('/kalender-akademik/pdf', [AdminAcademicCalendarController::class, 'pdf'])->name('kalender-akademik.pdf');
+
+        Route::get('/informasi', [AdminInformasiController::class, 'index'])->name('informasi.index');
+        Route::get('/informasi/create', [AdminInformasiController::class, 'create'])->name('informasi.create');
+        Route::post('/informasi', [AdminInformasiController::class, 'store'])->name('informasi.store');
+        Route::get('/informasi/{informasi}/edit', [AdminInformasiController::class, 'edit'])->name('informasi.edit');
+        Route::put('/informasi/{informasi}', [AdminInformasiController::class, 'update'])->name('informasi.update');
+        Route::patch('/informasi/{informasi}/toggle', [AdminInformasiController::class, 'toggleAktif'])->name('informasi.toggle');
+        Route::delete('/informasi/{informasi}', [AdminInformasiController::class, 'destroy'])->name('informasi.destroy');
 
         Route::get('/laporan', [AdminPengajuanLaporanController::class, 'index'])->name('laporan.index');
         Route::delete('/laporan/bulk-delete', [AdminPengajuanLaporanController::class, 'bulkDestroy'])->name('laporan.bulk-delete');

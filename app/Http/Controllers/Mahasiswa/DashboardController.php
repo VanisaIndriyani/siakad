@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Mahasiswa;
 
 use App\Http\Controllers\Controller;
+use App\Models\Informasi;
 use App\Models\Khs;
 use App\Models\Krs;
 use App\Models\Pembayaran;
@@ -55,6 +56,11 @@ class DashboardController extends Controller
                 ->get()
             : collect();
 
+        $informasiAktif = Informasi::query()
+            ->aktif()
+            ->whereNotNull('gambar_path')
+            ->first();
+
         return view('mahasiswa.dashboard', [
             'mahasiswa' => $mahasiswa,
             'totalKrs' => $totalKrs,
@@ -63,6 +69,7 @@ class DashboardController extends Controller
             'latestKhs' => $latestKhs,
             'chartLabels' => $ipsChart->pluck('semester')->map(fn ($s) => 'S'.$s),
             'chartValues' => $ipsChart->pluck('ips'),
+            'informasiAktif' => $informasiAktif,
         ]);
     }
 
