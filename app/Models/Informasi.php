@@ -40,11 +40,21 @@ class Informasi extends Model
             return null;
         }
 
-        if (str_starts_with($this->gambar_path, 'http')) {
-            return $this->gambar_path;
+        $path = (string) $this->gambar_path;
+
+        if (preg_match('#^https?://#i', $path)) {
+            return $path;
         }
 
-        return Storage::disk('public')->url($this->gambar_path);
+        if (str_starts_with($path, 'storage/') || str_starts_with($path, '/storage/')) {
+            $cleanPath = ltrim($path, '/');
+            if (str_starts_with($cleanPath, 'storage/')) {
+                $cleanPath = substr($cleanPath, strlen('storage/'));
+            }
+            return asset('storage/' . ltrim($cleanPath, '/'));
+        }
+
+        return asset('storage/' . ltrim($path, '/'));
     }
 
     public function getShareUrlAttribute(): string
