@@ -241,9 +241,35 @@
             }
         }
 
+        // Row clickable
+        const rows = document.querySelectorAll('table tbody tr[data-show-url]');
+        rows.forEach((row) => {
+            const url = row.getAttribute('data-show-url');
+            if (!url) return;
+            row.addEventListener('click', (e) => {
+                if (e.target.closest('a, button, input, label, form')) return;
+                window.location.href = url;
+            });
+            row.style.cursor = 'pointer';
+        });
+
         // Buka Semua
         const btnBukaSemua = document.getElementById('btnBukaSemuaKkn');
-        const rows = document.querySelectorAll('[data-show-url]');
+
+        function openInNewTab(url, idx) {
+            try {
+                const w = window.open(url, 'kkn_' + Date.now() + '_' + idx, 'noopener,noreferrer');
+                if (!w) throw new Error('blocked');
+            } catch (e) {
+                const a = document.createElement('a');
+                a.href = url;
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => a.remove(), 0);
+            }
+        }
 
         if (btnBukaSemua) {
             btnBukaSemua.addEventListener('click', () => {
@@ -260,7 +286,7 @@
                     return;
                 }
                 urls.forEach((u, i) => {
-                    setTimeout(() => window.open(u, '_blank'), i * 80);
+                    setTimeout(() => openInNewTab(u, i), i * 120);
                 });
             });
         }

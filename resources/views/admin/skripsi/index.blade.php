@@ -109,7 +109,7 @@
                             </td>
                             <td class="px-4 py-3 text-right">
                                 <div class="flex items-center justify-end gap-2">
-                                    <a href="{{ route('admin.skripsi.pdf', $row) }}" class="h-9 px-3 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-emerald-100" title="Print PDF">
+                                    <a href="{{ route($routeGroup.'.pdf', $row) }}" class="h-9 px-3 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-emerald-100" title="Print PDF">
                                         <i class="fa-solid fa-print"></i>
                                     </a>
                                     <a href="{{ $showUrl }}" class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
@@ -149,7 +149,22 @@
             const checks = document.querySelectorAll('.skripsi-check');
             const form = document.getElementById('bulkDeleteSkripsiForm');
             const btnBukaSemua = document.getElementById('btnBukaSemuaSkripsi');
-            const rows = document.querySelectorAll('[data-show-url]');
+            const rows = document.querySelectorAll('table tbody tr[data-show-url]');
+
+            function openInNewTab(url, idx) {
+                try {
+                    const w = window.open(url, 'skripsi_' + Date.now() + '_' + idx, 'noopener,noreferrer');
+                    if (!w) throw new Error('blocked');
+                } catch (e) {
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.target = '_blank';
+                    a.rel = 'noopener noreferrer';
+                    document.body.appendChild(a);
+                    a.click();
+                    setTimeout(() => a.remove(), 0);
+                }
+            }
 
             if (checkAll) {
                 checkAll.addEventListener('change', () => {
@@ -167,6 +182,16 @@
                 });
             }
 
+            rows.forEach((row) => {
+                const url = row.getAttribute('data-show-url');
+                if (!url) return;
+                row.addEventListener('click', (e) => {
+                    if (e.target.closest('a, button, input, label, form')) return;
+                    window.location.href = url;
+                });
+                row.style.cursor = 'pointer';
+            });
+
             if (btnBukaSemua) {
                 btnBukaSemua.addEventListener('click', () => {
                     if (!rows || rows.length === 0) {
@@ -182,7 +207,7 @@
                         return;
                     }
                     urls.forEach((u, i) => {
-                        setTimeout(() => window.open(u, '_blank'), i * 80);
+                        setTimeout(() => openInNewTab(u, i), i * 120);
                     });
                 });
             }
