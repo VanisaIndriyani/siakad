@@ -49,6 +49,40 @@
                     </div>
 
                     <div class="flex items-center gap-3">
+                        @php
+                            $dosenProfil = auth()->user()?->dosen;
+                            $showProfilBtns = $dosenProfil && (
+                                !empty(trim((string) $dosenProfil->scopus_url)) ||
+                                !empty(trim((string) $dosenProfil->wos_url)) ||
+                                !empty(trim((string) $dosenProfil->sinta_url)) ||
+                                !empty(trim((string) $dosenProfil->google_scholar_url))
+                            );
+                        @endphp
+                        @if($showProfilBtns)
+                            <div class="hidden md:flex items-center gap-2 mr-1">
+                                @if(!empty(trim((string) $dosenProfil->scopus_url)))
+                                    <a href="{{ $dosenProfil->scopus_url }}" target="_blank" rel="noopener" title="Scopus" class="h-9 w-9 inline-flex items-center justify-center rounded-xl bg-orange-500/15 hover:bg-orange-500/25 border border-orange-500/25 transition text-orange-300">
+                                        <i class="fa-solid fa-book-atlas text-xs"></i>
+                                    </a>
+                                @endif
+                                @if(!empty(trim((string) $dosenProfil->wos_url)))
+                                    <a href="{{ $dosenProfil->wos_url }}" target="_blank" rel="noopener" title="Whos" class="h-9 w-9 inline-flex items-center justify-center rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/25 transition text-indigo-300">
+                                        <i class="fa-solid fa-w text-xs"></i>
+                                    </a>
+                                @endif
+                                @if(!empty(trim((string) $dosenProfil->sinta_url)))
+                                    <a href="{{ $dosenProfil->sinta_url }}" target="_blank" rel="noopener" title="Sinta" class="h-9 w-9 inline-flex items-center justify-center rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/25 transition text-red-300">
+                                        <i class="fa-solid fa-chart-line text-xs"></i>
+                                    </a>
+                                @endif
+                                @if(!empty(trim((string) $dosenProfil->google_scholar_url)))
+                                    <a href="{{ $dosenProfil->google_scholar_url }}" target="_blank" rel="noopener" title="Google Scholar" class="h-9 w-9 inline-flex items-center justify-center rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/25 transition text-sky-300">
+                                        <i class="fa-brands fa-google-scholar text-xs"></i>
+                                    </a>
+                                @endif
+                            </div>
+                        @endif
+
                         <div class="hidden sm:block text-right leading-tight">
                             <div class="text-sm font-medium">{{ auth()->user()->name }}</div>
                             <div class="text-xs text-emerald-100/70 capitalize">{{ auth()->user()->role }}</div>
