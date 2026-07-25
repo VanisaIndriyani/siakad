@@ -8,6 +8,8 @@
         $canManage = $canManage ?? ($canAssign ?? false);
         $rPrefix = $routePrefix ?? 'admin';
         $routeGroup = $rPrefix === 'admin' ? 'admin.ppl' : 'dosen.ppl-pengajuan';
+         $showRouteName = $rPrefix === 'admin' ? 'admin.ppl.show' : 'dosen.ppl.show';
+         $pdfRouteName = $rPrefix === 'admin' ? 'admin.ppl.pdf' : 'dosen.ppl.pdf';
     @endphp
 
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -83,7 +85,7 @@
                                 'rejected' => 'bg-red-500/15 border-red-500/20 text-red-100',
                                 default => 'bg-yellow-500/15 border-yellow-500/20 text-yellow-100',
                             };
-                            $showUrl = route($routeGroup.'.show', $row);
+                            $showUrl = route($showRouteName, $row);
                         @endphp
                         <tr class="hover:bg-white/5" data-show-url="{{ $showUrl }}">
                             @if ($canManage)
@@ -114,7 +116,7 @@
                             </td>
                             <td class="px-4 py-3 text-right">
                                 <div class="flex items-center justify-end gap-2">
-                                    <a href="{{ route($routeGroup.'.pdf', $row) }}" class="h-9 px-3 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-emerald-100" title="Print PDF">
+                                    <a href="{{ route($pdfRouteName, $row) }}" class="h-9 px-3 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-emerald-100" title="Print PDF">
                                         <i class="fa-solid fa-print"></i>
                                     </a>
                                     <a href="{{ $showUrl }}" class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
@@ -154,8 +156,7 @@
             const checks = document.querySelectorAll('.ppl-check');
             const form = document.getElementById('bulkDeleteForm');
             const btnBukaSemua = document.getElementById('btnBukaSemuaPpl');
-            const tableWrap = btnBukaSemua?.closest('.flex')?.nextElementSibling?.nextElementSibling?.nextElementSibling ?? null;
-            const rows = (tableWrap ? tableWrap : document).querySelectorAll('tbody tr[data-show-url]');
+            const rows = document.querySelectorAll('table tbody tr[data-show-url]');
 
             function openInNewTab(url, idx) {
                 try {
