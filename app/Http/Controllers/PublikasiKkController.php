@@ -67,8 +67,13 @@ class PublikasiKkController extends Controller
         $items = $query->paginate(10)->withQueryString();
 
         $kategoriList = self::KATEGORI;
+        $currentDosen = null;
+        $currentUser = $request->user();
+        if ($currentUser && $currentUser->isDosen()) {
+            $currentDosen = $currentUser->dosen;
+        }
 
-        return view('publikasi-kk.index', compact('items', 'routePrefix', 'kategoriList'));
+        return view('publikasi-kk.index', compact('items', 'routePrefix', 'kategoriList', 'currentDosen'));
     }
 
     public function create(Request $request)

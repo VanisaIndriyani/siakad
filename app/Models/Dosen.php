@@ -45,6 +45,10 @@ class Dosen extends Model
         'status_akademik',
         'status_dosen',
         'foto_path',
+        'scopus_url',
+        'wos_url',
+        'sinta_url',
+        'google_scholar_url',
     ];
 
     public function user(): BelongsTo

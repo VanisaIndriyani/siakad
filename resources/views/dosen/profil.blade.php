@@ -346,6 +346,32 @@
                     @error('foto') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
                 </div>
 
+                <div class="rounded-2xl bg-white/5 border border-white/10 p-4 mt-6">
+                    <div class="text-sm font-semibold mb-3">Profil Penelitian</div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-sm text-emerald-100/80">Scopus (Link URL)</label>
+                            <input type="url" name="scopus_url" value="{{ old('scopus_url', $dosen?->scopus_url ?? '') }}" placeholder="https://www.scopus.com/authid/detail.uri?authorId=..." class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
+                            @error('scopus_url') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
+                        </div>
+                        <div>
+                            <label class="text-sm text-emerald-100/80">Whos (Link URL)</label>
+                            <input type="url" name="wos_url" value="{{ old('wos_url', $dosen?->wos_url ?? '') }}" placeholder="https://www.webofscience.com/..." class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
+                            @error('wos_url') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
+                        </div>
+                        <div>
+                            <label class="text-sm text-emerald-100/80">Sinta (Link URL)</label>
+                            <input type="url" name="sinta_url" value="{{ old('sinta_url', $dosen?->sinta_url ?? '') }}" placeholder="https://sinta.kemdikbud.go.id/authors/profile/..." class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
+                            @error('sinta_url') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
+                        </div>
+                        <div>
+                            <label class="text-sm text-emerald-100/80">Google Scholar (Link URL)</label>
+                            <input type="url" name="google_scholar_url" value="{{ old('google_scholar_url', $dosen?->google_scholar_url ?? '') }}" placeholder="https://scholar.google.com/citations?user=..." class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
+                            @error('google_scholar_url') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
+                        </div>
+                    </div>
+                </div>
+
             <div class="flex items-center justify-end">
                 <button class="h-11 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition font-medium">
                     Simpan

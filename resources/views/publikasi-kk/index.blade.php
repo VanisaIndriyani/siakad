@@ -17,8 +17,69 @@
                 <i class="fa-solid fa-file-excel"></i>
                 Download Excel
             </a>
+            @if(!empty($currentDosen))
+                <div class="ml-0 md:ml-4 flex items-center gap-2 flex-wrap">
+                    @if(!empty(trim((string) $currentDosen->scopus_url)))
+                        <a href="{{ $currentDosen->scopus_url }}" target="_blank" rel="noopener" title="Scopus" class="h-10 w-10 inline-flex items-center justify-center rounded-xl bg-orange-500/15 hover:bg-orange-500/25 border border-orange-500/25 transition text-orange-300">
+                            <i class="fa-solid fa-book-atlas"></i>
+                        </a>
+                    @endif
+                    @if(!empty(trim((string) $currentDosen->wos_url)))
+                        <a href="{{ $currentDosen->wos_url }}" target="_blank" rel="noopener" title="Whos" class="h-10 w-10 inline-flex items-center justify-center rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/25 transition text-indigo-300">
+                            <i class="fa-solid fa-w"></i>
+                        </a>
+                    @endif
+                    @if(!empty(trim((string) $currentDosen->sinta_url)))
+                        <a href="{{ $currentDosen->sinta_url }}" target="_blank" rel="noopener" title="Sinta" class="h-10 w-10 inline-flex items-center justify-center rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/25 transition text-red-300">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </a>
+                    @endif
+                    @if(!empty(trim((string) $currentDosen->google_scholar_url)))
+                        <a href="{{ $currentDosen->google_scholar_url }}" target="_blank" rel="noopener" title="Google Scholar" class="h-10 w-10 inline-flex items-center justify-center rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/25 transition text-sky-300">
+                            <i class="fa-brands fa-google-scholar"></i>
+                        </a>
+                    @endif
+                </div>
+            @endif
         </div>
     </div>
+
+    @if(!empty($currentDosen) && ($currentDosen->scopus_url || $currentDosen->wos_url || $currentDosen->sinta_url || $currentDosen->google_scholar_url))
+        <div class="mb-6 p-4 rounded-2xl bg-white/5 border border-white/10 shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+                <div class="min-w-0">
+                    <div class="text-sm font-semibold text-white">Profil</div>
+                    <div class="text-xs text-emerald-100/50 mt-0.5">Profil penelitian dosen.</div>
+                </div>
+                <div class="flex-1 flex flex-wrap items-center gap-3 sm:justify-end">
+                    @if(!empty(trim((string) $currentDosen->scopus_url)))
+                        <a href="{{ $currentDosen->scopus_url }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-3 h-9 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 text-orange-200 transition text-xs font-medium">
+                            <i class="fa-solid fa-book-atlas"></i>
+                            Scopus
+                        </a>
+                    @endif
+                    @if(!empty(trim((string) $currentDosen->wos_url)))
+                        <a href="{{ $currentDosen->wos_url }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-3 h-9 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-200 transition text-xs font-medium">
+                            <i class="fa-solid fa-w"></i>
+                            Whos
+                        </a>
+                    @endif
+                    @if(!empty(trim((string) $currentDosen->sinta_url)))
+                        <a href="{{ $currentDosen->sinta_url }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-3 h-9 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-200 transition text-xs font-medium">
+                            <i class="fa-solid fa-chart-line"></i>
+                            Sinta
+                        </a>
+                    @endif
+                    @if(!empty(trim((string) $currentDosen->google_scholar_url)))
+                        <a href="{{ $currentDosen->google_scholar_url }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-3 h-9 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/20 text-sky-200 transition text-xs font-medium">
+                            <i class="fa-brands fa-google-scholar"></i>
+                            Google Scholar
+                        </a>
+                    @endif
+                </div>
+            </div>
+        </div>
+    @endif
 
     <div class="mb-6 p-4 rounded-2xl bg-[#0d2a23] border border-white/10 shadow-sm">
         <form action="{{ route($routePrefix . '.publikasi.index') }}" method="GET" class="flex flex-row items-center gap-3">

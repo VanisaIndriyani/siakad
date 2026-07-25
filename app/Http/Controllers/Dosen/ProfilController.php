@@ -80,6 +80,10 @@ class ProfilController extends Controller
             'tanggal_pengangkatan' => ['nullable', 'date'],
             'mata_kuliah' => ['nullable', 'string', 'max:255'],
             'foto' => ['nullable', 'image', 'max:2048'],
+            'scopus_url' => ['nullable', 'url', 'max:255'],
+            'wos_url' => ['nullable', 'url', 'max:255'],
+            'sinta_url' => ['nullable', 'url', 'max:255'],
+            'google_scholar_url' => ['nullable', 'url', 'max:255'],
         ]);
 
         if ($request->hasFile('foto')) {
