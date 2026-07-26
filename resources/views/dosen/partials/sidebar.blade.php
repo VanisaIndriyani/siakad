@@ -74,6 +74,11 @@
         <i class="fa-solid fa-newspaper text-emerald-300"></i>
         <span class="text-sm font-medium">Publikasi</span>
     </a>
+<a href="{{ route('dosen.informasi.index') }}"
+   class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('dosen.informasi.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+    <i class="fa-solid fa-bullhorn text-emerald-300"></i>
+    <span class="text-sm font-medium">Informasi</span>
+</a>
     <a href="{{ route('dosen.penasehat-akademik.index') }}"
        class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('dosen.penasehat-akademik.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
         <i class="fa-solid fa-user-tie text-emerald-300"></i>

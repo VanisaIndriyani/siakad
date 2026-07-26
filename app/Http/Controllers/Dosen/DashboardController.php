@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dosen;
 
 use App\Http\Controllers\Controller;
+use App\Models\Informasi;
 use App\Models\Krs;
 use App\Models\Mahasiswa;
 use App\Models\User;
@@ -43,12 +44,31 @@ class DashboardController extends Controller
                 ->get()
             : collect();
 
+        $informasiAktif = Informasi::query()
+            ->aktif()
+            ->whereNotNull('gambar_path')
+            ->first();
+
         return view('dosen.dashboard', [
             'dosen' => $dosen,
             'totalMahasiswa' => $totalMahasiswa,
             'krsUntukNilai' => $krsUntukNilai,
             'chartLabels' => $approvedPerSemester->pluck('semester')->map(fn ($s) => 'S'.$s),
             'chartValues' => $approvedPerSemester->pluck('total'),
+            'informasiAktif' => $informasiAktif,
+        ]);
+    }
+
+    public function informasiIndex(Request $request): View
+    {
+        $items = Informasi::query()
+            ->aktif()
+            ->latest('id')
+            ->paginate(12)
+            ->withQueryString();
+
+        return view('dosen.informasi.index', [
+            'items' => $items,
         ]);
     }
 }

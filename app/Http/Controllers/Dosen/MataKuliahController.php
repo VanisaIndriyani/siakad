@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dosen;
 
 use App\Http\Controllers\Controller;
 use App\Models\MataKuliah;
+use Dompdf\Dompdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -35,6 +36,37 @@ class MataKuliahController extends Controller
 
         return view('dosen.mata-kuliah.index', [
             'items' => $items,
+        ]);
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $dosen = $request->user()?->dosen;
+        abort_unless($dosen, 403);
+
+        $items = MataKuliah::query()
+            ->where(function ($q) use ($dosen) {
+                $q->where('dosen_id', $dosen->id)->orWhere('dosen_id_2', $dosen->id);
+            })
+            ->orderBy('semester')
+            ->orderBy('kode')
+            ->get();
+
+        $html = view('dosen.mata-kuliah.pdf', [
+            'items' => $items,
+            'dosen' => $dosen,
+        ])->render();
+
+        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->render();
+
+        $filename = 'mata-kuliah-dosen-'.Str::slug((string) ($dosen->nama ?? 'dosen')).'.pdf';
+
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ]);
     }
 

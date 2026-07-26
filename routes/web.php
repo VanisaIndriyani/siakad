@@ -418,6 +418,7 @@ Route::prefix('dosen')
     ->middleware(['auth', 'role:dosen'])
     ->group(function () {
         Route::get('/dashboard', DosenDashboardController::class)->name('dashboard');
+        Route::get('/informasi', [DosenDashboardController::class, 'informasiIndex'])->name('informasi.index');
         
         Route::get('/penasehat-akademik', [\App\Http\Controllers\Dosen\PenasehatAkademikController::class, 'index'])->name('penasehat-akademik.index');
         Route::get('/penasehat-akademik/{mahasiswa}', [\App\Http\Controllers\Dosen\PenasehatAkademikController::class, 'show'])->name('penasehat-akademik.show');
@@ -447,6 +448,7 @@ Route::prefix('dosen')
         Route::get('/kuesioner/{mataKuliah}/excel', [DosenQuestionnaireController::class, 'exportExcel'])->name('kuesioner.export.excel');
 
         Route::get('/mata-kuliah', [\App\Http\Controllers\Dosen\MataKuliahController::class, 'index'])->name('mata-kuliah.index');
+        Route::get('/mata-kuliah/pdf', [\App\Http\Controllers\Dosen\MataKuliahController::class, 'exportPdf'])->name('mata-kuliah.pdf');
         Route::post('/mata-kuliah/{mataKuliah}/rps', [\App\Http\Controllers\Dosen\MataKuliahController::class, 'uploadRps'])->name('mata-kuliah.rps.upload');
         Route::get('/mata-kuliah/{mataKuliah}/rps-admin', [\App\Http\Controllers\Dosen\MataKuliahController::class, 'downloadRpsAdmin'])->name('mata-kuliah.rps-admin.download');
         Route::get('/mata-kuliah/{mataKuliah}/rps-admin/preview', [\App\Http\Controllers\Dosen\MataKuliahController::class, 'previewRpsAdmin'])->name('mata-kuliah.rps-admin.preview');

@@ -8,6 +8,7 @@
         $canManage = $canManage ?? ($canAssign ?? false);
         $rPrefix = $routePrefix ?? 'admin';
         $routeGroup = $rPrefix === 'admin' ? 'admin.kkn' : 'dosen.kkn-pengajuan';
+        $showRouteName = $rPrefix === 'admin' ? 'admin.kkn.show' : 'dosen.kkn.show';
     @endphp
 
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -90,7 +91,7 @@
                                     'rejected' => 'bg-red-500/15 border-red-500/20 text-red-100',
                                     default => 'bg-yellow-500/15 border-yellow-500/20 text-yellow-100',
                                 };
-                                $showUrl = route($routeGroup.'.show', $row);
+                                $showUrl = route($showRouteName, $row);
                             @endphp
                             <tr class="hover:bg-white/5" data-show-url="{{ $showUrl }}">
                                 @if ($canManage)

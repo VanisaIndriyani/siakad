@@ -8,6 +8,11 @@
             <div class="text-xl font-semibold">Mata Kuliah</div>
             <div class="text-sm text-emerald-100/70">Daftar mata kuliah yang diampu dosen dan upload RPS.</div>
         </div>
+        <a href="{{ route('dosen.mata-kuliah.pdf') }}"
+           class="h-10 px-4 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 transition text-sm font-medium inline-flex items-center gap-2 text-emerald-100">
+            <i class="fa-solid fa-file-pdf"></i>
+            PDF
+        </a>
     </div>
 
     <div class="rounded-2xl bg-white/5 border border-white/10 overflow-hidden">
