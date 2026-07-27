@@ -153,19 +153,24 @@
             const btnBukaSemua = document.getElementById('btnBukaSemuaSkripsi');
             const rows = document.querySelectorAll('table tbody tr[data-show-url]');
 
-            function openInNewTab(url, idx) {
-                try {
-                    const w = window.open(url, 'skripsi_' + Date.now() + '_' + idx, 'noopener,noreferrer');
-                    if (!w) throw new Error('blocked');
-                } catch (e) {
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.target = '_blank';
-                    a.rel = 'noopener noreferrer';
-                    document.body.appendChild(a);
-                    a.click();
-                    setTimeout(() => a.remove(), 0);
+            function openAllUrls(urls) {
+                const uniqueUrls = Array.from(new Set(urls.filter(Boolean)));
+                const tabs = uniqueUrls.map(() => window.open('about:blank', '_blank', 'noopener,noreferrer'));
+                const blocked = tabs.some(tab => !tab);
+
+                if (blocked) {
+                    tabs.forEach(tab => {
+                        try { if (tab) tab.close(); } catch (e) {}
+                    });
+                    alert('Browser memblokir pembukaan banyak tab. Izinkan pop-up untuk situs ini lalu coba lagi.');
+                    return;
                 }
+
+                tabs.forEach((tab, i) => {
+                    if (tab) {
+                        tab.location = uniqueUrls[i];
+                    }
+                });
             }
 
             if (checkAll) {
@@ -205,12 +210,11 @@
                         alert('Tidak ada data pengajuan skripsi untuk dibuka.');
                         return;
                     }
-                    if (!confirm(`Buka ${urls.length} halaman detail pengajuan di tab baru?`)) {
+                    const total = Array.from(new Set(urls)).length;
+                    if (!confirm(`Buka ${total} halaman detail pengajuan di tab baru?`)) {
                         return;
                     }
-                    urls.forEach((u, i) => {
-                        setTimeout(() => openInNewTab(u, i), i * 120);
-                    });
+                    openAllUrls(urls);
                 });
             }
         })();
