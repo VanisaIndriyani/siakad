@@ -349,8 +349,6 @@ class NilaiController extends Controller
     private function buildEditData(Request $request, MataKuliah $mataKuliah, int $semester, bool $paginate = true): array
     {
         $q = trim((string) $request->get('q', ''));
-        $page = max(1, (int) $request->get('page', 1));
-
         $krsQuery = Krs::query()
             ->with(['mahasiswa', 'mahasiswa.user'])
             ->where('status_approval', 'approved')
@@ -369,9 +367,9 @@ class NilaiController extends Controller
         $orderedQuery = $krsQuery->orderBy('mahasiswa_id');
         $krs = $paginate
             ? $orderedQuery->paginate(15)->withQueryString()
-            : $orderedQuery->paginate(15, ['*'], 'page', $page);
+            : $orderedQuery->get();
 
-        $rows = $krs->getCollection();
+        $rows = $paginate ? $krs->getCollection() : $krs;
 
         $mahasiswaIds = $rows
             ->pluck('mahasiswa_id')

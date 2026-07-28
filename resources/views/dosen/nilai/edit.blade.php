@@ -21,7 +21,7 @@
             <a href="{{ route('dosen.nilai.edit', [$mataKuliah, $semester]) }}" class="h-11 px-4 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">Reset</a>
         </form>
 
-        <a href="{{ route('dosen.nilai.pdf', [$mataKuliah, $semester] + array_filter(['q' => $q, 'page' => request()->get('page')])) }}" class="h-11 px-4 inline-flex items-center justify-center gap-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/20 transition text-red-100">
+        <a href="{{ route('dosen.nilai.pdf', [$mataKuliah, $semester] + array_filter(['q' => $q])) }}" class="h-11 px-4 inline-flex items-center justify-center gap-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/20 transition text-red-100">
             <i class="fa-solid fa-file-pdf"></i>
             PDF
         </a>
