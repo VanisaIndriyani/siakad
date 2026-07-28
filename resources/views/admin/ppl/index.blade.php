@@ -76,7 +76,7 @@
                         <th class="text-right font-medium px-4 py-3 w-40">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-white/10">
+                <tbody id="pplListBody" class="divide-y divide-white/10">
                     @forelse ($items as $row)
                         @php
                             $badge = match ($row->status) {
@@ -156,67 +156,54 @@
             const checks = document.querySelectorAll('.ppl-check');
             const form = document.getElementById('bulkDeleteForm');
             const btnBukaSemua = document.getElementById('btnBukaSemuaPpl');
-            const rows = document.querySelectorAll('table tbody tr[data-show-url]');
+            const rows = document.querySelectorAll('#pplListBody tr');
 
-            function openInTab(url, idx) {
-                const name = 'ppl_' + Date.now() + '_' + idx;
+            function collectRowUrls() {
+                const urls = [];
+                rows.forEach((row) => {
+                    const a = row.querySelector('a[href*="/ppl/"][href*="/admin/"], a[href*="/ppl/"][href*="/dosen/"]');
+                    const direct = a && a.href ? a.getAttribute('href') : (row.getAttribute('data-show-url') || '');
+                    if (direct) urls.push(direct);
+                });
+                return urls;
+            }
+
+            const rowHandlers = [];
+            rows.forEach((row) => {
+                const a = row.querySelector('a[href*="/ppl/"][href*="/admin/"], a[href*="/ppl/"][href*="/dosen/"]');
+                const url = a && a.href ? a.getAttribute('href') : (row.getAttribute('data-show-url') || '');
+                if (!url) return;
+                row.setAttribute('data-show-url', url);
+                const handler = (e) => {
+                    if (e.target.closest('a, button, input, label, form')) return;
+                    window.location.href = url;
+                };
+                row.addEventListener('click', handler);
+                rowHandlers.push({ row, handler });
+                row.style.cursor = 'pointer';
+            });
+
+            function openOneTab(url, idx, stamp) {
+                const name = 'ppl_' + stamp + '_' + idx;
                 const fallback = () => {
                     const a = document.createElement('a');
                     a.href = url;
                     a.target = '_blank';
                     a.rel = 'noopener noreferrer';
                     document.body.appendChild(a);
-                    a.click();
+                    const click = new MouseEvent('click', {
+                        view: window,
+                        bubbles: false,
+                        cancelable: true,
+                    });
+                    a.dispatchEvent(click);
                     setTimeout(() => a.remove(), 0);
                 };
                 try {
                     const tab = window.open(url, name, 'noopener,noreferrer');
-                    if (!tab) {
-                        fallback();
-                        return false;
-                    }
-                    return true;
+                    if (!tab) fallback();
                 } catch (e) {
                     fallback();
-                    return false;
-                }
-            }
-
-            function openAllUrls(urls) {
-                const uniqueUrls = Array.from(new Set(urls.filter(Boolean)));
-                const base = document.createElement('div');
-                base.style.display = 'none';
-                document.body.appendChild(base);
-                let anyOpened = 0;
-                uniqueUrls.forEach((url, i) => {
-                    try {
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.target = '_blank';
-                        a.rel = 'noopener noreferrer';
-                        base.appendChild(a);
-                        const ev = new MouseEvent('click', {
-                            view: window,
-                            bubbles: false,
-                            cancelable: true,
-                        });
-                        const dispatched = a.dispatchEvent(ev);
-                        if (!dispatched) {
-                            if (openInTab(url, i)) {
-                                anyOpened++;
-                            }
-                        } else {
-                            anyOpened++;
-                        }
-                    } catch (e) {
-                        if (openInTab(url, i)) {
-                            anyOpened++;
-                        }
-                    }
-                });
-                setTimeout(() => base.remove(), 0);
-                if (anyOpened === 0) {
-                    alert('Browser memblokir pembukaan banyak tab. Izinkan pop-up untuk situs ini lalu coba lagi.');
                 }
             }
 
@@ -236,36 +223,29 @@
                 });
             }
 
-            rows.forEach((row) => {
-                const url = row.getAttribute('data-show-url');
-                if (!url) return;
-                row.addEventListener('click', (e) => {
-                    if (e.target.closest('a, button, input, label, form')) return;
-                    window.location.href = url;
-                });
-                row.style.cursor = 'pointer';
-            });
-
             if (btnBukaSemua) {
                 btnBukaSemua.addEventListener('click', (e) => {
                     if (e) {
                         e.preventDefault();
                         e.stopPropagation();
+                        e.stopImmediatePropagation();
                     }
-                    if (!rows || rows.length === 0) {
+                    const urls = Array.from(new Set(collectRowUrls().filter(Boolean)));
+                    if (!urls.length) {
                         alert('Tidak ada data pengajuan PPL untuk dibuka.');
                         return;
                     }
-                    const urls = Array.from(rows).map(r => r.getAttribute('data-show-url')).filter(Boolean);
-                    if (urls.length === 0) {
-                        alert('Tidak ada data pengajuan PPL untuk dibuka.');
+                    if (!confirm(`Buka ${urls.length} halaman detail pengajuan di tab baru?`)) {
                         return;
                     }
-                    const total = Array.from(new Set(urls)).length;
-                    if (!confirm(`Buka ${total} halaman detail pengajuan di tab baru?`)) {
-                        return;
-                    }
-                    openAllUrls(urls);
+                    rowHandlers.forEach(({ row, handler }) => row.removeEventListener('click', handler));
+                    const stamp = Date.now();
+                    urls.forEach((url, i) => {
+                        setTimeout(() => openOneTab(url, i + 1, stamp), i * 130);
+                    });
+                    setTimeout(() => {
+                        rowHandlers.forEach(({ row, handler }) => row.addEventListener('click', handler));
+                    }, urls.length * 130 + 400);
                 });
             }
         })();
