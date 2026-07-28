@@ -5,27 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Input Nilai</title>
     <style>
-        @page { margin: 12mm 10mm 12mm 12mm; }
-        body { font-family: DejaVu Sans, sans-serif; font-size: 10px; color: #111827; }
+        @page { margin: 8mm 7mm 8mm 9mm; }
+        body { font-family: DejaVu Sans, sans-serif; font-size: 9.5px; color: #111827; }
         table { width: 100%; border-collapse: collapse; }
-        .kop-title-1 { color: #000; font-size: 20px; font-weight: 800; margin: 0; line-height: 1.12; }
-        .kop-title-2 { color: #000; font-size: 28px; font-weight: 900; margin: 1px 0 0; letter-spacing: 0.4px; line-height: 1.06; }
-        .kop-title-3 { color: #000; font-size: 20px; font-weight: 900; margin: 1px 0 0; line-height: 1.12; }
-        .kop-meta { color: #000; font-size: 12px; margin-top: 3px; line-height: 1.2; }
-        .kop-line-1 { border-top: 4px solid #000; margin-top: 7px; }
-        .kop-line-2 { border-top: 2px solid #000; margin-top: 3px; }
-        .doc-title { text-align: center; font-size: 14px; font-weight: 900; margin: 10px 0 6px; }
-        .kv2 td { padding: 2px 0; font-size: 11px; vertical-align: top; }
+        .kop-title-1 { color: #000; font-size: 18px; font-weight: 800; margin: 0; line-height: 1.1; }
+        .kop-title-2 { color: #000; font-size: 24px; font-weight: 900; margin: 1px 0 0; letter-spacing: 0.4px; line-height: 1.06; }
+        .kop-title-3 { color: #000; font-size: 18px; font-weight: 900; margin: 1px 0 0; line-height: 1.1; }
+        .kop-meta { color: #000; font-size: 11px; margin-top: 2px; line-height: 1.15; }
+        .kop-line-1 { border-top: 4px solid #000; margin-top: 5px; }
+        .kop-line-2 { border-top: 2px solid #000; margin-top: 2px; }
+        .doc-title { text-align: center; font-size: 13px; font-weight: 900; margin: 8px 0 5px; }
+        .kv2 td { padding: 1.5px 0; font-size: 10.5px; vertical-align: top; }
         .kv2 .label { width: 140px; }
         .kv2 .colon { width: 10px; text-align: center; }
         .kv2 .value { font-weight: 700; }
-        .tbl th, .tbl td { border: 1px solid #111827; padding: 7px 8px; }
-        .tbl th { font-size: 9px; text-transform: uppercase; letter-spacing: 0.4px; }
+        .tbl th, .tbl td { border: 1px solid #111827; padding: 4px 6px; }
+        .tbl th { font-size: 9px; text-transform: uppercase; letter-spacing: 0.3px; }
         .center { text-align: center; }
         .nowrap { white-space: nowrap; }
-        .sign-wrap { width: 100%; margin-top: 18px; }
+        .sign-wrap { width: 100%; margin-top: 10px; page-break-inside: avoid; }
         .sign-box { width: 42%; margin-left: auto; text-align: center; }
-        .sign-space { height: 62px; }
+        .sign-space { height: 46px; }
         .sign-name { font-weight: 800; }
     </style>
 </head>
@@ -74,9 +74,9 @@
 
     <table>
         <tr>
-            <td style="width: 130px; vertical-align: middle; padding-top: 2px;">
+            <td style="width: 115px; vertical-align: middle; padding-top: 2px;">
                 @if($logoBase64)
-                    <img src="{{ $logoBase64 }}" alt="Logo" style="display: block; width: 125px; height: auto;" />
+                    <img src="{{ $logoBase64 }}" alt="Logo" style="display: block; width: 108px; height: auto;" />
                 @endif
             </td>
             <td style="text-align: center;">
@@ -95,7 +95,7 @@
 
     <div class="doc-title">DAFTAR INPUT NILAI MAHASISWA</div>
 
-    <table style="margin-bottom: 14px;">
+    <table style="margin-bottom: 10px;">
         <tr>
             <td style="width: 50%; vertical-align: top;">
                 <table class="kv2">

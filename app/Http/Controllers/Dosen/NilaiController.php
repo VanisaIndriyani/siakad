@@ -87,7 +87,7 @@ class NilaiController extends Controller
 
         $dompdf = new Dompdf(['isRemoteEnabled' => true]);
         $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->setPaper('legal', 'landscape');
         $dompdf->render();
 
         $filename = 'nilai-'.$mataKuliah->kode.'-semester-'.$semester.'.pdf';
