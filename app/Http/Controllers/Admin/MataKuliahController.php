@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Dosen;
 use App\Models\MataKuliah;
+use Dompdf\Dompdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -24,7 +25,7 @@ class MataKuliahController extends Controller
         'Ekonomi Syariah',
     ];
 
-    public function index(Request $request): View
+    private function buildMataKuliahQuery(Request $request)
     {
         $q = trim((string) $request->get('q', ''));
         $jurusan = trim((string) $request->get('jurusan', ''));
@@ -44,14 +45,54 @@ class MataKuliahController extends Controller
             });
         }
 
-        $mataKuliah = $query->orderBy('kode')->paginate(10)->withQueryString();
+        return (object) [
+            'query' => $query,
+            'q' => $q,
+            'jurusan' => $jurusan,
+            'semester' => $semester,
+        ];
+    }
+
+    public function index(Request $request): View
+    {
+        $ctx = $this->buildMataKuliahQuery($request);
+        $mataKuliah = $ctx->query->orderBy('kode')->paginate(10)->withQueryString();
 
         return view('admin.mata-kuliah.index', [
             'jurusanList' => self::JURUSAN,
             'mataKuliah' => $mataKuliah,
-            'q' => $q,
-            'jurusan' => $jurusan,
-            'semester' => $semester ?: null,
+            'q' => $ctx->q,
+            'jurusan' => $ctx->jurusan,
+            'semester' => $ctx->semester ?: null,
+        ]);
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $ctx = $this->buildMataKuliahQuery($request);
+        $items = $ctx->query->orderBy('kode')->get();
+
+        $html = view('admin.mata-kuliah.pdf', [
+            'items' => $items,
+            'q' => $ctx->q,
+            'jurusan' => $ctx->jurusan,
+            'semester' => $ctx->semester,
+        ])->render();
+
+        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->render();
+
+        $namePart = $ctx->jurusan ? Str::slug($ctx->jurusan) : 'semua-jurusan';
+        if ($ctx->semester >= 1 && $ctx->semester <= 8) {
+            $namePart .= '-semester-'.$ctx->semester;
+        }
+        $filename = 'mata-kuliah-'.$namePart.'.pdf';
+
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ]);
     }
 

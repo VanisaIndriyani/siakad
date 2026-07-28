@@ -50,10 +50,16 @@
                             Reset
                         </a>
                     </form>
-                    <a href="{{ route('admin.mata-kuliah.create', ['jurusan' => $jurusan, 'semester' => $semester]) }}" class="h-11 px-5 inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition">
-                        <i class="fa-solid fa-plus"></i>
-                        <span class="text-sm font-medium">Tambah MK</span>
-                    </a>
+                    <div class="flex items-center gap-2">
+                        <a href="{{ route('admin.mata-kuliah.export-pdf', array_filter(['q' => $q, 'jurusan' => $jurusan, 'semester' => $semester])) }}" class="h-11 px-4 inline-flex items-center gap-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 transition text-emerald-100">
+                            <i class="fa-solid fa-file-pdf"></i>
+                            <span class="text-sm font-medium">PDF</span>
+                        </a>
+                        <a href="{{ route('admin.mata-kuliah.create', ['jurusan' => $jurusan, 'semester' => $semester]) }}" class="h-11 px-5 inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition">
+                            <i class="fa-solid fa-plus"></i>
+                            <span class="text-sm font-medium">Tambah MK</span>
+                        </a>
+                    </div>
                 </div>
 
                 <div x-data="{
