@@ -153,24 +153,66 @@
             const btnBukaSemua = document.getElementById('btnBukaSemuaSkripsi');
             const rows = document.querySelectorAll('table tbody tr[data-show-url]');
 
+            function openInTab(url, idx) {
+                const name = 'skripsi_' + Date.now() + '_' + idx;
+                const fallback = () => {
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.target = '_blank';
+                    a.rel = 'noopener noreferrer';
+                    document.body.appendChild(a);
+                    a.click();
+                    setTimeout(() => a.remove(), 0);
+                };
+                try {
+                    const tab = window.open(url, name, 'noopener,noreferrer');
+                    if (!tab) {
+                        fallback();
+                        return false;
+                    }
+                    return true;
+                } catch (e) {
+                    fallback();
+                    return false;
+                }
+            }
+
             function openAllUrls(urls) {
                 const uniqueUrls = Array.from(new Set(urls.filter(Boolean)));
-                const tabs = uniqueUrls.map(() => window.open('about:blank', '_blank', 'noopener,noreferrer'));
-                const blocked = tabs.some(tab => !tab);
-
-                if (blocked) {
-                    tabs.forEach(tab => {
-                        try { if (tab) tab.close(); } catch (e) {}
-                    });
-                    alert('Browser memblokir pembukaan banyak tab. Izinkan pop-up untuk situs ini lalu coba lagi.');
-                    return;
-                }
-
-                tabs.forEach((tab, i) => {
-                    if (tab) {
-                        tab.location = uniqueUrls[i];
+                const base = document.createElement('div');
+                base.style.display = 'none';
+                document.body.appendChild(base);
+                let anyOpened = 0;
+                uniqueUrls.forEach((url, i) => {
+                    try {
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.target = '_blank';
+                        a.rel = 'noopener noreferrer';
+                        base.appendChild(a);
+                        const ev = new MouseEvent('click', {
+                            view: window,
+                            bubbles: false,
+                            cancelable: true,
+                        });
+                        const dispatched = a.dispatchEvent(ev);
+                        if (!dispatched) {
+                            if (openInTab(url, i)) {
+                                anyOpened++;
+                            }
+                        } else {
+                            anyOpened++;
+                        }
+                    } catch (e) {
+                        if (openInTab(url, i)) {
+                            anyOpened++;
+                        }
                     }
                 });
+                setTimeout(() => base.remove(), 0);
+                if (anyOpened === 0) {
+                    alert('Browser memblokir pembukaan banyak tab. Izinkan pop-up untuk situs ini lalu coba lagi.');
+                }
             }
 
             if (checkAll) {
@@ -200,7 +242,11 @@
             });
 
             if (btnBukaSemua) {
-                btnBukaSemua.addEventListener('click', () => {
+                btnBukaSemua.addEventListener('click', (e) => {
+                    if (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
                     if (!rows || rows.length === 0) {
                         alert('Tidak ada data pengajuan skripsi untuk dibuka.');
                         return;
