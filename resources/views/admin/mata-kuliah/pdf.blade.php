@@ -173,7 +173,7 @@
             <div style="font-weight: 700;">Ketua Program Studi</div>
             <div class="sign-space"></div>
             <div class="sign-name">___________________________</div>
-            <div style="font-size: 9px; margin-top: 2px;">NIP. ___________________________</div>
+            <div style="font-size: 9px; margin-top: 2px;">NUPTK. ___________________________</div>
         </div>
     </div>
 </body>
