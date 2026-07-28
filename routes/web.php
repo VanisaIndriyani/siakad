@@ -269,7 +269,6 @@ Route::prefix('admin')
 
             Route::get('/kkn', [AdminKknController::class, 'index'])->name('kkn.index');
             Route::get('/kkn/export-pdf', [AdminKknController::class, 'exportPdf'])->name('kkn.export-pdf');
-            Route::get('/kkn/{kkn}', [AdminKknController::class, 'show'])->name('kkn.show');
             Route::delete('/kkn/bulk-delete', [AdminKknController::class, 'bulkDestroy'])->name('kkn.bulk-delete');
             Route::delete('/kkn/{kkn}', [AdminKknController::class, 'destroy'])->name('kkn.destroy');
             Route::patch('/kkn/{kkn}/status', [AdminKknController::class, 'updateStatus'])->name('kkn.status');
@@ -281,6 +280,7 @@ Route::prefix('admin')
             Route::delete('/kkn/posko/{posko}', [AdminKknController::class, 'poskoDestroy'])->name('kkn.posko.destroy');
             Route::post('/kkn/posko/{posko}/assign', [AdminKknController::class, 'assignStudent'])->name('kkn.posko.assign');
             Route::delete('/kkn/pengajuan/{kkn}/remove', [AdminKknController::class, 'removeStudent'])->name('kkn.pengajuan.remove');
+            Route::get('/kkn/{kkn}', [AdminKknController::class, 'show'])->name('kkn.show');
 
             Route::get('/publikasi', [\App\Http\Controllers\PublikasiKkController::class, 'index'])->name('publikasi.index');
             Route::get('/publikasi/export-excel', [\App\Http\Controllers\PublikasiKkController::class, 'exportExcel'])->name('publikasi.export-excel');
