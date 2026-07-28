@@ -119,7 +119,7 @@
                                     <a href="{{ route($pdfRouteName, $row) }}" class="h-9 px-3 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-emerald-100" title="Print PDF">
                                         <i class="fa-solid fa-print"></i>
                                     </a>
-                                    <a href="{{ $showUrl }}" class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                                    <a href="{{ $showUrl }}" class="js-detail-link h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                                         <i class="fa-solid fa-eye"></i>
                                         <span class="text-sm font-medium">Detail</span>
                                     </a>
@@ -161,7 +161,7 @@
             function collectRowUrls() {
                 const urls = [];
                 rows.forEach((row) => {
-                    const a = row.querySelector('a[href*="/ppl/"][href*="/admin/"], a[href*="/ppl/"][href*="/dosen/"]');
+                    const a = row.querySelector('a.js-detail-link');
                     const direct = a && a.href ? a.getAttribute('href') : (row.getAttribute('data-show-url') || '');
                     if (direct) urls.push(direct);
                 });
@@ -170,7 +170,7 @@
 
             const rowHandlers = [];
             rows.forEach((row) => {
-                const a = row.querySelector('a[href*="/ppl/"][href*="/admin/"], a[href*="/ppl/"][href*="/dosen/"]');
+                const a = row.querySelector('a.js-detail-link');
                 const url = a && a.href ? a.getAttribute('href') : (row.getAttribute('data-show-url') || '');
                 if (!url) return;
                 row.setAttribute('data-show-url', url);

@@ -114,7 +114,7 @@
                                 </td>
                                 <td class="px-4 py-3 text-right">
                                     <div class="flex items-center justify-end gap-2">
-                                        <a href="{{ $showUrl }}" class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                                        <a href="{{ $showUrl }}" class="js-detail-link h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                                             <i class="fa-solid fa-eye"></i>
                                             <span class="text-sm font-medium">Detail</span>
                                         </a>
@@ -246,7 +246,7 @@
         const rows = document.querySelectorAll('#kknListBody tr');
         const rowHandlers = [];
         rows.forEach((row) => {
-            const a = row.querySelector('a[href*="/kkn/"][href*="/admin/"], a[href*="/kkn/"][href*="/dosen/"]');
+            const a = row.querySelector('a.js-detail-link');
             const url = a && a.href ? a.getAttribute('href') : (row.getAttribute('data-show-url') || '');
             if (!url) return;
             row.setAttribute('data-show-url', url);
@@ -262,7 +262,7 @@
         function collectRowUrls() {
             const urls = [];
             rows.forEach((row) => {
-                const a = row.querySelector('a[href*="/kkn/"][href*="/admin/"], a[href*="/kkn/"][href*="/dosen/"]');
+                const a = row.querySelector('a.js-detail-link');
                 const direct = a && a.href ? a.getAttribute('href') : (row.getAttribute('data-show-url') || '');
                 if (direct) urls.push(direct);
             });
