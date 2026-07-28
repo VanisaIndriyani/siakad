@@ -3,9 +3,15 @@
         @include('admin.partials.sidebar')
     </x-slot:sidebar>
 
-    <div class="flex flex-col gap-2">
-        <div class="text-xl font-semibold">Mata Kuliah</div>
-        <div class="text-sm text-emerald-100/70">Pilih jurusan → pilih semester → baru tampil daftar mata kuliah.</div>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div class="flex flex-col gap-2">
+            <div class="text-xl font-semibold">Mata Kuliah</div>
+            <div class="text-sm text-emerald-100/70">Pilih jurusan → pilih semester → baru tampil daftar mata kuliah.</div>
+        </div>
+        <a href="{{ route('admin.mata-kuliah.export-pdf', array_filter(['q' => $q, 'jurusan' => $jurusan, 'semester' => $semester])) }}" class="h-11 px-4 inline-flex items-center gap-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 transition text-emerald-100">
+            <i class="fa-solid fa-file-pdf"></i>
+            <span class="text-sm font-medium">PDF</span>
+        </a>
     </div>
 
     <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -25,9 +31,15 @@
                     <div class="text-lg font-semibold">{{ $jurusan }}</div>
                     <div class="text-sm text-emerald-100/70">Pilih semester untuk menampilkan mata kuliah.</div>
                 </div>
-                <a href="{{ route('admin.mata-kuliah.index') }}" class="h-10 px-4 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
-                    Reset
-                </a>
+                <div class="flex items-center gap-2">
+                    <a href="{{ route('admin.mata-kuliah.export-pdf', array_filter(['q' => $q, 'jurusan' => $jurusan, 'semester' => $semester])) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 transition text-emerald-100">
+                        <i class="fa-solid fa-file-pdf"></i>
+                        <span class="text-sm font-medium">PDF</span>
+                    </a>
+                    <a href="{{ route('admin.mata-kuliah.index') }}" class="h-10 px-4 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                        Reset
+                    </a>
+                </div>
             </div>
 
             <div class="mt-4 flex flex-wrap gap-2">
