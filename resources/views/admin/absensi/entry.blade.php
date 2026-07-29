@@ -133,13 +133,13 @@
                                 </td>
                                 <td class="px-4 py-3">
                                     <div class="flex items-center justify-end">
-                                        <form method="POST" action="{{ route(($routePrefix ?? 'admin').'.absensi.items.destroy', $item) }}" data-confirm-item-delete="true" onsubmit="return confirm('Hapus mahasiswa ini dari daftar absensi?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" title="Hapus dari daftar absensi" class="h-9 w-9 inline-flex items-center justify-center rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-200 transition">
-                                                <i class="fa-solid fa-trash"></i>
-                                            </button>
-                                        </form>
+                                        <button type="button"
+                                                data-delete-item="1"
+                                                data-action="{{ route(($routePrefix ?? 'admin').'.absensi.items.destroy', $item) }}"
+                                                title="Hapus dari daftar absensi"
+                                                class="h-9 w-9 inline-flex items-center justify-center rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-200 transition">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -166,12 +166,19 @@
         @method('DELETE')
     </form>
 
+    <form id="delete-item-form" method="POST" style="display: none;">
+        @csrf
+        @method('DELETE')
+    </form>
+
     <script>
         (function () {
             const tbody = document.getElementById('absensiTbody');
             const search = document.getElementById('absensiSearch');
             const setButtons = document.querySelectorAll('[data-set-status]');
             const mainForm = document.getElementById('absensiMainForm');
+            const deleteItemForm = document.getElementById('delete-item-form');
+            const deleteButtons = document.querySelectorAll('[data-delete-item="1"]');
 
             function setAllStatus(value) {
                 const selects = tbody ? tbody.querySelectorAll('select[name^="status["]') : [];
@@ -198,6 +205,17 @@
                 search.addEventListener('input', applyFilter);
             }
 
+            deleteButtons.forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const action = btn.getAttribute('data-action');
+                    if (!action) return;
+                    if (!confirm('Hapus mahasiswa ini dari daftar absensi?')) return;
+                    deleteItemForm.action = action;
+                    deleteItemForm.dataset.confirmed = '1';
+                    deleteItemForm.submit();
+                });
+            });
+
             if (mainForm) {
                 mainForm.addEventListener('submit', (e) => {
                     if (e.submitter && e.submitter.form && e.submitter.form !== mainForm) {
@@ -213,14 +231,6 @@
                     return true;
                 });
             }
-
-            document.addEventListener('submit', (e) => {
-                const form = e.target;
-                if (!(form instanceof HTMLFormElement)) return;
-                if (form === mainForm) return;
-                if (form.matches('[data-confirm-item-delete="true"]')) return;
-                if (form.id === 'delete-materi-form') return;
-            }, true);
         })();
     </script>
 </x-portal-layout>
