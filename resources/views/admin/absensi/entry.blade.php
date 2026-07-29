@@ -26,10 +26,14 @@
                 <i class="fa-solid fa-arrow-left"></i>
                 Kembali
             </a>
+            <button type="submit" form="absensiMainForm" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition font-medium">
+                <i class="fa-solid fa-save"></i>
+                Simpan Absensi
+            </button>
         </div>
     </div>
 
-    <form method="POST" action="{{ route(($routePrefix ?? 'admin').'.absensi.update', $absensi) }}" enctype="multipart/form-data" class="rounded-2xl bg-white/5 border border-white/10 p-5">
+    <form id="absensiMainForm" method="POST" action="{{ route(($routePrefix ?? 'admin').'.absensi.update', $absensi) }}" enctype="multipart/form-data" class="rounded-2xl bg-white/5 border border-white/10 p-5">
         @csrf
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -129,7 +133,7 @@
                                 </td>
                                 <td class="px-4 py-3">
                                     <div class="flex items-center justify-end">
-                                        <form method="POST" action="{{ route(($routePrefix ?? 'admin').'.absensi.items.destroy', $item) }}" onsubmit="return confirm('Hapus mahasiswa ini dari daftar absensi?')">
+                                        <form method="POST" action="{{ route(($routePrefix ?? 'admin').'.absensi.items.destroy', $item) }}" data-confirm-item-delete="true" onsubmit="return confirm('Hapus mahasiswa ini dari daftar absensi?')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" title="Hapus dari daftar absensi" class="h-9 w-9 inline-flex items-center justify-center rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-200 transition">
@@ -150,7 +154,8 @@
         </div>
 
         <div class="mt-6 flex items-center justify-end">
-            <button class="h-11 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition font-medium">
+            <button type="submit" class="h-11 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition font-medium">
+                <i class="fa-solid fa-save"></i>
                 Simpan Absensi
             </button>
         </div>
@@ -166,6 +171,7 @@
             const tbody = document.getElementById('absensiTbody');
             const search = document.getElementById('absensiSearch');
             const setButtons = document.querySelectorAll('[data-set-status]');
+            const mainForm = document.getElementById('absensiMainForm');
 
             function setAllStatus(value) {
                 const selects = tbody ? tbody.querySelectorAll('select[name^="status["]') : [];
@@ -191,6 +197,30 @@
             if (search) {
                 search.addEventListener('input', applyFilter);
             }
+
+            if (mainForm) {
+                mainForm.addEventListener('submit', (e) => {
+                    if (e.submitter && e.submitter.form && e.submitter.form !== mainForm) {
+                        return;
+                    }
+                    const ok = confirm('Simpan data absensi pertemuan ini?');
+                    if (!ok) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        e.stopImmediatePropagation();
+                        return false;
+                    }
+                    return true;
+                });
+            }
+
+            document.addEventListener('submit', (e) => {
+                const form = e.target;
+                if (!(form instanceof HTMLFormElement)) return;
+                if (form === mainForm) return;
+                if (form.matches('[data-confirm-item-delete="true"]')) return;
+                if (form.id === 'delete-materi-form') return;
+            }, true);
         })();
     </script>
 </x-portal-layout>
