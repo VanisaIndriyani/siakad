@@ -194,8 +194,84 @@
         </tbody>
     </table>
 
-    <div style="page-break-inside: avoid; margin-top: 15px;">
-        <div style="font-weight: 800; text-transform: uppercase; margin-bottom: 5px; font-size: 9px;">Jurnal Materi Perkuliahan</div>
+    <table class="sign-table">
+        <tr>
+            <td>
+                <div style="font-weight: 700;">Mengetahui,</div>
+                <div style="font-weight: 700;">Ketua Program Studi</div>
+                <div class="sign-space"></div>
+                <div class="sign-name">{{ $kaprodiNama ?? '........................................' }}</div>
+                <div style="font-size: 9px; margin-top: 2px;">NUPTK. {{ $kaprodiNuptk ?? '.....................................' }}</div>
+            </td>
+            <td>
+                <div style="font-weight: 700;">Sidrap, {{ date('d F Y') }}</div>
+                <div style="font-weight: 700;">Dosen Pengampu Mata Kuliah,</div>
+                <div class="sign-space"></div>
+                <div class="sign-name">{{ $dosenNama }}</div>
+                <div style="font-size: 9px; margin-top: 2px;">NUPTK. {{ $dosenNuptk ?? '.....................................' }}</div>
+            </td>
+        </tr>
+    </table>
+
+    <div class="page-break" style="page-break-after: always;"></div>
+
+    <table style="border: none;">
+        <tr>
+            <td style="width: 130px; vertical-align: middle; padding-top: 2px; border: none;">
+                @if($logoBase64)
+                    <img src="{{ $logoBase64 }}" alt="Logo" style="display: block; width: 125px; height: auto;" />
+                @endif
+            </td>
+            <td style="text-align: center; border: none;">
+                <div class="kop-title-1">{{ $kop1 }}</div>
+                <div class="kop-title-2">{{ $kop2 }}</div>
+                <div class="kop-title-3">{{ $kop3 }}</div>
+                <div class="kop-meta" style="font-weight: 700;">{{ $kop4 }}</div>
+                <div class="kop-meta">{{ $kop5 }}</div>
+                <div class="kop-meta">{{ $kop6 }}</div>
+            </td>
+            <td style="width: 100px; border: none;"></td>
+        </tr>
+    </table>
+    <div class="kop-line-1"></div>
+    <div class="kop-line-2"></div>
+
+    <div style="page-break-inside: avoid; margin-top: 12px;">
+        <div class="doc-title">JURNAL MATERI PERKULIAHAN</div>
+
+        <table style="margin-bottom: 8px; border: none;">
+            <tr>
+                <td style="width: 55%; vertical-align: top; border: none;">
+                    <table class="kv2">
+                        <tr>
+                            <td class="label">Mata Kuliah</td>
+                            <td class="colon">:</td>
+                            <td class="value">{{ $mk->kode }} - {{ $mk->nama }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Dosen Pengampu</td>
+                            <td class="colon">:</td>
+                            <td class="value">{{ $dosenNama }} (NUPTK. {{ $dosenNuptk ?: '-' }})</td>
+                        </tr>
+                    </table>
+                </td>
+                <td style="width: 45%; vertical-align: top; border: none; padding-left: 20px;">
+                    <table class="kv2">
+                        <tr>
+                            <td class="label">Program Studi</td>
+                            <td class="colon">:</td>
+                            <td class="value">{{ $jurusan }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Semester / TA</td>
+                            <td class="colon">:</td>
+                            <td class="value">{{ $semester }} / {{ date('Y') }}</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+
         <table class="tbl" style="width: 100%;">
             <thead>
                 <tr>
@@ -221,24 +297,5 @@
             </tbody>
         </table>
     </div>
-
-    <table class="sign-table">
-        <tr>
-            <td>
-                <div style="font-weight: 700;">Mengetahui,</div>
-                <div style="font-weight: 700;">Ketua Program Studi</div>
-                <div class="sign-space"></div>
-                <div class="sign-name">{{ $kaprodiNama ?? '........................................' }}</div>
-                <div style="font-size: 9px; margin-top: 2px;">NUPTK. {{ $kaprodiNuptk ?? '.....................................' }}</div>
-            </td>
-            <td>
-                <div style="font-weight: 700;">Sidrap, {{ date('d F Y') }}</div>
-                <div style="font-weight: 700;">Dosen Pengampu,</div>
-                <div class="sign-space"></div>
-                <div class="sign-name">{{ $dosenNama }}</div>
-                <div style="font-size: 9px; margin-top: 2px;">NUPTK. {{ $dosenNuptk ?? '.....................................' }}</div>
-            </td>
-        </tr>
-    </table>
 </body>
 </html>
