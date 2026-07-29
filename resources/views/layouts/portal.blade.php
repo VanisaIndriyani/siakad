@@ -256,7 +256,7 @@
                     }
 
                     const methodInput = form.querySelector('input[name="_method"]');
-                    const isDelete = methodInput && String(methodInput.value || '').toUpperCase() === 'DELETE';
+                    const isDelete = Boolean(methodInput && methodInput.form === form && String(methodInput.value || '').toUpperCase() === 'DELETE');
                     const message = form.getAttribute('data-confirm') || (isDelete ? 'Apakah kamu yakin ingin menghapus data ini?' : '');
 
                     if (message) {
