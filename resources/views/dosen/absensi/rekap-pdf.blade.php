@@ -296,6 +296,25 @@
                 @endfor
             </tbody>
         </table>
+
+        <table class="sign-table">
+            <tr>
+                <td>
+                    <div style="font-weight: 700;">Mengetahui,</div>
+                    <div style="font-weight: 700;">Ketua Program Studi</div>
+                    <div class="sign-space"></div>
+                    <div class="sign-name">{{ $kaprodiNama ?? '........................................' }}</div>
+                    <div style="font-size: 9px; margin-top: 2px;">NUPTK. {{ $kaprodiNuptk ?? '.....................................' }}</div>
+                </td>
+                <td>
+                    <div style="font-weight: 700;">Sidrap, {{ date('d F Y') }}</div>
+                    <div style="font-weight: 700;">Dosen Pengampu Mata Kuliah,</div>
+                    <div class="sign-space"></div>
+                    <div class="sign-name">{{ $dosenNama }}</div>
+                    <div style="font-size: 9px; margin-top: 2px;">NUPTK. {{ $dosenNuptk ?? '.....................................' }}</div>
+                </td>
+            </tr>
+        </table>
     </div>
 </body>
 </html>
