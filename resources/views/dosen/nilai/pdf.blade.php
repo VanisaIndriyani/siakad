@@ -180,6 +180,7 @@
                 </tbody>
             </table>
 
+            @if ($isLastChunk)
             <div class="sign-wrap">
                 <div class="sign-box">
                     <div style="font-weight: 700; font-size: 9px;">Sidrap, {{ date('d F Y') }}</div>
@@ -190,6 +191,7 @@
                     @endif
                 </div>
             </div>
+            @endif
         </div>
         @if (!$isLastChunk)
             <div class="page-break"></div>
