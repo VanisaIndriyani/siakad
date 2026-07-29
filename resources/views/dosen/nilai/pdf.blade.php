@@ -8,12 +8,12 @@
         @page { margin: 8mm 7mm 8mm 9mm; }
         body { font-family: DejaVu Sans, sans-serif; font-size: 9px; color: #111827; }
         table { width: 100%; border-collapse: collapse; }
-        .kop-title-1 { color: #000; font-size: 17px; font-weight: 800; margin: 0; line-height: 1.1; }
-        .kop-title-2 { color: #000; font-size: 23px; font-weight: 900; margin: 1px 0 0; letter-spacing: 0.4px; line-height: 1.06; }
-        .kop-title-3 { color: #000; font-size: 17px; font-weight: 900; margin: 1px 0 0; line-height: 1.1; }
-        .kop-meta { color: #000; font-size: 10.5px; margin-top: 2px; line-height: 1.15; }
-        .kop-line-1 { border-top: 4px solid #000; margin-top: 5px; }
-        .kop-line-2 { border-top: 2px solid #000; margin-top: 2px; }
+        .kop-title-1 { color: #000; font-size: 20px; font-weight: 800; margin: 0; line-height: 1.12; }
+        .kop-title-2 { color: #000; font-size: 28px; font-weight: 900; margin: 1px 0 0; letter-spacing: 0.4px; line-height: 1.06; }
+        .kop-title-3 { color: #000; font-size: 20px; font-weight: 900; margin: 1px 0 0; line-height: 1.12; }
+        .kop-meta { color: #000; font-size: 12px; margin-top: 3px; line-height: 1.2; }
+        .kop-line-1 { border-top: 4px solid #000; margin-top: 7px; }
+        .kop-line-2 { border-top: 2px solid #000; margin-top: 3px; }
         .doc-title { text-align: center; font-size: 12.5px; font-weight: 900; margin: 7px 0 4px; }
         .kv2 td { padding: 1.2px 0; font-size: 10px; vertical-align: top; }
         .kv2 .label { width: 140px; }

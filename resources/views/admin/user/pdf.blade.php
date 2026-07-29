@@ -11,12 +11,13 @@
         .kop-logo { width: 110px; text-align: left; vertical-align: middle; }
         .kop-logo img { width: 100px; height: auto; }
         .kop-text { text-align: center; vertical-align: middle; }
-        .kop-title-1 { font-size: 16px; font-weight: 800; margin: 0; line-height: 1.1; }
-        .kop-title-2 { font-size: 22px; font-weight: 900; margin: 2px 0; line-height: 1; }
-        .kop-title-3 { font-size: 16px; font-weight: 800; margin: 0; line-height: 1.1; }
-        .kop-meta { font-size: 9px; font-weight: 700; margin-top: 3px; }
-        .kop-alamat { font-size: 9px; margin: 2px 0; }
-        .kop-line-2 { border-top: 1px solid #000; margin-top: 2px; margin-bottom: 20px; }
+        .kop-title-1 { color: #000; font-size: 20px; font-weight: 800; margin: 0; line-height: 1.12; }
+        .kop-title-2 { color: #000; font-size: 28px; font-weight: 900; margin: 1px 0 0; letter-spacing: 0.4px; line-height: 1.06; }
+        .kop-title-3 { color: #000; font-size: 20px; font-weight: 900; margin: 1px 0 0; line-height: 1.12; }
+        .kop-meta { color: #000; font-size: 12px; margin-top: 3px; line-height: 1.2; }
+        .kop-alamat { color: #000; font-size: 12px; margin-top: 3px; line-height: 1.2; }
+        .kop-line-1 { border-top: 4px solid #000; margin-top: 7px; }
+        .kop-line-2 { border-top: 2px solid #000; margin-top: 3px; margin-bottom: 20px; }
         .doc-title { text-align: center; font-size: 14px; font-weight: bold; text-decoration: underline; margin-bottom: 20px; text-transform: uppercase; }
         table.data-table { width: 100%; border-collapse: collapse; }
         table.data-table th { background: #f3f4f6; border: 1px solid #000; padding: 6px; font-weight: bold; text-align: center; }
