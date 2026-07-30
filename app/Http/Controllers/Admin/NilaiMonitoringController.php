@@ -57,8 +57,8 @@ class NilaiMonitoringController extends Controller
                 $semester = (int) Krs::query()->max('semester') ?: 1;
             }
 
-            $mataKuliah->load(['dosen', 'dosenDua']);
-            $relatedDosen = $mataKuliah->dosen ?? $mataKuliah->dosenDua;
+            $mataKuliah->load(['dosen', 'dosen2']);
+            $relatedDosen = $mataKuliah->dosen ?? $mataKuliah->dosen2;
 
             $data = $this->buildDetailNilaiData($mataKuliah, $semester);
             $html = view('dosen.nilai.pdf', [
