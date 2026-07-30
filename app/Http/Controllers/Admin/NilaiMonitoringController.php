@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Khs;
 use App\Models\Krs;
+use App\Models\MataKuliah;
 use Dompdf\Dompdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -45,6 +47,46 @@ class NilaiMonitoringController extends Controller
             return redirect()
                 ->route('admin.nilai-monitoring.index', $request->only(['q', 'semester', 'status', 'all', 'page']))
                 ->with('error', 'Gagal generate PDF. Coba gunakan filter atau matikan opsi Buka Semua.');
+        }
+    }
+
+    public function exportDetailPdf(Request $request, MataKuliah $mataKuliah, int $semester)
+    {
+        try {
+            if ($semester < 1 || $semester > 8) {
+                $semester = (int) Krs::query()->max('semester') ?: 1;
+            }
+
+            $mataKuliah->load(['dosen', 'dosenDua']);
+            $relatedDosen = $mataKuliah->dosen ?? $mataKuliah->dosenDua;
+
+            $data = $this->buildDetailNilaiData($mataKuliah, $semester);
+            $html = view('dosen.nilai.pdf', [
+                'mataKuliah' => $mataKuliah,
+                'semester' => $semester,
+                'krs' => $data['krs'],
+                'existing' => $data['existing'],
+                'q' => '',
+                'relatedDosen' => $relatedDosen,
+            ])->render();
+
+            $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+            $dompdf->loadHtml($html);
+            $dompdf->setPaper('legal', 'landscape');
+            $dompdf->render();
+
+            $filename = 'nilai-'.$mataKuliah->kode.'-semester-'.$semester.'.pdf';
+
+            return response($dompdf->output(), 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+            ]);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return redirect()
+                ->route('admin.nilai-monitoring.index', $request->only(['q', 'semester', 'status', 'all', 'page']))
+                ->with('error', 'Gagal generate PDF detail nilai mata kuliah.');
         }
     }
 
@@ -171,6 +213,45 @@ class NilaiMonitoringController extends Controller
         }
 
         return $query->orderBy('mk.kode')->orderBy('mk.id');
+    }
+
+    private function buildDetailNilaiData(MataKuliah $mataKuliah, int $semester): array
+    {
+        $krsQuery = Krs::query()
+            ->with(['mahasiswa', 'mahasiswa.user'])
+            ->where('status_approval', 'approved')
+            ->where('semester', $semester)
+            ->whereHas('items', function ($sub) use ($mataKuliah) {
+                $sub->where('mata_kuliah_id', $mataKuliah->id);
+            })
+            ->orderBy('mahasiswa_id');
+
+        $krs = $krsQuery->get();
+
+        $mahasiswaIds = $krs
+            ->pluck('mahasiswa_id')
+            ->map(fn ($v) => (int) $v)
+            ->unique()
+            ->values()
+            ->all();
+
+        $khsList = Khs::query()
+            ->with(['items' => function ($sub) use ($mataKuliah) {
+                $sub->where('mata_kuliah_id', $mataKuliah->id);
+            }])
+            ->where('semester', $semester)
+            ->whereIn('mahasiswa_id', $mahasiswaIds)
+            ->get();
+
+        $existing = $khsList->mapWithKeys(function ($khs) {
+            $item = $khs->items->first();
+            return [(int) $khs->mahasiswa_id => $item];
+        });
+
+        return [
+            'krs' => $krs,
+            'existing' => $existing,
+        ];
     }
 }
 

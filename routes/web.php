@@ -192,6 +192,7 @@ Route::prefix('admin')
 
         Route::get('/nilai-monitoring', [AdminNilaiMonitoringController::class, 'index'])->name('nilai-monitoring.index');
         Route::get('/nilai-monitoring/pdf', [AdminNilaiMonitoringController::class, 'exportPdf'])->name('nilai-monitoring.pdf');
+        Route::get('/nilai-monitoring/{mataKuliah}/pdf/{semester}', [AdminNilaiMonitoringController::class, 'exportDetailPdf'])->name('nilai-monitoring.detail.pdf');
 
         Route::get('/kuesioner', [AdminQuestionnaireController::class, 'index'])->name('kuesioner.index');
         Route::get('/kuesioner/create', [AdminQuestionnaireController::class, 'create'])->name('kuesioner.create');

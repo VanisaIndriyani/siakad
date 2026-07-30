@@ -85,6 +85,7 @@
                         <th class="text-left font-medium px-4 py-3 w-32">Peserta</th>
                         <th class="text-left font-medium px-4 py-3 w-40">Nilai Terisi</th>
                         <th class="text-left font-medium px-4 py-3 w-40">Status</th>
+                        <th class="text-left font-medium px-4 py-3 w-28">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-white/10">
@@ -94,6 +95,7 @@
                             $terisi = (int) ($row->nilai_terisi ?? 0);
                             $progress = $peserta > 0 ? $terisi.' / '.$peserta : '-';
                             $no = $showAll ? ($i + 1) : ($rows->firstItem() + $i);
+                            $detailPdfUrl = route('admin.nilai-monitoring.detail.pdf', [$row->id, $semester]);
                         @endphp
                         <tr class="hover:bg-white/5">
                             <td class="px-4 py-3">{{ $no }}</td>
@@ -114,10 +116,18 @@
                                     {{ $statusLabel($row->status_input) }}
                                 </span>
                             </td>
+                            <td class="px-4 py-3">
+                                <a href="{{ $detailPdfUrl }}"
+                                   class="h-9 px-3 inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/20 transition text-emerald-100"
+                                   title="Download PDF Nilai">
+                                    <i class="fa-solid fa-file-pdf text-xs"></i>
+                                    <span class="text-xs font-medium">PDF Nilai</span>
+                                </a>
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-10 text-center text-emerald-100/70">Data tidak ditemukan.</td>
+                            <td colspan="7" class="px-4 py-10 text-center text-emerald-100/70">Data tidak ditemukan.</td>
                         </tr>
                     @endforelse
                 </tbody>
