@@ -190,6 +190,10 @@ Route::prefix('admin')
         Route::put('/khs/{khs}', [AdminKhsController::class, 'update'])->name('khs.update');
         Route::delete('/khs/{khs}', [AdminKhsController::class, 'destroy'])->name('khs.destroy');
 
+        Route::get('/rekap-nilai', [AdminKhsController::class, 'rekapIndex'])->name('rekap-nilai.index');
+        Route::get('/rekap-nilai/{mahasiswa}', [AdminKhsController::class, 'rekapShow'])->name('rekap-nilai.show');
+        Route::get('/rekap-nilai/{mahasiswa}/pdf', [AdminKhsController::class, 'rekapPdf'])->name('rekap-nilai.pdf');
+
         Route::get('/nilai-monitoring', [AdminNilaiMonitoringController::class, 'index'])->name('nilai-monitoring.index');
         Route::get('/nilai-monitoring/pdf', [AdminNilaiMonitoringController::class, 'exportPdf'])->name('nilai-monitoring.pdf');
         Route::get('/nilai-monitoring/{mataKuliah}/pdf/{semester}', [AdminNilaiMonitoringController::class, 'exportDetailPdf'])->name('nilai-monitoring.detail.pdf');
