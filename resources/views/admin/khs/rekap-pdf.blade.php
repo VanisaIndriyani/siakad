@@ -207,29 +207,54 @@
         </table>
     </div>
 
-    <div class="ttd-wrap">
-        <table>
-            <tr>
-                <td style="width: 55%; vertical-align: top;">
-                    <div style="font-size: 10.5px;">Mengetahui,</div>
-                    <div style="font-size: 10.5px; font-weight: 700;">Dosen Penasehat Akademik</div>
-                    <div style="height: 62px;"></div>
-                    <div style="font-size: 10.5px; font-weight: 800;">{{ $mahasiswa->dosenPenasehat?->nama ?: '_______________________________' }}</div>
-                    @if (!empty($mahasiswa->dosenPenasehat?->nidn))
-                        <div style="font-size: 9.5px;">NIDN. {{ $mahasiswa->dosenPenasehat->nidn }}</div>
-                    @endif
-                </td>
-                <td style="width: 45%; vertical-align: top; padding-left: 16px;">
-                    <div style="font-size: 10.5px;">{{ $kotaTtd }}, {{ $tanggalTtd }}</div>
-                    <div style="font-size: 10.5px; font-weight: 700;">Ketua Prodi {{ $mahasiswa->program_studi ?? '-' }}</div>
-                    <div style="height: 62px;"></div>
-                    <div style="font-size: 10.5px; font-weight: 800;">{{ $kaprodi?->nama ?: '_______________________________' }}</div>
-                    @if ($kaprodiNuptk)
-                        <div style="font-size: 9.5px;">NIDN/NUPTK. {{ $kaprodiNuptk }}</div>
-                    @endif
-                </td>
-            </tr>
-        </table>
-    </div>
+  <div class="ttd-wrap">
+    <table style="width:100%;">
+        <tr>
+            <!-- Mahasiswa -->
+            <td style="width:50%; text-align:center; vertical-align:top;">
+                <div style="font-size:10.5px;">
+                    {{ $kotaTtd }}, {{ $tanggalTtd }}
+                </div>
+
+                <div style="font-size:10.5px; font-weight:700;">
+                    Mahasiswa
+                </div>
+
+                <div style="height:70px;"></div>
+
+                <div style="font-size:10.5px; font-weight:800;">
+                    {{ $mahasiswa->nama_lengkap }}
+                </div>
+
+                <div style="font-size:9.5px;">
+                    NPM. {{ $mahasiswa->npm }}
+                </div>
+            </td>
+
+            <!-- Ketua Prodi -->
+            <td style="width:50%; text-align:center; vertical-align:top;">
+                <div style="font-size:10.5px;">
+                    Mengetahui,
+                </div>
+
+                <div style="font-size:10.5px; font-weight:700;">
+                    Ketua Program Studi
+                </div>
+
+                <div style="height:70px;"></div>
+
+                <div style="font-size:10.5px; font-weight:800;">
+                    {{ $kaprodi?->nama ?? '_________________________' }}
+                </div>
+
+                @if($kaprodiNuptk)
+                    <div style="font-size:9.5px;">
+                        NIDN/NUPTK. {{ $kaprodiNuptk }}
+                    </div>
+                @endif
+            </td>
+        </tr>
+    </table>
+</div>
 </body>
 </html>

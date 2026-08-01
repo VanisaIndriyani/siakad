@@ -206,13 +206,16 @@ class KhsController extends Controller
                     $sub->whereHas('items');
                 },
             ])
-            ->withSum('khs as total_sks', function ($sub) {
-                $sub->join('khs_items', 'khs_items.khs_id', '=', 'khs.id')
-                    ->join('mata_kuliah', 'mata_kuliah.id', '=', 'khs_items.mata_kuliah_id')
-                    ->whereNotNull('khs_items.nilai_huruf')
-                    ->where('khs_items.nilai_huruf', '!=', 'E')
-                    ->where('khs_items.nilai_huruf', '!=', '-');
-            });
+          ->addSelect([
+    'total_sks' => KhsItem::query()
+        ->selectRaw('COALESCE(SUM(mata_kuliah.sks),0)')
+        ->join('mata_kuliah', 'mata_kuliah.id', '=', 'khs_items.mata_kuliah_id')
+        ->join('khs', 'khs.id', '=', 'khs_items.khs_id')
+        ->whereColumn('khs.mahasiswa_id', 'mahasiswa.id')
+        ->whereNotNull('khs_items.nilai_huruf')
+        ->where('khs_items.nilai_huruf', '!=', 'E')
+        ->where('khs_items.nilai_huruf', '!=', '-')
+]);
 
         if ($q !== '') {
             $query->where(function ($sub) use ($q) {
