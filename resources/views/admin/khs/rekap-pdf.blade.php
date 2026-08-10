@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Transkip Nilai {{ $mahasiswa->nama_lengkap }}</title>
     <style>
-        @page { margin: 14mm 12mm 14mm 14mm; }
+        @page { size: 210mm 330mm; margin: 14mm 12mm 14mm 14mm; }
         body { font-family: DejaVu Sans, sans-serif; font-size: 10.5px; color: #111827; line-height: 1.4; }
         table { width: 100%; border-collapse: collapse; }
         .kop-title-1 { color: #000; font-size: 18px; font-weight: 800; margin: 0; line-height: 1.1; }
@@ -73,13 +73,7 @@
                 <table style="width: 100%;">
                     <tr>
                         <td style="text-align: right;">
-                            <div class="foto-box">
-                                @if($fotoBase64)
-                                    <img src="{{ $fotoBase64 }}" alt="Foto" />
-                                @else
-                                    <div style="padding-top: 58px;">Foto</div>
-                                @endif
-                            </div>
+                        
                         </td>
                     </tr>
                 </table>
@@ -90,7 +84,7 @@
     <div class="kop-line-2"></div>
 
     <div class="doc-title">Transkip Nilai</div>
-    <div class="doc-sub">Untuk Acuan Ijazah / Studi Lanjut</div>
+    
 
     <table style="margin-bottom: 10px;">
         <tr>
