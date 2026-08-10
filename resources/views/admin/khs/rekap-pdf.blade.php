@@ -243,7 +243,7 @@
 
                 @if($kaprodiNuptk)
                     <div style="font-size:9.5px;">
-                        NIDN/NUPTK. {{ $kaprodiNuptk }}
+                        NUPTK. {{ $kaprodiNuptk }}
                     </div>
                 @endif
             </td>
