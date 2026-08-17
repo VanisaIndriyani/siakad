@@ -109,6 +109,10 @@
                                         <i class="fa-solid fa-book-open"></i>
                                         Jurnal
                                     </a>
+                                    <a href="{{ route('mahasiswa.kkn.absensi.index', $pengajuan) }}" class="h-12 px-6 rounded-2xl bg-purple-500/15 border border-purple-500/20 text-purple-100 font-bold tracking-widest uppercase text-xs flex items-center justify-center gap-2 transition-all hover:bg-purple-500/20">
+                                        <i class="fa-solid fa-clipboard-user"></i>
+                                        Daftar Hadir
+                                    </a>
                                     <a href="{{ route('mahasiswa.kkn.posko', $pengajuan->posko) }}" class="h-14 px-8 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold tracking-widest uppercase text-xs flex items-center justify-center gap-3 transition-all shadow-lg shadow-emerald-900/40">
                                         Buka Halaman Posko
                                         <i class="fa-solid fa-arrow-right"></i>

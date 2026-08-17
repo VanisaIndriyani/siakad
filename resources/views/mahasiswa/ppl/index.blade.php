@@ -58,6 +58,10 @@
                             <i class="fa-solid fa-book-open"></i>
                             <span class="text-sm font-medium">Jurnal</span>
                         </a>
+                        <a href="{{ route('mahasiswa.ppl.absensi.index', $row) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-purple-500/15 hover:bg-purple-500/20 border border-purple-500/20 text-purple-100 transition">
+                            <i class="fa-solid fa-clipboard-user"></i>
+                            <span class="text-sm font-medium">Daftar Hadir</span>
+                        </a>
                         @if ($row->dosen_pembimbing_id || $row->dosen_pembimbing_id_2)
                             <a href="{{ route('mahasiswa.ppl.bimbingan', $row) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/20 border border-emerald-500/20 transition">
                                 <span style="position: relative; display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px;">

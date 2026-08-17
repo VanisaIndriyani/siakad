@@ -18,6 +18,9 @@
         $jurnalUrl = $prefix === 'admin'
             ? route('admin.ppl.jurnal.index', $ppl)
             : route('dosen.ppl.jurnal.index', $ppl);
+        $absensiUrl = $prefix === 'admin'
+            ? route('admin.ppl.absensi.index', $ppl)
+            : route('dosen.ppl.absensi.index', $ppl);
 
         $badge = match ($ppl->status) {
             'assigned' => 'bg-emerald-500/15 border-emerald-500/20 text-emerald-100',
@@ -43,6 +46,10 @@
             <a href="{{ $jurnalUrl }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-orange-500/15 hover:bg-orange-500/20 border border-orange-500/20 text-orange-100 transition">
                 <i class="fa-solid fa-book-open"></i>
                 <span class="text-sm font-medium">Jurnal</span>
+            </a>
+            <a href="{{ $absensiUrl }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-purple-500/15 hover:bg-purple-500/20 border border-purple-500/20 text-purple-100 transition">
+                <i class="fa-solid fa-clipboard-user"></i>
+                <span class="text-sm font-medium">Daftar Hadir</span>
             </a>
             <a href="{{ route('admin.ppl.pdf', $ppl) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                 <i class="fa-solid fa-print"></i>

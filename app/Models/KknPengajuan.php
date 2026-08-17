@@ -34,4 +34,9 @@ class KknPengajuan extends Model
     {
         return $this->hasMany(KknJurnal::class, 'kkn_pengajuan_id')->orderBy('tanggal', 'asc');
     }
+
+    public function absensis(): HasMany
+    {
+        return $this->hasMany(KknAbsensi::class, 'kkn_pengajuan_id')->orderBy('tanggal', 'asc');
+    }
 }
