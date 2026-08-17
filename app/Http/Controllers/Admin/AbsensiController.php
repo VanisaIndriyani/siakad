@@ -121,8 +121,9 @@ class AbsensiController extends Controller
 
         $mahasiswa = Mahasiswa::query()
             ->where('program_studi', $jurusan)
-            ->whereHas('krs', function ($q) use ($mataKuliahId) {
-                $q->where('status_approval', 'approved')
+            ->whereHas('krs', function ($q) use ($semester, $mataKuliahId) {
+                $q->where('semester', $semester)
+                    ->where('status_approval', 'approved')
                     ->whereHas('items', function ($qi) use ($mataKuliahId) {
                         $qi->where('mata_kuliah_id', $mataKuliahId);
                     });
@@ -221,7 +222,8 @@ class AbsensiController extends Controller
         $mahasiswaIds = Mahasiswa::query()
             ->where('program_studi', $validated['jurusan'])
             ->whereHas('krs', function ($q) use ($validated) {
-                $q->where('status_approval', 'approved')
+                $q->where('semester', $validated['semester'])
+                    ->where('status_approval', 'approved')
                     ->whereHas('items', function ($qi) use ($validated) {
                         $qi->where('mata_kuliah_id', $validated['mata_kuliah_id']);
                     });

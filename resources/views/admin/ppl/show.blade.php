@@ -15,6 +15,9 @@
         $skDownloadUrl = $prefix === 'admin'
             ? route('admin.ppl.sk.download', $ppl)
             : route('dosen.ppl-pengajuan.sk.download', $ppl);
+        $jurnalUrl = $prefix === 'admin'
+            ? route('admin.ppl.jurnal.index', $ppl)
+            : route('dosen.ppl.jurnal.index', $ppl);
 
         $badge = match ($ppl->status) {
             'assigned' => 'bg-emerald-500/15 border-emerald-500/20 text-emerald-100',
@@ -36,7 +39,11 @@
                 <span>({{ $ppl->mahasiswa?->npm ?: '-' }})</span>
             </div>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
+            <a href="{{ $jurnalUrl }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-orange-500/15 hover:bg-orange-500/20 border border-orange-500/20 text-orange-100 transition">
+                <i class="fa-solid fa-book-open"></i>
+                <span class="text-sm font-medium">Jurnal</span>
+            </a>
             <a href="{{ route('admin.ppl.pdf', $ppl) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                 <i class="fa-solid fa-print"></i>
                 <span class="text-sm font-medium">Print PDF</span>

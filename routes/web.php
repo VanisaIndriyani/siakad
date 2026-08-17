@@ -18,9 +18,12 @@ use App\Http\Controllers\Admin\MahasiswaController as AdminMahasiswaController;
 use App\Http\Controllers\Admin\MataKuliahController as AdminMataKuliahController;
 use App\Http\Controllers\Admin\PengajuanLaporanController as AdminPengajuanLaporanController;
 use App\Http\Controllers\Admin\PplController as AdminPplController;
+use App\Http\Controllers\Admin\PplJurnalController as AdminPplJurnalController;
 use App\Http\Controllers\Admin\SkripsiController as AdminSkripsiController;
 use App\Http\Controllers\Admin\KknController as AdminKknController;
+use App\Http\Controllers\Admin\KknJurnalController as AdminKknJurnalController;
 use App\Http\Controllers\Mahasiswa\KknController as MahasiswaKknController;
+use App\Http\Controllers\Mahasiswa\KknJurnalController as MahasiswaKknJurnalController;
 use App\Http\Controllers\Dosen\KknController as DosenKknController;
 use App\Http\Controllers\KknBimbinganController;
 use App\Http\Controllers\Dosen\AcademicCalendarController as DosenAcademicCalendarController;
@@ -45,6 +48,7 @@ use App\Http\Controllers\Mahasiswa\PengajuanLaporanController as MahasiswaPengaj
 use App\Http\Controllers\Mahasiswa\PplBimbinganController as MahasiswaPplBimbinganController;
 use App\Http\Controllers\Mahasiswa\PplController as MahasiswaPplController;
 use App\Http\Controllers\Mahasiswa\PplFileController as MahasiswaPplFileController;
+use App\Http\Controllers\Mahasiswa\PplJurnalController as MahasiswaPplJurnalController;
 use App\Http\Controllers\Mahasiswa\PplRevisiController as MahasiswaPplRevisiController;
 use App\Http\Controllers\Mahasiswa\ProfilController as MahasiswaProfilController;
 use App\Http\Controllers\Mahasiswa\QuestionnaireController as MahasiswaQuestionnaireController;
@@ -271,6 +275,9 @@ Route::prefix('admin')
             Route::delete('/ppl/bulk-delete', [AdminPplController::class, 'bulkDestroy'])->name('ppl.bulk-delete');
             Route::delete('/ppl/{ppl}', [AdminPplController::class, 'destroy'])->name('ppl.destroy');
             Route::delete('/ppl-files/{file}', [AdminPplController::class, 'destroyFile'])->name('ppl-files.destroy');
+            Route::get('/ppl/{ppl}/jurnal', [AdminPplJurnalController::class, 'index'])->name('ppl.jurnal.index');
+            Route::patch('/ppl/{ppl}/jurnal/{jurnal}/status', [AdminPplJurnalController::class, 'updateStatus'])->name('ppl.jurnal.status');
+            Route::get('/ppl/{ppl}/jurnal/pdf', [AdminPplJurnalController::class, 'pdf'])->name('ppl.jurnal.pdf');
 
             Route::get('/kkn', [AdminKknController::class, 'index'])->name('kkn.index');
             Route::get('/kkn/export-pdf', [AdminKknController::class, 'exportPdf'])->name('kkn.export-pdf');
@@ -286,6 +293,9 @@ Route::prefix('admin')
             Route::post('/kkn/posko/{posko}/assign', [AdminKknController::class, 'assignStudent'])->name('kkn.posko.assign');
             Route::delete('/kkn/pengajuan/{kkn}/remove', [AdminKknController::class, 'removeStudent'])->name('kkn.pengajuan.remove');
             Route::get('/kkn/{kkn}', [AdminKknController::class, 'show'])->name('kkn.show');
+            Route::get('/kkn/{kkn}/jurnal', [AdminKknJurnalController::class, 'index'])->name('kkn.jurnal.index');
+            Route::patch('/kkn/{kkn}/jurnal/{jurnal}/status', [AdminKknJurnalController::class, 'updateStatus'])->name('kkn.jurnal.status');
+            Route::get('/kkn/{kkn}/jurnal/pdf', [AdminKknJurnalController::class, 'pdf'])->name('kkn.jurnal.pdf');
 
             Route::get('/publikasi', [\App\Http\Controllers\PublikasiKkController::class, 'index'])->name('publikasi.index');
             Route::get('/publikasi/export-excel', [\App\Http\Controllers\PublikasiKkController::class, 'exportExcel'])->name('publikasi.export-excel');
@@ -404,11 +414,25 @@ Route::prefix('mahasiswa')
         Route::get('/ppl-files/{file}/preview', [MahasiswaPplFileController::class, 'preview'])->name('ppl-files.preview');
         Route::get('/ppl-files/{file}/download', [MahasiswaPplFileController::class, 'download'])->name('ppl-files.download');
         Route::delete('/ppl-files/{file}', [MahasiswaPplFileController::class, 'destroy'])->name('ppl-files.destroy');
+        Route::get('/ppl/{ppl}/jurnal', [MahasiswaPplJurnalController::class, 'index'])->name('ppl.jurnal.index');
+        Route::get('/ppl/{ppl}/jurnal/create', [MahasiswaPplJurnalController::class, 'create'])->name('ppl.jurnal.create');
+        Route::post('/ppl/{ppl}/jurnal', [MahasiswaPplJurnalController::class, 'store'])->name('ppl.jurnal.store');
+        Route::get('/ppl/{ppl}/jurnal/{jurnal}/edit', [MahasiswaPplJurnalController::class, 'edit'])->name('ppl.jurnal.edit');
+        Route::put('/ppl/{ppl}/jurnal/{jurnal}', [MahasiswaPplJurnalController::class, 'update'])->name('ppl.jurnal.update');
+        Route::delete('/ppl/{ppl}/jurnal/{jurnal}', [MahasiswaPplJurnalController::class, 'destroy'])->name('ppl.jurnal.destroy');
+        Route::get('/ppl/{ppl}/jurnal/pdf', [MahasiswaPplJurnalController::class, 'pdf'])->name('ppl.jurnal.pdf');
 
         // KKN
         Route::get('/kkn', [MahasiswaKknController::class, 'index'])->name('kkn.index');
         Route::post('/kkn', [MahasiswaKknController::class, 'store'])->name('kkn.store');
         Route::get('/kkn/posko/{posko}', [MahasiswaKknController::class, 'showPosko'])->name('kkn.posko');
+        Route::get('/kkn/{kkn}/jurnal', [MahasiswaKknJurnalController::class, 'index'])->name('kkn.jurnal.index');
+        Route::get('/kkn/{kkn}/jurnal/create', [MahasiswaKknJurnalController::class, 'create'])->name('kkn.jurnal.create');
+        Route::post('/kkn/{kkn}/jurnal', [MahasiswaKknJurnalController::class, 'store'])->name('kkn.jurnal.store');
+        Route::get('/kkn/{kkn}/jurnal/{jurnal}/edit', [MahasiswaKknJurnalController::class, 'edit'])->name('kkn.jurnal.edit');
+        Route::put('/kkn/{kkn}/jurnal/{jurnal}', [MahasiswaKknJurnalController::class, 'update'])->name('kkn.jurnal.update');
+        Route::delete('/kkn/{kkn}/jurnal/{jurnal}', [MahasiswaKknJurnalController::class, 'destroy'])->name('kkn.jurnal.destroy');
+        Route::get('/kkn/{kkn}/jurnal/pdf', [MahasiswaKknJurnalController::class, 'pdf'])->name('kkn.jurnal.pdf');
 
         Route::get('/laporan', [MahasiswaPengajuanLaporanController::class, 'index'])->name('laporan.index');
         Route::get('/laporan/create', [MahasiswaPengajuanLaporanController::class, 'create'])->name('laporan.create');
@@ -530,6 +554,9 @@ Route::prefix('dosen')
         Route::delete('/ppl/pengajuan/{ppl}', [AdminPplController::class, 'destroy'])->name('ppl-pengajuan.destroy');
         Route::get('/ppl/pengajuan/{ppl}/sk-pembimbing', [AdminPplController::class, 'downloadSkPembimbing'])->name('ppl-pengajuan.sk.download');
         Route::get('/ppl/pengajuan/{ppl}/sk-pembimbing/preview', [AdminPplController::class, 'previewSkPembimbing'])->name('ppl-pengajuan.sk.preview');
+        Route::get('/ppl/pengajuan/{ppl}/jurnal', [AdminPplJurnalController::class, 'index'])->name('ppl.jurnal.index');
+        Route::patch('/ppl/pengajuan/{ppl}/jurnal/{jurnal}/status', [AdminPplJurnalController::class, 'updateStatus'])->name('ppl.jurnal.status');
+        Route::get('/ppl/pengajuan/{ppl}/jurnal/pdf', [AdminPplJurnalController::class, 'pdf'])->name('ppl.jurnal.pdf');
 
         // KKN
         Route::get('/kkn', [DosenKknController::class, 'index'])->name('kkn.index');
@@ -541,6 +568,9 @@ Route::prefix('dosen')
         Route::patch('/kkn/pengajuan/{kkn}/status', [AdminKknController::class, 'updateStatus'])->name('kkn-pengajuan.status');
         Route::delete('/kkn/pengajuan/bulk-delete', [AdminKknController::class, 'bulkDestroy'])->name('kkn-pengajuan.bulk-delete');
         Route::delete('/kkn/pengajuan/{kkn}', [AdminKknController::class, 'destroy'])->name('kkn-pengajuan.destroy');
+        Route::get('/kkn/pengajuan/{kkn}/jurnal', [AdminKknJurnalController::class, 'index'])->name('kkn.jurnal.index');
+        Route::patch('/kkn/pengajuan/{kkn}/jurnal/{jurnal}/status', [AdminKknJurnalController::class, 'updateStatus'])->name('kkn.jurnal.status');
+        Route::get('/kkn/pengajuan/{kkn}/jurnal/pdf', [AdminKknJurnalController::class, 'pdf'])->name('kkn.jurnal.pdf');
 
         Route::get('/laporan', [DosenPengajuanLaporanController::class, 'index'])->name('laporan.index');
         Route::delete('/laporan/bulk-delete', [DosenPengajuanLaporanController::class, 'bulkDestroy'])->name('laporan.bulk-delete');

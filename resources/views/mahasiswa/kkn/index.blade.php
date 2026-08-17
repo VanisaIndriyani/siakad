@@ -104,10 +104,16 @@
                                         <span class="text-sm font-medium">{{ $pengajuan->posko->lokasi ?: 'Lokasi segera ditentukan' }}</span>
                                     </div>
                                 </div>
-                                <a href="{{ route('mahasiswa.kkn.posko', $pengajuan->posko) }}" class="h-14 px-8 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold tracking-widest uppercase text-xs flex items-center justify-center gap-3 transition-all shadow-lg shadow-emerald-900/40">
-                                    Buka Halaman Posko
-                                    <i class="fa-solid fa-arrow-right"></i>
-                                </a>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <a href="{{ route('mahasiswa.kkn.jurnal.index', $pengajuan) }}" class="h-12 px-6 rounded-2xl bg-orange-500/15 border border-orange-500/20 text-orange-100 font-bold tracking-widest uppercase text-xs flex items-center justify-center gap-2 transition-all hover:bg-orange-500/20">
+                                        <i class="fa-solid fa-book-open"></i>
+                                        Jurnal
+                                    </a>
+                                    <a href="{{ route('mahasiswa.kkn.posko', $pengajuan->posko) }}" class="h-14 px-8 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold tracking-widest uppercase text-xs flex items-center justify-center gap-3 transition-all shadow-lg shadow-emerald-900/40">
+                                        Buka Halaman Posko
+                                        <i class="fa-solid fa-arrow-right"></i>
+                                    </a>
+                                </div>
                             </div>
                         </div>
 

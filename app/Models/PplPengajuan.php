@@ -81,4 +81,9 @@ class PplPengajuan extends Model
     {
         return $this->hasMany(PplRevisi::class, 'ppl_pengajuan_id');
     }
+
+    public function jurnals(): HasMany
+    {
+        return $this->hasMany(PplJurnal::class, 'ppl_pengajuan_id')->orderBy('tanggal', 'asc');
+    }
 }

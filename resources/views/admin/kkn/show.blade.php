@@ -5,6 +5,9 @@
 
     @php
         $isAdminView = ($routePrefix ?? 'admin') === 'admin';
+        $jurnalUrl = $isAdminView
+            ? route('admin.kkn.jurnal.index', $kkn)
+            : route('dosen.kkn.jurnal.index', $kkn);
         $badge = match ($kkn->status) {
             'approved' => 'bg-emerald-500/15 border-emerald-500/20 text-emerald-100',
             'rejected' => 'bg-red-500/15 border-red-500/20 text-red-100',
@@ -19,7 +22,11 @@
             </a>
             <div class="mt-2 text-xl font-semibold">Detail Pendaftaran KKN</div>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
+            <a href="{{ $jurnalUrl }}" class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-orange-500/15 hover:bg-orange-500/20 border border-orange-500/20 text-orange-100 transition text-sm font-medium">
+                <i class="fa-solid fa-book-open"></i>
+                Jurnal
+            </a>
             @if ($canAssign)
                 <form method="POST" action="{{ $isAdminView ? route('admin.kkn.destroy', $kkn) : route('dosen.kkn-pengajuan.destroy', $kkn) }}" data-confirm="Hapus data pendaftaran KKN ini?" class="inline-flex">
                     @csrf
