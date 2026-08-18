@@ -280,9 +280,15 @@ Route::prefix('admin')
             Route::delete('/ppl/{ppl}', [AdminPplController::class, 'destroy'])->name('ppl.destroy');
             Route::delete('/ppl-files/{file}', [AdminPplController::class, 'destroyFile'])->name('ppl-files.destroy');
             Route::get('/ppl/{ppl}/jurnal', [AdminPplJurnalController::class, 'index'])->name('ppl.jurnal.index');
+            Route::get('/ppl/{ppl}/jurnal/{jurnal}/edit', [AdminPplJurnalController::class, 'edit'])->name('ppl.jurnal.edit');
+            Route::put('/ppl/{ppl}/jurnal/{jurnal}', [AdminPplJurnalController::class, 'update'])->name('ppl.jurnal.update');
+            Route::delete('/ppl/{ppl}/jurnal/{jurnal}', [AdminPplJurnalController::class, 'destroy'])->name('ppl.jurnal.destroy');
             Route::patch('/ppl/{ppl}/jurnal/{jurnal}/status', [AdminPplJurnalController::class, 'updateStatus'])->name('ppl.jurnal.status');
             Route::get('/ppl/{ppl}/jurnal/pdf', [AdminPplJurnalController::class, 'pdf'])->name('ppl.jurnal.pdf');
             Route::get('/ppl/{ppl}/absensi', [AdminPplAbsensiController::class, 'index'])->name('ppl.absensi.index');
+            Route::get('/ppl/{ppl}/absensi/{absensi}/edit', [AdminPplAbsensiController::class, 'edit'])->name('ppl.absensi.edit');
+            Route::put('/ppl/{ppl}/absensi/{absensi}', [AdminPplAbsensiController::class, 'update'])->name('ppl.absensi.update');
+            Route::delete('/ppl/{ppl}/absensi/{absensi}', [AdminPplAbsensiController::class, 'destroy'])->name('ppl.absensi.destroy');
             Route::patch('/ppl/{ppl}/absensi/{absensi}/status', [AdminPplAbsensiController::class, 'updateStatus'])->name('ppl.absensi.status');
             Route::get('/ppl/{ppl}/absensi/pdf', [AdminPplAbsensiController::class, 'pdf'])->name('ppl.absensi.pdf');
 
@@ -301,9 +307,15 @@ Route::prefix('admin')
             Route::delete('/kkn/pengajuan/{kkn}/remove', [AdminKknController::class, 'removeStudent'])->name('kkn.pengajuan.remove');
             Route::get('/kkn/{kkn}', [AdminKknController::class, 'show'])->name('kkn.show');
             Route::get('/kkn/{kkn}/jurnal', [AdminKknJurnalController::class, 'index'])->name('kkn.jurnal.index');
+            Route::get('/kkn/{kkn}/jurnal/{jurnal}/edit', [AdminKknJurnalController::class, 'edit'])->name('kkn.jurnal.edit');
+            Route::put('/kkn/{kkn}/jurnal/{jurnal}', [AdminKknJurnalController::class, 'update'])->name('kkn.jurnal.update');
+            Route::delete('/kkn/{kkn}/jurnal/{jurnal}', [AdminKknJurnalController::class, 'destroy'])->name('kkn.jurnal.destroy');
             Route::patch('/kkn/{kkn}/jurnal/{jurnal}/status', [AdminKknJurnalController::class, 'updateStatus'])->name('kkn.jurnal.status');
             Route::get('/kkn/{kkn}/jurnal/pdf', [AdminKknJurnalController::class, 'pdf'])->name('kkn.jurnal.pdf');
             Route::get('/kkn/{kkn}/absensi', [AdminKknAbsensiController::class, 'index'])->name('kkn.absensi.index');
+            Route::get('/kkn/{kkn}/absensi/{absensi}/edit', [AdminKknAbsensiController::class, 'edit'])->name('kkn.absensi.edit');
+            Route::put('/kkn/{kkn}/absensi/{absensi}', [AdminKknAbsensiController::class, 'update'])->name('kkn.absensi.update');
+            Route::delete('/kkn/{kkn}/absensi/{absensi}', [AdminKknAbsensiController::class, 'destroy'])->name('kkn.absensi.destroy');
             Route::patch('/kkn/{kkn}/absensi/{absensi}/status', [AdminKknAbsensiController::class, 'updateStatus'])->name('kkn.absensi.status');
             Route::get('/kkn/{kkn}/absensi/pdf', [AdminKknAbsensiController::class, 'pdf'])->name('kkn.absensi.pdf');
 
@@ -579,9 +591,15 @@ Route::prefix('dosen')
         Route::get('/ppl/pengajuan/{ppl}/sk-pembimbing', [AdminPplController::class, 'downloadSkPembimbing'])->name('ppl-pengajuan.sk.download');
         Route::get('/ppl/pengajuan/{ppl}/sk-pembimbing/preview', [AdminPplController::class, 'previewSkPembimbing'])->name('ppl-pengajuan.sk.preview');
         Route::get('/ppl/pengajuan/{ppl}/jurnal', [AdminPplJurnalController::class, 'index'])->name('ppl.jurnal.index');
+        Route::get('/ppl/pengajuan/{ppl}/jurnal/{jurnal}/edit', [AdminPplJurnalController::class, 'edit'])->name('ppl.jurnal.edit');
+        Route::put('/ppl/pengajuan/{ppl}/jurnal/{jurnal}', [AdminPplJurnalController::class, 'update'])->name('ppl.jurnal.update');
+        Route::delete('/ppl/pengajuan/{ppl}/jurnal/{jurnal}', [AdminPplJurnalController::class, 'destroy'])->name('ppl.jurnal.destroy');
         Route::patch('/ppl/pengajuan/{ppl}/jurnal/{jurnal}/status', [AdminPplJurnalController::class, 'updateStatus'])->name('ppl.jurnal.status');
         Route::get('/ppl/pengajuan/{ppl}/jurnal/pdf', [AdminPplJurnalController::class, 'pdf'])->name('ppl.jurnal.pdf');
         Route::get('/ppl/pengajuan/{ppl}/absensi', [AdminPplAbsensiController::class, 'index'])->name('ppl.absensi.index');
+        Route::get('/ppl/pengajuan/{ppl}/absensi/{absensi}/edit', [AdminPplAbsensiController::class, 'edit'])->name('ppl.absensi.edit');
+        Route::put('/ppl/pengajuan/{ppl}/absensi/{absensi}', [AdminPplAbsensiController::class, 'update'])->name('ppl.absensi.update');
+        Route::delete('/ppl/pengajuan/{ppl}/absensi/{absensi}', [AdminPplAbsensiController::class, 'destroy'])->name('ppl.absensi.destroy');
         Route::patch('/ppl/pengajuan/{ppl}/absensi/{absensi}/status', [AdminPplAbsensiController::class, 'updateStatus'])->name('ppl.absensi.status');
         Route::get('/ppl/pengajuan/{ppl}/absensi/pdf', [AdminPplAbsensiController::class, 'pdf'])->name('ppl.absensi.pdf');
 
@@ -596,9 +614,15 @@ Route::prefix('dosen')
         Route::delete('/kkn/pengajuan/bulk-delete', [AdminKknController::class, 'bulkDestroy'])->name('kkn-pengajuan.bulk-delete');
         Route::delete('/kkn/pengajuan/{kkn}', [AdminKknController::class, 'destroy'])->name('kkn-pengajuan.destroy');
         Route::get('/kkn/pengajuan/{kkn}/jurnal', [AdminKknJurnalController::class, 'index'])->name('kkn.jurnal.index');
+        Route::get('/kkn/pengajuan/{kkn}/jurnal/{jurnal}/edit', [AdminKknJurnalController::class, 'edit'])->name('kkn.jurnal.edit');
+        Route::put('/kkn/pengajuan/{kkn}/jurnal/{jurnal}', [AdminKknJurnalController::class, 'update'])->name('kkn.jurnal.update');
+        Route::delete('/kkn/pengajuan/{kkn}/jurnal/{jurnal}', [AdminKknJurnalController::class, 'destroy'])->name('kkn.jurnal.destroy');
         Route::patch('/kkn/pengajuan/{kkn}/jurnal/{jurnal}/status', [AdminKknJurnalController::class, 'updateStatus'])->name('kkn.jurnal.status');
         Route::get('/kkn/pengajuan/{kkn}/jurnal/pdf', [AdminKknJurnalController::class, 'pdf'])->name('kkn.jurnal.pdf');
         Route::get('/kkn/pengajuan/{kkn}/absensi', [AdminKknAbsensiController::class, 'index'])->name('kkn.absensi.index');
+        Route::get('/kkn/pengajuan/{kkn}/absensi/{absensi}/edit', [AdminKknAbsensiController::class, 'edit'])->name('kkn.absensi.edit');
+        Route::put('/kkn/pengajuan/{kkn}/absensi/{absensi}', [AdminKknAbsensiController::class, 'update'])->name('kkn.absensi.update');
+        Route::delete('/kkn/pengajuan/{kkn}/absensi/{absensi}', [AdminKknAbsensiController::class, 'destroy'])->name('kkn.absensi.destroy');
         Route::patch('/kkn/pengajuan/{kkn}/absensi/{absensi}/status', [AdminKknAbsensiController::class, 'updateStatus'])->name('kkn.absensi.status');
         Route::get('/kkn/pengajuan/{kkn}/absensi/pdf', [AdminKknAbsensiController::class, 'pdf'])->name('kkn.absensi.pdf');
 

@@ -108,6 +108,65 @@ class PplJurnalController extends Controller
         return back()->with('success', 'Status jurnal berhasil diperbarui.');
     }
 
+    public function edit(Request $request, PplPengajuan $ppl, PplJurnal $jurnal): View
+    {
+        $context = $this->resolveContext($request);
+        $this->authorizeAccess($request, $ppl, $context);
+        abort_unless((int) $jurnal->ppl_pengajuan_id === (int) $ppl->id, 404);
+
+        $ppl->loadMissing(['mahasiswa', 'dosenPembimbing', 'dosenPembimbing2']);
+
+        return view('admin.ppl.jurnal.edit', [
+            'ppl' => $ppl,
+            'jurnal' => $jurnal,
+            'routePrefix' => $context['routePrefix'],
+        ]);
+    }
+
+    public function update(Request $request, PplPengajuan $ppl, PplJurnal $jurnal): RedirectResponse
+    {
+        $context = $this->resolveContext($request);
+        $this->authorizeAccess($request, $ppl, $context);
+        abort_unless((int) $jurnal->ppl_pengajuan_id === (int) $ppl->id, 404);
+
+        $validated = $request->validate([
+            'tanggal' => ['required', 'date'],
+            'kegiatan' => ['required', 'string', 'max:255'],
+            'deskripsi' => ['nullable', 'string'],
+            'lokasi' => ['required', 'string', 'max:255'],
+            'pihak_terkait' => ['required', 'string', 'max:255'],
+            'catatan_pembimbing' => ['nullable', 'string'],
+            'status' => ['required', 'in:pending,approved,rejected'],
+        ]);
+
+        $jurnal->update([
+            'tanggal' => $validated['tanggal'],
+            'kegiatan' => $validated['kegiatan'],
+            'deskripsi' => $validated['deskripsi'] ?: null,
+            'lokasi' => $validated['lokasi'],
+            'pihak_terkait' => $validated['pihak_terkait'],
+            'catatan_pembimbing' => $validated['catatan_pembimbing'] ?: null,
+            'status' => $validated['status'],
+        ]);
+
+        $indexRoute = $context['routePrefix'] === 'admin' ? 'admin.ppl.jurnal.index' : 'dosen.ppl.jurnal.index';
+
+        return redirect()->route($indexRoute, $ppl)->with('success', 'Jurnal kegiatan berhasil diperbarui.');
+    }
+
+    public function destroy(Request $request, PplPengajuan $ppl, PplJurnal $jurnal): RedirectResponse
+    {
+        $context = $this->resolveContext($request);
+        $this->authorizeAccess($request, $ppl, $context);
+        abort_unless((int) $jurnal->ppl_pengajuan_id === (int) $ppl->id, 404);
+
+        $jurnal->delete();
+
+        $indexRoute = $context['routePrefix'] === 'admin' ? 'admin.ppl.jurnal.index' : 'dosen.ppl.jurnal.index';
+
+        return redirect()->route($indexRoute, $ppl)->with('success', 'Jurnal kegiatan berhasil dihapus.');
+    }
+
     public function pdf(Request $request, PplPengajuan $ppl)
     {
         $context = $this->resolveContext($request);

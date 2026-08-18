@@ -118,6 +118,65 @@ class PplAbsensiController extends Controller
         return back()->with('success', 'Status absensi berhasil diperbarui.');
     }
 
+    public function edit(Request $request, PplPengajuan $ppl, PplAbsensi $absensi): View
+    {
+        $context = $this->resolveContext($request);
+        $this->authorizeAccess($request, $ppl, $context);
+        abort_unless((int) $absensi->ppl_pengajuan_id === (int) $ppl->id, 404);
+
+        $ppl->loadMissing(['mahasiswa', 'dosenPembimbing', 'dosenPembimbing2']);
+
+        return view('admin.ppl.absensi.edit', [
+            'ppl' => $ppl,
+            'absensi' => $absensi,
+            'routePrefix' => $context['routePrefix'],
+        ]);
+    }
+
+    public function update(Request $request, PplPengajuan $ppl, PplAbsensi $absensi): RedirectResponse
+    {
+        $context = $this->resolveContext($request);
+        $this->authorizeAccess($request, $ppl, $context);
+        abort_unless((int) $absensi->ppl_pengajuan_id === (int) $ppl->id, 404);
+
+        $validated = $request->validate([
+            'tanggal' => ['required', 'date'],
+            'jam_masuk' => ['nullable', 'date_format:H:i'],
+            'jam_pulang' => ['nullable', 'date_format:H:i'],
+            'status_kehadiran' => ['required', 'in:hadir,izin,sakit,alpha'],
+            'keterangan' => ['nullable', 'string'],
+            'catatan_pembimbing' => ['nullable', 'string'],
+            'status' => ['required', 'in:pending,approved,rejected'],
+        ]);
+
+        $absensi->update([
+            'tanggal' => $validated['tanggal'],
+            'jam_masuk' => $validated['jam_masuk'] ?: null,
+            'jam_pulang' => $validated['jam_pulang'] ?: null,
+            'status_kehadiran' => $validated['status_kehadiran'],
+            'keterangan' => $validated['keterangan'] ?: null,
+            'catatan_pembimbing' => $validated['catatan_pembimbing'] ?: null,
+            'status' => $validated['status'],
+        ]);
+
+        $indexRoute = $context['routePrefix'] === 'admin' ? 'admin.ppl.absensi.index' : 'dosen.ppl.absensi.index';
+
+        return redirect()->route($indexRoute, $ppl)->with('success', 'Daftar hadir berhasil diperbarui.');
+    }
+
+    public function destroy(Request $request, PplPengajuan $ppl, PplAbsensi $absensi): RedirectResponse
+    {
+        $context = $this->resolveContext($request);
+        $this->authorizeAccess($request, $ppl, $context);
+        abort_unless((int) $absensi->ppl_pengajuan_id === (int) $ppl->id, 404);
+
+        $absensi->delete();
+
+        $indexRoute = $context['routePrefix'] === 'admin' ? 'admin.ppl.absensi.index' : 'dosen.ppl.absensi.index';
+
+        return redirect()->route($indexRoute, $ppl)->with('success', 'Daftar hadir berhasil dihapus.');
+    }
+
     public function pdf(Request $request, PplPengajuan $ppl)
     {
         $context = $this->resolveContext($request);

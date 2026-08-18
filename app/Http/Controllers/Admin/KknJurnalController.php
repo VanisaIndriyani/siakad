@@ -111,6 +111,65 @@ class KknJurnalController extends Controller
         return back()->with('success', 'Status jurnal berhasil diperbarui.');
     }
 
+    public function edit(Request $request, KknPengajuan $kkn, KknJurnal $jurnal): View
+    {
+        $context = $this->resolveContext($request);
+        $this->authorizeAccess($request, $kkn, $context);
+        abort_unless((int) $jurnal->kkn_pengajuan_id === (int) $kkn->id, 404);
+
+        $kkn->loadMissing(['mahasiswa', 'posko.pembimbingS']);
+
+        return view('admin.kkn.jurnal.edit', [
+            'kkn' => $kkn,
+            'jurnal' => $jurnal,
+            'routePrefix' => $context['routePrefix'],
+        ]);
+    }
+
+    public function update(Request $request, KknPengajuan $kkn, KknJurnal $jurnal): RedirectResponse
+    {
+        $context = $this->resolveContext($request);
+        $this->authorizeAccess($request, $kkn, $context);
+        abort_unless((int) $jurnal->kkn_pengajuan_id === (int) $kkn->id, 404);
+
+        $validated = $request->validate([
+            'tanggal' => ['required', 'date'],
+            'kegiatan' => ['required', 'string', 'max:255'],
+            'deskripsi' => ['nullable', 'string'],
+            'lokasi' => ['required', 'string', 'max:255'],
+            'pihak_terkait' => ['required', 'string', 'max:255'],
+            'catatan_pembimbing' => ['nullable', 'string'],
+            'status' => ['required', 'in:pending,approved,rejected'],
+        ]);
+
+        $jurnal->update([
+            'tanggal' => $validated['tanggal'],
+            'kegiatan' => $validated['kegiatan'],
+            'deskripsi' => $validated['deskripsi'] ?: null,
+            'lokasi' => $validated['lokasi'],
+            'pihak_terkait' => $validated['pihak_terkait'],
+            'catatan_pembimbing' => $validated['catatan_pembimbing'] ?: null,
+            'status' => $validated['status'],
+        ]);
+
+        $indexRoute = $context['routePrefix'] === 'admin' ? 'admin.kkn.jurnal.index' : 'dosen.kkn.jurnal.index';
+
+        return redirect()->route($indexRoute, $kkn)->with('success', 'Jurnal kegiatan berhasil diperbarui.');
+    }
+
+    public function destroy(Request $request, KknPengajuan $kkn, KknJurnal $jurnal): RedirectResponse
+    {
+        $context = $this->resolveContext($request);
+        $this->authorizeAccess($request, $kkn, $context);
+        abort_unless((int) $jurnal->kkn_pengajuan_id === (int) $kkn->id, 404);
+
+        $jurnal->delete();
+
+        $indexRoute = $context['routePrefix'] === 'admin' ? 'admin.kkn.jurnal.index' : 'dosen.kkn.jurnal.index';
+
+        return redirect()->route($indexRoute, $kkn)->with('success', 'Jurnal kegiatan berhasil dihapus.');
+    }
+
     public function pdf(Request $request, KknPengajuan $kkn)
     {
         $context = $this->resolveContext($request);

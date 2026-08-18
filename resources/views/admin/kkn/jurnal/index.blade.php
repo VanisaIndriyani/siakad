@@ -9,6 +9,8 @@
         $indexUrl = $prefix === 'admin' ? route('admin.kkn.index') : route('dosen.kkn-pengajuan.index');
         $jurnalStatusUrl = $prefix === 'admin' ? 'admin.kkn.jurnal.status' : 'dosen.kkn.jurnal.status';
         $jurnalPdfUrl = $prefix === 'admin' ? 'admin.kkn.jurnal.pdf' : 'dosen.kkn.jurnal.pdf';
+        $jurnalEditUrl = $prefix === 'admin' ? 'admin.kkn.jurnal.edit' : 'dosen.kkn.jurnal.edit';
+        $jurnalDestroyUrl = $prefix === 'admin' ? 'admin.kkn.jurnal.destroy' : 'dosen.kkn.jurnal.destroy';
     @endphp
 
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -47,6 +49,18 @@
                             <span class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold {{ $badge }}">
                                 {{ strtoupper($jurnal->status) }}
                             </span>
+                            <a href="{{ route($jurnalEditUrl, [$kkn, $jurnal]) }}" class="ml-2 h-8 px-3 inline-flex items-center gap-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition text-xs text-white/90">
+                                <i class="fa-solid fa-pen"></i>
+                                <span class="font-medium">Edit</span>
+                            </a>
+                            <form method="POST" action="{{ route($jurnalDestroyUrl, [$kkn, $jurnal]) }}" onsubmit="return confirm('Hapus jurnal kegiatan ini?');" class="m-0 inline-flex">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="h-8 px-3 inline-flex items-center gap-1.5 rounded-lg bg-red-500/15 hover:bg-red-500/20 border border-red-500/20 text-red-100 transition text-xs">
+                                    <i class="fa-solid fa-trash"></i>
+                                    <span class="font-medium">Hapus</span>
+                                </button>
+                            </form>
                         </div>
                         <div class="mt-1 text-sm text-emerald-100/70">
                             <i class="fa-regular fa-calendar"></i> {{ $jurnal->tanggal?->format('d F Y') }}
