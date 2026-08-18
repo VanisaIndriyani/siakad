@@ -185,7 +185,27 @@
                 <div style="height: 58px;"></div>
                 @if($kaprodi ?? null)
                     <div style="font-size: 10px; font-weight: 800;">{{ trim($kaprodi->nama) }}</div>
-                    <div style="font-size: 9px;">NUPTK. {{ $kaprodi->nuptk ?: ($kaprodi->nidn ?: '.....................................') }}</div>
+                    <div style="font-size: 9px;">
+                        @php
+                            $_label = null;
+                            $_val = null;
+                            if (!empty(trim((string) $kaprodi->nuptk))) {
+                                $_label = 'NUPTK';
+                                $_val = trim((string) $kaprodi->nuptk);
+                            } elseif (!empty(trim((string) $kaprodi->nidn))) {
+                                $_label = 'NIDN';
+                                $_val = trim((string) $kaprodi->nidn);
+                            } elseif (!empty(trim((string) $kaprodi->nip))) {
+                                $_label = 'NIP';
+                                $_val = trim((string) $kaprodi->nip);
+                            }
+                        @endphp
+                        @if ($_label && $_val)
+                            {{ $_label }}. {{ $_val }}
+                        @else
+                            .....................................
+                        @endif
+                    </div>
                 @else
                     <div style="font-size: 10px; font-weight: 800;">.....................................</div>
                 @endif
