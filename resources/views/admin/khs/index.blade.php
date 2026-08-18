@@ -1,14 +1,21 @@
 <x-portal-layout :title="'KHS - '.config('app.name')" subtitle="Kelola KHS">
     <x-slot:sidebar>
-        @include('admin.partials.sidebar')
+        @php
+            $prefix = $routePrefix ?? 'admin';
+        @endphp
+        @include($prefix === 'admin' ? 'admin.partials.sidebar' : 'dosen.partials.sidebar')
     </x-slot:sidebar>
 
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
             <div class="text-xl font-semibold">KHS</div>
-            <div class="text-sm text-emerald-100/70">Kelola nilai, IPS, IPK, dan detail KHS.</div>
+            <div class="text-sm text-emerald-100/70">Kelola nilai, IPS, IPK, dan detail KHS.
+                @if(!empty($programStudi))
+                    <span class="text-emerald-200/90">(Prodi: <b>{{ $programStudi }}</b>)</span>
+                @endif
+            </div>
         </div>
-        <a href="{{ route('admin.khs.create') }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition">
+        <a href="{{ route($prefix.'.khs.create') }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition">
             <i class="fa-solid fa-plus"></i>
             <span class="text-sm font-medium">Buat KHS</span>
         </a>
@@ -19,7 +26,7 @@
         <input type="number" name="semester" value="{{ $semester }}" class="h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" placeholder="Semester" />
         <div class="flex gap-2">
             <button class="flex-1 h-11 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">Filter</button>
-            <a href="{{ route('admin.khs.index') }}" class="h-11 px-4 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">Reset</a>
+            <a href="{{ route($prefix.'.khs.index') }}" class="h-11 px-4 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">Reset</a>
         </div>
     </form>
 
@@ -54,7 +61,7 @@
             selectAll.indeterminate = checkedCount > 0 && checkedCount < rows.length;
         }
     }">
-        <form x-ref="bulkForm" method="POST" action="{{ route('admin.khs.bulk-delete') }}" @change="onBulkChange($event)"
+        <form x-ref="bulkForm" method="POST" action="{{ route($prefix.'.khs.bulk-delete') }}" @change="onBulkChange($event)"
               data-confirm="Apakah kamu yakin ingin menghapus KHS yang dipilih?">
             @csrf
             @method('DELETE')
@@ -103,14 +110,14 @@
                                     <td class="px-4 py-3 text-emerald-100/80">{{ $row->ipk ?? '-' }}</td>
                                     <td class="px-4 py-3">
                                         <div class="flex items-center justify-end gap-2">
-                                            <a href="{{ route('admin.khs.pdf', $row) }}" class="h-9 px-3 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-emerald-100" title="Print PDF">
+                                            <a href="{{ route($prefix.'.khs.pdf', $row) }}" class="h-9 px-3 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-emerald-100" title="Print PDF">
                                                 <i class="fa-solid fa-print"></i>
                                             </a>
-                                            <a href="{{ route('admin.khs.show', $row) }}" class="h-9 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                                            <a href="{{ route($prefix.'.khs.show', $row) }}" class="h-9 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                                                 <i class="fa-solid fa-eye"></i>
                                                 Detail
                                             </a>
-                                            <a href="{{ route('admin.khs.edit', $row) }}" class="h-9 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                                            <a href="{{ route($prefix.'.khs.edit', $row) }}" class="h-9 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                                                 <i class="fa-solid fa-pen"></i>
                                                 Edit
                                             </a>
@@ -134,7 +141,7 @@
         </form>
 
         @foreach ($khs as $row)
-            <form id="delete-form-{{ $row->id }}" method="POST" action="{{ route('admin.khs.destroy', $row) }}" class="hidden">
+            <form id="delete-form-{{ $row->id }}" method="POST" action="{{ route($prefix.'.khs.destroy', $row) }}" class="hidden">
                 @csrf
                 @method('DELETE')
             </form>

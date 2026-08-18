@@ -1,20 +1,27 @@
 <x-portal-layout :title="'Buat KHS - '.config('app.name')" subtitle="Buat KHS">
     <x-slot:sidebar>
-        @include('admin.partials.sidebar')
+        @php
+            $prefix = $routePrefix ?? 'admin';
+        @endphp
+        @include($prefix === 'admin' ? 'admin.partials.sidebar' : 'dosen.partials.sidebar')
     </x-slot:sidebar>
 
     <div class="flex items-center justify-between gap-3 mb-5">
         <div>
             <div class="text-xl font-semibold">Buat KHS</div>
-            <div class="text-sm text-emerald-100/70">Buat data KHS berdasarkan mahasiswa dan semester.</div>
+            <div class="text-sm text-emerald-100/70">Buat data KHS berdasarkan mahasiswa dan semester.
+                @if(!empty($programStudi))
+                    <span class="text-emerald-200/90">(Prodi: <b>{{ $programStudi }}</b>)</span>
+                @endif
+            </div>
         </div>
-        <a href="{{ route('admin.khs.index') }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+        <a href="{{ route($prefix.'.khs.index') }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
             <i class="fa-solid fa-arrow-left"></i>
             Kembali
         </a>
     </div>
 
-    <form method="POST" action="{{ route('admin.khs.store') }}" class="rounded-2xl bg-white/5 border border-white/10 p-5">
+    <form method="POST" action="{{ route($prefix.'.khs.store') }}" class="rounded-2xl bg-white/5 border border-white/10 p-5">
         @csrf
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div class="lg:col-span-2">

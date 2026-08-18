@@ -1,21 +1,28 @@
 <x-portal-layout :title="'Rekapitulasi Nilai - '.config('app.name')" subtitle="Transkip Nilai Acuan Ijazah">
     <x-slot:sidebar>
-        @include('admin.partials.sidebar')
+        @php
+            $prefix = $routePrefix ?? 'admin';
+        @endphp
+        @include($prefix === 'admin' ? 'admin.partials.sidebar' : 'dosen.partials.sidebar')
     </x-slot:sidebar>
 
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
             <div class="text-xl font-semibold">Rekapitulasi Nilai Mahasiswa</div>
-            <div class="text-sm text-emerald-100/70">Rekap KHS semester 1 s/d 8 sebagai acuan Transkip Nilai Ijazah.</div>
+            <div class="text-sm text-emerald-100/70">Rekap KHS semester 1 s/d 8 sebagai acuan Transkip Nilai Ijazah.
+                @if(!empty($programStudi))
+                    <span class="text-emerald-200/90">(Prodi: <b>{{ $programStudi }}</b>)</span>
+                @endif
+            </div>
         </div>
     </div>
 
     <form method="GET" class="mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
         <input name="q" value="{{ $q }}" class="h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" placeholder="Cari nama / NPM..." />
-        <select name="prodi" class="h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400">
+        <select name="prodi" @disabled(!empty($programStudi)) class="h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400 disabled:opacity-60">
             <option value="">Semua Prodi</option>
             @foreach ($prodiList as $p)
-                <option value="{{ $p }}" @selected($prodi === (string) $p)>{{ $p }}</option>
+                <option value="{{ $p }}" @selected($prodi === (string) $p || (!empty($programStudi) && $programStudi === (string) $p))>{{ $p }}</option>
             @endforeach
         </select>
         <select name="angkatan" class="h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400">
@@ -26,7 +33,7 @@
         </select>
         <div class="flex gap-2">
             <button class="flex-1 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition font-medium">Cari</button>
-            <a href="{{ route('admin.rekap-nilai.index') }}" class="h-11 px-4 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">Reset</a>
+            <a href="{{ route($prefix.'.rekap-nilai.index') }}" class="h-11 px-4 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">Reset</a>
         </div>
     </form>
 
@@ -62,11 +69,11 @@
                             <td class="px-4 py-3 text-center text-emerald-100/80">{{ $m->total_sks ?? 0 }}</td>
                             <td class="px-4 py-3">
                                 <div class="flex items-center justify-end gap-2">
-                                    <a href="{{ route('admin.rekap-nilai.show', $m) }}" class="h-9 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+                                    <a href="{{ route($prefix.'.rekap-nilai.show', $m) }}" class="h-9 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                                         <i class="fa-solid fa-eye"></i>
                                         <span class="text-xs">Lihat</span>
                                     </a>
-                                    <a href="{{ route('admin.rekap-nilai.pdf', $m) }}" target="_blank" class="h-9 px-4 inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition text-white font-medium">
+                                    <a href="{{ route($prefix.'.rekap-nilai.pdf', $m) }}" target="_blank" class="h-9 px-4 inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition text-white font-medium">
                                         <i class="fa-solid fa-file-pdf"></i>
                                         <span class="text-xs">PDF</span>
                                     </a>

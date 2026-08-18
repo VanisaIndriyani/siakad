@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Dosen;
 use App\Models\Khs;
 use App\Models\KhsItem;
 use App\Models\Mahasiswa;
@@ -14,8 +15,53 @@ use Illuminate\View\View;
 
 class KhsController extends Controller
 {
+    private const PRODI_APPROVER_STATUS = ['Ketua Prodi', 'Sekretaris Prodi'];
+
+    private function resolveContext(Request $request): array
+    {
+        $user = $request->user();
+        if ($user?->isAdmin()) {
+            return [
+                'routePrefix' => 'admin',
+                'canManage' => true,
+                'programStudi' => null,
+            ];
+        }
+
+        if ($user?->isDosen()) {
+            $dosen = $user->dosen;
+            $programStudi = trim((string) ($dosen?->program_studi ?? ''));
+            $statusAkademik = (string) ($dosen?->status_akademik ?? '');
+
+            $canManage = in_array($statusAkademik, self::PRODI_APPROVER_STATUS, true);
+            abort_unless($canManage, 403);
+
+            return [
+                'routePrefix' => 'dosen',
+                'canManage' => true,
+                'programStudi' => $programStudi ?: '---',
+            ];
+        }
+
+        abort(403);
+    }
+
+    private function scopeByProdi($query, ?string $programStudi, string $mahasiswaAlias = 'mahasiswa')
+    {
+        if (empty($programStudi)) {
+            return $query;
+        }
+
+        return $query->whereHas($mahasiswaAlias, function ($sub) use ($programStudi) {
+            $sub->where('program_studi', $programStudi);
+        });
+    }
+
     public function index(Request $request): View
     {
+        $context = $this->resolveContext($request);
+        $programStudi = $context['programStudi'] ?? null;
+
         $q = trim((string) $request->get('q', ''));
         $semester = trim((string) $request->get('semester', ''));
 
@@ -34,47 +80,62 @@ class KhsController extends Controller
             $query->where('semester', $semester);
         }
 
+        $this->scopeByProdi($query, $programStudi);
+
         $khs = $query->orderByDesc('id')->paginate(10)->withQueryString();
 
         return view('admin.khs.index', [
             'khs' => $khs,
             'q' => $q,
             'semester' => $semester,
+            'routePrefix' => $context['routePrefix'],
+            'programStudi' => $programStudi,
         ]);
     }
 
-    public function show(Khs $khs): View
+    public function show(Request $request, Khs $khs): View
     {
+        $context = $this->resolveContext($request);
         $khs->load(['mahasiswa', 'mahasiswa.user', 'items.mataKuliah']);
+
+        if (!empty($context['programStudi'] ?? null)) {
+            abort_unless((string) ($khs->mahasiswa?->program_studi ?? '') === $context['programStudi'], 403);
+        }
 
         return view('admin.khs.show', [
             'khs' => $khs,
+            'routePrefix' => $context['routePrefix'],
         ]);
     }
 
-    private function resolveKaprodi(?string $programStudi): ?\App\Models\Dosen
+    private function resolveKaprodi(?string $programStudi): ?Dosen
     {
         $programStudi = trim((string) $programStudi);
         if ($programStudi === '') {
             return null;
         }
 
-        return \App\Models\Dosen::query()
+        return Dosen::query()
             ->where('program_studi', $programStudi)
             ->where('status_akademik', 'Ketua Prodi')
             ->orderByDesc('id')
             ->first();
     }
 
-    public function downloadPdf(Khs $khs)
+    public function downloadPdf(Request $request, Khs $khs)
     {
+        $context = $this->resolveContext($request);
         $khs->load(['mahasiswa', 'items.mataKuliah']);
-        
+
+        if (!empty($context['programStudi'] ?? null)) {
+            abort_unless((string) ($khs->mahasiswa?->program_studi ?? '') === $context['programStudi'], 403);
+        }
+
         $kaprodi = $this->resolveKaprodi($khs->mahasiswa->program_studi ?? null);
 
         $html = view('mahasiswa.khs.pdf', [
             'khs' => $khs,
-            'kaprodi' => $kaprodi, 
+            'kaprodi' => $kaprodi,
         ])->render();
 
         $dompdf = new Dompdf(['isRemoteEnabled' => true]);
@@ -90,20 +151,38 @@ class KhsController extends Controller
         ]);
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
+        $context = $this->resolveContext($request);
+        $programStudi = $context['programStudi'] ?? null;
+
+        $mahasiswaQuery = Mahasiswa::query()->orderBy('nama_lengkap');
+        if (!empty($programStudi)) {
+            $mahasiswaQuery->where('program_studi', $programStudi);
+        }
+
         return view('admin.khs.create', [
-            'mahasiswa' => Mahasiswa::query()->orderBy('nama_lengkap')->get(),
+            'mahasiswa' => $mahasiswaQuery->get(),
+            'routePrefix' => $context['routePrefix'],
+            'programStudi' => $programStudi,
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
+        $context = $this->resolveContext($request);
+        $programStudi = $context['programStudi'] ?? null;
+
         $validated = $request->validate([
             'mahasiswa_id' => ['required', 'exists:mahasiswa,id'],
             'semester' => ['required', 'integer', 'min:1', 'max:8'],
             'tahun_ajaran' => ['nullable', 'string', 'max:20'],
         ]);
+
+        if (!empty($programStudi)) {
+            $mhs = Mahasiswa::query()->find($validated['mahasiswa_id']);
+            abort_unless($mhs && (string) ($mhs->program_studi ?? '') === $programStudi, 403);
+        }
 
         $khs = Khs::query()->firstOrCreate(
             [
@@ -115,21 +194,36 @@ class KhsController extends Controller
             ]
         );
 
-        return redirect()->route('admin.khs.edit', $khs)->with('success', 'KHS berhasil dibuat. Silakan input nilai.');
+        $editRoute = $context['routePrefix'] === 'admin' ? 'admin.khs.edit' : 'dosen.khs.edit';
+
+        return redirect()->route($editRoute, $khs)->with('success', 'KHS berhasil dibuat. Silakan input nilai.');
     }
 
-    public function edit(Khs $khs): View
+    public function edit(Request $request, Khs $khs): View
     {
+        $context = $this->resolveContext($request);
         $khs->load(['mahasiswa', 'items.mataKuliah']);
+
+        if (!empty($context['programStudi'] ?? null)) {
+            abort_unless((string) ($khs->mahasiswa?->program_studi ?? '') === $context['programStudi'], 403);
+        }
 
         return view('admin.khs.edit', [
             'khs' => $khs,
             'mataKuliah' => MataKuliah::query()->orderBy('semester')->orderBy('kode')->get(),
+            'routePrefix' => $context['routePrefix'],
         ]);
     }
 
     public function update(Request $request, Khs $khs): RedirectResponse
     {
+        $context = $this->resolveContext($request);
+
+        if (!empty($context['programStudi'] ?? null)) {
+            $khs->loadMissing('mahasiswa');
+            abort_unless((string) ($khs->mahasiswa?->program_studi ?? '') === $context['programStudi'], 403);
+        }
+
         $validated = $request->validate([
             'tahun_ajaran' => ['nullable', 'string', 'max:20'],
             'ips' => ['nullable', 'numeric', 'min:0', 'max:4'],
@@ -172,29 +266,47 @@ class KhsController extends Controller
             })
             ->delete();
 
-        return redirect()->route('admin.khs.show', $khs)->with('success', 'KHS berhasil diperbarui.');
+        $showRoute = $context['routePrefix'] === 'admin' ? 'admin.khs.show' : 'dosen.khs.show';
+
+        return redirect()->route($showRoute, $khs)->with('success', 'KHS berhasil diperbarui.');
     }
 
-    public function destroy(Khs $khs): RedirectResponse
+    public function destroy(Request $request, Khs $khs): RedirectResponse
     {
+        $context = $this->resolveContext($request);
+
+        if (!empty($context['programStudi'] ?? null)) {
+            $khs->loadMissing('mahasiswa');
+            abort_unless((string) ($khs->mahasiswa?->program_studi ?? '') === $context['programStudi'], 403);
+        }
+
         $khs->delete();
         return back()->with('success', 'Data KHS berhasil dihapus.');
     }
 
     public function bulkDestroy(Request $request): RedirectResponse
     {
+        $context = $this->resolveContext($request);
+        $programStudi = $context['programStudi'] ?? null;
+
         $validated = $request->validate([
             'ids' => ['required', 'array', 'min:1'],
             'ids.*' => ['integer', 'exists:khs,id'],
         ]);
 
-        Khs::query()->whereIn('id', $validated['ids'])->delete();
+        $ids = array_map('intval', (array) $validated['ids']);
+        $query = Khs::query()->whereIn('id', $ids);
+        $this->scopeByProdi($query, $programStudi);
+        $query->delete();
 
         return back()->with('success', 'Data KHS terpilih berhasil dihapus.');
     }
 
     public function rekapIndex(Request $request): View
     {
+        $context = $this->resolveContext($request);
+        $programStudi = $context['programStudi'] ?? null;
+
         $q = trim((string) $request->get('q', ''));
         $prodi = trim((string) $request->get('prodi', ''));
         $angkatan = trim((string) $request->get('angkatan', ''));
@@ -206,16 +318,16 @@ class KhsController extends Controller
                     $sub->whereHas('items');
                 },
             ])
-          ->addSelect([
-    'total_sks' => KhsItem::query()
-        ->selectRaw('COALESCE(SUM(mata_kuliah.sks),0)')
-        ->join('mata_kuliah', 'mata_kuliah.id', '=', 'khs_items.mata_kuliah_id')
-        ->join('khs', 'khs.id', '=', 'khs_items.khs_id')
-        ->whereColumn('khs.mahasiswa_id', 'mahasiswa.id')
-        ->whereNotNull('khs_items.nilai_huruf')
-        ->where('khs_items.nilai_huruf', '!=', 'E')
-        ->where('khs_items.nilai_huruf', '!=', '-')
-]);
+            ->addSelect([
+                'total_sks' => KhsItem::query()
+                    ->selectRaw('COALESCE(SUM(mata_kuliah.sks),0)')
+                    ->join('mata_kuliah', 'mata_kuliah.id', '=', 'khs_items.mata_kuliah_id')
+                    ->join('khs', 'khs.id', '=', 'khs_items.khs_id')
+                    ->whereColumn('khs.mahasiswa_id', 'mahasiswa.id')
+                    ->whereNotNull('khs_items.nilai_huruf')
+                    ->where('khs_items.nilai_huruf', '!=', 'E')
+                    ->where('khs_items.nilai_huruf', '!=', '-'),
+            ]);
 
         if ($q !== '') {
             $query->where(function ($sub) use ($q) {
@@ -223,9 +335,13 @@ class KhsController extends Controller
                     ->orWhere('npm', 'like', "%{$q}%");
             });
         }
-        if ($prodi !== '') {
+
+        if (!empty($programStudi)) {
+            $query->where('program_studi', $programStudi);
+        } elseif ($prodi !== '') {
             $query->where('program_studi', $prodi);
         }
+
         if ($angkatan !== '') {
             $query->where('angkatan', $angkatan);
         }
@@ -241,6 +357,8 @@ class KhsController extends Controller
             'angkatan' => $angkatan,
             'prodiList' => $prodiList,
             'angkatanList' => $angkatanList,
+            'routePrefix' => $context['routePrefix'],
+            'programStudi' => $programStudi,
         ]);
     }
 
@@ -324,15 +442,28 @@ class KhsController extends Controller
 
     public function rekapShow(Request $request, Mahasiswa $mahasiswa): View
     {
+        $context = $this->resolveContext($request);
+
+        if (!empty($context['programStudi'] ?? null)) {
+            abort_unless((string) ($mahasiswa->program_studi ?? '') === $context['programStudi'], 403);
+        }
+
         $data = $this->buildTranskipData($mahasiswa);
 
         return view('admin.khs.rekap-show', array_merge([
             'mahasiswa' => $mahasiswa,
+            'routePrefix' => $context['routePrefix'],
         ], $data));
     }
 
     public function rekapPdf(Request $request, Mahasiswa $mahasiswa)
     {
+        $context = $this->resolveContext($request);
+
+        if (!empty($context['programStudi'] ?? null)) {
+            abort_unless((string) ($mahasiswa->program_studi ?? '') === $context['programStudi'], 403);
+        }
+
         $data = $this->buildTranskipData($mahasiswa);
 
         $logoCandidates = [

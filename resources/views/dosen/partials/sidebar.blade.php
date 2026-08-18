@@ -104,6 +104,16 @@
         <i class="fa-solid fa-circle-check text-emerald-300"></i>
         <span class="text-sm font-medium">Approve KRS</span>
     </a>
+    <a href="{{ route('dosen.khs.index') }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('dosen.khs.*') && !request()->routeIs('dosen.rekap-nilai.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+        <i class="fa-solid fa-award text-emerald-300"></i>
+        <span class="text-sm font-medium">KHS</span>
+    </a>
+    <a href="{{ route('dosen.rekap-nilai.index') }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('dosen.rekap-nilai.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+        <i class="fa-solid fa-graduation-cap text-emerald-300"></i>
+        <span class="text-sm font-medium">Rekap Nilai</span>
+    </a>
     <a href="{{ route('dosen.skripsi-pengajuan.index') }}"
        class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('dosen.skripsi-pengajuan.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
         <i class="fa-solid fa-graduation-cap text-emerald-300"></i>

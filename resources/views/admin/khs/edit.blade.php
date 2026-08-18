@@ -1,6 +1,9 @@
 <x-portal-layout :title="'Edit KHS - '.config('app.name')" subtitle="Edit KHS">
     <x-slot:sidebar>
-        @include('admin.partials.sidebar')
+        @php
+            $prefix = $routePrefix ?? 'admin';
+        @endphp
+        @include($prefix === 'admin' ? 'admin.partials.sidebar' : 'dosen.partials.sidebar')
     </x-slot:sidebar>
 
     @php
@@ -14,13 +17,13 @@
             <div class="text-xl font-semibold">Edit KHS</div>
             <div class="text-sm text-emerald-100/70">{{ $khs->mahasiswa?->nama_lengkap }} • Semester {{ $khs->semester }}</div>
         </div>
-        <a href="{{ route('admin.khs.show', $khs) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+        <a href="{{ route($prefix.'.khs.show', $khs) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
             <i class="fa-solid fa-arrow-left"></i>
             Kembali
         </a>
     </div>
 
-    <form method="POST" action="{{ route('admin.khs.update', $khs) }}" class="rounded-2xl bg-white/5 border border-white/10 p-5">
+    <form method="POST" action="{{ route($prefix.'.khs.update', $khs) }}" class="rounded-2xl bg-white/5 border border-white/10 p-5">
         @csrf
         @method('PUT')
 

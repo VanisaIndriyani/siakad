@@ -1,6 +1,9 @@
 <x-portal-layout :title="'Transkip Nilai - '.$mahasiswa->nama_lengkap" subtitle="Rekapitulasi Semester 1 s/d 8">
     <x-slot:sidebar>
-        @include('admin.partials.sidebar')
+        @php
+            $prefix = $routePrefix ?? 'admin';
+        @endphp
+        @include($prefix === 'admin' ? 'admin.partials.sidebar' : 'dosen.partials.sidebar')
     </x-slot:sidebar>
 
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -9,15 +12,15 @@
             <div class="text-sm text-emerald-100/70">{{ $mahasiswa->nama_lengkap }} • {{ $mahasiswa->npm }}</div>
         </div>
         <div class="flex gap-2">
-            <a href="{{ route('admin.rekap-nilai.index') }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+            <a href="{{ route($prefix.'.rekap-nilai.index') }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                 <i class="fa-solid fa-arrow-left"></i>
                 <span class="text-sm font-medium">Kembali</span>
             </a>
-            <a href="{{ route('admin.rekap-nilai.pdf', $mahasiswa, ['inline' => 1]) }}" target="_blank" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+            <a href="{{ route($prefix.'.rekap-nilai.pdf', $mahasiswa, ['inline' => 1]) }}" target="_blank" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                 <i class="fa-solid fa-eye"></i>
                 <span class="text-sm font-medium">Lihat PDF</span>
             </a>
-            <a href="{{ route('admin.rekap-nilai.pdf', $mahasiswa) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition">
+            <a href="{{ route($prefix.'.rekap-nilai.pdf', $mahasiswa) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition">
                 <i class="fa-solid fa-file-pdf"></i>
                 <span class="text-sm font-medium">Unduh PDF</span>
             </a>

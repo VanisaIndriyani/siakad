@@ -1,6 +1,9 @@
 <x-portal-layout :title="'Detail KHS - '.config('app.name')" subtitle="Detail KHS">
     <x-slot:sidebar>
-        @include('admin.partials.sidebar')
+        @php
+            $prefix = $routePrefix ?? 'admin';
+        @endphp
+        @include($prefix === 'admin' ? 'admin.partials.sidebar' : 'dosen.partials.sidebar')
     </x-slot:sidebar>
 
     <div class="flex items-center justify-between gap-3 mb-5">
@@ -9,15 +12,15 @@
             <div class="text-sm text-emerald-100/70">{{ $khs->mahasiswa?->nama_lengkap }} • Semester {{ $khs->semester }}</div>
         </div>
         <div class="flex items-center gap-2">
-            <a href="{{ route('admin.khs.pdf', $khs) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+            <a href="{{ route($prefix.'.khs.pdf', $khs) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                 <i class="fa-solid fa-print"></i>
                 Print PDF
             </a>
-            <a href="{{ route('admin.khs.edit', $khs) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+            <a href="{{ route($prefix.'.khs.edit', $khs) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                 <i class="fa-solid fa-pen"></i>
                 Edit
             </a>
-            <a href="{{ route('admin.khs.index') }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
+            <a href="{{ route($prefix.'.khs.index') }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
                 <i class="fa-solid fa-arrow-left"></i>
                 Kembali
             </a>

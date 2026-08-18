@@ -603,6 +603,20 @@ Route::prefix('dosen')
         Route::patch('/ppl/pengajuan/{ppl}/absensi/{absensi}/status', [AdminPplAbsensiController::class, 'updateStatus'])->name('ppl.absensi.status');
         Route::get('/ppl/pengajuan/{ppl}/absensi/pdf', [AdminPplAbsensiController::class, 'pdf'])->name('ppl.absensi.pdf');
 
+        Route::delete('/khs/bulk-delete', [AdminKhsController::class, 'bulkDestroy'])->name('khs.bulk-delete');
+        Route::get('/khs', [AdminKhsController::class, 'index'])->name('khs.index');
+        Route::get('/khs/create', [AdminKhsController::class, 'create'])->name('khs.create');
+        Route::get('/khs/{khs}', [AdminKhsController::class, 'show'])->name('khs.show');
+        Route::get('/khs/{khs}/pdf', [AdminKhsController::class, 'downloadPdf'])->name('khs.pdf');
+        Route::post('/khs', [AdminKhsController::class, 'store'])->name('khs.store');
+        Route::get('/khs/{khs}/edit', [AdminKhsController::class, 'edit'])->name('khs.edit');
+        Route::put('/khs/{khs}', [AdminKhsController::class, 'update'])->name('khs.update');
+        Route::delete('/khs/{khs}', [AdminKhsController::class, 'destroy'])->name('khs.destroy');
+
+        Route::get('/rekap-nilai', [AdminKhsController::class, 'rekapIndex'])->name('rekap-nilai.index');
+        Route::get('/rekap-nilai/{mahasiswa}', [AdminKhsController::class, 'rekapShow'])->name('rekap-nilai.show');
+        Route::get('/rekap-nilai/{mahasiswa}/pdf', [AdminKhsController::class, 'rekapPdf'])->name('rekap-nilai.pdf');
+
         // KKN
         Route::get('/kkn', [DosenKknController::class, 'index'])->name('kkn.index');
         Route::get('/kkn/posko/{posko}', [DosenKknController::class, 'showPosko'])->name('kkn.posko');
