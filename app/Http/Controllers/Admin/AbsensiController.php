@@ -121,6 +121,9 @@ class AbsensiController extends Controller
 
         $mahasiswa = Mahasiswa::query()
             ->where('program_studi', $jurusan)
+            ->where(function ($sub) {
+                $this->scopeMahasiswaAktif($sub);
+            })
             ->whereHas('krs', function ($q) use ($semester, $mataKuliahId) {
                 $q->where('semester', $semester)
                     ->where('status_approval', 'approved')
@@ -179,6 +182,43 @@ class AbsensiController extends Controller
             ->first();
     }
 
+    private function scopeMahasiswaAktif($query)
+    {
+        return $query->where(function ($sub) {
+            $sub->whereNull('status_mahasiswa')
+                ->orWhere('status_mahasiswa', '')
+                ->orWhereRaw('LOWER(TRIM(status_mahasiswa)) = ?', ['aktif']);
+        });
+    }
+
+    /**
+     * @return array<int,int>
+     */
+    private function getActiveKrsMahasiswaIds(string $jurusan, int $semester, int $mataKuliahId): array
+    {
+        $jurusan = trim($jurusan);
+        if ($jurusan === '' || $semester < 1 || $mataKuliahId <= 0) {
+            return [];
+        }
+
+        $ids = Mahasiswa::query()
+            ->where('program_studi', $jurusan)
+            ->where(function ($sub) {
+                $this->scopeMahasiswaAktif($sub);
+            })
+            ->whereHas('krs', function ($q) use ($semester, $mataKuliahId) {
+                $q->where('semester', $semester)
+                    ->where('status_approval', 'approved')
+                    ->whereHas('items', function ($qi) use ($mataKuliahId) {
+                        $qi->where('mata_kuliah_id', $mataKuliahId);
+                    });
+            })
+            ->pluck('id')
+            ->all();
+
+        return array_map('intval', (array) $ids);
+    }
+
     public function entry(Request $request): View
     {
         $routePrefix = $request->user()?->isDosen() ? 'dosen' : 'admin';
@@ -219,17 +259,7 @@ class AbsensiController extends Controller
             ]
         );
 
-        $mahasiswaIds = Mahasiswa::query()
-            ->where('program_studi', $validated['jurusan'])
-            ->whereHas('krs', function ($q) use ($validated) {
-                $q->where('semester', $validated['semester'])
-                    ->where('status_approval', 'approved')
-                    ->whereHas('items', function ($qi) use ($validated) {
-                        $qi->where('mata_kuliah_id', $validated['mata_kuliah_id']);
-                    });
-            })
-            ->pluck('id')
-            ->all();
+        $mahasiswaIds = $this->getActiveKrsMahasiswaIds((string) $validated['jurusan'], (int) $validated['semester'], (int) $validated['mata_kuliah_id']);
 
         foreach ($mahasiswaIds as $mahasiswaId) {
             AbsensiItem::query()->firstOrCreate(
@@ -422,7 +452,11 @@ class AbsensiController extends Controller
         }
 
         $absensi->load(['mataKuliah.dosen', 'mataKuliah.dosen2', 'items.mahasiswa']);
-        $items = $absensi->items->sortBy(fn ($i) => (string) ($i->mahasiswa?->npm ?? ''))->values();
+        $allowedIds = $this->getActiveKrsMahasiswaIds((string) ($absensi->jurusan ?? ''), (int) $absensi->semester, (int) ($absensi->mata_kuliah_id ?? 0));
+        $items = $absensi->items
+            ->when(count($allowedIds) > 0, fn ($col) => $col->whereIn('mahasiswa_id', $allowedIds))
+            ->sortBy(fn ($i) => (string) ($i->mahasiswa?->npm ?? ''))
+            ->values();
 
         $kaprodi = $this->resolveKaprodi($absensi->jurusan);
         $dosen = $request->user()?->isDosen()
@@ -486,17 +520,7 @@ class AbsensiController extends Controller
             ->where('id', $mataKuliahId)
             ->firstOrFail();
 
-        $mahasiswaIds = Mahasiswa::query()
-            ->where('program_studi', $jurusan)
-            ->whereHas('krs', function ($q) use ($semester, $mataKuliahId) {
-                $q->where('semester', $semester)
-                    ->where('status_approval', 'approved')
-                    ->whereHas('items', function ($qi) use ($mataKuliahId) {
-                        $qi->where('mata_kuliah_id', $mataKuliahId);
-                    });
-            })
-            ->pluck('id')
-            ->all();
+        $mahasiswaIds = $this->getActiveKrsMahasiswaIds($jurusan, $semester, $mataKuliahId);
 
         foreach (range(1, 16) as $pertemuan) {
             $absensi = Absensi::query()->firstOrCreate(
@@ -633,7 +657,11 @@ class AbsensiController extends Controller
         }
 
         $absensi->load(['mataKuliah', 'items.mahasiswa']);
-        $items = $absensi->items->sortBy(fn ($i) => (string) ($i->mahasiswa?->npm ?? ''))->values();
+        $allowedIds = $this->getActiveKrsMahasiswaIds((string) ($absensi->jurusan ?? ''), (int) $absensi->semester, (int) ($absensi->mata_kuliah_id ?? 0));
+        $items = $absensi->items
+            ->when(count($allowedIds) > 0, fn ($col) => $col->whereIn('mahasiswa_id', $allowedIds))
+            ->sortBy(fn ($i) => (string) ($i->mahasiswa?->npm ?? ''))
+            ->values();
 
         $mk = $absensi->mataKuliah;
 

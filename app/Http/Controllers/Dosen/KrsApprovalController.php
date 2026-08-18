@@ -45,7 +45,12 @@ class KrsApprovalController extends Controller
             ->when($status !== '', fn ($q2) => $q2->where('status_approval', $status));
 
         $query->whereHas('mahasiswa', function ($sub) use ($programStudi) {
-            $sub->whereRaw('LOWER(TRIM(program_studi)) = ?', [mb_strtolower($programStudi)]);
+            $sub->whereRaw('LOWER(TRIM(program_studi)) = ?', [mb_strtolower($programStudi)])
+                ->where(function ($sub2) {
+                    $sub2->whereNull('status_mahasiswa')
+                        ->orWhere('status_mahasiswa', '')
+                        ->orWhereRaw('LOWER(TRIM(status_mahasiswa)) = ?', ['aktif']);
+                });
         });
 
         if ($q !== '') {

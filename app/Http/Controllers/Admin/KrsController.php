@@ -22,7 +22,12 @@ class KrsController extends Controller
 
         $query = Krs::query()
             ->with(['mahasiswa', 'mahasiswa.user'])
-            ->withCount('items');
+            ->withCount('items')
+            ->whereHas('mahasiswa', function ($sub) {
+                $sub->whereNull('status_mahasiswa')
+                    ->orWhere('status_mahasiswa', '')
+                    ->orWhereRaw('LOWER(TRIM(status_mahasiswa)) = ?', ['aktif']);
+            });
 
         if ($q !== '') {
             $query->whereHas('mahasiswa', function ($sub) use ($q) {
