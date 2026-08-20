@@ -300,6 +300,11 @@ class NilaiController extends Controller
 
     private function recalculateIpsIpk(int $mahasiswaId, int $upToSemester): void
     {
+        $this->callableRecalculate($mahasiswaId, $upToSemester);
+    }
+
+    public function callableRecalculate(int $mahasiswaId, int $upToSemester): void
+    {
         $khsList = Khs::query()
             ->with(['items.mataKuliah'])
             ->where('mahasiswa_id', $mahasiswaId)
@@ -308,21 +313,14 @@ class NilaiController extends Controller
             ->get();
 
         $ipsBySemester = [];
-        $hasItemsBySemester = [];
+        $hasAnyGradeBySemester = [];
 
         foreach ($khsList as $khs) {
             $items = $khs->items;
-            $hasItems = $items->count() > 0;
-            $hasItemsBySemester[(int) $khs->semester] = $hasItems;
-            $allFilled = $hasItems && $items->every(fn ($it) => $it->nilai_angka !== null);
+            $anyFilled = $items->count() > 0 && $items->some(fn ($it) => $it->nilai_angka !== null);
+            $hasAnyGradeBySemester[(int) $khs->semester] = $anyFilled;
 
-            if (! $hasItems) {
-                $khs->update(['ips' => null]);
-                $ipsBySemester[(int) $khs->semester] = null;
-                continue;
-            }
-
-            if (! $allFilled) {
+            if (! $anyFilled) {
                 $khs->update(['ips' => null]);
                 $ipsBySemester[(int) $khs->semester] = null;
                 continue;
@@ -332,7 +330,11 @@ class NilaiController extends Controller
             $totalBobot = 0.0;
 
             foreach ($items as $it) {
-                $huruf = $it->nilai_huruf ?: ($it->nilai_angka !== null ? self::hurufFromAngka((float) $it->nilai_angka) : null);
+                if ($it->nilai_angka === null) {
+                    continue;
+                }
+
+                $huruf = $it->nilai_huruf ?: self::hurufFromAngka((float) $it->nilai_angka);
                 $bobot = self::bobotFromHuruf($huruf);
                 $sks = (float) ($it->mataKuliah?->sks ?? 0);
 
@@ -351,32 +353,17 @@ class NilaiController extends Controller
 
         $cumulativeSks = 0.0;
         $cumulativeBobot = 0.0;
-        $allSemestersComplete = true;
 
         foreach ($khsList as $khs) {
             $semester = (int) $khs->semester;
             $ips = $ipsBySemester[$semester] ?? null;
-            $hasItems = $hasItemsBySemester[$semester] ?? false;
-
-            if (! $hasItems) {
-                $ipk = $cumulativeSks > 0 ? round($cumulativeBobot / $cumulativeSks, 2) : null;
-                $khs->update(['ipk' => $ipk]);
-                continue;
-            }
-
-            if ($ips === null) {
-                $allSemestersComplete = false;
-                $khs->update(['ipk' => null]);
-                continue;
-            }
-
-            if (! $allSemestersComplete) {
-                $khs->update(['ipk' => null]);
-                continue;
-            }
+            $anyFilled = $hasAnyGradeBySemester[$semester] ?? false;
 
             foreach ($khs->items as $it) {
-                $huruf = $it->nilai_huruf ?: ($it->nilai_angka !== null ? self::hurufFromAngka((float) $it->nilai_angka) : null);
+                if ($it->nilai_angka === null) {
+                    continue;
+                }
+                $huruf = $it->nilai_huruf ?: self::hurufFromAngka((float) $it->nilai_angka);
                 $bobot = self::bobotFromHuruf($huruf);
                 $sks = (float) ($it->mataKuliah?->sks ?? 0);
 

@@ -232,20 +232,52 @@ class KhsController extends Controller
             'mata_kuliah_id.*' => ['integer', 'exists:mata_kuliah,id'],
             'nilai_angka' => ['nullable', 'array'],
             'nilai_huruf' => ['nullable', 'array'],
+            'nilai_tm' => ['nullable', 'array'],
+            'nilai_quis' => ['nullable', 'array'],
+            'nilai_mid' => ['nullable', 'array'],
+            'nilai_final' => ['nullable', 'array'],
         ]);
 
         $khs->update([
             'tahun_ajaran' => $validated['tahun_ajaran'] ?? $khs->tahun_ajaran,
-            'ips' => $validated['ips'] ?? $khs->ips,
-            'ipk' => $validated['ipk'] ?? $khs->ipk,
         ]);
 
         $mkIds = $validated['mata_kuliah_id'] ?? [];
         $mkIds = array_values(array_map('intval', (array) $mkIds));
 
+        $nilaiAngka = $validated['nilai_angka'] ?? [];
+        $nilaiHuruf = $validated['nilai_huruf'] ?? [];
+        $nilaiTm = $validated['nilai_tm'] ?? [];
+        $nilaiQuis = $validated['nilai_quis'] ?? [];
+        $nilaiMid = $validated['nilai_mid'] ?? [];
+        $nilaiFinal = $validated['nilai_final'] ?? [];
+
         foreach ($mkIds as $mkId) {
-            $angka = $validated['nilai_angka'][$mkId] ?? null;
-            $huruf = $validated['nilai_huruf'][$mkId] ?? null;
+            $angka = $nilaiAngka[$mkId] ?? null;
+            $huruf = $nilaiHuruf[$mkId] ?? null;
+            $tm = $nilaiTm[$mkId] ?? null;
+            $quis = $nilaiQuis[$mkId] ?? null;
+            $mid = $nilaiMid[$mkId] ?? null;
+            $final = $nilaiFinal[$mkId] ?? null;
+
+            $angka = $angka !== '' ? $angka : null;
+            $huruf = $huruf !== '' ? $huruf : null;
+            $tm = $tm !== '' ? $tm : null;
+            $quis = $quis !== '' ? $quis : null;
+            $mid = $mid !== '' ? $mid : null;
+            $final = $final !== '' ? $final : null;
+
+            if ($angka === null && ($tm !== null || $quis !== null || $mid !== null || $final !== null)) {
+                $angka = \App\Http\Controllers\Dosen\NilaiController::hitungTotalNilai(
+                    $tm !== null ? (float) $tm : null,
+                    $quis !== null ? (float) $quis : null,
+                    $mid !== null ? (float) $mid : null,
+                    $final !== null ? (float) $final : null,
+                );
+                $huruf = $angka !== null ? \App\Http\Controllers\Dosen\NilaiController::hurufFromAngka((float) $angka) : null;
+            } elseif ($angka !== null && $huruf === null) {
+                $huruf = \App\Http\Controllers\Dosen\NilaiController::hurufFromAngka((float) $angka);
+            }
 
             KhsItem::query()->updateOrCreate(
                 [
@@ -253,8 +285,12 @@ class KhsController extends Controller
                     'mata_kuliah_id' => $mkId,
                 ],
                 [
-                    'nilai_angka' => $angka !== '' ? $angka : null,
-                    'nilai_huruf' => $huruf !== '' ? $huruf : null,
+                    'nilai_tm' => $tm,
+                    'nilai_quis' => $quis,
+                    'nilai_mid' => $mid,
+                    'nilai_final' => $final,
+                    'nilai_angka' => $angka,
+                    'nilai_huruf' => $huruf,
                 ]
             );
         }
@@ -266,9 +302,32 @@ class KhsController extends Controller
             })
             ->delete();
 
+        $semester = (int) $khs->semester;
+        $upToSemester = $semester > 0 ? 8 : 8;
+        if ($semester > 0) {
+            $upToSemester = max(
+                $semester,
+                (int) Khs::query()->where('mahasiswa_id', $khs->mahasiswa_id)->max('semester')
+            );
+        }
+        \App::call(\App\Http\Controllers\Dosen\NilaiController::class . '@callableRecalculate', [
+            'mahasiswaId' => (int) $khs->mahasiswa_id,
+            'upToSemester' => $upToSemester,
+        ]);
+
+        $customIps = $validated['ips'] ?? null;
+        $customIpk = $validated['ipk'] ?? null;
+        if ($customIps !== null || $customIpk !== null) {
+            $khs->refresh();
+            $khs->update([
+                'ips' => $customIps !== '' ? $customIps : $khs->ips,
+                'ipk' => $customIpk !== '' ? $customIpk : $khs->ipk,
+            ]);
+        }
+
         $showRoute = $context['routePrefix'] === 'admin' ? 'admin.khs.show' : 'dosen.khs.show';
 
-        return redirect()->route($showRoute, $khs)->with('success', 'KHS berhasil diperbarui.');
+        return redirect()->route($showRoute, $khs)->with('success', 'KHS berhasil diperbarui. IPS/IPK dihitung otomatis.');
     }
 
     public function destroy(Request $request, Khs $khs): RedirectResponse
