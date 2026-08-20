@@ -430,6 +430,25 @@ class KhsController extends Controller
             ->get()
             ->keyBy('semester');
 
+        $bobotHuruf = [
+            'A' => 4.00,
+            'A-' => 3.70,
+            'B+' => 3.30,
+            'B' => 3.00,
+            'B-' => 2.70,
+            'C+' => 2.30,
+            'C' => 2.00,
+            'D' => 1.00,
+            'E' => 0.00,
+        ];
+
+        $toBobot = function (?string $huruf) use ($bobotHuruf): ?float {
+            $huruf = (string) $huruf;
+            $huruf = trim($huruf);
+            if ($huruf === '' || $huruf === '-') return null;
+            return $bobotHuruf[$huruf] ?? null;
+        };
+
         $semesterRows = [];
         $totalSksKumulatif = 0;
         $totalBobotKumulatif = 0;
@@ -444,11 +463,15 @@ class KhsController extends Controller
             foreach ($items as $it) {
                 $mk = $it->mataKuliah;
                 $sks = (int) ($mk?->sks ?? 0);
-                $nilaiHuruf = (string) ($it->nilai_huruf ?? '-');
-                $nilaiAngka = (float) ($it->nilai_angka ?? 0);
-                $bobot = $sks * $nilaiAngka;
+                $nilaiHurufRaw = (string) ($it->nilai_huruf ?? '');
+                $nilaiHuruf = $nilaiHurufRaw !== '' ? $nilaiHurufRaw : '-';
+                $bobotNilai = $toBobot($nilaiHuruf);
+                $nilaiAngka = $bobotNilai;
+                $bobot = ($bobotNilai !== null && $sks > 0) ? (float) $sks * $bobotNilai : 0.0;
 
-                if ($nilaiHuruf !== '-' && $nilaiHuruf !== '' && $nilaiHuruf !== 'E') {
+                $lulusMatkul = $nilaiHuruf !== '-' && $nilaiHuruf !== '' && $nilaiHuruf !== 'E';
+
+                if ($lulusMatkul && $bobotNilai !== null && $sks > 0) {
                     $sksSemester += $sks;
                     $bobotSemester += $bobot;
                 }
