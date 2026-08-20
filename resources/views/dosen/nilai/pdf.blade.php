@@ -5,29 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Input Nilai</title>
     <style>
-        @page { margin: 8mm 7mm 8mm 9mm; }
+        @page { margin: 7mm 6mm 7mm 6mm; }
         body { font-family: DejaVu Sans, sans-serif; font-size: 9px; color: #111827; }
         table { width: 100%; border-collapse: collapse; }
-        .kop-title-1 { color: #000; font-size: 20px; font-weight: 800; margin: 0; line-height: 1.12; }
-        .kop-title-2 { color: #000; font-size: 28px; font-weight: 900; margin: 1px 0 0; letter-spacing: 0.4px; line-height: 1.06; }
-        .kop-title-3 { color: #000; font-size: 20px; font-weight: 900; margin: 1px 0 0; line-height: 1.12; }
-        .kop-meta { color: #000; font-size: 12px; margin-top: 3px; line-height: 1.2; }
+        .kop-title-1 { color: #000; font-size: 18px; font-weight: 800; margin: 0; line-height: 1.12; }
+        .kop-title-2 { color: #000; font-size: 26px; font-weight: 900; margin: 1px 0 0; letter-spacing: 0.4px; line-height: 1.06; }
+        .kop-title-3 { color: #000; font-size: 18px; font-weight: 900; margin: 1px 0 0; line-height: 1.12; }
+        .kop-meta { color: #000; font-size: 11px; margin-top: 3px; line-height: 1.2; }
         .kop-line-1 { border-top: 4px solid #000; margin-top: 7px; }
         .kop-line-2 { border-top: 2px solid #000; margin-top: 3px; }
-        .doc-title { text-align: center; font-size: 12.5px; font-weight: 900; margin: 7px 0 4px; }
-        .kv2 td { padding: 1.2px 0; font-size: 10px; vertical-align: top; }
-        .kv2 .label { width: 140px; }
+        .prodi-title { text-align: center; font-size: 14px; font-weight: 900; margin: 8px 0 3px; }
+        .kv2 td { padding: 1.2px 0; font-size: 9.5px; vertical-align: top; }
+        .kv2 .label { width: 120px; }
         .kv2 .colon { width: 10px; text-align: center; }
         .kv2 .value { font-weight: 700; }
-        .tbl th, .tbl td { border: 1px solid #111827; padding: 3px 5px; font-size: 9px; }
-        .tbl th { text-transform: uppercase; letter-spacing: 0.3px; font-size: 8.5px; }
+        .tbl th, .tbl td { border: 1px solid #111827; padding: 3px 4px; font-size: 8.5px; vertical-align: middle; }
+        .tbl th { text-transform: uppercase; letter-spacing: 0.2px; font-size: 7.8px; background: #f3f4f6; }
+        .tbl .ghead { font-size: 9px; background: #e5e7eb; font-weight: 900; }
         .center { text-align: center; }
         .nowrap { white-space: nowrap; }
         .sign-wrap { width: 100%; margin-top: 8px; page-break-inside: avoid; }
-        .sign-box { width: 42%; margin-left: auto; text-align: center; }
+        .sign-box { width: 40%; margin-left: auto; text-align: center; }
         .sign-space { height: 38px; }
         .sign-name { font-weight: 800; font-size: 9px; }
         .page-break { page-break-after: always; }
+        .total-cell { background: #fde68a; font-weight: 900; }
+        .mutu-cell { background: #bbf7d0; font-weight: 900; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -66,12 +69,30 @@
                     return $nomor;
                 }
             }
-
             return null;
         };
 
+        $hitungTertimbang = function (?float $nilai, float $bobot): ?string {
+            if ($nilai === null) return '-';
+            return number_format(round($nilai * $bobot, 2), 2, ',', '.');
+        };
+
+        $formatNilai = function (?float $nilai): string {
+            if ($nilai === null) return '-';
+            return number_format($nilai, 0, ',', '.');
+        };
+
+        $formatTotal = function (?float $nilai): string {
+            if ($nilai === null) return '-';
+            return number_format($nilai, 1, ',', '.');
+        };
+
         $relatedDosenNomor = $pickNomor($relatedDosen ?? null);
-        $krsChunks = collect($krs ?? [])->chunk(15);
+        $programStudi = $mataKuliah?->jurusan ?? (optional(optional($krs->first()?->mahasiswa)->program_studi) ?: '-');
+        $semesterGasalGenap = ((int) $semester % 2 === 1) ? 'GANJIL (I)' : 'GENAP (II)';
+        $tahunAjaran = optional(optional($krs->first())->krs ?? null)->tahun_ajaran ?? date('Y').'/'.(date('Y') + 1);
+
+        $krsChunks = collect($krs ?? [])->chunk(16);
         if ($krsChunks->isEmpty()) {
             $krsChunks = collect([collect()]);
         }
@@ -83,14 +104,14 @@
         @php
             $chunkIndex++;
             $isLastChunk = $chunkIndex >= $totalChunks;
-            $startNo = ($chunkIndex - 1) * 15 + 1;
+            $startNo = ($chunkIndex - 1) * 16 + 1;
         @endphp
         <div>
             <table>
                 <tr>
-                    <td style="width: 115px; vertical-align: middle; padding-top: 2px;">
+                    <td style="width: 110px; vertical-align: middle; padding-top: 2px;">
                         @if($logoBase64)
-                            <img src="{{ $logoBase64 }}" alt="Logo" style="display: block; width: 108px; height: auto;" />
+                            <img src="{{ $logoBase64 }}" alt="Logo" style="display: block; width: 100px; height: auto;" />
                         @endif
                     </td>
                     <td style="text-align: center;">
@@ -101,46 +122,51 @@
                         <div class="kop-meta">Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang</div>
                         <div class="kop-meta">E-mail : iaiddisidrap@gmail.com  Website : www.yppddisrapp.ac.id</div>
                     </td>
-                    <td style="width: 90px;"></td>
+                    <td style="width: 80px;"></td>
                 </tr>
             </table>
             <div class="kop-line-1"></div>
             <div class="kop-line-2"></div>
 
-            <div class="doc-title">DAFTAR INPUT NILAI MAHASISWA</div>
+            <div class="prodi-title">PROGRAM STUDI {{ strtoupper($programStudi) }}</div>
 
-            <table style="margin-bottom: 8px;">
+            <table style="margin: 3px 0 8px;">
                 <tr>
-                    <td style="width: 50%; vertical-align: top;">
+                    <td style="width: 40%; vertical-align: top;">
                         <table class="kv2">
                             <tr>
-                                <td class="label">Kode Mata Kuliah</td>
+                                <td class="label">MATA KULIAH</td>
                                 <td class="colon">:</td>
-                                <td class="value">{{ $mataKuliah->kode }}</td>
+                                <td class="value">{{ strtoupper($mataKuliah?->nama ?? '-') }}</td>
                             </tr>
                             <tr>
-                                <td class="label">Mata Kuliah</td>
+                                <td class="label">SEMESTER</td>
                                 <td class="colon">:</td>
-                                <td class="value">{{ $mataKuliah->nama }}</td>
+                                <td class="value">{{ $semesterGasalGenap }} TA. {{ $tahunAjaran }}</td>
                             </tr>
                             <tr>
-                                <td class="label">Semester</td>
+                                <td class="label">JAM PERTEMUAN</td>
                                 <td class="colon">:</td>
-                                <td class="value">{{ $semester }}</td>
+                                <td class="value">16 PERTEMUAN</td>
                             </tr>
                         </table>
                     </td>
-                    <td style="width: 50%; vertical-align: top; padding-left: 16px;">
+                    <td style="width: 30%; vertical-align: top; padding-left: 10px;">
                         <table class="kv2">
+                            <tr>
+                                <td class="label">Kode MK</td>
+                                <td class="colon">:</td>
+                                <td class="value">{{ $mataKuliah?->kode ?? '-' }}</td>
+                            </tr>
                             <tr>
                                 <td class="label">Dosen 1</td>
                                 <td class="colon">:</td>
-                                <td class="value">{{ $mataKuliah->dosen?->nama ?? '-' }}</td>
+                                <td class="value">{{ $mataKuliah?->dosen?->nama ?? '-' }}</td>
                             </tr>
                             <tr>
                                 <td class="label">Dosen 2</td>
                                 <td class="colon">:</td>
-                                <td class="value">{{ $mataKuliah->dosen2?->nama ?? '-' }}</td>
+                                <td class="value">{{ $mataKuliah?->dosen2?->nama ?? '-' }}</td>
                             </tr>
                         </table>
                     </td>
@@ -150,11 +176,23 @@
             <table class="tbl">
                 <thead>
                     <tr>
-                        <th style="width: 34px;" class="center">No</th>
-                        <th>Mahasiswa</th>
-                        <th style="width: 120px;">NPM</th>
-                        <th style="width: 90px;" class="center">Nilai Angka</th>
-                        <th style="width: 90px;" class="center">Nilai Huruf</th>
+                        <th rowspan="2" style="width: 28px;" class="center">No</th>
+                        <th rowspan="2" style="width: 86px;">NIM/NPM</th>
+                        <th rowspan="2" style="min-width: 140px;">NAMA MAHASISWA</th>
+                        <th colspan="4" class="center ghead">NILAI</th>
+                        <th colspan="4" class="center ghead">NILAI TERTIMBANG</th>
+                        <th rowspan="2" style="width: 58px;" class="center">TOTAL</th>
+                        <th rowspan="2" style="width: 58px;" class="center">NILAI MUTU</th>
+                    </tr>
+                    <tr>
+                        <th style="width: 42px;" class="center">TM</th>
+                        <th style="width: 42px;" class="center">QUIS</th>
+                        <th style="width: 42px;" class="center">FINAL</th>
+                        <th style="width: 42px;" class="center">MID</th>
+                        <th style="width: 52px;" class="center">MUKA (50%)</th>
+                        <th style="width: 52px;" class="center">QUIS (20%)</th>
+                        <th style="width: 52px;" class="center">SEMESTE (15%)</th>
+                        <th style="width: 52px;" class="center">SEMEST (15%)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -163,18 +201,32 @@
                             @php
                                 $mhs = $row->mahasiswa;
                                 $existingItem = $existing->get($row->mahasiswa_id);
+                                $tm = $existingItem?->nilai_tm;
+                                $quis = $existingItem?->nilai_quis;
+                                $mid = $existingItem?->nilai_mid;
+                                $final = $existingItem?->nilai_final;
+                                $angka = $existingItem?->nilai_angka;
+                                $huruf = $existingItem?->nilai_huruf;
                             @endphp
                             <tr>
                                 <td class="center">{{ $startNo + $loop->index }}</td>
-                                <td>{{ $mhs?->nama_lengkap ?? '-' }}</td>
                                 <td class="nowrap">{{ $mhs?->npm ?? '-' }}</td>
-                                <td class="center">{{ $existingItem?->nilai_angka !== null ? number_format((float) $existingItem->nilai_angka, 2) : '-' }}</td>
-                                <td class="center">{{ $existingItem?->nilai_huruf ?? '-' }}</td>
+                                <td>{{ strtoupper($mhs?->nama_lengkap ?? '-') }}</td>
+                                <td class="center">{{ $formatNilai($tm) }}</td>
+                                <td class="center">{{ $formatNilai($quis) }}</td>
+                                <td class="center">{{ $formatNilai($final) }}</td>
+                                <td class="center">{{ $formatNilai($mid) }}</td>
+                                <td class="center">{{ $hitungTertimbang($tm, 0.50) }}</td>
+                                <td class="center">{{ $hitungTertimbang($quis, 0.20) }}</td>
+                                <td class="center">{{ $hitungTertimbang($mid, 0.15) }}</td>
+                                <td class="center">{{ $hitungTertimbang($final, 0.15) }}</td>
+                                <td class="center total-cell">{{ $formatTotal($angka) }}</td>
+                                <td class="center mutu-cell">{{ $huruf ?? '-' }}</td>
                             </tr>
                         @endforeach
                     @else
                         <tr>
-                            <td colspan="5" class="center">Tidak ada mahasiswa pada mata kuliah ini.</td>
+                            <td colspan="12" class="center">Tidak ada mahasiswa pada mata kuliah ini.</td>
                         </tr>
                     @endif
                 </tbody>

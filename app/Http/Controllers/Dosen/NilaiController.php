@@ -104,17 +104,35 @@ class NilaiController extends Controller
         abort_unless($dosen && in_array((int) $dosen->id, [(int) $mataKuliah->dosen_id, (int) $mataKuliah->dosen_id_2], true), 403);
 
         $validated = $request->validate([
-            'nilai_angka' => ['nullable', 'array'],
-            'nilai_angka.*' => ['nullable', 'numeric', 'min:0', 'max:100'],
-            'nilai_huruf' => ['nullable', 'array'],
-            'nilai_huruf.*' => ['nullable', 'string', Rule::in(self::hurufChoices())],
+            'nilai_tm' => ['nullable', 'array'],
+            'nilai_tm.*' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'nilai_quis' => ['nullable', 'array'],
+            'nilai_quis.*' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'nilai_mid' => ['nullable', 'array'],
+            'nilai_mid.*' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'nilai_final' => ['nullable', 'array'],
+            'nilai_final.*' => ['nullable', 'numeric', 'min:0', 'max:100'],
         ]);
 
-        $nilaiAngka = collect($validated['nilai_angka'] ?? [])
+        $nilaiTm = collect($validated['nilai_tm'] ?? [])
+            ->mapWithKeys(fn ($v, $k) => [(int) $k => $v])
+            ->all();
+        $nilaiQuis = collect($validated['nilai_quis'] ?? [])
+            ->mapWithKeys(fn ($v, $k) => [(int) $k => $v])
+            ->all();
+        $nilaiMid = collect($validated['nilai_mid'] ?? [])
+            ->mapWithKeys(fn ($v, $k) => [(int) $k => $v])
+            ->all();
+        $nilaiFinal = collect($validated['nilai_final'] ?? [])
             ->mapWithKeys(fn ($v, $k) => [(int) $k => $v])
             ->all();
 
-        $requestedMahasiswaIds = collect(array_keys($nilaiAngka))
+        $requestedMahasiswaIds = collect(array_merge(
+            array_keys($nilaiTm),
+            array_keys($nilaiQuis),
+            array_keys($nilaiMid),
+            array_keys($nilaiFinal)
+        ))
             ->map(fn ($v) => (int) $v)
             ->filter(fn ($v) => $v > 0)
             ->unique()
@@ -167,12 +185,24 @@ class NilaiController extends Controller
                 continue;
             }
 
-            $angka = $nilaiAngka[(int) $mahasiswaId] ?? null;
-            $angka = $angka !== '' ? $angka : null;
-            $angka = $angka !== null ? (float) $angka : null;
+            $tm = $nilaiTm[(int) $mahasiswaId] ?? null;
+            $quis = $nilaiQuis[(int) $mahasiswaId] ?? null;
+            $mid = $nilaiMid[(int) $mahasiswaId] ?? null;
+            $final = $nilaiFinal[(int) $mahasiswaId] ?? null;
+
+            $tm = $tm !== '' && $tm !== null ? (float) $tm : null;
+            $quis = $quis !== '' && $quis !== null ? (float) $quis : null;
+            $mid = $mid !== '' && $mid !== null ? (float) $mid : null;
+            $final = $final !== '' && $final !== null ? (float) $final : null;
+
+            $angka = self::hitungTotalNilai($tm, $quis, $mid, $final);
             $huruf = $angka !== null ? self::hurufFromAngka($angka) : null;
 
             $khsItem->update([
+                'nilai_tm' => $tm,
+                'nilai_quis' => $quis,
+                'nilai_mid' => $mid,
+                'nilai_final' => $final,
                 'nilai_angka' => $angka,
                 'nilai_huruf' => $huruf,
             ]);
@@ -198,6 +228,23 @@ class NilaiController extends Controller
         return redirect()
             ->route('dosen.nilai.edit', [$mataKuliah, $semester])
             ->with('success', $message);
+    }
+
+    public static function hitungTotalNilai(?float $tm, ?float $quis, ?float $mid, ?float $final): ?float
+    {
+        $filled = array_filter([$tm, $quis, $mid, $final], fn ($v) => $v !== null);
+        if (count($filled) === 0) {
+            return null;
+        }
+
+        $tmVal = $tm ?? 0;
+        $quisVal = $quis ?? 0;
+        $midVal = $mid ?? 0;
+        $finalVal = $final ?? 0;
+
+        $total = ($tmVal * 0.50) + ($quisVal * 0.20) + ($midVal * 0.15) + ($finalVal * 0.15);
+
+        return round($total, 2);
     }
 
     private static function hurufChoices(): array

@@ -15,6 +15,10 @@ class KhsItem extends Model
     protected $fillable = [
         'khs_id',
         'mata_kuliah_id',
+        'nilai_tm',
+        'nilai_quis',
+        'nilai_mid',
+        'nilai_final',
         'nilai_angka',
         'nilai_huruf',
     ];
