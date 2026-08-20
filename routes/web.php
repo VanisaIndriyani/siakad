@@ -189,6 +189,7 @@ Route::prefix('admin')
         Route::delete('/cuti/bulk-delete', [AdminCutiApprovalController::class, 'bulkDestroy'])->name('cuti.bulk-delete');
 
         Route::delete('/khs/bulk-delete', [AdminKhsController::class, 'bulkDestroy'])->name('khs.bulk-delete');
+        Route::post('/khs/recalc', [AdminKhsController::class, 'recalcAll'])->name('khs.recalc');
         Route::get('/khs', [AdminKhsController::class, 'index'])->name('khs.index');
         Route::get('/khs/create', [AdminKhsController::class, 'create'])->name('khs.create');
         Route::get('/khs/{khs}', [AdminKhsController::class, 'show'])->name('khs.show');
@@ -604,6 +605,7 @@ Route::prefix('dosen')
         Route::get('/ppl/pengajuan/{ppl}/absensi/pdf', [AdminPplAbsensiController::class, 'pdf'])->name('ppl.absensi.pdf');
 
         Route::delete('/khs/bulk-delete', [AdminKhsController::class, 'bulkDestroy'])->name('khs.bulk-delete');
+        Route::post('/khs/recalc', [AdminKhsController::class, 'recalcAll'])->name('khs.recalc');
         Route::get('/khs', [AdminKhsController::class, 'index'])->name('khs.index');
         Route::get('/khs/create', [AdminKhsController::class, 'create'])->name('khs.create');
         Route::get('/khs/{khs}', [AdminKhsController::class, 'show'])->name('khs.show');

@@ -15,10 +15,22 @@
                 @endif
             </div>
         </div>
-        <a href="{{ route($prefix.'.khs.create') }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition">
-            <i class="fa-solid fa-plus"></i>
-            <span class="text-sm font-medium">Buat KHS</span>
-        </a>
+        <div class="flex flex-wrap gap-2 justify-end">
+            <form method="POST" action="{{ route($prefix.'.khs.recalc') }}" class="inline" onsubmit="return confirm('Hitung ulang IPS &amp; IPK untuk SEMUA mahasiswa yang punya KHS?');">
+                @csrf
+                @foreach(array_filter(request()->only(['q', 'semester', 'page'])) as $k => $v)
+                    <input type="hidden" name="{{ $k }}" value="{{ $v }}" />
+                @endforeach
+                <button class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-blue-600/20 hover:bg-blue-500/30 border border-blue-400/30 transition text-blue-100">
+                    <i class="fa-solid fa-calculator"></i>
+                    <span class="text-sm font-medium">Hitung Ulang IPS/IPK</span>
+                </button>
+            </form>
+            <a href="{{ route($prefix.'.khs.create') }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition">
+                <i class="fa-solid fa-plus"></i>
+                <span class="text-sm font-medium">Buat KHS</span>
+            </a>
+        </div>
     </div>
 
     <form method="GET" class="mt-5 grid grid-cols-1 md:grid-cols-3 gap-3">

@@ -361,6 +361,44 @@ class KhsController extends Controller
         return back()->with('success', 'Data KHS terpilih berhasil dihapus.');
     }
 
+    public function recalcAll(Request $request): RedirectResponse
+    {
+        $context = $this->resolveContext($request);
+        $programStudi = $context['programStudi'] ?? null;
+
+        $mahasiswaQuery = Mahasiswa::query()->orderBy('id');
+        if (!empty($programStudi)) {
+            $mahasiswaQuery->where('program_studi', $programStudi);
+        }
+
+        $mahasiswaIds = $mahasiswaQuery->pluck('id')
+            ->map(fn ($v) => (int) $v)
+            ->filter(fn ($v) => $v > 0)
+            ->values()
+            ->all();
+
+        $maxSemester = (int) Khs::query()->max('semester');
+        if ($maxSemester < 1) {
+            $maxSemester = 8;
+        }
+
+        $processedCount = 0;
+        $nilaiController = new \App\Http\Controllers\Dosen\NilaiController();
+        foreach ($mahasiswaIds as $mhsId) {
+            $hasKhs = Khs::query()->where('mahasiswa_id', $mhsId)->exists();
+            if (! $hasKhs) {
+                continue;
+            }
+            $nilaiController->callableRecalculate((int) $mhsId, $maxSemester);
+            $processedCount++;
+        }
+
+        $prefix = $context['routePrefix'] ?? 'admin';
+
+        return redirect()->route($prefix.'.khs.index', $request->only(['q', 'semester', 'page']))
+            ->with('success', "Berhasil hitung ulang IPS/IPK untuk {$processedCount} mahasiswa.");
+    }
+
     public function rekapIndex(Request $request): View
     {
         $context = $this->resolveContext($request);
