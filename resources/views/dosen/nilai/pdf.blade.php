@@ -185,14 +185,14 @@
                         <th rowspan="2" style="width: 58px;" class="center">NILAI MUTU</th>
                     </tr>
                     <tr>
-                        <th style="width: 42px;" class="center">TM</th>
+                        <th style="width: 42px;" class="center">TATAP MUKA</th>
                         <th style="width: 42px;" class="center">QUIS</th>
+                        <th style="width: 46px;" class="center">MID SEMESTER</th>
                         <th style="width: 42px;" class="center">FINAL</th>
-                        <th style="width: 42px;" class="center">MID</th>
                         <th style="width: 52px;" class="center">MUKA (50%)</th>
                         <th style="width: 52px;" class="center">QUIS (20%)</th>
-                        <th style="width: 52px;" class="center">SEMESTE (15%)</th>
-                        <th style="width: 52px;" class="center">SEMEST (15%)</th>
+                        <th style="width: 56px;" class="center">MID (15%)</th>
+                        <th style="width: 52px;" class="center">FINAL (15%)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -214,8 +214,8 @@
                                 <td>{{ strtoupper($mhs?->nama_lengkap ?? '-') }}</td>
                                 <td class="center">{{ $formatNilai($tm) }}</td>
                                 <td class="center">{{ $formatNilai($quis) }}</td>
-                                <td class="center">{{ $formatNilai($final) }}</td>
                                 <td class="center">{{ $formatNilai($mid) }}</td>
+                                <td class="center">{{ $formatNilai($final) }}</td>
                                 <td class="center">{{ $hitungTertimbang($tm, 0.50) }}</td>
                                 <td class="center">{{ $hitungTertimbang($quis, 0.20) }}</td>
                                 <td class="center">{{ $hitungTertimbang($mid, 0.15) }}</td>
