@@ -242,7 +242,7 @@ class NilaiController extends Controller
         $midVal = $mid ?? 0;
         $finalVal = $final ?? 0;
 
-        $total = ($tmVal * 0.50) + ($quisVal * 0.20) + ($midVal * 0.15) + ($finalVal * 0.15);
+        $total = ($tmVal * 0.50) + ($quisVal * 0.20) + ($midVal * 0.10) + ($finalVal * 0.20);
 
         return round($total, 2);
     }

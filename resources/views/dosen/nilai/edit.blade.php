@@ -8,7 +8,7 @@
             <div class="text-xl font-semibold">Input Nilai</div>
             <div class="text-sm text-emerald-100/70">{{ $mataKuliah->kode }} - {{ $mataKuliah->nama }} • Semester {{ $semester }}</div>
             <div class="text-xs text-emerald-100/60 mt-1">
-                Bobot Nilai: Tatap Muka (50%) • Tugas/Quis (20%) • MID (15%) • Final (15%)
+                Bobot Nilai: Tatap Muka (50%) • Tugas (20%) • MID (10%) • Final (20%)
             </div>
         </div>
         <a href="{{ route('dosen.nilai.index') }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">
@@ -46,9 +46,9 @@
                         <tr>
                             <th class="text-left font-medium px-4 py-3">Mahasiswa</th>
                             <th class="text-center font-medium px-3 py-3">TM (50%)</th>
-                            <th class="text-center font-medium px-3 py-3">Quis (20%)</th>
-                            <th class="text-center font-medium px-3 py-3">MID (15%)</th>
-                            <th class="text-center font-medium px-3 py-3">Final (15%)</th>
+                            <th class="text-center font-medium px-3 py-3">Tugas (20%)</th>
+                            <th class="text-center font-medium px-3 py-3">MID (10%)</th>
+                            <th class="text-center font-medium px-3 py-3">Final (20%)</th>
                             <th class="text-center font-medium px-4 py-3">Total Angka</th>
                             <th class="text-center font-medium px-4 py-3">Nilai Mutu</th>
                         </tr>
@@ -151,7 +151,7 @@
 
     <script>
         (function () {
-            const BOBOT = { tm: 0.50, quis: 0.20, mid: 0.15, final: 0.15 };
+            const BOBOT = { tm: 0.50, quis: 0.20, mid: 0.10, final: 0.20 };
 
             function hurufFromAngka(angka) {
                 if (angka === null || Number.isNaN(angka)) return '';
