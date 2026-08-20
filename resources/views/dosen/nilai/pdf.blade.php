@@ -189,7 +189,7 @@
                         <th style="width: 42px;" class="center">QUIS</th>
                         <th style="width: 46px;" class="center">MID SEMESTER</th>
                         <th style="width: 42px;" class="center">FINAL</th>
-                        <th style="width: 52px;" class="center">MUKA (50%)</th>
+                        <th style="width: 60px;" class="center">TATAP MUKA (50%)</th>
                         <th style="width: 52px;" class="center">QUIS (20%)</th>
                         <th style="width: 56px;" class="center">MID (15%)</th>
                         <th style="width: 52px;" class="center">FINAL (15%)</th>
