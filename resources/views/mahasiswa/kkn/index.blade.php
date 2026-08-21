@@ -57,7 +57,8 @@
                             <div class="text-xs font-bold text-emerald-100/40 uppercase tracking-widest">Status Pendaftaran</div>
                             @php
                                 $statusColor = match ($pengajuan->status) {
-                                    'approved' => 'text-emerald-400',
+                                    'assigned' => 'text-emerald-400',
+                                    'approved' => 'text-blue-400',
                                     'rejected' => 'text-red-400',
                                     default => 'text-yellow-400',
                                 };
@@ -80,6 +81,58 @@
                         @endif
                     </div>
                 </div>
+
+                @if ($pengajuan->dosen_pembimbing_id || $pengajuan->nomor_sk || $pengajuan->sk_pembimbing_path)
+                    <div class="rounded-3xl bg-[#0d2a23] border border-white/10 p-6 shadow-xl relative overflow-hidden">
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="h-12 w-12 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-center justify-center">
+                                <i class="fa-solid fa-file-signature text-blue-400"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-blue-100/40 uppercase tracking-widest">Pembimbing SK</div>
+                                <div class="text-sm font-black text-white">Ditetapkan</div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div>
+                                <div class="text-[10px] font-black text-emerald-100/30 uppercase tracking-widest mb-1">Pembimbing 1</div>
+                                <div class="text-sm font-bold text-white">{{ $pengajuan->dosenPembimbing?->nama ?: '-' }}</div>
+                            </div>
+                            @if ($pengajuan->dosenPembimbing2?->nama)
+                                <div>
+                                    <div class="text-[10px] font-black text-emerald-100/30 uppercase tracking-widest mb-1">Pembimbing 2</div>
+                                    <div class="text-sm font-bold text-white">{{ $pengajuan->dosenPembimbing2?->nama }}</div>
+                                </div>
+                            @endif
+                            <div class="p-4 rounded-2xl bg-white/5 border border-white/5">
+                                <div class="text-[10px] font-black text-emerald-100/30 uppercase tracking-widest mb-1">Nomor SK</div>
+                                <div class="text-sm font-bold text-white">{{ $pengajuan->nomor_sk ?: '-' }}</div>
+                                @if ($pengajuan->tanggal_sk)
+                                    <div class="mt-2 text-[10px] font-black text-emerald-100/30 uppercase tracking-widest mb-1">Tanggal SK</div>
+                                    <div class="text-sm font-medium text-emerald-100/80">{{ $pengajuan->tanggal_sk->format('d F Y') }}</div>
+                                @endif
+                            </div>
+                            @if ($pengajuan->sk_pembimbing_path)
+                                <div class="flex flex-col gap-2">
+                                    <a href="{{ route('mahasiswa.kkn.sk.preview', $pengajuan) }}" target="_blank"
+                                       class="h-11 px-4 rounded-2xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/20 text-emerald-100 font-bold tracking-widest uppercase text-xs flex items-center justify-center gap-2 transition">
+                                        <i class="fa-solid fa-eye"></i>
+                                        Preview SK
+                                    </a>
+                                    <a href="{{ route('mahasiswa.kkn.sk.download', $pengajuan) }}"
+                                       class="h-11 px-4 rounded-2xl bg-blue-500/15 hover:bg-blue-500/25 border border-blue-500/20 text-blue-100 font-bold tracking-widest uppercase text-xs flex items-center justify-center gap-2 transition">
+                                        <i class="fa-solid fa-download"></i>
+                                        Unduh SK
+                                    </a>
+                                    <div class="text-[10px] text-emerald-100/40 truncate text-center">
+                                        {{ $pengajuan->sk_pembimbing_name ?: basename($pengajuan->sk_pembimbing_path) }}
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @endif
 
                 @if ($pengajuan->status === 'approved' && !$pengajuan->kkn_posko_id)
                     <div class="rounded-3xl bg-emerald-600/10 border border-emerald-500/20 p-6 text-center">

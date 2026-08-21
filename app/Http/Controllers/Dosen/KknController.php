@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dosen;
 
 use App\Http\Controllers\Controller;
+use App\Models\KknPengajuan;
 use App\Models\KknPosko;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -18,8 +19,18 @@ class KknController extends Controller
             ->with(['pengajuans.mahasiswa'])
             ->get();
 
+        $items = KknPengajuan::query()
+            ->with(['mahasiswa', 'dosenPembimbing', 'dosenPembimbing2'])
+            ->where(function ($q) use ($dosen) {
+                $q->where('dosen_pembimbing_id', $dosen->id)
+                    ->orWhere('dosen_pembimbing_id_2', $dosen->id);
+            })
+            ->orderByDesc('id')
+            ->get();
+
         return view('dosen.kkn.index', [
             'poskos' => $poskos,
+            'items' => $items,
         ]);
     }
 

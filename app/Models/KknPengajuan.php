@@ -18,6 +18,22 @@ class KknPengajuan extends Model
         'kkn_posko_id',
         'status',
         'catatan_admin',
+        'dosen_pembimbing_id',
+        'dosen_pembimbing_id_2',
+        'nomor_sk',
+        'tanggal_sk',
+        'sk_pembimbing_path',
+        'sk_pembimbing_name',
+        'assigned_at',
+        'mahasiswa_last_read_at',
+        'dosen_last_read_at',
+    ];
+
+    protected $casts = [
+        'tanggal_sk' => 'date',
+        'assigned_at' => 'datetime',
+        'mahasiswa_last_read_at' => 'datetime',
+        'dosen_last_read_at' => 'datetime',
     ];
 
     public function mahasiswa(): BelongsTo
@@ -28,6 +44,16 @@ class KknPengajuan extends Model
     public function posko(): BelongsTo
     {
         return $this->belongsTo(KknPosko::class, 'kkn_posko_id');
+    }
+
+    public function dosenPembimbing(): BelongsTo
+    {
+        return $this->belongsTo(Dosen::class, 'dosen_pembimbing_id');
+    }
+
+    public function dosenPembimbing2(): BelongsTo
+    {
+        return $this->belongsTo(Dosen::class, 'dosen_pembimbing_id_2');
     }
 
     public function jurnals(): HasMany

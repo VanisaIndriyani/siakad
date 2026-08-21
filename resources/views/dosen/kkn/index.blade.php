@@ -6,9 +6,81 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
             <div class="text-xl font-semibold text-white uppercase tracking-tight">Bimbingan KKN</div>
-            <div class="text-sm text-emerald-100/60 font-medium">Daftar posko KKN yang Anda bimbing.</div>
+            <div class="text-sm text-emerald-100/60 font-medium">Daftar pembimbingan KKN per SK dan posko yang Anda bimbing.</div>
         </div>
     </div>
+
+    <div class="rounded-2xl bg-white/5 border border-white/10 p-5 mb-6">
+        <div class="text-sm font-semibold mb-3 text-emerald-100">Daftar Pembimbingan KKN (sesuai SK Pembimbing)</div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead class="bg-white/5 text-emerald-100/80">
+                    <tr>
+                        <th class="text-left font-medium px-3 py-2 w-10">No</th>
+                        <th class="text-left font-medium px-3 py-2">Mahasiswa</th>
+                        <th class="text-left font-medium px-3 py-2">Prodi</th>
+                        <th class="text-left font-medium px-3 py-2">Nomor SK</th>
+                        <th class="text-left font-medium px-3 py-2 w-28">Tanggal SK</th>
+                        <th class="text-left font-medium px-3 py-2">Posko</th>
+                        <th class="text-right font-medium px-3 py-2 w-56">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/10">
+                    @forelse ($items as $i => $row)
+                        <tr class="hover:bg-white/5">
+                            <td class="px-3 py-3">{{ $i + 1 }}</td>
+                            <td class="px-3 py-3">
+                                <div class="font-semibold">{{ $row->mahasiswa?->nama_lengkap ?: '-' }}</div>
+                                <div class="text-xs text-emerald-100/60">{{ $row->mahasiswa?->npm ?: '-' }}</div>
+                            </td>
+                            <td class="px-3 py-3 text-emerald-100/85">{{ $row->mahasiswa?->program_studi ?: '-' }}</td>
+                            <td class="px-3 py-3">
+                                @if ($row->nomor_sk)
+                                    <span class="font-medium text-emerald-100">{{ $row->nomor_sk }}</span>
+                                @else
+                                    <span class="text-emerald-100/40">-</span>
+                                @endif
+                            </td>
+                            <td class="px-3 py-3 text-emerald-100/85">
+                                {{ $row->tanggal_sk?->format('d/m/Y') ?: '-' }}
+                            </td>
+                            <td class="px-3 py-3 text-emerald-100/85">
+                                {{ $row->posko?->nama_posko ?: '-' }}
+                            </td>
+                            <td class="px-3 py-3">
+                                <div class="flex items-center justify-end gap-2 flex-wrap">
+                                    <a href="{{ route('dosen.kkn-pengajuan.index', ['q' => $row->mahasiswa?->npm]) }}" class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-xs font-medium">
+                                        <i class="fa-solid fa-list"></i>
+                                        Detail
+                                    </a>
+                                    @if ($row->sk_pembimbing_path)
+                                        <a href="{{ route('dosen.kkn-pengajuan.sk.preview', $row) }}" target="_blank"
+                                           class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/20 transition text-xs font-medium">
+                                            <i class="fa-solid fa-eye"></i>
+                                            Preview
+                                        </a>
+                                        <a href="{{ route('dosen.kkn-pengajuan.sk.download', $row) }}"
+                                           class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-blue-500/15 hover:bg-blue-500/25 border border-blue-500/20 transition text-xs font-medium">
+                                            <i class="fa-solid fa-download"></i>
+                                            Unduh SK
+                                        </a>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="px-3 py-10 text-center text-emerald-100/60 text-xs">
+                                Belum ada pengajuan KKN yang menetapkan Anda sebagai pembimbing sesuai SK.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="text-sm font-semibold text-emerald-100 mb-3">Daftar Posko KKN (DPL)</div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @forelse ($poskos as $posko)

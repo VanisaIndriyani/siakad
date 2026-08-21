@@ -17,7 +17,7 @@ class KknController extends Controller
         abort_unless($mahasiswa, 403);
 
         $pengajuan = KknPengajuan::query()
-            ->with(['posko.pembimbingS', 'posko.pengajuans.mahasiswa'])
+            ->with(['posko.pembimbingS', 'posko.pengajuans.mahasiswa', 'dosenPembimbing', 'dosenPembimbing2'])
             ->where('mahasiswa_id', $mahasiswa->id)
             ->first();
 

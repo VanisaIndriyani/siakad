@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class KknController extends Controller
 {
@@ -149,13 +150,139 @@ class KknController extends Controller
             abort_unless((string) ($kkn->mahasiswa?->program_studi ?? '') === $context['programStudi'], 403);
         }
 
-        $kkn->load(['mahasiswa', 'posko.pembimbingS']);
+        $kkn->load(['mahasiswa', 'posko.pembimbingS', 'dosenPembimbing', 'dosenPembimbing2']);
+
+        $dosenList = Dosen::query()->orderBy('nama')->get();
 
         return view('admin.kkn.show', [
             'kkn' => $kkn,
             'routePrefix' => $context['routePrefix'],
             'canAssign' => $context['canAssign'],
+            'dosenList' => $dosenList,
         ]);
+    }
+
+    public function assign(Request $request, KknPengajuan $kkn): RedirectResponse
+    {
+        $context = $this->resolveContext($request);
+        abort_unless($context['canAssign'], 403);
+
+        if ($context['programStudi']) {
+            $kkn->loadMissing('mahasiswa');
+            abort_unless((string) ($kkn->mahasiswa?->program_studi ?? '') === $context['programStudi'], 403);
+        }
+
+        $validated = $request->validate([
+            'dosen_pembimbing_id' => ['required', 'exists:dosen,id'],
+            'dosen_pembimbing_id_2' => ['nullable', 'exists:dosen,id', 'different:dosen_pembimbing_id'],
+            'nomor_sk' => ['nullable', 'string', 'max:255'],
+            'tanggal_sk' => ['nullable', 'date'],
+            'sk_pembimbing_file' => ['nullable', 'file', 'max:10240', 'mimes:pdf,jpg,jpeg,png'],
+        ]);
+
+        $skPath = $kkn->sk_pembimbing_path;
+        $skName = $kkn->sk_pembimbing_name;
+
+        if (! empty($validated['sk_pembimbing_file'])) {
+            $file = $validated['sk_pembimbing_file'];
+            $originalName = (string) $file->getClientOriginalName();
+            $ext = (string) $file->getClientOriginalExtension();
+            $filename = 'sk-kkn-'.now()->format('YmdHis').'-'.Str::random(8).($ext !== '' ? '.'.$ext : '');
+            $path = $file->storeAs('kkn/sk/'.$kkn->id, $filename, 'public');
+
+            if ($kkn->sk_pembimbing_path) {
+                Storage::disk('public')->delete($kkn->sk_pembimbing_path);
+            }
+
+            $skPath = $path;
+            $skName = $originalName;
+        }
+
+        $kkn->update([
+            'status' => 'assigned',
+            'dosen_pembimbing_id' => (int) $validated['dosen_pembimbing_id'],
+            'dosen_pembimbing_id_2' => $validated['dosen_pembimbing_id_2'] ? (int) $validated['dosen_pembimbing_id_2'] : null,
+            'nomor_sk' => $validated['nomor_sk'] ?: null,
+            'tanggal_sk' => $validated['tanggal_sk'] ?: null,
+            'sk_pembimbing_path' => $skPath,
+            'sk_pembimbing_name' => $skName,
+            'assigned_at' => now(),
+            'approved_at' => $kkn->approved_at ?: now(),
+        ]);
+
+        return back()->with('success', 'Pembimbing KKN berhasil ditetapkan.');
+    }
+
+    private function authorizeSkAccess(Request $request, KknPengajuan $kkn): void
+    {
+        $user = $request->user();
+        abort_unless($user, 403);
+
+        if ($user->isAdmin()) {
+            return;
+        }
+
+        if ($user->isMahasiswa()) {
+            abort_unless((int) $kkn->mahasiswa_id === (int) ($user->mahasiswa?->id ?? 0), 404);
+            return;
+        }
+
+        if ($user->isDosen()) {
+            $dosenId = (int) ($user->dosen?->id ?? 0);
+            $statusAkademik = (string) ($user->dosen?->status_akademik ?? '');
+            $allowed = in_array($dosenId, [(int) $kkn->dosen_pembimbing_id, (int) $kkn->dosen_pembimbing_id_2], true)
+                || in_array($statusAkademik, self::PRODI_APPROVER_STATUS, true);
+            abort_unless($allowed, 403);
+            return;
+        }
+
+        abort(403);
+    }
+
+    public function downloadSkPembimbing(Request $request, KknPengajuan $kkn): BinaryFileResponse
+    {
+        $this->authorizeSkAccess($request, $kkn);
+
+        abort_unless($kkn->sk_pembimbing_path, 404);
+        abort_unless(Storage::disk('public')->exists($kkn->sk_pembimbing_path), 404);
+
+        $downloadName = $kkn->sk_pembimbing_name ?: basename($kkn->sk_pembimbing_path);
+        return response()->download(storage_path('app/public/'.$kkn->sk_pembimbing_path), $downloadName);
+    }
+
+    public function previewSkPembimbing(Request $request, KknPengajuan $kkn): BinaryFileResponse
+    {
+        $this->authorizeSkAccess($request, $kkn);
+
+        abort_unless($kkn->sk_pembimbing_path, 404);
+        abort_unless(Storage::disk('public')->exists($kkn->sk_pembimbing_path), 404);
+
+        $downloadName = $kkn->sk_pembimbing_name ?: basename($kkn->sk_pembimbing_path);
+        return response()->file(storage_path('app/public/'.$kkn->sk_pembimbing_path), [
+            'Content-Disposition' => 'inline; filename="'.$downloadName.'"',
+        ]);
+    }
+
+    public function destroySkPembimbing(Request $request, KknPengajuan $kkn): RedirectResponse
+    {
+        $context = $this->resolveContext($request);
+        abort_unless($context['canAssign'], 403);
+
+        if ($context['programStudi']) {
+            $kkn->loadMissing('mahasiswa');
+            abort_unless((string) ($kkn->mahasiswa?->program_studi ?? '') === $context['programStudi'], 403);
+        }
+
+        if ($kkn->sk_pembimbing_path) {
+            Storage::disk('public')->delete($kkn->sk_pembimbing_path);
+        }
+
+        $kkn->update([
+            'sk_pembimbing_path' => null,
+            'sk_pembimbing_name' => null,
+        ]);
+
+        return back()->with('success', 'File SK Pembimbing KKN berhasil dihapus.');
     }
 
     public function updateStatus(Request $request, KknPengajuan $kkn): RedirectResponse
