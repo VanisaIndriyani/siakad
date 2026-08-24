@@ -9,8 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('kkn_pengajuans', function (Blueprint $table) {
-            $table->foreignId('dosen_pembimbing_id')->nullable()->constrained('dosens')->nullOnDelete()->after('catatan_admin');
-            $table->foreignId('dosen_pembimbing_id_2')->nullable()->constrained('dosens')->nullOnDelete()->after('dosen_pembimbing_id');
+            $table->foreignId('dosen_pembimbing_id')->nullable()->constrained('dosen')->nullOnDelete()->after('catatan_admin');
+            $table->foreignId('dosen_pembimbing_id_2')->nullable()->constrained('dosen')->nullOnDelete()->after('dosen_pembimbing_id');
             $table->string('nomor_sk')->nullable()->after('dosen_pembimbing_id_2');
             $table->date('tanggal_sk')->nullable()->after('nomor_sk');
             $table->string('sk_pembimbing_path')->nullable()->after('tanggal_sk');
