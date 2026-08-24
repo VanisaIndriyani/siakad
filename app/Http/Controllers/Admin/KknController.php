@@ -35,7 +35,7 @@ class KknController extends Controller
     private function resolveContext(Request $request): array
     {
         $user = $request->user();
-        if ($user?->isAdmin()) {
+        if ($user?->isStaffAkademik()) {
             return ['routePrefix' => 'admin', 'canAssign' => true, 'programStudi' => null];
         }
 

@@ -20,7 +20,7 @@ class KhsController extends Controller
     private function resolveContext(Request $request): array
     {
         $user = $request->user();
-        if ($user?->isAdmin()) {
+        if ($user?->isAdmin() || $user?->isAkademik()) {
             return [
                 'routePrefix' => 'admin',
                 'canManage' => true,

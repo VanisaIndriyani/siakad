@@ -36,7 +36,7 @@ class SkripsiController extends Controller
     private function resolveContext(Request $request): array
     {
         $user = $request->user();
-        if ($user?->isAdmin()) {
+        if ($user?->isStaffAkademik()) {
             return ['routePrefix' => 'admin', 'canAssign' => true, 'programStudi' => null];
         }
 
@@ -395,8 +395,11 @@ class SkripsiController extends Controller
             abort_unless((int) $skripsi->mahasiswa_id === (int) ($user->mahasiswa?->id ?? 0), 404);
         } elseif ($user->isAdmin()) {
         } elseif ($user->isDosen()) {
+            $dosenId = (int) ($user->dosen?->id ?? 0);
             $statusAkademik = (string) ($user->dosen?->status_akademik ?? '');
-            abort_unless(in_array($statusAkademik, self::PRODI_APPROVER_STATUS, true), 403);
+            $allowed = in_array($dosenId, [(int) $skripsi->dosen_pembimbing_id, (int) $skripsi->dosen_pembimbing_id_2], true)
+                || in_array($statusAkademik, self::PRODI_APPROVER_STATUS, true);
+            abort_unless($allowed, 403);
         } else {
             abort(403);
         }
@@ -417,8 +420,11 @@ class SkripsiController extends Controller
             abort_unless((int) $skripsi->mahasiswa_id === (int) ($user->mahasiswa?->id ?? 0), 404);
         } elseif ($user->isAdmin()) {
         } elseif ($user->isDosen()) {
+            $dosenId = (int) ($user->dosen?->id ?? 0);
             $statusAkademik = (string) ($user->dosen?->status_akademik ?? '');
-            abort_unless(in_array($statusAkademik, self::PRODI_APPROVER_STATUS, true), 403);
+            $allowed = in_array($dosenId, [(int) $skripsi->dosen_pembimbing_id, (int) $skripsi->dosen_pembimbing_id_2], true)
+                || in_array($statusAkademik, self::PRODI_APPROVER_STATUS, true);
+            abort_unless($allowed, 403);
         } else {
             abort(403);
         }

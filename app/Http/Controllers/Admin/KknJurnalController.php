@@ -18,7 +18,7 @@ class KknJurnalController extends Controller
     private function resolveContext(Request $request): array
     {
         $user = $request->user();
-        if ($user?->isAdmin()) {
+        if ($user?->isStaffAkademik()) {
             return [
                 'routePrefix' => 'admin',
                 'canAssign' => true,
@@ -37,7 +37,6 @@ class KknJurnalController extends Controller
                 'routePrefix' => 'dosen',
                 'canAssign' => $canAssign,
                 'programStudi' => $programStudi ?: '---',
-                'dosenId' => (int) ($dosen?->id ?? 0),
             ];
         }
 
