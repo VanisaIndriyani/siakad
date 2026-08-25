@@ -50,6 +50,11 @@
         <i class="fa-solid fa-graduation-cap text-emerald-300"></i>
         <span class="text-sm font-medium">Rekap Nilai</span>
     </a>
+    <a href="{{ route('admin.transkrip-nilai.index') }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('admin.transkrip-nilai.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+        <i class="fa-solid fa-scroll text-emerald-300"></i>
+        <span class="text-sm font-medium">Transkrip Nilai</span>
+    </a>
     <a href="{{ route('admin.nilai-monitoring.index') }}"
        class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('admin.nilai-monitoring.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
         <i class="fa-solid fa-clipboard-check text-emerald-300"></i>

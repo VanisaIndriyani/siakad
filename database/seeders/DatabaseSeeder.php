@@ -219,18 +219,60 @@ class DatabaseSeeder extends Seeder
                 ]
             );
 
-            foreach ($mkSem3 as $mk) {
-                KhsItem::query()->firstOrCreate(
+            $bobotHuruf = [
+                ['angka' => 92, 'huruf' => 'A'],
+                ['angka' => 86, 'huruf' => 'A-'],
+                ['angka' => 81, 'huruf' => 'B+'],
+                ['angka' => 76, 'huruf' => 'B'],
+                ['angka' => 71, 'huruf' => 'B-'],
+                ['angka' => 66, 'huruf' => 'C+'],
+                ['angka' => 60, 'huruf' => 'C'],
+                ['angka' => 50, 'huruf' => 'D'],
+            ];
+            $totalSkorSem3 = 0;
+            $totalSksSem3 = 0;
+            $bobot = [
+                'A' => 4.00,
+                'A-' => 3.70,
+                'B+' => 3.30,
+                'B' => 3.00,
+                'B-' => 2.70,
+                'C+' => 2.30,
+                'C' => 2.00,
+                'D' => 1.00,
+            ];
+
+            foreach ($mkSem3 as $idx => $mk) {
+                $pilihan = $bobotHuruf[$idx % count($bobotHuruf)];
+                $nilaiAngka = $pilihan['angka'] + rand(0, 6);
+                $nilaiHuruf = $pilihan['huruf'];
+                if ($nilaiAngka > 100) $nilaiAngka = 100;
+
+                KhsItem::query()->updateOrCreate(
                     [
                         'khs_id' => $khsSem3->id,
                         'mata_kuliah_id' => $mk->id,
                     ],
                     [
-                        'nilai_angka' => null,
-                        'nilai_huruf' => null,
+                        'nilai_angka' => $nilaiAngka,
+                        'nilai_huruf' => $nilaiHuruf,
                     ]
                 );
+
+                $sks = (int) ($mk->sks ?? 0);
+                $bobotH = $bobot[$nilaiHuruf] ?? 0;
+                $totalSkorSem3 += $sks * $bobotH;
+                $totalSksSem3 += $sks;
             }
+
+            $ipsSem3 = $totalSksSem3 > 0 ? round($totalSkorSem3 / $totalSksSem3, 2) : 0;
+            if (!$khsSem3->ips || $khsSem3->ips <= 0) {
+                $khsSem3->ips = $ipsSem3;
+            }
+            if (!$khsSem3->ipk || $khsSem3->ipk <= 0) {
+                $khsSem3->ipk = $ipsSem3;
+            }
+            $khsSem3->save();
 
             $mkSem4 = MataKuliah::query()
                 ->where('jurusan', $mhs->program_studi)

@@ -66,6 +66,11 @@ class Mahasiswa extends Model
         'sk_penasehat_name',
         'mahasiswa_last_read_at',
         'dosen_last_read_at',
+        'nomor_transkrip',
+        'tanggal_lulus',
+        'nomor_sk_banpt',
+        'ujian_kompre',
+        'judul_skripsi',
     ];
 
     protected function casts(): array
@@ -75,8 +80,10 @@ class Mahasiswa extends Model
             'ayah_tanggal_lahir' => 'date',
             'ibu_tanggal_lahir' => 'date',
             'tanggal_sk_penasehat' => 'date',
+            'tanggal_lulus' => 'date',
             'mahasiswa_last_read_at' => 'datetime',
             'dosen_last_read_at' => 'datetime',
+            'ujian_kompre' => 'array',
         ];
     }
 

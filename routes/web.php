@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\SkripsiController as AdminSkripsiController;
 use App\Http\Controllers\Admin\KknController as AdminKknController;
 use App\Http\Controllers\Admin\KknJurnalController as AdminKknJurnalController;
 use App\Http\Controllers\Admin\KknAbsensiController as AdminKknAbsensiController;
+use App\Http\Controllers\Admin\TranskripNilaiController as AdminTranskripNilaiController;
 use App\Http\Controllers\Mahasiswa\KknController as MahasiswaKknController;
 use App\Http\Controllers\Mahasiswa\KknJurnalController as MahasiswaKknJurnalController;
 use App\Http\Controllers\Mahasiswa\KknAbsensiController as MahasiswaKknAbsensiController;
@@ -332,6 +333,12 @@ Route::prefix('admin')
             Route::put('/publikasi/{publikasiKk}', [\App\Http\Controllers\PublikasiKkController::class, 'update'])->name('publikasi.update');
             Route::delete('/publikasi/{publikasiKk}', [\App\Http\Controllers\PublikasiKkController::class, 'destroy'])->name('publikasi.destroy');
             Route::get('/publikasi/{publikasiKk}/download', [\App\Http\Controllers\PublikasiKkController::class, 'download'])->name('publikasi.download');
+
+            Route::get('/transkrip-nilai', [AdminTranskripNilaiController::class, 'index'])->name('transkrip-nilai.index');
+            Route::get('/transkrip-nilai/{mahasiswa}', [AdminTranskripNilaiController::class, 'show'])->name('transkrip-nilai.show');
+            Route::get('/transkrip-nilai/{mahasiswa}/pdf', [AdminTranskripNilaiController::class, 'pdf'])->name('transkrip-nilai.pdf');
+            Route::get('/transkrip-nilai/{mahasiswa}/edit', [AdminTranskripNilaiController::class, 'edit'])->name('transkrip-nilai.edit');
+            Route::put('/transkrip-nilai/{mahasiswa}', [AdminTranskripNilaiController::class, 'update'])->name('transkrip-nilai.update');
         });
     });
 
