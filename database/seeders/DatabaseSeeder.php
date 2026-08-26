@@ -116,10 +116,15 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'email' => 'mhs20260005@iaiddisidrap.ac.id',
-                'nama_lengkap' => 'Mahasiswa 20260005',
+                'nama_lengkap' => 'Nur Afiah',
                 'npm' => '20260005',
                 'angkatan' => 2026,
                 'program_studi' => 'Perbankan Syariah',
+                'tempat_lahir' => 'Pangkajene',
+                'tanggal_lahir' => '2002-05-15',
+                'foto_path' => 'foto_mahasiswa/20260005.jpg',
+                'tanggal_lulus' => '2026-08-25',
+                'judul_skripsi' => 'PRODUKTIVITAS EKONOMI MASYARAKAT PASCA BANJIR DI DESA LEPPANGENG KABUPATEN WAJO (TINJAUAN EKONOMI ISLAM)',
             ],
         ];
 
@@ -137,16 +142,21 @@ class DatabaseSeeder extends Seeder
                 ['user_id' => $user->id],
                 [
                     'nama_lengkap' => $row['nama_lengkap'],
-                    'tempat_lahir' => 'Kota',
-                    'tanggal_lahir' => '2004-01-01',
-                    'nik' => null,
+                    'tempat_lahir' => $row['tempat_lahir'] ?? 'Kota',
+                    'tanggal_lahir' => $row['tanggal_lahir'] ?? '2004-01-01',
+                    'nik' => '73' . str_pad((string) (($user->id ?? 1) * 137), 14, '0', STR_PAD_LEFT),
                     'npm' => $row['npm'],
                     'alamat' => 'Jalan Kampus No. 1',
                     'nomor_telp' => '081234567001',
                     'angkatan' => $row['angkatan'],
                     'program_studi' => $row['program_studi'],
-                    'asal_sekolah' => 'SMA Negeri 1',
-                    'status_mahasiswa' => 'Aktif',
+                    'fakultas' => 'Fakultas Ekonomi dan Bisnis Islam',
+                    'asal_sekolah' => 'SMA Negeri 1 Pangkajene',
+                    'status_mahasiswa' => 'Lulus',
+                    'foto_path' => $row['foto_path'] ?? null,
+                    'tanggal_lulus' => $row['tanggal_lulus'] ?? null,
+                    'judul_skripsi' => $row['judul_skripsi'] ?? null,
+                    'nomor_transkrip' => isset($row['npm']) ? ('TR' . $row['npm'] . '202608') : null,
                 ]
             );
         })->values();
@@ -181,122 +191,122 @@ class DatabaseSeeder extends Seeder
             }
         }
 
+        $bobotHuruf = [
+            ['angka' => 92, 'huruf' => 'A'],
+            ['angka' => 86, 'huruf' => 'A-'],
+            ['angka' => 81, 'huruf' => 'B+'],
+            ['angka' => 76, 'huruf' => 'B'],
+            ['angka' => 71, 'huruf' => 'B-'],
+            ['angka' => 66, 'huruf' => 'C+'],
+            ['angka' => 60, 'huruf' => 'C'],
+            ['angka' => 50, 'huruf' => 'D'],
+        ];
+        $bobot = [
+            'A' => 4.00,
+            'A-' => 3.70,
+            'B+' => 3.30,
+            'B' => 3.00,
+            'B-' => 2.70,
+            'C+' => 2.30,
+            'C' => 2.00,
+            'D' => 1.00,
+        ];
+
+        $totalSksKumulatif = 0;
+        $totalMutuKumulatif = 0;
+
         foreach ($mahasiswaList as $mhs) {
             $tahunAjaran = '2026/2027';
+            $mhsTotalSks = 0;
+            $mhsTotalMutu = 0;
 
-            $mkSem3 = MataKuliah::query()
-                ->where('jurusan', $mhs->program_studi)
-                ->where('semester', 3)
-                ->orderBy('kode')
-                ->limit(3)
-                ->get();
+            foreach (range(1, 8) as $semester) {
+                $jumlahMkPerSmt = ($semester <= 2 || $semester >= 7) ? 4 : 5;
+                if ($semester === 6) $jumlahMkPerSmt = 6;
 
-            $krsApproved = Krs::query()->firstOrCreate(
-                [
-                    'mahasiswa_id' => $mhs->id,
-                    'semester' => 3,
-                ],
-                [
-                    'tahun_ajaran' => $tahunAjaran,
-                    'status_approval' => 'approved',
-                ]
-            );
+                $mkSemesterIni = MataKuliah::query()
+                    ->where('jurusan', $mhs->program_studi)
+                    ->where('semester', $semester)
+                    ->orderBy('kode')
+                    ->limit($jumlahMkPerSmt)
+                    ->get();
 
-            foreach ($mkSem3 as $mk) {
-                KrsItem::query()->firstOrCreate([
-                    'krs_id' => $krsApproved->id,
-                    'mata_kuliah_id' => $mk->id,
-                ]);
-            }
+                if ($mkSemesterIni->count() < $jumlahMkPerSmt) {
+                    $mkLainnya = MataKuliah::query()
+                        ->where('jurusan', '!=', $mhs->program_studi)
+                        ->where('semester', $semester)
+                        ->orderBy('kode')
+                        ->limit($jumlahMkPerSmt - $mkSemesterIni->count())
+                        ->get();
+                    $mkSemesterIni = $mkSemesterIni->merge($mkLainnya);
+                }
 
-            $khsSem3 = Khs::query()->firstOrCreate(
-                [
-                    'mahasiswa_id' => $mhs->id,
-                    'semester' => 3,
-                ],
-                [
-                    'tahun_ajaran' => $tahunAjaran,
-                ]
-            );
-
-            $bobotHuruf = [
-                ['angka' => 92, 'huruf' => 'A'],
-                ['angka' => 86, 'huruf' => 'A-'],
-                ['angka' => 81, 'huruf' => 'B+'],
-                ['angka' => 76, 'huruf' => 'B'],
-                ['angka' => 71, 'huruf' => 'B-'],
-                ['angka' => 66, 'huruf' => 'C+'],
-                ['angka' => 60, 'huruf' => 'C'],
-                ['angka' => 50, 'huruf' => 'D'],
-            ];
-            $totalSkorSem3 = 0;
-            $totalSksSem3 = 0;
-            $bobot = [
-                'A' => 4.00,
-                'A-' => 3.70,
-                'B+' => 3.30,
-                'B' => 3.00,
-                'B-' => 2.70,
-                'C+' => 2.30,
-                'C' => 2.00,
-                'D' => 1.00,
-            ];
-
-            foreach ($mkSem3 as $idx => $mk) {
-                $pilihan = $bobotHuruf[$idx % count($bobotHuruf)];
-                $nilaiAngka = $pilihan['angka'] + rand(0, 6);
-                $nilaiHuruf = $pilihan['huruf'];
-                if ($nilaiAngka > 100) $nilaiAngka = 100;
-
-                KhsItem::query()->updateOrCreate(
+                $krs = Krs::query()->firstOrCreate(
                     [
-                        'khs_id' => $khsSem3->id,
-                        'mata_kuliah_id' => $mk->id,
+                        'mahasiswa_id' => $mhs->id,
+                        'semester' => $semester,
                     ],
                     [
-                        'nilai_angka' => $nilaiAngka,
-                        'nilai_huruf' => $nilaiHuruf,
+                        'tahun_ajaran' => $tahunAjaran,
+                        'status_approval' => $semester <= 6 ? 'approved' : 'pending',
                     ]
                 );
 
-                $sks = (int) ($mk->sks ?? 0);
-                $bobotH = $bobot[$nilaiHuruf] ?? 0;
-                $totalSkorSem3 += $sks * $bobotH;
-                $totalSksSem3 += $sks;
-            }
+                foreach ($mkSemesterIni as $mk) {
+                    KrsItem::query()->firstOrCreate([
+                        'krs_id' => $krs->id,
+                        'mata_kuliah_id' => $mk->id,
+                    ]);
+                }
 
-            $ipsSem3 = $totalSksSem3 > 0 ? round($totalSkorSem3 / $totalSksSem3, 2) : 0;
-            if (!$khsSem3->ips || $khsSem3->ips <= 0) {
-                $khsSem3->ips = $ipsSem3;
-            }
-            if (!$khsSem3->ipk || $khsSem3->ipk <= 0) {
-                $khsSem3->ipk = $ipsSem3;
-            }
-            $khsSem3->save();
+                $khs = Khs::query()->firstOrCreate(
+                    [
+                        'mahasiswa_id' => $mhs->id,
+                        'semester' => $semester,
+                    ],
+                    [
+                        'tahun_ajaran' => $tahunAjaran,
+                    ]
+                );
 
-            $mkSem4 = MataKuliah::query()
-                ->where('jurusan', $mhs->program_studi)
-                ->where('semester', 4)
-                ->orderBy('kode')
-                ->limit(3)
-                ->get();
+                $totalSkorSmt = 0;
+                $totalSksSmt = 0;
 
-            $krsPending = Krs::query()->firstOrCreate(
-                [
-                    'mahasiswa_id' => $mhs->id,
-                    'semester' => 4,
-                ],
-                [
-                    'tahun_ajaran' => $tahunAjaran,
-                    'status_approval' => 'pending',
-                ]
-            );
+                foreach ($mkSemesterIni as $idx => $mk) {
+                    $bobotIdx = (($semester - 1) * 5 + $idx) % count($bobotHuruf);
+                    if ($semester >= 5 && $idx < 2) $bobotIdx = 0;
+                    if ($semester >= 5 && $idx === 4) $bobotIdx = 1;
 
-            foreach ($mkSem4 as $mk) {
-                KrsItem::query()->firstOrCreate([
-                    'krs_id' => $krsPending->id,
-                    'mata_kuliah_id' => $mk->id,
-                ]);
+                    $pilihan = $bobotHuruf[$bobotIdx];
+                    $nilaiAngka = $pilihan['angka'] + rand(0, 6);
+                    $nilaiHuruf = $pilihan['huruf'];
+                    if ($nilaiAngka > 100) $nilaiAngka = 100;
+
+                    KhsItem::query()->updateOrCreate(
+                        [
+                            'khs_id' => $khs->id,
+                            'mata_kuliah_id' => $mk->id,
+                        ],
+                        [
+                            'nilai_angka' => $nilaiAngka,
+                            'nilai_huruf' => $nilaiHuruf,
+                        ]
+                    );
+
+                    $sks = (int) ($mk->sks ?? 0);
+                    $bobotH = $bobot[$nilaiHuruf] ?? 0;
+                    $totalSkorSmt += $sks * $bobotH;
+                    $totalSksSmt += $sks;
+                    $mhsTotalSks += $sks;
+                    $mhsTotalMutu += $sks * $bobotH;
+                }
+
+                $ips = $totalSksSmt > 0 ? round($totalSkorSmt / $totalSksSmt, 2) : 0;
+                $ipkSmt = $mhsTotalSks > 0 ? round($mhsTotalMutu / $mhsTotalSks, 2) : $ips;
+
+                $khs->ips = $ips;
+                $khs->ipk = $ipkSmt;
+                $khs->save();
             }
         }
 
@@ -308,5 +318,20 @@ class DatabaseSeeder extends Seeder
                 ]);
             }
         });
+
+        Mahasiswa::query()
+            ->where('npm', '20260005')
+            ->update([
+                'nama_lengkap' => 'Nur Afiah',
+                'tempat_lahir' => 'Pangkajene',
+                'tanggal_lahir' => '2002-05-15',
+                'fakultas' => 'Fakultas Ekonomi dan Bisnis Islam',
+                'asal_sekolah' => 'SMA Negeri 1 Pangkajene',
+                'status_mahasiswa' => 'Lulus',
+                'foto_path' => 'foto_mahasiswa/20260005.jpg',
+                'tanggal_lulus' => '2026-08-25',
+                'judul_skripsi' => 'PRODUKTIVITAS EKONOMI MASYARAKAT PASCA BANJIR DI DESA LEPPANGENG KABUPATEN WAJO (TINJAUAN EKONOMI ISLAM)',
+                'nomor_transkrip' => 'TR20260005202608',
+            ]);
     }
 }

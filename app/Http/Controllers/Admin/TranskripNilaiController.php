@@ -152,7 +152,7 @@ class TranskripNilaiController extends Controller
 
     private function predikat(float $ipk): string
     {
-        if ($ipk >= 3.75) return 'Dengan Pujian (Cum Laude)';
+        if ($ipk >= 3.75) return 'Dengan Pujian';
         if ($ipk >= 3.50) return 'Sangat Memuaskan';
         if ($ipk >= 3.00) return 'Memuaskan';
         if ($ipk >= 2.00) return 'Cukup';
@@ -163,7 +163,7 @@ class TranskripNilaiController extends Controller
     {
         return [
             'Ujian Komprehensif',
-            'Al Quran Agama dan Bahasa (Lisan)',
+            'Al-Qur\'an, Agama, dan Bahasa (Lisan)',
             'Ilmu Pendidikan Islam',
             'Pengembangan Kurikulum Anak Usia Dini',
             'Metodik Khusus Pendidikan Anak Usia Dini',
@@ -201,12 +201,24 @@ class TranskripNilaiController extends Controller
         $sksLulus = 0;
         $mutuLulus = 0;
 
+        $daftarMataKuliah = [];
+
         foreach ($items as $it) {
             $mk = $it->mataKuliah;
             $sks = (int) ($mk->sks ?? 0);
             $huruf = (string) ($it->nilai_huruf ?? '');
             $nilaiM = $this->nilaiMutuHuruf($huruf);
             $m = $sks * $nilaiM;
+
+            $namaMk = (string) ($mk->nama ?? '');
+            if ($namaMk !== '') {
+                $daftarMataKuliah[] = (object) [
+                    'nama_mata_kuliah' => $namaMk,
+                    'sks' => $sks,
+                    'nilai_huruf' => $huruf,
+                    'nilai_m' => $m,
+                ];
+            }
 
             $it->_sks = $sks;
             $it->_nilai_huruf = $huruf;
@@ -222,24 +234,96 @@ class TranskripNilaiController extends Controller
             }
         }
 
-        $ipk = 0;
-        if ($sksLulus > 0) {
-            $ipk = round($mutuLulus / $sksLulus, 2);
-        }
-
         $ujianKompre = is_array($mahasiswa->ujian_kompre) ? $mahasiswa->ujian_kompre : [];
         $ujianKompre = array_values(array_filter(array_map(fn($v) => trim((string) $v), $ujianKompre), fn($v) => $v !== ''));
         if (count($ujianKompre) === 0) {
             $ujianKompre = $this->defaultUjianKompre();
         }
 
+        $totalItem = count($daftarMataKuliah);
+        $jumlahKiri = (int) ceil($totalItem / 2);
+        $bagianKiri = array_slice($daftarMataKuliah, 0, $jumlahKiri);
+        $bagianKanan = array_slice($daftarMataKuliah, $jumlahKiri);
+
+        $ipk = 0;
+        if ($sksLulus > 0) {
+            $ipk = round($mutuLulus / $sksLulus, 2);
+        }
+
         $nomorTranskrip = $mahasiswa->nomor_transkrip
             ? $mahasiswa->nomor_transkrip
             : ('TR' . ($mahasiswa->npm ? $mahasiswa->npm : '0000' . $mahasiswa->id) . now()->format('Ym'));
 
+        $judulSkripsi = (string) ($mahasiswa->judul_skripsi ?? '-');
+        if ($judulSkripsi === '') $judulSkripsi = '-';
+
+        $tempatLahir = (string) ($mahasiswa->tempat_lahir ?? '-');
+        if ($tempatLahir === '') $tempatLahir = '-';
+        $tglLahir = $mahasiswa->tanggal_lahir
+            ? \Illuminate\Support\Carbon::parse($mahasiswa->tanggal_lahir)->translatedFormat('d F Y')
+            : '-';
+        if ($tempatLahir !== '-' && $tglLahir !== '-') {
+            $tempatTgl = "{$tempatLahir}, {$tglLahir}";
+        } else {
+            $gabung = ($tempatLahir !== '-' ? $tempatLahir : '') . ($tglLahir !== '-' ? $tglLahir : '');
+            $tempatTgl = $gabung !== '' ? $gabung : '-';
+        }
+
+        $tanggalLulus = $mahasiswa->tanggal_lulus
+            ? \Illuminate\Support\Carbon::parse($mahasiswa->tanggal_lulus)->translatedFormat('d F Y')
+            : '-';
+
+        $skBanpt = (string) ($mahasiswa->nomor_sk_banpt ?? '');
+        if ($skBanpt === '') {
+            $tahunLulus = $mahasiswa->tanggal_lulus
+                ? (int) \Illuminate\Support\Carbon::parse($mahasiswa->tanggal_lulus)->format('Y')
+                : (int) date('Y');
+            $skBanpt = "281/SK/LAMDIK/AK/V/III/{$tahunLulus}";
+        }
+
+        $ujianAda = $ujianKompre;
+        $ujianCount = count($ujianAda);
+
+        $fotoMahasiswa = null;
+        if (!empty($mahasiswa->foto_path)) {
+            try {
+                $relPath = trim(str_replace(['/', '\\'], '/', (string) $mahasiswa->foto_path), '/');
+                $absPath = public_path('storage/' . $relPath);
+                $absPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $absPath);
+
+                if (\Illuminate\Support\Facades\File::exists($absPath) && \Illuminate\Support\Facades\File::isFile($absPath)) {
+                    $size = (int) \Illuminate\Support\Facades\File::size($absPath);
+                    if ($size > 0 && $size < 10_000_000) {
+                        $ext = strtolower((string) \Illuminate\Support\Facades\File::extension($absPath));
+                        $mimeMap = [
+                            'jpg'  => 'image/jpeg',
+                            'jpeg' => 'image/jpeg',
+                            'png'  => 'image/png',
+                            'gif'  => 'image/gif',
+                        ];
+                        if (isset($mimeMap[$ext])) {
+                            $content = \Illuminate\Support\Facades\File::get($absPath);
+                            if ($content !== false && $content !== '') {
+                                $fotoMahasiswa = 'data:' . $mimeMap[$ext] . ';base64,' . base64_encode($content);
+                            }
+                        }
+                    }
+                }
+            } catch (\Throwable $e) {
+                $fotoMahasiswa = null;
+            }
+        }
+
         return [
             'mahasiswa' => $mahasiswa,
             'items' => $items,
+            'daftarMataKuliah' => $daftarMataKuliah,
+            'bagianKiri' => $bagianKiri,
+            'bagianKanan' => $bagianKanan,
+            'left' => $bagianKiri,
+            'right' => $bagianKanan,
+            'half' => count($bagianKiri),
+            'maxRows' => $maxRows ?? max(count($bagianKiri), count($bagianKanan)),
             'totalSks' => $totalSks,
             'totalMutu' => round($totalMutu, 2),
             'sksLulus' => $sksLulus,
@@ -248,6 +332,13 @@ class TranskripNilaiController extends Controller
             'predikat' => $this->predikat($ipk),
             'nomorTranskrip' => $nomorTranskrip,
             'ujianKompre' => $ujianKompre,
+            'ujianAda' => $ujianAda,
+            'ujianCount' => $ujianCount,
+            'judulSkripsi' => $judulSkripsi,
+            'tempatTgl' => $tempatTgl,
+            'tanggalLulus' => $tanggalLulus,
+            'skBanpt' => $skBanpt,
+            'fotoMahasiswa' => $fotoMahasiswa,
         ];
     }
 }

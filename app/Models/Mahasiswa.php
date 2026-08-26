@@ -70,6 +70,7 @@ class Mahasiswa extends Model
         'tanggal_lulus',
         'nomor_sk_banpt',
         'ujian_kompre',
+        'nilai_transkrip',
         'judul_skripsi',
     ];
 
@@ -84,6 +85,7 @@ class Mahasiswa extends Model
             'mahasiswa_last_read_at' => 'datetime',
             'dosen_last_read_at' => 'datetime',
             'ujian_kompre' => 'array',
+            'nilai_transkrip' => 'array',
         ];
     }
 

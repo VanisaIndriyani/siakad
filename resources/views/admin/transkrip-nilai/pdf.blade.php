@@ -30,34 +30,75 @@
         .wrap { width: 100%; }
 
         /* ====== SEMUA CLASS DI BAWAH INI = PERSIS SAMA DENGAN show.blade.php ====== */
-        .kop-surat { width: 100%; border-collapse: collapse; }
-        .kop-logo { width: 86px; vertical-align: top; padding-top: 2px; padding-right: 14px; }
-        .kop-logo img { width: 76px; height: auto; display: block; }
-        .kop-text { text-align: center; vertical-align: middle; color: #000000; }
-        .kop-title-1 { font-size: 15px; font-weight: 700; letter-spacing: 0.5px; line-height: 1.1; margin: 0; padding: 0; }
-        .kop-title-2 { font-size: 20px; font-weight: 800; letter-spacing: 0.6px; line-height: 1.12; margin: 3px 0 0; padding: 0; }
-        .kop-title-3 { font-size: 16px; font-weight: 800; letter-spacing: 0.5px; line-height: 1.1; margin: 3px 0 0; padding: 0; }
-        .kop-meta { font-size: 9px; margin-top: 6px; line-height: 1.2; color: #000000; }
-        .kop-alamat { font-size: 9px; margin-top: 3px; line-height: 1.2; color: #000000; }
-        .kop-line-tebal { border-top: 3px solid #000; margin-top: 11px; }
-        .kop-line-tipis { border-top: 1px solid #000; margin-top: 2px; }
+        .kop-wrap { width: 100%; text-align: center; color: #000000; }
+        .kop-logo-center { width: 100%; text-align: center; margin-bottom: 8px; }
+        .kop-logo-center img { width: 110px; height: 110px; object-fit: contain; display: inline-block; }
+        .kop-title-a {
+            font-size: 24px; font-weight: 800; letter-spacing: 0.8px; line-height: 1.2; margin: 3px 0 0; padding: 0; color: #000000;
+        }
+        .kop-title-a2 { margin-top: 1px; }
+        .kop-title-b {
+            font-size: 23px; font-weight: 800; letter-spacing: 0.8px; line-height: 1.2; margin: 3px 0 0; padding: 0; color: #000000;
+        }
+        .kop-terakreditasi {
+            font-size: 11px; margin-top: 6px; color: #000000; text-align: center; letter-spacing: 0.1px;
+        }
+        .kop-alamat-line {
+            font-size: 10.5px; margin-top: 4px; line-height: 1.25; color: #000000; text-align: center;
+        }
+        .kop-email-web { margin-top: 2px; }
+        .kop-line-double {
+            margin-top: 3px;
+            width: 100%;
+            display: block;
+        }
+        .kop-line-double .kop-line-top {
+            width: 100%; height: 0px; background: transparent;
+        }
+        .kop-line-double .kop-line-bottom {
+            width: 100%; height: 0px; background: transparent; margin-top: 0;
+        }
 
-        .judul-box { text-align: center; margin-top: 18px; }
+        .judul-box { text-align: center; margin-top: 10px; }
         .judul-text {
             font-size: 16px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
-            text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 1.2px; color: #000000;
+            text-decoration: none; color: #000000;
         }
-        .judul-nomor { font-size: 9.2px; margin-top: 9px; color: #000000; }
+        .judul-nomor { font-size: 9.2px; margin-top: 1px; color: #000000; }
 
         .biodata {
-            width: 100%; margin-top: 18px; border-collapse: collapse;
-            font-size: 9.5px; color: #000000;
+            width: 100%; margin-top: 10px; border-collapse: collapse;
+            font-size: 9.5px; color: #000000; table-layout: fixed;
         }
         .biodata td { vertical-align: top; padding: 0; line-height: 1.3; }
-        .bio-kiri, .bio-kanan { width: 50%; }
-        .bio-label { width: 130px; display: inline-block; padding: 1.5px 0; }
-        .bio-sep   { width: 10px;  display: inline-block; padding: 1.5px 0; text-align: center; }
-        .bio-val   { display: inline-block; padding: 1.5px 0; font-weight: 700; color: #000000; }
+        .biodata td.bio-label {
+            width: 25%;
+            padding: 1.5px 10px 1.5px 0;
+            text-align: left;
+            font-weight: 400;
+            color: #000000;
+            position: relative;
+        }
+        .biodata td.bio-label.right-label {
+            width: 20%;
+        }
+        .biodata td.bio-label:after {
+            content: ":";
+            position: absolute;
+            right: 0px;
+            top: 1.5px;
+            display: inline-block;
+            color: #000000;
+        }
+        .biodata td.bio-value {
+            width: 25%;
+            padding: 1.5px 0 1.5px 6px;
+            color: #000000;
+        }
+        .biodata td.bio-value.right-val {
+            width: 30%;
+        }
+        .bio-val { font-weight: 700; color: #000000; display: inline-block; }
 
         table.nilai {
             width: 100%; border-collapse: collapse; margin-top: 14px;
@@ -82,45 +123,106 @@
         table.nilai td.nilaih { width: 5%; font-weight: 700; padding: 3px 2px; }
         table.nilai td.m { width: 5%; padding: 3px 2px; }
         table.nilai tr.jumlah td {
-            background: #e0f2ea; font-weight: 700; padding: 3.5px 6px;
+            background: #ffffff !important; font-weight: 700; padding: 3.5px 6px;
             letter-spacing: 0.2px; line-height: 1.22;
         }
-        table.nilai tr.jumlah td.mk { text-align: left; }
-        table.nilai tr.ujian-head td {
-            background: #f7fef9; font-weight: 700; padding: 3.5px 6px;
-            letter-spacing: 0.3px; font-size: 8.5px; line-height: 1.22;
+        table.nilai tr.jumlah td.mk { text-align: center; }
+        table.nilai tr.jumlah td.jumlah-dashed {
+            background: #ffffff !important;
+            border-top: 1px dashed #000000 !important;
+            border-bottom: none !important;
         }
-        table.nilai tr.ujian-row td { font-size: 8.3px; padding: 3px 5px; line-height: 1.22; }
-        table.nilai td.ujian-inner { padding: 1px 0; vertical-align: top; }
-        table.inner-ujian { width: 100%; border-collapse: collapse; }
-        table.inner-ujian td { border: none; padding: 2px 3px; }
-        table.inner-ujian td.mk { padding: 2px 5px; }
-        table.inner-ujian td.num    { width: 28px; }
-        table.inner-ujian td.sks    { width: 32px; }
-        table.inner-ujian td.nilaih { width: 34px; }
-        table.inner-ujian td.m      { width: 32px; }
+        table.nilai tr.ujian-head td {
+            background: #ffffff !important; font-weight: 700; letter-spacing: 0.2px;
+            padding: 3.5px 6px; line-height: 1.22; font-size: 9px;
+        }
+        table.nilai td.ujian-left-title { text-align: left; padding-left: 8px !important; }
+        table.nilai td.ujian-left-spacer,
+        table.nilai td.ujian-left-spacer-cell,
+        table.nilai td.ujian-right-spacer,
+        table.nilai td.ujian-right-title,
+        table.nilai td.ujian-right-title-sks,
+        table.nilai td.ujian-right-title-nilai,
+        table.nilai td.ujian-right-title-m { background: #ffffff !important; }
+        table.nilai tr.spacer-row td {
+            background: #ffffff !important; border: 1px solid #000000;
+            height: 18px; padding: 0;
+        }
+        table.nilai tr.ujian-row td { font-size: 9px; padding: 3px 5px; line-height: 1.22; }
+
+        table.nilai tr.jumlah td.left-col,
+        table.nilai tr.spacer-row td.left-col,
+        table.nilai tr.ujian-head td.left-col,
+        table.nilai tr.ujian-row td.left-col {
+            background: #ffffff !important;
+            font-weight: 400 !important;
+            padding: 3px 4px !important;
+            text-align: center !important;
+            letter-spacing: 0 !important;
+        }
+        table.nilai tr.jumlah td.mk.left-col,
+        table.nilai tr.spacer-row td.mk.left-col,
+        table.nilai tr.ujian-head td.mk.left-col,
+        table.nilai tr.ujian-row td.mk.left-col {
+            text-align: left !important;
+            padding: 3px 6px !important;
+        }
 
         .ringkasan {
             width: 100%; margin-top: 9px; border-collapse: collapse;
-            font-size: 9.2px; color: #000000;
+            font-size: 9.5px; color: #000000; table-layout: auto;
         }
-        .ringkasan td { vertical-align: top; padding: 1.8px 0; line-height: 1.32; }
-        .ringkasan td.label { width: 190px; font-weight: 700; color: #000000; }
-        .ringkasan td.sep   { width: 10px;  text-align: center; }
-        .ringkasan td.val   { font-weight: 800; color: #000000; font-size: 9.8px; }
-        .ringkasan td.justify { text-align: justify; color: #000000; }
+        .ringkasan td { vertical-align: top; padding: 1.5px 0; line-height: 1.28; }
+        .ringkasan td.label {
+            width: auto; white-space: nowrap; font-weight: 700; color: #000000; padding-right: 12px;
+        }
+        .ringkasan td.label-top {
+            width: auto; white-space: nowrap; font-weight: 700; color: #000000; padding: 1.5px 12px 0 0;
+        }
+        .ringkasan td.sep   { width: auto; text-align: left; padding-right: 10px; }
+        .ringkasan td.sep-top { width: auto; text-align: left; padding: 1.5px 10px 0 0; }
+        .ringkasan td.val   { font-weight: 800; color: #000000; font-size: 9.8px; width: auto; white-space: nowrap; }
+        .ringkasan td.val-judul {
+            text-align: left; color: #000000; line-height: 1.28; padding: 1.5px 0 1.5px 0;
+            vertical-align: top; width: auto;
+        }
 
+        .ttd-foto-wrapper {
+            width: 100%; margin: 8mm 0 0 0; border-collapse: collapse;
+            padding-left: 12mm; /* KIRI BAWAH, GESER KE KANAN 12mm SESUAI REQUEST USER TERBARU (SAMA SHOW.BLADE) */
+        }
+        .ttd-foto-wrapper td { vertical-align: top; padding: 0; }
+        .ttd-foto-col {
+            width: 28mm; padding-right: 2mm;
+        }
+        .ttd-foto-box {
+            width: 24mm; height: 32mm; /* foto diperkecil */
+            border: 1px solid #333; background: #fdfdfd;
+            overflow: hidden; box-sizing: border-box;
+            position: relative;
+            margin: 0;
+        }
+        .ttd-foto-box img {
+            width: 100%; height: 100%; object-fit: cover; display: block;
+        }
+        .ttd-foto-empty {
+            position: absolute; inset: 0;
+            text-align: center; color: #888; font-size: 10.5px;
+            line-height: 1.25; padding-top: 16mm;
+            background: #ffffff;
+        }
+        .ttd-col-wrapper { width: auto; }
         .ttd-box {
-            width: 100%; margin-top: 12px; border-collapse: collapse;
-            font-size: 9px; color: #000000;
+            width: 100%; margin-top: 0; border-collapse: collapse;
+            font-size: 9.3px; color: #000000;
         }
         .ttd-box td { vertical-align: top; }
-        .ttd-spacer-l { width: 44%; }
-        .ttd-spacer-m { width: 14%; }
-        .ttd-col { width: 42%; text-align: center; line-height: 1.32; color: #000000; }
-        .ttd-jabatan { margin-top: 2px; font-weight: 800; }
-        .ttd-nama    { margin-top: 40px; font-weight: 800; text-decoration: underline; font-size: 9.8px; }
-        .ttd-nidk    { margin-top: 2px; font-size: 8.6px; }
+        .ttd-spacer-l { width: 0%; }
+        .ttd-spacer-r { width: 0%; }
+        .ttd-col { width: 100%; text-align: left; line-height: 1.32; color: #000000; padding-left: 0; font-size: 9.5px; }
+        .ttd-jabatan { margin-top: 3px; font-weight: 800; letter-spacing: 0.2px; }
+        .ttd-nama    { margin-top: 48px; font-weight: 800; text-decoration: underline; font-size: 9.5px; }
+        .ttd-nidk    { margin-top: 1px; font-size: 8.5px; letter-spacing: 0.1px; }
     </style>
 </head>
 <body>
@@ -148,26 +250,24 @@
     $judulSkripsi = trim($mahasiswa->judul_skripsi ?: '-');
 @endphp
 <div class="wrap">
-    {{-- ===== KOP SURAT ===== --}}
-    <table class="kop-surat" cellpadding="0" cellspacing="0">
-        <tr>
-            <td class="kop-logo">
-                @if($logoData)
-                    <img src="{{ $logoData }}" alt="Logo">
-                @endif
-            </td>
-            <td class="kop-text">
-                <div class="kop-title-1">INSTITUT AGAMA ISLAM</div>
-                <div class="kop-title-2">DARUD DA'WAH WAL IRSYAD</div>
-                <div class="kop-title-3">SIDENRENG RAPPANG</div>
-                <div class="kop-meta">TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021</div>
-                <div class="kop-alamat">Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang</div>
-                <div class="kop-alamat">E-mail : iaiddisidrap@gmail.com &nbsp;&nbsp; Website : www.yppddisrapp.ac.id</div>
-            </td>
-        </tr>
-    </table>
-    <div class="kop-line-tebal"></div>
-    <div class="kop-line-tipis"></div>
+    {{-- ===== KOP SURAT (LOGO DI TENGAH, SESUAI CONTOH WILDAH ASLI) ===== --}}
+    <div class="kop-wrap">
+        <div class="kop-logo-center">
+            @if($logoData)
+                <img src="{{ $logoData }}" alt="Logo">
+            @endif
+        </div>
+        <div class="kop-title-a">INSTITUT AGAMA ISLAM</div>
+        <div class="kop-title-a kop-title-a2">DARUD DA'WAH WAL IRSYAD</div>
+        <div class="kop-title-b">SIDENRENG RAPPANG</div>
+        <div class="kop-terakreditasi">TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021</div>
+        <div class="kop-alamat-line">Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang</div>
+        <div class="kop-alamat-line kop-email-web">E-mail : iaiddisidrap@gmail.com &nbsp;&nbsp; Website : www.yppddisrapp.ac.id</div>
+        <div class="kop-line-double">
+            <div class="kop-line-top"></div>
+            <div class="kop-line-bottom"></div>
+        </div>
+    </div>
 
     {{-- ===== JUDUL TRANSKRIP ===== --}}
     <div class="judul-box">
@@ -175,27 +275,47 @@
         <div class="judul-nomor">Nomor : {{ $nomorTranskrip }}</div>
     </div>
 
-    {{-- ===== BIODATA 50-50 KIRI KANAN ===== --}}
+    {{-- ===== BIODATA 50/50 URUTAN SESUAI CONTOH WILDAH ===== --}}
     <table class="biodata" cellpadding="0" cellspacing="0">
+        <colgroup>
+            <col style="width:25%;">
+            <col style="width:25%;">
+            <col style="width:20%;">
+            <col style="width:30%;">
+        </colgroup>
         <tr>
-            <td class="bio-kiri">
-                <div><span class="bio-label">Nama</span><span class="bio-sep">:</span><span class="bio-val">{{ $mahasiswa->nama_lengkap }}</span></div>
-                <div><span class="bio-label">No. Pokok Mahasiswa</span><span class="bio-sep">:</span><span class="bio-val">{{ $mahasiswa->npm ?? '-' }}</span></div>
-                <div><span class="bio-label">NIK</span><span class="bio-sep">:</span><span class="bio-val">{{ $mahasiswa->nik ?? '-' }}</span></div>
-                <div><span class="bio-label">Tempat / Tanggal Lahir</span><span class="bio-sep">:</span><span class="bio-val">{{ $tempatTgl }}</span></div>
-                <div><span class="bio-label">Tanggal, Bulan dan Tahun Lulus</span><span class="bio-sep">:</span><span class="bio-val">{{ $tanggalLulus }}</span></div>
-            </td>
-            <td class="bio-kanan">
-                <div><span class="bio-label">Program Pendidikan</span><span class="bio-sep">:</span><span class="bio-val">Strata Satu (S1)</span></div>
-                <div><span class="bio-label">Fakultas</span><span class="bio-sep">:</span><span class="bio-val">{{ $mahasiswa->fakultas ?? 'Fakultas Tarbiyah & Keguruan' }}</span></div>
-                <div><span class="bio-label">Program Studi</span><span class="bio-sep">:</span><span class="bio-val">{{ $mahasiswa->program_studi ?? '-' }}</span></div>
-                <div><span class="bio-label">No. SK BAN-PT</span><span class="bio-sep">:</span><span class="bio-val">{{ $skBanpt }}</span></div>
-                <div></div>
-            </td>
+            <td class="bio-label">Nama</td>
+            <td class="bio-value"><span class="bio-val">{{ $mahasiswa->nama_lengkap }}</span></td>
+            <td class="bio-label right-label">Program Pendidikan</td>
+            <td class="bio-value right-val"><span class="bio-val">Strata Satu (S1)</span></td>
+        </tr>
+        <tr>
+            <td class="bio-label">No. Pokok Mahasiswa</td>
+            <td class="bio-value"><span class="bio-val">{{ $mahasiswa->npm ?? '-' }}</span></td>
+            <td class="bio-label right-label">Fakultas</td>
+            <td class="bio-value right-val"><span class="bio-val">{{ $mahasiswa->fakultas ?? 'Fakultas Tarbiyah & Keguruan' }}</span></td>
+        </tr>
+        <tr>
+            <td class="bio-label">NIK</td>
+            <td class="bio-value"><span class="bio-val">{{ $mahasiswa->nik ?? '-' }}</span></td>
+            <td class="bio-label right-label">Program Studi</td>
+            <td class="bio-value right-val"><span class="bio-val">{{ $mahasiswa->program_studi ?? '-' }}</span></td>
+        </tr>
+        <tr>
+            <td class="bio-label">Tempat / Tanggal Lahir</td>
+            <td class="bio-value"><span class="bio-val">{{ $tempatTgl }}</span></td>
+            <td class="bio-label right-label">No. SK BAN-PT</td>
+            <td class="bio-value right-val"><span class="bio-val">{{ $skBanpt }}</span></td>
+        </tr>
+        <tr>
+            <td class="bio-label">Tanggal, Bulan dan Tahun Lulus</td>
+            <td class="bio-value"><span class="bio-val">{{ $tanggalLulus }}</span></td>
+            <td></td>
+            <td></td>
         </tr>
     </table>
 
-    {{-- ===== TABEL NILAI ===== --}}
+    {{-- ===== TABEL NILAI (MK BIASA 2 PANEL → JUMLAH → SUB-PANEL UJIAN KOMPETENSI NOMOR URUT SENDIRI) ===== --}}
     <table class="nilai" cellpadding="0" cellspacing="0">
         <thead>
             <tr>
@@ -212,20 +332,34 @@
             </tr>
         </thead>
         <tbody>
-            @for($i = 0; $i < $maxRows; $i++)
+            @php
+                $semuaMK = $daftarMataKuliah;
+                $totalMK = count($semuaMK);
+                $barisBawah = 3 + $ujianCount;
+                $sisa = max(0, $totalMK - $barisBawah);
+                $mkAtas = array_slice($semuaMK, 0, $sisa);
+                $mkBawahKiri = array_slice($semuaMK, $sisa);
+                while (count($mkBawahKiri) < $barisBawah) { $mkBawahKiri[] = null; }
+                $halfAtas = (int) ceil(count($mkAtas) / 2);
+                $kiriAtas = array_slice($mkAtas, 0, $halfAtas);
+                $kananAtas = array_slice($mkAtas, $halfAtas);
+                $maxAtas = max(count($kiriAtas), count($kananAtas));
+                $noAwalKanan = count($kiriAtas);
+            @endphp
+            @for($i = 0; $i < $maxAtas; $i++)
                 @php
-                    $L = $left[$i] ?? null;
-                    $R = $right[$i] ?? null;
+                    $L = $kiriAtas[$i] ?? null;
+                    $R = $kananAtas[$i] ?? null;
                     $noL = $L ? ($i + 1) : '';
-                    $noR = $R ? ($half + $i + 1) : '';
-                    $namaL = $L ? ($L->mataKuliah?->nama ?? '') : '';
-                    $sksL = $L ? ($L->_sks ?? 0) : '';
-                    $nhL = $L ? ($L->_nilai_huruf !== '' ? $L->_nilai_huruf : '-') : '';
-                    $mutuL = $L ? ($L->_nilai_m > 0 ? rtrim(rtrim(number_format($L->_nilai_m, 2, '.', ''), '0'), '.') : ($L->_nilai_huruf !== '' ? '0' : '')) : '';
-                    $namaR = $R ? ($R->mataKuliah?->nama ?? '') : '';
-                    $sksR = $R ? ($R->_sks ?? 0) : '';
-                    $nhR = $R ? ($R->_nilai_huruf !== '' ? $R->_nilai_huruf : '-') : '';
-                    $mutuR = $R ? ($R->_nilai_m > 0 ? rtrim(rtrim(number_format($R->_nilai_m, 2, '.', ''), '0'), '.') : ($R->_nilai_huruf !== '' ? '0' : '')) : '';
+                    $noR = $R ? ($noAwalKanan + $i + 1) : '';
+                    $namaL = $L ? $L->nama_mata_kuliah : '';
+                    $sksL = $L ? ($L->sks == 0 ? '0' : $L->sks) : '';
+                    $nhL = $L ? ($L->nilai_huruf !== '' ? $L->nilai_huruf : '') : '';
+                    $mutuL = $L ? ($L->nilai_m > 0 ? rtrim(rtrim(number_format($L->nilai_m, 2, '.', ''), '0'), '.') : ($L->nilai_huruf !== '' ? '0' : '')) : '';
+                    $namaR = $R ? $R->nama_mata_kuliah : '';
+                    $sksR = $R ? ($R->sks == 0 ? '0' : $R->sks) : '';
+                    $nhR = $R ? ($R->nilai_huruf !== '' ? $R->nilai_huruf : '') : '';
+                    $mutuR = $R ? ($R->nilai_m > 0 ? rtrim(rtrim(number_format($R->nilai_m, 2, '.', ''), '0'), '.') : ($R->nilai_huruf !== '' ? '0' : '')) : '';
                 @endphp
                 <tr>
                     <td class="num">{{ $noL }}</td>
@@ -241,67 +375,88 @@
                 </tr>
             @endfor
 
+            @for($bi = 0; $bi < $barisBawah; $bi++)
+                @php
+                    $LL = $mkBawahKiri[$bi] ?? null;
+                    $namaLL = $LL ? $LL->nama_mata_kuliah : '';
+                    $sksLL = $LL ? ($LL->sks == 0 ? '0' : $LL->sks) : '';
+                    $nhLL = $LL ? ($LL->nilai_huruf !== '' ? $LL->nilai_huruf : '') : '';
+                    $mutuLL = $LL ? ($LL->nilai_m > 0 ? rtrim(rtrim(number_format($LL->nilai_m, 2, '.', ''), '0'), '.') : ($LL->nilai_huruf !== '' ? '0' : '')) : '';
+                    $noLanjutTampil = $LL ? ($noAwalKanan + count($kananAtas) + $bi + 1) : '';
+                    if ($bi === 0) {
+                        $jenisBaris = 'jumlah';
+                    } elseif ($bi === 1) {
+                        $jenisBaris = 'spacer';
+                    } elseif ($bi === 2) {
+                        $jenisBaris = 'ujian-head';
+                    } else {
+                        $jenisBaris = 'ujian-row';
+                        $uIdx = $bi - 3;
+                        $uNama = $ujianKompre[$uIdx] ?? '';
+                        $uNo = $uIdx + 1;
+                    }
+                @endphp
+                @if($jenisBaris === 'jumlah')
             <tr class="jumlah">
-                <td colspan="2" class="mk">Jumlah</td>
+                <td class="num left-col">{{ $noLanjutTampil }}</td>
+                <td class="mk left-col">{{ $namaLL }}</td>
+                <td class="sks left-col">{{ $sksLL }}</td>
+                <td class="nilaih left-col">{{ $nhLL }}</td>
+                <td class="m left-col">{{ $mutuLL }}</td>
+                <td class="num jumlah-dashed"></td>
+                <td class="mk">Jumlah</td>
                 <td class="sks">{{ $totalSks }}</td>
-                <td></td>
+                <td class="nilaih"></td>
                 <td class="m">{{ rtrim(rtrim(number_format($totalMutu, 2, '.', ''), '0'), '.') }}</td>
-                <td colspan="2"></td>
-                <td></td>
-                <td></td>
-                <td></td>
             </tr>
-
-            @if($ujianCount > 0)
-                <tr class="ujian-head">
-                    <td colspan="10">UJIAN KOMPETENSI</td>
-                </tr>
-                <tr class="ujian-row">
-                    <td class="num">1</td>
-                    <td class="mk">{{ $ujianAda[0] }}</td>
-                    <td class="sks">0</td>
-                    <td class="nilaih">A</td>
-                    <td class="m">0</td>
-                    <td colspan="5" class="ujian-inner">
-                        @if($ujianCount > 1)
-                            <table class="inner-ujian" cellpadding="0" cellspacing="0">
-                                @for($u = 1; $u < min($ujianCount, 4); $u++)
-                                    <tr>
-                                        <td class="num">{{ $u }}</td>
-                                        <td class="mk">{{ $ujianAda[$u] }}</td>
-                                        <td class="sks">0</td>
-                                        <td class="nilaih">A</td>
-                                        <td class="m">0</td>
-                                    </tr>
-                                @endfor
-                            </table>
-                        @endif
-                    </td>
-                </tr>
-                @if($ujianCount > 4)
-                    <tr class="ujian-row">
-                        <td colspan="5"></td>
-                        <td colspan="5" class="ujian-inner">
-                            <table class="inner-ujian" cellpadding="0" cellspacing="0">
-                                @for($u = 4; $u < $ujianCount; $u++)
-                                    <tr>
-                                        <td class="num">{{ $u }}</td>
-                                        <td class="mk">{{ $ujianAda[$u] }}</td>
-                                        <td class="sks">0</td>
-                                        <td class="nilaih">A</td>
-                                        <td class="m">0</td>
-                                    </tr>
-                                @endfor
-                            </table>
-                        </td>
-                    </tr>
+                @elseif($jenisBaris === 'spacer')
+            <tr class="spacer-row">
+                <td class="num left-col">{{ $noLanjutTampil }}</td>
+                <td class="mk left-col">{{ $namaLL }}</td>
+                <td class="sks left-col">{{ $sksLL }}</td>
+                <td class="nilaih left-col">{{ $nhLL }}</td>
+                <td class="m left-col">{{ $mutuLL }}</td>
+                <td class="num"></td>
+                <td class="mk"></td>
+                <td class="sks"></td>
+                <td class="nilaih"></td>
+                <td class="m"></td>
+            </tr>
+                @elseif($jenisBaris === 'ujian-head')
+            <tr class="ujian-head">
+                <td class="num left-col">{{ $noLanjutTampil }}</td>
+                <td class="mk left-col">{{ $namaLL }}</td>
+                <td class="sks left-col">{{ $sksLL }}</td>
+                <td class="nilaih left-col">{{ $nhLL }}</td>
+                <td class="m left-col">{{ $mutuLL }}</td>
+                <td class="num ujian-right-spacer"></td>
+                <td class="mk ujian-left-title" colspan="4">Ujian Kompetensi</td>
+            </tr>
+                @else
+            <tr class="ujian-row">
+                <td class="num left-col">{{ $noLanjutTampil }}</td>
+                <td class="mk left-col">{{ $namaLL }}</td>
+                <td class="sks left-col">{{ $sksLL }}</td>
+                <td class="nilaih left-col">{{ $nhLL }}</td>
+                <td class="m left-col">{{ $mutuLL }}</td>
+                <td class="num">{{ $uNo }}</td>
+                <td class="mk">{{ $uNama }}</td>
+                <td class="sks">0</td>
+                <td class="nilaih">A</td>
+                <td class="m">0</td>
+            </tr>
                 @endif
-            @endif
+            @endfor
         </tbody>
     </table>
 
-    {{-- ===== RINGKASAN IPK, PREDIKAT, JUDUL SKRIPSI ===== --}}
+    {{-- ===== RINGKASAN IPK, PREDIKAT, JUDUL SKRIPSI (SEJAJAR VERTIKAL + JUDUL INDENT) ===== --}}
     <table class="ringkasan" cellpadding="0" cellspacing="0">
+        <colgroup>
+            <col style="width:290px;">
+            <col style="width:22px;">
+            <col style="width:auto;">
+        </colgroup>
         <tr>
             <td class="label">INDEKS PRESTASI KUMULATIF (IPK)</td>
             <td class="sep">:</td>
@@ -313,25 +468,42 @@
             <td class="val">{{ $predikat }}</td>
         </tr>
         <tr>
-            <td class="label">JUDUL SKRIPSI</td>
-            <td class="sep">:</td>
-            <td class="justify">{{ $judulSkripsi }}</td>
+            <td class="label-top">JUDUL SKRIPSI</td>
+            <td class="sep-top">:</td>
+            <td class="val-judul">{{ $judulSkripsi }}</td>
         </tr>
     </table>
 
-    {{-- ===== TANDA TANGAN ===== --}}
-    <table class="ttd-box" cellpadding="0" cellspacing="0">
+    {{-- ===== FOTO MAHASISWA 35mm × 45mm (KIRI BAWAH) + TANDA TANGAN WR AK AKADEMIK (KANAN) ===== --}}
+    <div style="page-break-inside: avoid; padding-left:90mm !important; margin-top:4mm !important;">
+        <table class="ttd-foto-wrapper" cellpadding="0" cellspacing="0" style="padding-left:0 !important; margin:0 !important;">
         <tr>
-            <td class="ttd-spacer-l"></td>
-            <td class="ttd-spacer-m"></td>
-            <td class="ttd-col">
-                <div>Pangkajene, {{ ($mahasiswa->tanggal_lulus ? \Illuminate\Support\Carbon::parse($mahasiswa->tanggal_lulus) : now())->translatedFormat('d F Y') }}</div>
-                <div class="ttd-jabatan">WAKIL REKTOR BIDANG AKADEMIK</div>
-                <div class="ttd-nama">Dr. H. UMAR YAHYA, M.Ag.</div>
-                <div class="ttd-nidk">NIDK. 8932610021</div>
+            <td class="ttd-foto-col">
+                <div class="ttd-foto-box">
+                    @if($fotoMahasiswa)
+                        <img src="{{ $fotoMahasiswa }}" alt="Foto {{ $mahasiswa->nama_lengkap }}">
+                    @else
+                        <div class="ttd-foto-empty">Foto<br>3 × 4</div>
+                    @endif
+                </div>
+            </td>
+            <td class="ttd-col-wrapper">
+                <table class="ttd-box" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td class="ttd-spacer-l"></td>
+                        <td class="ttd-col">
+                            <div>Pangkajene, {{ ($mahasiswa->tanggal_lulus ? \Illuminate\Support\Carbon::parse($mahasiswa->tanggal_lulus) : now())->translatedFormat('d F Y') }}</div>
+                            <div class="ttd-jabatan">WAKIL REKTOR BIDANG AKADEMIK</div>
+                            <div class="ttd-nama">Dr. H. UMAR YAHYA, M.Ag.</div>
+                            <div class="ttd-nidk">NIDK. 8932610021</div>
+                        </td>
+                        <td class="ttd-spacer-r"></td>
+                    </tr>
+                </table>
             </td>
         </tr>
     </table>
+    </div>
 </div>
 </body>
 </html>
