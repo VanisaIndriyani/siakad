@@ -88,24 +88,93 @@
     </div>
 
     @php
-        $logoWebCandidates = [
+        $logoWebPrefer = 'img/lo.jpeg';
+        $logoWebBaseCandidates = [
             'img/lo.jpeg',
-            'img/logo.png',
             'img/lo.jpg',
             'img/logo.jpeg',
+            'img/logo.jpg',
+            'img/logo.png',
+            'img/Logo.png',
+            'img/LOGO.png',
+            'img/Lo.jpeg',
+            'img/LO.JPEG',
+            'img/LO.jpeg',
         ];
-        $logoWeb = null;
-        foreach ($logoWebCandidates as $c) {
-            $abs = public_path($c);
-            if (file_exists($abs)) {
-                $logoWeb = asset($c);
-                break;
+
+        function __findLogoByGlob($baseDirs, $relDir, $patterns) {
+            if (!is_array($baseDirs) || !is_array($patterns)) return null;
+            foreach ($baseDirs as $bd) {
+                $bd = rtrim(str_replace('\\', '/', (string)$bd), '/');
+                if ($bd === '') continue;
+                $dir = $bd . '/' . trim(str_replace('\\', '/', (string)$relDir), '/');
+                if (!@is_dir($dir)) continue;
+                foreach ($patterns as $p) {
+                    try {
+                        $matches = @glob($dir . '/' . $p, GLOB_NOSORT | GLOB_BRACE);
+                    } catch (\Throwable $e) {
+                        $matches = false;
+                    }
+                    if (is_array($matches) && count($matches) > 0) {
+                        foreach ($matches as $m) {
+                            if (@is_file($m) && @is_readable($m)) {
+                                $baseName = basename($m);
+                                return trim(str_replace('\\', '/', (string)$relDir), '/') . '/' . $baseName;
+                            }
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        $logoWebRel = null;
+        try {
+            $baseDirs = [public_path()];
+            try {
+                $bp = rtrim(str_replace('\\', '/', base_path()), '/');
+                if ($bp !== '') {
+                    $baseDirs[] = $bp . '/public';
+                    $baseDirs[] = $bp . '/public_html';
+                    $baseDirs[] = $bp . '/../public_html';
+                    $baseDirs[] = $bp . '/../../public_html';
+                }
+            } catch (\Throwable $e) {}
+            $patterns = [
+                '[Ll][Oo].[Jj][Pp][Ee][Gg]',
+                '[Ll][Oo].[Jj][Pp][Gg]',
+                '[Ll][Oo][Gg][Oo].[Jj][Pp][Ee][Gg]',
+                '[Ll][Oo][Gg][Oo].[Jj][Pp][Gg]',
+                '[Ll][Oo][Gg][Oo].[Pp][Nn][Gg]',
+            ];
+            $logoWebRel = __findLogoByGlob(array_values(array_unique($baseDirs)), 'img', $patterns);
+        } catch (\Throwable $e) {
+            $logoWebRel = null;
+        }
+
+        if (!$logoWebRel) {
+            foreach ($logoWebBaseCandidates as $c) {
+                try {
+                    $abs = public_path($c);
+                    if (@file_exists($abs) && @is_file($abs) && @is_readable($abs)) {
+                        $logoWebRel = $c;
+                        break;
+                    }
+                } catch (\Throwable $e) {}
             }
         }
-        if (!$logoWeb) {
-            $logoWeb = asset('img/logo.png');
+
+        if (!$logoWebRel) {
+            $logoWebRel = $logoWebPrefer;
         }
-        $logoWebFallback = asset('img/logo.png');
+
+        $logoWeb = asset($logoWebRel);
+        $logoWebFallbacks = [];
+        foreach ($logoWebBaseCandidates as $c) {
+            $logoWebFallbacks[] = asset($c);
+        }
+        $logoWebFallbacks = array_values(array_unique($logoWebFallbacks));
+        $logoWebFallbackJs = json_encode($logoWebFallbacks, JSON_UNESCAPED_SLASHES);
 
         $half = (int) ceil(count($items) / 2);
         $left = array_slice($items, 0, $half);
@@ -129,10 +198,31 @@
             {{-- ===== KOP SURAT (LOGO DI TENGAH, SESUAI CONTOH WILDAH ASLI) ===== --}}
             <div class="kop-wrap">
                 <div class="kop-logo-center">
-                    <img src="{{ $logoWeb }}"
-                         onerror="if (this.src !== '{{ $logoWebFallback }}') { this.src = '{{ $logoWebFallback }}'; } else { this.style.display='none'; }"
+                    <img id="transkripLogoHeader"
+                         src="{{ $logoWeb }}"
                          alt="Logo IAI DDI Sidrap"
                          width="110" height="110">
+                    <script>
+                        (function () {
+                            var img = document.getElementById('transkripLogoHeader');
+                            if (!img) return;
+                            var fallbacks = {!! $logoWebFallbackJs !!};
+                            var idx = 0;
+                            var tried = {};
+                            var current = img.getAttribute('src') || '';
+                            tried[current] = true;
+                            img.addEventListener('error', function () {
+                                while (idx < fallbacks.length && tried[fallbacks[idx]]) idx++;
+                                if (idx < fallbacks.length) {
+                                    var next = fallbacks[idx++];
+                                    tried[next] = true;
+                                    img.setAttribute('src', next);
+                                } else {
+                                    img.style.display = 'none';
+                                }
+                            });
+                        })();
+                    </script>
                 </div>
                 <div class="kop-title-a">INSTITUT AGAMA ISLAM</div>
                 <div class="kop-title-a kop-title-a2">DARUD DA'WAH WAL IRSYAD</div>

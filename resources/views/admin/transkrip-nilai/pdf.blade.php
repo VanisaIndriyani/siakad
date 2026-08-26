@@ -227,12 +227,61 @@
 </head>
 <body>
 @php
+    function __logoGlobFind($baseDirs, $relDir, $patterns) {
+        if (!is_array($baseDirs) || !is_array($patterns)) return null;
+        foreach ($baseDirs as $bd) {
+            $bd = rtrim(str_replace('\\', '/', (string)$bd), '/');
+            if ($bd === '') continue;
+            $dir = $bd . '/' . trim(str_replace('\\', '/', (string)$relDir), '/');
+            if (!@is_dir($dir)) continue;
+            foreach ($patterns as $p) {
+                try {
+                    $matches = @glob($dir . '/' . $p, GLOB_NOSORT | GLOB_BRACE);
+                } catch (\Throwable $e) {
+                    $matches = false;
+                }
+                if (is_array($matches) && count($matches) > 0) {
+                    foreach ($matches as $m) {
+                        if (@is_file($m) && @is_readable($m)) {
+                            return ['path' => $m, 'rel' => trim(str_replace('\\', '/', (string)$relDir), '/') . '/' . basename($m)];
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    $globPatterns = [
+        '[Ll][Oo].[Jj][Pp][Ee][Gg]',
+        '[Ll][Oo].[Jj][Pp][Gg]',
+        '[Ll][Oo][Gg][Oo].[Jj][Pp][Ee][Gg]',
+        '[Ll][Oo][Gg][Oo].[Jj][Pp][Gg]',
+        '[Ll][Oo][Gg][Oo].[Pp][Nn][Gg]',
+    ];
+
     $logoCandidates = [
         ['rel' => 'img/lo.jpeg',     'public' => true,  'type' => 'image/jpeg'],
-        ['rel' => 'img/logo.png',    'public' => true,  'type' => 'image/png'],
         ['rel' => 'img/lo.jpg',      'public' => true,  'type' => 'image/jpeg'],
         ['rel' => 'img/logo.jpeg',   'public' => true,  'type' => 'image/jpeg'],
+        ['rel' => 'img/logo.jpg',    'public' => true,  'type' => 'image/jpeg'],
+        ['rel' => 'img/logo.png',    'public' => true,  'type' => 'image/png'],
+        ['rel' => 'img/Logo.png',    'public' => true,  'type' => 'image/png'],
+        ['rel' => 'img/LOGO.png',    'public' => true,  'type' => 'image/png'],
+        ['rel' => 'img/Lo.jpeg',     'public' => true,  'type' => 'image/jpeg'],
+        ['rel' => 'img/LO.JPEG',     'public' => true,  'type' => 'image/jpeg'],
+        ['rel' => 'img/LO.jpeg',     'public' => true,  'type' => 'image/jpeg'],
     ];
+
+    function __mimeByPath($p) {
+        $ext = strtolower(pathinfo((string)$p, PATHINFO_EXTENSION));
+        if ($ext === 'png') return 'image/png';
+        if ($ext === 'jpg' || $ext === 'jpeg' || $ext === 'jfif' || $ext === 'pjpeg') return 'image/jpeg';
+        if ($ext === 'gif') return 'image/gif';
+        if ($ext === 'webp') return 'image/webp';
+        if ($ext === 'svg') return 'image/svg+xml';
+        return 'image/jpeg';
+    }
 
     $extraPaths = [];
     try {
@@ -245,32 +294,57 @@
         $extraPaths = [];
     }
 
+    $baseDirs = [];
+    try { $baseDirs[] = public_path(); } catch (\Throwable $e) {}
+    foreach ($extraPaths as $ep) $baseDirs[] = $ep;
+    $baseDirs = array_values(array_unique(array_filter($baseDirs, fn($v) => is_string($v) && $v !== '')));
+
     $logoData = null;
-    foreach ($logoCandidates as $c) {
-        $rel = ltrim(str_replace('\\', '/', $c['rel']), '/');
-        $absCandidates = [];
-        try { $absCandidates[] = public_path($rel); } catch (\Throwable $e) {}
-        foreach ($extraPaths as $ep) {
-            $absCandidates[] = rtrim($ep, '/') . '/' . $rel;
-        }
-        $absCandidates = array_values(array_filter(array_unique($absCandidates), fn($p) => is_string($p) && $p !== ''));
-        $foundPath = null;
-        foreach ($absCandidates as $ap) {
+
+    try {
+        $found = __logoGlobFind($baseDirs, 'img', $globPatterns);
+        if (is_array($found) && !empty($found['path'])) {
             try {
-                if (file_exists($ap) && is_file($ap) && is_readable($ap)) {
-                    $foundPath = $ap;
-                    break;
+                $mime = __mimeByPath($found['path']);
+                $content = file_get_contents($found['path']);
+                if (is_string($content) && $content !== '') {
+                    $logoData = 'data:' . $mime . ';base64,' . base64_encode($content);
                 }
             } catch (\Throwable $e) {
-                continue;
+                $logoData = null;
             }
         }
-        if ($foundPath) {
-            try {
-                $logoData = 'data:' . $c['type'] . ';base64,' . base64_encode(file_get_contents($foundPath));
-                break;
-            } catch (\Throwable $e) {
-                $logoData = null;
+    } catch (\Throwable $e) {
+        $logoData = null;
+    }
+
+    if (!$logoData) {
+        foreach ($logoCandidates as $c) {
+            $rel = ltrim(str_replace('\\', '/', $c['rel']), '/');
+            $absCandidates = [];
+            try { $absCandidates[] = public_path($rel); } catch (\Throwable $e) {}
+            foreach ($extraPaths as $ep) {
+                $absCandidates[] = rtrim($ep, '/') . '/' . $rel;
+            }
+            $absCandidates = array_values(array_filter(array_unique($absCandidates), fn($p) => is_string($p) && $p !== ''));
+            $foundPath = null;
+            foreach ($absCandidates as $ap) {
+                try {
+                    if (@file_exists($ap) && @is_file($ap) && @is_readable($ap)) {
+                        $foundPath = $ap;
+                        break;
+                    }
+                } catch (\Throwable $e) {
+                    continue;
+                }
+            }
+            if ($foundPath) {
+                try {
+                    $logoData = 'data:' . $c['type'] . ';base64,' . base64_encode(file_get_contents($foundPath));
+                    break;
+                } catch (\Throwable $e) {
+                    $logoData = null;
+                }
             }
         }
     }
@@ -279,10 +353,12 @@
         try {
             $urlCandidates = [
                 [asset('img/lo.jpeg'),   'image/jpeg'],
-                [asset('img/logo.png'),  'image/png'],
                 [asset('img/lo.jpg'),    'image/jpeg'],
+                [asset('img/logo.jpeg'), 'image/jpeg'],
+                [asset('img/logo.jpg'),  'image/jpeg'],
+                [asset('img/logo.png'),  'image/png'],
             ];
-            $urlEnabled = ini_get('allow_url_fopen') && filter_var(asset('img/logo.png'), FILTER_VALIDATE_URL);
+            $urlEnabled = @ini_get('allow_url_fopen') && filter_var(asset('img/logo.png'), FILTER_VALIDATE_URL);
             if ($urlEnabled) {
                 foreach ($urlCandidates as [$u, $t]) {
                     try {
