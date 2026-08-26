@@ -227,10 +227,82 @@
 </head>
 <body>
 @php
-    $logoSrc = public_path('img/lo.jpeg');
+    $logoCandidates = [
+        ['rel' => 'img/lo.jpeg',     'public' => true,  'type' => 'image/jpeg'],
+        ['rel' => 'img/logo.png',    'public' => true,  'type' => 'image/png'],
+        ['rel' => 'img/lo.jpg',      'public' => true,  'type' => 'image/jpeg'],
+        ['rel' => 'img/logo.jpeg',   'public' => true,  'type' => 'image/jpeg'],
+    ];
+
+    $extraPaths = [];
+    try {
+        $base = rtrim(str_replace('\\', '/', base_path()), '/');
+        $extraPaths[] = $base . '/public';
+        $extraPaths[] = $base . '/public_html';
+        $extraPaths[] = $base . '/../public_html';
+        $extraPaths[] = $base . '/../../public_html';
+    } catch (\Throwable $e) {
+        $extraPaths = [];
+    }
+
     $logoData = null;
-    if (file_exists($logoSrc)) {
-        $logoData = 'data:image/jpeg;base64,' . base64_encode(file_get_contents($logoSrc));
+    foreach ($logoCandidates as $c) {
+        $rel = ltrim(str_replace('\\', '/', $c['rel']), '/');
+        $absCandidates = [];
+        try { $absCandidates[] = public_path($rel); } catch (\Throwable $e) {}
+        foreach ($extraPaths as $ep) {
+            $absCandidates[] = rtrim($ep, '/') . '/' . $rel;
+        }
+        $absCandidates = array_values(array_filter(array_unique($absCandidates), fn($p) => is_string($p) && $p !== ''));
+        $foundPath = null;
+        foreach ($absCandidates as $ap) {
+            try {
+                if (file_exists($ap) && is_file($ap) && is_readable($ap)) {
+                    $foundPath = $ap;
+                    break;
+                }
+            } catch (\Throwable $e) {
+                continue;
+            }
+        }
+        if ($foundPath) {
+            try {
+                $logoData = 'data:' . $c['type'] . ';base64,' . base64_encode(file_get_contents($foundPath));
+                break;
+            } catch (\Throwable $e) {
+                $logoData = null;
+            }
+        }
+    }
+
+    if (!$logoData) {
+        try {
+            $urlCandidates = [
+                [asset('img/lo.jpeg'),   'image/jpeg'],
+                [asset('img/logo.png'),  'image/png'],
+                [asset('img/lo.jpg'),    'image/jpeg'],
+            ];
+            $urlEnabled = ini_get('allow_url_fopen') && filter_var(asset('img/logo.png'), FILTER_VALIDATE_URL);
+            if ($urlEnabled) {
+                foreach ($urlCandidates as [$u, $t]) {
+                    try {
+                        $ctx = stream_context_create([
+                            'http' => ['timeout' => 5, 'method' => 'GET'],
+                            'ssl'  => ['verify_peer' => false, 'verify_peer_name' => false],
+                        ]);
+                        $content = @file_get_contents($u, false, $ctx);
+                        if (is_string($content) && $content !== '') {
+                            $logoData = 'data:' . $t . ';base64,' . base64_encode($content);
+                            break;
+                        }
+                    } catch (\Throwable $e) {
+                        continue;
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            $logoData = null;
+        }
     }
 
     $half = (int) ceil(count($items) / 2);

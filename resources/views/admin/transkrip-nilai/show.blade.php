@@ -88,11 +88,24 @@
     </div>
 
     @php
-        $logoSrc = public_path('img/lo.jpeg');
-        $logoData = null;
-        if (file_exists($logoSrc)) {
-            $logoData = 'data:image/jpeg;base64,' . base64_encode(file_get_contents($logoSrc));
+        $logoWebCandidates = [
+            'img/lo.jpeg',
+            'img/logo.png',
+            'img/lo.jpg',
+            'img/logo.jpeg',
+        ];
+        $logoWeb = null;
+        foreach ($logoWebCandidates as $c) {
+            $abs = public_path($c);
+            if (file_exists($abs)) {
+                $logoWeb = asset($c);
+                break;
+            }
         }
+        if (!$logoWeb) {
+            $logoWeb = asset('img/logo.png');
+        }
+        $logoWebFallback = asset('img/logo.png');
 
         $half = (int) ceil(count($items) / 2);
         $left = array_slice($items, 0, $half);
@@ -116,9 +129,10 @@
             {{-- ===== KOP SURAT (LOGO DI TENGAH, SESUAI CONTOH WILDAH ASLI) ===== --}}
             <div class="kop-wrap">
                 <div class="kop-logo-center">
-                    @if($logoData)
-                        <img src="{{ $logoData }}" alt="Logo">
-                    @endif
+                    <img src="{{ $logoWeb }}"
+                         onerror="if (this.src !== '{{ $logoWebFallback }}') { this.src = '{{ $logoWebFallback }}'; } else { this.style.display='none'; }"
+                         alt="Logo IAI DDI Sidrap"
+                         width="110" height="110">
                 </div>
                 <div class="kop-title-a">INSTITUT AGAMA ISLAM</div>
                 <div class="kop-title-a kop-title-a2">DARUD DA'WAH WAL IRSYAD</div>
