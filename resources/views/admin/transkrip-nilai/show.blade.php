@@ -350,9 +350,9 @@
                                     <td class="ttd-spacer-l"></td>
                                     <td class="ttd-col">
                                         <div>Pangkajene, {{ ($mahasiswa->tanggal_lulus ? \Illuminate\Support\Carbon::parse($mahasiswa->tanggal_lulus) : now())->translatedFormat('d F Y') }}</div>
-                                        <div class="ttd-jabatan">WAKIL REKTOR BIDANG AKADEMIK</div>
-                                        <div class="ttd-nama">Dr. H. UMAR YAHYA, M.Ag.</div>
-                                        <div class="ttd-nidk">NIDK. 8932610021</div>
+                                        <div class="ttd-jabatan">{{ $ttdJabatan }}</div>
+                                        <div class="ttd-nama">{{ $ttdNama }}</div>
+                                        <div class="ttd-nidk">{{ $ttdNomorLabel }}. {{ $ttdNomor }}</div>
                                     </td>
                                     <td class="ttd-spacer-r"></td>
                                 </tr>

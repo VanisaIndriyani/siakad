@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Dosen;
 use App\Models\Khs;
 use App\Models\Mahasiswa;
 use App\Models\User;
@@ -117,6 +118,7 @@ class MahasiswaController extends Controller
         return view('admin.mahasiswa.create', [
             'jurusan' => self::JURUSAN,
             'fakultasList' => self::FAKULTAS,
+            'dosenList' => Dosen::orderBy('nama')->get(),
         ]);
     }
 
@@ -129,6 +131,7 @@ class MahasiswaController extends Controller
             'fakultas' => ['nullable', 'string', Rule::in(self::FAKULTAS)],
             'status_mahasiswa' => ['required', 'string', 'max:50'],
             'angkatan' => ['nullable', 'integer', 'min:1900', 'max:2100'],
+            'dekan_fakultas_id' => ['nullable', 'integer', 'exists:dosen,id'],
             'foto' => ['nullable', 'image', 'max:2048'],
             'kartu_mahasiswa' => ['nullable', 'image', 'max:2048'],
         ]);
@@ -168,6 +171,7 @@ class MahasiswaController extends Controller
             'fakultas' => $validated['fakultas'] ?? null,
             'status_mahasiswa' => $validated['status_mahasiswa'],
             'angkatan' => $validated['angkatan'] ?? null,
+            'dekan_fakultas_id' => $validated['dekan_fakultas_id'] ?? null,
             'foto_path' => $fotoPath,
             'kartu_mahasiswa_path' => $kartuMahasiswaPath,
         ]);
@@ -197,6 +201,7 @@ class MahasiswaController extends Controller
             'mahasiswa' => $mahasiswa,
             'jurusan' => self::JURUSAN,
             'fakultasList' => self::FAKULTAS,
+            'dosenList' => Dosen::orderBy('nama')->get(),
         ]);
     }
 
@@ -209,6 +214,7 @@ class MahasiswaController extends Controller
             'fakultas' => ['nullable', 'string', Rule::in(self::FAKULTAS)],
             'status_mahasiswa' => ['required', 'string', 'max:50'],
             'angkatan' => ['nullable', 'integer', 'min:1900', 'max:2100'],
+            'dekan_fakultas_id' => ['nullable', 'integer', 'exists:dosen,id'],
             'foto' => ['nullable', 'image', 'max:2048'],
             'kartu_mahasiswa' => ['nullable', 'image', 'max:2048'],
         ]);
@@ -234,6 +240,7 @@ class MahasiswaController extends Controller
             'fakultas' => $validated['fakultas'] ?? null,
             'status_mahasiswa' => $validated['status_mahasiswa'],
             'angkatan' => $validated['angkatan'] ?? null,
+            'dekan_fakultas_id' => $validated['dekan_fakultas_id'] ?? $mahasiswa->dekan_fakultas_id,
         ])->save();
 
         $mahasiswa->user?->update(['name' => $validated['nama_lengkap']]);

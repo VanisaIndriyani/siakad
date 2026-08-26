@@ -40,6 +40,24 @@
     </div>
 
     <div>
+        <label class="text-sm text-emerald-100/80">Fakultas (Opsional)</label>
+        <select name="fakultas" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400">
+            @php $selectedFak = old('fakultas', $dosen->fakultas ?? ''); @endphp
+            <option value="" @selected($selectedFak === '') class="text-black">Pilih Fakultas</option>
+            @foreach (($fakultasList ?? []) as $opt)
+                <option value="{{ $opt }}" @selected($selectedFak === $opt) class="text-black">{{ $opt }}</option>
+            @endforeach
+        </select>
+        @error('fakultas') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
+    </div>
+
+    <div>
+        <label class="text-sm text-emerald-100/80">Jabatan Struktural (Opsional)</label>
+        <input name="jabatan_struktural" value="{{ old('jabatan_struktural', $dosen->jabatan_struktural ?? '') }}" placeholder="Contoh: DEKAN FAKULTAS TARBIYAH DAN KEGURUAN" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
+        @error('jabatan_struktural') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
+    </div>
+
+    <div>
         <label class="text-sm text-emerald-100/80">Status Akademik (Opsional)</label>
         <select name="status_akademik" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400">
             @php $status = old('status_akademik', $dosen->status_akademik ?? 'Dosen'); @endphp

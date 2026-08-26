@@ -27,10 +27,19 @@ class DosenController extends Controller
         'Ekonomi Syariah',
     ];
 
+    private const FAKULTAS = [
+        'Fakultas Tarbiyah & Keguruan',
+        'Fakultas Syariah & Hukum',
+        'Fakultas Ekonomi & Bisnis Islam',
+    ];
+
     private const STATUS_AKADEMIK = [
         'Dosen',
         'Ketua Prodi',
         'Sekretaris Prodi',
+        'Dekan Fakultas',
+        'Wakil Rektor Bidang Akademik',
+        'Rektor',
     ];
 
     private const STATUS_DOSEN = [
@@ -73,6 +82,7 @@ class DosenController extends Controller
     {
         return view('admin.dosen.create', [
             'programStudiList' => self::PROGRAM_STUDI,
+            'fakultasList' => self::FAKULTAS,
         ]);
     }
 
@@ -84,7 +94,9 @@ class DosenController extends Controller
             'nik' => ['required', 'string', 'max:50', 'unique:dosen,nik'],
             'nuptk' => ['nullable', 'string', 'max:50', 'unique:dosen,nuptk'],
             'nomor_sk' => ['nullable', 'string', 'max:255'],
+            'jabatan_struktural' => ['nullable', 'string', 'max:255'],
             'program_studi' => ['nullable', 'string', 'max:255'],
+            'fakultas' => ['nullable', 'string', Rule::in(self::FAKULTAS)],
             'status_akademik' => ['nullable', 'string', Rule::in(self::STATUS_AKADEMIK)],
             'status_dosen' => ['nullable', 'string', Rule::in(self::STATUS_DOSEN)],
             'foto' => ['nullable', 'image', 'max:2048'],
@@ -120,7 +132,9 @@ class DosenController extends Controller
             'nidn' => $validated['nidn'] ?? null,
             'nuptk' => $validated['nuptk'] ?? null,
             'nomor_sk' => $validated['nomor_sk'] ?? null,
+            'jabatan_struktural' => $validated['jabatan_struktural'] ?? null,
             'program_studi' => $validated['program_studi'] ?? null,
+            'fakultas' => $validated['fakultas'] ?? null,
             'status_akademik' => $validated['status_akademik'] ?? 'Dosen',
             'status_dosen' => $validated['status_dosen'] ?? 'aktif',
             'alamat' => $validated['alamat'] ?? null,
@@ -146,6 +160,7 @@ class DosenController extends Controller
         return view('admin.dosen.edit', [
             'dosen' => $dosen,
             'programStudiList' => self::PROGRAM_STUDI,
+            'fakultasList' => self::FAKULTAS,
         ]);
     }
 
@@ -157,7 +172,9 @@ class DosenController extends Controller
             'nik' => ['required', 'string', 'max:50', 'unique:dosen,nik,'.$dosen->id],
             'nuptk' => ['nullable', 'string', 'max:50', 'unique:dosen,nuptk,'.$dosen->id],
             'nomor_sk' => ['nullable', 'string', 'max:255'],
+            'jabatan_struktural' => ['nullable', 'string', 'max:255'],
             'program_studi' => ['nullable', 'string', 'max:255'],
+            'fakultas' => ['nullable', 'string', Rule::in(self::FAKULTAS)],
             'status_akademik' => ['nullable', 'string', Rule::in(self::STATUS_AKADEMIK)],
             'status_dosen' => ['nullable', 'string', Rule::in(self::STATUS_DOSEN)],
             'foto' => ['nullable', 'image', 'max:2048'],
@@ -176,7 +193,9 @@ class DosenController extends Controller
             'nidn' => $validated['nidn'] ?? $dosen->nidn,
             'nuptk' => $validated['nuptk'] ?? $dosen->nuptk,
             'nomor_sk' => $validated['nomor_sk'] ?? $dosen->nomor_sk,
+            'jabatan_struktural' => $validated['jabatan_struktural'] ?? $dosen->jabatan_struktural,
             'program_studi' => $validated['program_studi'],
+            'fakultas' => $validated['fakultas'] ?? $dosen->fakultas,
             'status_akademik' => $validated['status_akademik'] ?? ($dosen->status_akademik ?: 'Dosen'),
             'status_dosen' => $validated['status_dosen'] ?? ($dosen->status_dosen ?: 'aktif'),
         ])->save();

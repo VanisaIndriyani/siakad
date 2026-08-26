@@ -60,6 +60,7 @@ class Mahasiswa extends Model
         'ibu_pekerjaan',
         'ibu_penghasilan',
         'dosen_penasehat_id',
+        'dekan_fakultas_id',
         'nomor_sk_penasehat',
         'tanggal_sk_penasehat',
         'sk_penasehat_path',
@@ -92,6 +93,11 @@ class Mahasiswa extends Model
     public function dosenPenasehat(): BelongsTo
     {
         return $this->belongsTo(Dosen::class, 'dosen_penasehat_id');
+    }
+
+    public function dekanFakultas(): BelongsTo
+    {
+        return $this->belongsTo(Dosen::class, 'dekan_fakultas_id');
     }
 
     public function bimbinganAkademikMessages(): HasMany

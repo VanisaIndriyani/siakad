@@ -63,6 +63,25 @@
     </div>
 
     <div>
+        <label class="text-sm text-emerald-100/80">Dekan Fakultas (Untuk Tanda Tangan Transkrip)</label>
+        <select name="dekan_fakultas_id" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400">
+            @php
+                $selectedDekan = old('dekan_fakultas_id', $mahasiswa->dekan_fakultas_id ?? '');
+            @endphp
+            <option value="" @selected($selectedDekan === '') class="text-black">- Otomatis / Pilih Manual -</option>
+            @foreach (($dosenList ?? []) as $d)
+                <option value="{{ $d->id }}" @selected((string) $selectedDekan === (string) $d->id) class="text-black">
+                    {{ $d->nama }}
+                    @if (!empty($d->program_studi)) ({{ $d->program_studi }}) @endif
+                    @if (!empty($d->nidn)) [NIDN {{ $d->nidn }}] @elseif (!empty($d->nik)) [NIK {{ $d->nik }}] @endif
+                </option>
+            @endforeach
+        </select>
+        <div class="mt-2 text-xs text-emerald-100/60 italic">Jika kosong: sistem otomatis mencari Dosen dengan Jabatan Struktural "DEKAN FAKULTAS" sesuai Fakultas mahasiswa.</div>
+        @error('dekan_fakultas_id') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
+    </div>
+
+    <div>
         <label class="text-sm text-emerald-100/80">Foto (Opsional)</label>
         <input type="file" name="foto" accept="image/*" class="mt-2 w-full rounded-xl bg-white/5 border border-white/10 file:bg-white/10 file:border-0 file:text-white file:px-4 file:py-2 file:rounded-xl" />
         @error('foto') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror

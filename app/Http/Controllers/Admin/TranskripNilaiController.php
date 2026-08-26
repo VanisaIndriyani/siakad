@@ -177,6 +177,7 @@ class TranskripNilaiController extends Controller
         $mahasiswa->load([
             'khs.items.mataKuliah',
             'dosenPenasehat',
+            'dekanFakultas',
         ]);
 
         $items = [];
@@ -284,6 +285,66 @@ class TranskripNilaiController extends Controller
         $ujianAda = $ujianKompre;
         $ujianCount = count($ujianAda);
 
+        $dekan = $mahasiswa->dekanFakultas;
+        if (!$dekan) {
+            $fakultasMhs = (string) ($mahasiswa->fakultas ?? '');
+            if ($fakultasMhs !== '') {
+                $dekan = \App\Models\Dosen::query()
+                    ->where(function ($s) {
+                        $s->whereNotNull('jabatan_struktural')
+                            ->whereRaw('LOWER(jabatan_struktural) LIKE ?', ['%dekan%fakultas%'])
+                            ->orWhereRaw('LOWER(jabatan_struktural) LIKE ?', ['%dekan%']);
+                    })
+                    ->where('fakultas', $fakultasMhs)
+                    ->first();
+            }
+            if (!$dekan) {
+                $dekan = \App\Models\Dosen::query()
+                    ->where(function ($s) {
+                        $s->whereNotNull('jabatan_struktural')
+                            ->whereRaw('LOWER(jabatan_struktural) LIKE ?', ['%dekan%fakultas%'])
+                            ->orWhereRaw('LOWER(jabatan_struktural) LIKE ?', ['%dekan%']);
+                    })
+                    ->first();
+            }
+        }
+
+        if ($dekan) {
+            $ttdJabatan = trim((string) ($dekan->jabatan_struktural ?? ''));
+            if ($ttdJabatan === '') {
+                $fakultasTtd = (string) ($dekan->fakultas ?: ($mahasiswa->fakultas ?? ''));
+                $ttdJabatan = $fakultasTtd !== '' ? "DEKAN FAKULTAS " . strtoupper($fakultasTtd) : "DEKAN FAKULTAS";
+            }
+            $ttdNama = (string) ($dekan->nama ?? '');
+            $nomorInduk = (string) ($dekan->nidn ?? '');
+            $labelInduk = 'NIDN';
+            if ($nomorInduk === '' && !empty($dekan->nidk)) {
+                $nomorInduk = (string) $dekan->nidk;
+                $labelInduk = 'NIDK';
+            }
+            if ($nomorInduk === '' && !empty($dekan->nip)) {
+                $nomorInduk = (string) $dekan->nip;
+                $labelInduk = 'NIP';
+            }
+            if ($nomorInduk === '' && !empty($dekan->nuptk)) {
+                $nomorInduk = (string) $dekan->nuptk;
+                $labelInduk = 'NUPTK';
+            }
+            if ($ttdNama === '') {
+                $ttdNama = 'Dr. H. UMAR YAHYA, M.Ag.';
+                $nomorInduk = '8932610021';
+                $labelInduk = 'NIDK';
+            }
+        } else {
+            $fakultasTtd = (string) ($mahasiswa->fakultas ?? 'Fakultas Tarbiyah & Keguruan');
+            $ttdJabatan = "DEKAN FAKULTAS " . strtoupper($fakultasTtd);
+            $ttdNama = 'Dr. H. UMAR YAHYA, M.Ag.';
+            $nomorInduk = '8932610021';
+            $labelInduk = 'NIDK';
+        }
+        $ttdNomor = $nomorInduk;
+        $ttdNomorLabel = $labelInduk;
+
         $fotoMahasiswa = null;
         if (!empty($mahasiswa->foto_path)) {
             try {
@@ -339,6 +400,10 @@ class TranskripNilaiController extends Controller
             'tanggalLulus' => $tanggalLulus,
             'skBanpt' => $skBanpt,
             'fotoMahasiswa' => $fotoMahasiswa,
+            'ttdJabatan' => $ttdJabatan,
+            'ttdNama' => $ttdNama,
+            'ttdNomor' => $ttdNomor,
+            'ttdNomorLabel' => $ttdNomorLabel,
         ];
     }
 }
