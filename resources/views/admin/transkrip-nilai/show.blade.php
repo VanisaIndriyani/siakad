@@ -30,6 +30,13 @@
                 $namaFilePdf = 'Transkrip-' . ($mahasiswa->npm ?: $mahasiswa->id) . '-' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', (string)$mahasiswa->nama_lengkap) . '.pdf';
                 $namaFileExcel = 'Transkrip-' . ($mahasiswa->npm ?: $mahasiswa->id) . '-' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', (string)$mahasiswa->nama_lengkap) . '.xlsx';
             @endphp
+
+            <a href="{{ route('admin.transkrip-nilai.pdf', $mahasiswa) }}"
+               download="{{ $namaFilePdf }}"
+               class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-red-600 hover:bg-red-500 border border-red-400/40 transition text-sm font-semibold shadow-lg shadow-red-900/30 text-white">
+                <i class="fa-solid fa-file-pdf"></i>
+                Download PDF
+            </a>
          
             <a href="{{ route('admin.transkrip-nilai.excel', $mahasiswa) }}"
                download="{{ $namaFileExcel }}"
