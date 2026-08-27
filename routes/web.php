@@ -337,6 +337,7 @@ Route::prefix('admin')
             Route::get('/transkrip-nilai', [AdminTranskripNilaiController::class, 'index'])->name('transkrip-nilai.index');
             Route::get('/transkrip-nilai/{mahasiswa}', [AdminTranskripNilaiController::class, 'show'])->name('transkrip-nilai.show');
             Route::get('/transkrip-nilai/{mahasiswa}/pdf', [AdminTranskripNilaiController::class, 'pdf'])->name('transkrip-nilai.pdf');
+            Route::get('/transkrip-nilai/{mahasiswa}/excel', [AdminTranskripNilaiController::class, 'excel'])->name('transkrip-nilai.excel');
             Route::get('/transkrip-nilai/{mahasiswa}/edit', [AdminTranskripNilaiController::class, 'edit'])->name('transkrip-nilai.edit');
             Route::put('/transkrip-nilai/{mahasiswa}', [AdminTranskripNilaiController::class, 'update'])->name('transkrip-nilai.update');
         });

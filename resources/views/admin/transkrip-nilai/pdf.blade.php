@@ -7,93 +7,103 @@
         *, *:before, *:after { box-sizing: border-box; }
         table, table th, table td { box-sizing: border-box; }
 
+        /* =============================================================
+           CSS UKURAN KERTAS & PAPER DIPAKSA 100% SAMA DENGAN
+           @page + @media print DI show.blade.php (LINE 718-757)
+           ============================================================= */
         @page {
             size: 210mm 330mm;
             margin: 0;
-            padding: 0;
         }
         html, body {
-            margin: 0;
-            padding: 0;
+            margin: 0 !important;
+            padding: 0 !important;
             background: #ffffff;
             -webkit-text-size-adjust: 100%;
         }
         body {
-            width: 210mm;
-            height: 330mm;
-            max-height: 330mm;
-            min-height: 330mm;
-            background: #ffffff;
+            width: 210mm !important;
+            height: 330mm !important;
+            min-height: 330mm !important;
+            max-height: 330mm !important;
+            background: #ffffff !important;
             color: #000000;
-            margin: 0;
-            padding: 0;
+            margin: 0 !important;
+            padding: 0 !important;
             box-sizing: border-box;
             font-family: 'Times New Roman', Times, serif;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
+            line-height: 1.18;
+            font-size: 10pt;
+            overflow: hidden !important;
         }
 
-        /* ====== WRAPPER KERTAS = PERSIS 1:1 DARI show.blade.php .transcript-paper ====== */
+        /* ===== .transcript-paper PERSIS show.blade.php @media print L740-L749 (padding 8mm hemat tinggi untuk mencegah halaman 2) ===== */
         .transcript-paper {
-            width: 210mm;
-            height: 330mm;
-            max-height: 330mm;
-            background: #ffffff;
+            width: 210mm !important;
+            height: 330mm !important;
+            min-height: 330mm !important;
+            max-height: 330mm !important;
+            background: #ffffff !important;
             color: #000000;
-            padding: 10mm 13mm 10mm !important; /* PERSIS SHOW */
+            margin: 0 !important;
+            padding: 8mm 13mm 8mm !important;
             box-sizing: border-box;
             font-family: 'Times New Roman', Times, serif;
-            overflow: hidden !important; /* PERSIS SHOW @media print overflow hidden */
-            margin: 0;
+            overflow: hidden !important;
+            page-break-inside: auto;
+            box-shadow: none !important;
+            border-radius: 0 !important;
         }
 
-        /* ====== SEMUA CLASS DI BAWAH INI = PERSIS 1:1 DARI show.blade.php (USER LOCK LAYOUT) ====== */
-        .wrap { width: 100%; }
+        .no-break { page-break-inside: avoid !important; }
 
+        /* ====== SEMUA CLASS DI BAWAH INI = PERSIS 1:1 DARI show.blade.php (USER LOCK LAYOUT) ====== */
         .kop-wrap { width: 100%; text-align: center; color: #000000; }
-        .kop-logo-center { width: 100%; text-align: center; margin-bottom: 8px; }
-        .kop-logo-center img { width: 110px; height: 110px; object-fit: contain; display: inline-block; }
+        .kop-logo-center { width: 100%; text-align: center; margin-bottom: 2px; }
+        .kop-logo-center img { width: 78px; height: 78px; object-fit: contain; display: inline-block; }
         .kop-title-a {
-            font-size: 24px; font-weight: 800; letter-spacing: 0.8px; line-height: 1.2; margin: 3px 0 0; padding: 0; color: #000000;
+            font-size: 18px; font-weight: 800; letter-spacing: 0.8px; line-height: 1.2; margin: 2px 0 0; padding: 0; color: #000000;
         }
         .kop-title-a2 { margin-top: 1px; }
         .kop-title-b {
-            font-size: 23px; font-weight: 800; letter-spacing: 0.8px; line-height: 1.2; margin: 3px 0 0; padding: 0; color: #000000;
+            font-size: 17px; font-weight: 800; letter-spacing: 0.8px; line-height: 1.2; margin: 2px 0 0; padding: 0; color: #000000;
         }
         .kop-terakreditasi {
-            font-size: 11px; margin-top: 6px; color: #000000; text-align: center; letter-spacing: 0.1px;
+            font-size: 9px; margin-top: 3px; color: #000000; text-align: center; letter-spacing: 0.1px;
         }
         .kop-alamat-line {
-            font-size: 10.5px; margin-top: 4px; line-height: 1.25; color: #000000; text-align: center;
+            font-size: 9px; margin-top: 2px; line-height: 1.2; color: #000000; text-align: center;
         }
-        .kop-email-web { margin-top: 2px; }
+        .kop-email-web { margin-top: 1px; font-size: 9px; }
         .kop-line-double {
-            margin-top: 3px;
+            margin-top: 2px;
             width: 100%;
             display: block;
         }
         .kop-line-double .kop-line-top {
-            width: 100%; height: 0px; background: transparent;
+            width: 100%; height: 2px; background: #000000;
         }
         .kop-line-double .kop-line-bottom {
-            width: 100%; height: 0px; background: transparent; margin-top: 0;
+            width: 100%; height: 1.5px; background: #000000; margin-top: 2px;
         }
 
-        .judul-box { text-align: center; margin-top: 10px; }
+        .judul-box { text-align: center; margin-top: 6px; }
         .judul-text {
-            font-size: 16px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+            font-size: 13px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
             text-decoration: none; color: #000000;
         }
-        .judul-nomor { font-size: 9.2px; margin-top: 1px; color: #000000; }
+        .judul-nomor { font-size: 8.5px; margin-top: 1px; color: #000000; }
 
         .biodata {
-            width: 100%; margin-top: 10px; border-collapse: collapse;
-            font-size: 9.5px; color: #000000; table-layout: fixed;
+            width: 100%; margin-top: 6px; border-collapse: collapse;
+            font-size: 8.5px; color: #000000; table-layout: fixed;
         }
-        .biodata td { vertical-align: top; padding: 0; line-height: 1.3; }
+        .biodata td { vertical-align: top; padding: 0; line-height: 1.2; }
         .biodata td.bio-label {
             width: 25%;
-            padding: 1.5px 10px 1.5px 0;
+            padding: 1px 8px 1px 0;
             text-align: left;
             font-weight: 400;
             color: #000000;
@@ -106,13 +116,13 @@
             content: ":";
             position: absolute;
             right: 0px;
-            top: 1.5px;
+            top: 1px;
             display: inline-block;
             color: #000000;
         }
         .biodata td.bio-value {
             width: 25%;
-            padding: 1.5px 0 1.5px 6px;
+            padding: 1px 0 1px 4px;
             color: #000000;
         }
         .biodata td.bio-value.right-val {
@@ -121,30 +131,30 @@
         .bio-val { font-weight: 700; color: #000000; display: inline-block; }
 
         table.nilai {
-            width: 100%; border-collapse: collapse; margin-top: 14px;
-            font-size: 9px; color: #000000; table-layout: fixed;
+            width: 100%; border-collapse: collapse; margin-top: 6px;
+            font-size: 7.8px; color: #000000; table-layout: fixed;
         }
         table.nilai th {
-            border: 1px solid #000; background: #e0f2ea; font-weight: 700; letter-spacing: 0.2px;
-            padding: 5px 3px; vertical-align: middle; line-height: 1.22; text-align: center;
+            border: 1px solid #000; background: #e0f2ea; font-weight: 700; letter-spacing: 0.15px;
+            padding: 3px 2px; vertical-align: middle; line-height: 1.15; text-align: center;
         }
-        table.nilai th.mk { text-align: left; padding: 5px 6px; width: 31%; }
-        table.nilai th.num { width: 4%; padding: 5px 2px; }
-        table.nilai th.sks { width: 5%; padding: 5px 2px; }
-        table.nilai th.nilaih { width: 5%; padding: 5px 2px; }
-        table.nilai th.m { width: 5%; padding: 5px 2px; }
+        table.nilai th.mk { text-align: left; padding: 3px 4px; width: 31%; }
+        table.nilai th.num { width: 4%; padding: 3px 2px; }
+        table.nilai th.sks { width: 5%; padding: 3px 2px; }
+        table.nilai th.nilaih { width: 5%; padding: 3px 2px; }
+        table.nilai th.m { width: 5%; padding: 3px 2px; }
         table.nilai td {
-            border: 1px solid #000; padding: 3px 4px; vertical-align: middle;
-            line-height: 1.22; text-align: center; color: #000000;
+            border: 1px solid #000; padding: 2px 2px; vertical-align: middle;
+            line-height: 1.15; text-align: center; color: #000000;
         }
-        table.nilai td.mk { text-align: left; padding: 3px 6px; width: 31%; }
-        table.nilai td.num { width: 4%; padding: 3px 2px; }
-        table.nilai td.sks { width: 5%; padding: 3px 2px; }
-        table.nilai td.nilaih { width: 5%; font-weight: 700; padding: 3px 2px; }
-        table.nilai td.m { width: 5%; padding: 3px 2px; }
+        table.nilai td.mk { text-align: left; padding: 2px 4px; width: 31%; }
+        table.nilai td.num { width: 4%; padding: 2px 2px; }
+        table.nilai td.sks { width: 5%; padding: 2px 2px; }
+        table.nilai td.nilaih { width: 5%; font-weight: 700; padding: 2px 2px; }
+        table.nilai td.m { width: 5%; padding: 2px 2px; }
         table.nilai tr.jumlah td {
-            background: #ffffff !important; font-weight: 700; padding: 3.5px 6px;
-            letter-spacing: 0.2px; line-height: 1.22;
+            background: #ffffff !important; font-weight: 700; padding: 2px 4px;
+            letter-spacing: 0.15px; line-height: 1.15;
         }
         table.nilai tr.jumlah td.mk { text-align: center; }
         table.nilai tr.jumlah td.jumlah-dashed {
@@ -153,10 +163,10 @@
             border-bottom: none !important;
         }
         table.nilai tr.ujian-head td {
-            background: #ffffff !important; font-weight: 700; letter-spacing: 0.2px;
-            padding: 3.5px 6px; line-height: 1.22; font-size: 9px;
+            background: #ffffff !important; font-weight: 700; letter-spacing: 0.15px;
+            padding: 2px 4px; line-height: 1.15; font-size: 7.8px;
         }
-        table.nilai td.ujian-left-title { text-align: left; padding-left: 8px !important; }
+        table.nilai td.ujian-left-title { text-align: left; padding-left: 6px !important; }
         table.nilai td.ujian-left-spacer,
         table.nilai td.ujian-left-spacer-cell,
         table.nilai td.ujian-right-spacer,
@@ -166,9 +176,9 @@
         table.nilai td.ujian-right-title-m { background: #ffffff !important; }
         table.nilai tr.spacer-row td {
             background: #ffffff !important; border: 1px solid #000000;
-            height: 18px; padding: 0;
+            height: 12px; padding: 0;
         }
-        table.nilai tr.ujian-row td { font-size: 9px; padding: 3px 5px; line-height: 1.22; }
+        table.nilai tr.ujian-row td { font-size: 7.8px; padding: 2px 4px; line-height: 1.15; }
 
         table.nilai tr.jumlah td.left-col,
         table.nilai tr.spacer-row td.left-col,
@@ -176,7 +186,7 @@
         table.nilai tr.ujian-row td.left-col {
             background: #ffffff !important;
             font-weight: 400 !important;
-            padding: 3px 4px !important;
+            padding: 2px 2px !important;
             text-align: center !important;
             letter-spacing: 0 !important;
         }
@@ -185,38 +195,53 @@
         table.nilai tr.ujian-head td.mk.left-col,
         table.nilai tr.ujian-row td.mk.left-col {
             text-align: left !important;
-            padding: 3px 6px !important;
+            padding: 2px 4px !important;
         }
 
         .ringkasan {
-            width: 100%; margin-top: 9px; border-collapse: collapse;
-            font-size: 9.5px; color: #000000; table-layout: auto;
+            width: 100%; margin-top: 4px; border-collapse: collapse;
+            font-size: 8.5px; color: #000000; table-layout: auto;
         }
-        .ringkasan td { vertical-align: top; padding: 1.5px 0; line-height: 1.28; }
+        .ringkasan td { vertical-align: top; padding: 1px 0; line-height: 1.2; }
         .ringkasan td.label {
-            width: auto; white-space: nowrap; font-weight: 700; color: #000000; padding-right: 12px;
+            width: auto; white-space: nowrap; font-weight: 700; color: #000000; padding-right: 8px;
         }
         .ringkasan td.label-top {
-            width: auto; white-space: nowrap; font-weight: 700; color: #000000; padding: 1.5px 12px 0 0;
+            width: auto; white-space: nowrap; font-weight: 700; color: #000000; padding: 1px 8px 0 0;
         }
-        .ringkasan td.sep   { width: auto; text-align: left; padding-right: 10px; }
-        .ringkasan td.sep-top { width: auto; text-align: left; padding: 1.5px 10px 0 0; }
-        .ringkasan td.val   { font-weight: 800; color: #000000; font-size: 9.8px; width: auto; white-space: nowrap; }
+        .ringkasan td.sep   { width: auto; text-align: left; padding-right: 6px; }
+        .ringkasan td.sep-top { width: auto; text-align: left; padding: 1px 6px 0 0; }
+        .ringkasan td.val   { font-weight: 800; color: #000000; font-size: 8.8px; width: auto; white-space: nowrap; }
         .ringkasan td.val-judul {
-            text-align: left; color: #000000; line-height: 1.28; padding: 1.5px 0 1.5px 0;
+            text-align: left; color: #000000; line-height: 1.2; padding: 1px 0 1px 0;
             vertical-align: top; width: auto;
         }
 
+        /* Tabel TTD + FOTO: 2 kolom lebar 50% masing-masing → TIDAK GUNAKAN padding-left 90mm yang DOMPDF suka hitung beda */
+        .ttd-foto-grid {
+            width: 100%; border-collapse: collapse; margin-top: 4px !important;
+            padding: 0 !important;
+        }
+        .ttd-foto-grid td {
+            width: 50%; vertical-align: top; padding: 0;
+        }
+        .ttd-foto-col-inner {
+            width: 28mm;
+            margin-left: auto;
+            margin-right: 0;
+            padding: 0 !important;
+            text-align: left;
+        }
         .ttd-foto-wrapper {
             width: 100%; margin: 0 !important; border-collapse: collapse;
             padding-left: 0 !important;
         }
         .ttd-foto-wrapper td { vertical-align: top; padding: 0; }
         .ttd-foto-col {
-            width: 28mm; padding-right: 2mm;
+            width: 21mm; padding-right: 1mm;
         }
         .ttd-foto-box {
-            width: 24mm; height: 32mm;
+            width: 18mm; height: 25mm;
             border: 1px solid #333; background: #fdfdfd;
             overflow: hidden; box-sizing: border-box;
             position: relative;
@@ -227,23 +252,26 @@
         }
         .ttd-foto-empty {
             position: absolute; inset: 0;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            color: #888; font-size: 10.5px; font-weight: 400;
-            line-height: 1.25; text-align: center;
+            display: block;
+            padding: 4px 2px;
+            text-align: center;
+            color: #888; font-size: 9px; font-weight: 400;
+            line-height: 1.2;
             background: #ffffff;
+            box-sizing: border-box;
         }
         .ttd-col-wrapper { width: auto; }
         .ttd-box {
             width: 100%; margin-top: 0; border-collapse: collapse;
-            font-size: 9.3px; color: #000000;
+            font-size: 8.3px; color: #000000;
         }
         .ttd-box td { vertical-align: top; }
         .ttd-spacer-l { width: 0%; }
         .ttd-spacer-r { width: 0%; }
-        .ttd-col { width: 100%; text-align: left; line-height: 1.32; color: #000000; padding-left: 0; font-size: 9.5px; }
-        .ttd-jabatan { margin-top: 3px; font-weight: 800; letter-spacing: 0.2px; }
-        .ttd-nama    { margin-top: 48px; font-weight: 800; text-decoration: underline; font-size: 9.5px; }
-        .ttd-nidk    { margin-top: 1px; font-size: 8.5px; letter-spacing: 0.1px; }
+        .ttd-col { width: 100%; text-align: left; line-height: 1.22; color: #000000; padding-left: 0; font-size: 8.3px; }
+        .ttd-jabatan { margin-top: 1px; font-weight: 800; letter-spacing: 0.15px; }
+        .ttd-nama    { margin-top: 22px; font-weight: 800; text-decoration: underline; font-size: 8.3px; }
+        .ttd-nidk    { margin-top: 1px; font-size: 7.8px; letter-spacing: 0.1px; }
     </style>
 </head>
 <body>
@@ -485,7 +513,7 @@
             <td class="bio-value right-val"><span class="bio-val">{{ $mahasiswa->fakultas ?? 'Fakultas Tarbiyah & Keguruan' }}</span></td>
         </tr>
         <tr>
-            <td class="bio-label">NIK</td>
+            <td class="bio-label">NO. Ijazah</td>
             <td class="bio-value"><span class="bio-val">{{ $mahasiswa->nik ?? '-' }}</span></td>
             <td class="bio-label right-label">Program Studi</td>
             <td class="bio-value right-val"><span class="bio-val">{{ $mahasiswa->program_studi ?? '-' }}</span></td>
@@ -664,35 +692,38 @@
     </table>
 
     {{-- ===== FOTO MAHASISWA 24mm × 32mm (KIRI BAWAH) + TANDA TANGAN DEKAN FAKULTAS (KANAN) ===== --}}
-    <div style="page-break-inside: avoid; padding-left:90mm !important; margin-top:10px !important;">
-        <table class="ttd-foto-wrapper" cellpadding="0" cellspacing="0" style="padding-left:0 !important; margin:0 !important;">
-            <tr>
-                <td class="ttd-foto-col">
-                    <div class="ttd-foto-box">
-                        @if($fotoSrcFinal)
-                            <img src="{{ $fotoSrcFinal }}" alt="Foto {{ $mahasiswa->nama_lengkap }}">
-                        @else
-                            <div class="ttd-foto-empty">Foto<br>3 × 4</div>
-                        @endif
-                    </div>
-                </td>
-                <td class="ttd-col-wrapper">
-                    <table class="ttd-box" cellpadding="0" cellspacing="0">
+    <table class="ttd-foto-grid no-break" cellpadding="0" cellspacing="0">
+        <tr>
+            <td><!-- kolom kiri: KOSONG (sesuai show yang pakai padding-left 90mm → area kiri dibiarkan kosong) --></td>
+            <td>
+                <div class="ttd-foto-col-inner">
+                    <table class="ttd-foto-wrapper" cellpadding="0" cellspacing="0" style="padding-left:0 !important; margin:0 !important;">
                         <tr>
-                            <td class="ttd-spacer-l"></td>
-                            <td class="ttd-col">
-                                <div>{{ $tanggalTtd }}</div>
-                                <div class="ttd-jabatan">{{ $ttdJabatan }}</div>
-                                <div class="ttd-nama">{{ $ttdNama }}</div>
-                                <div class="ttd-nidk">{{ $ttdNomorLabel }}. {{ $ttdNomor }}</div>
+                            <td class="ttd-foto-col">
+                                <div class="ttd-foto-box">
+                                    <div class="ttd-foto-empty">Foto<br>3 × 4</div>
+                                </div>
                             </td>
-                            <td class="ttd-spacer-r"></td>
+                            <td class="ttd-col-wrapper">
+                                <table class="ttd-box" cellpadding="0" cellspacing="0">
+                                    <tr>
+                                        <td class="ttd-spacer-l"></td>
+                                        <td class="ttd-col">
+                                            <div>Pangkajene, {{ $tanggalTtdPartBody ?? (($mahasiswa->tanggal_lulus ? \Illuminate\Support\Carbon::parse($mahasiswa->tanggal_lulus) : now())->translatedFormat('d F Y')) }}</div>
+                                            <div class="ttd-jabatan">{{ $ttdJabatan }}</div>
+                                            <div class="ttd-nama">{{ $ttdNama }}</div>
+                                            <div class="ttd-nidk">{{ $ttdNomorLabel }}. {{ $ttdNomor }}</div>
+                                        </td>
+                                        <td class="ttd-spacer-r"></td>
+                                    </tr>
+                                </table>
+                            </td>
                         </tr>
                     </table>
-                </td>
-            </tr>
-        </table>
-    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
 </div>
 </body>
 </html>

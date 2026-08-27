@@ -25,19 +25,17 @@
                 <i class="fa-solid fa-print"></i>
                 Cetak Halaman
             </button>
-            <a href="{{ route('admin.transkrip-nilai.pdf', $mahasiswa) }}" target="_blank" rel="noopener noreferrer" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-sm">
-                <i class="fa-solid fa-file-pdf"></i>
-                Cetak PDF
-            </a>
+           
             @php
                 $namaFilePdf = 'Transkrip-' . ($mahasiswa->npm ?: $mahasiswa->id) . '-' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', (string)$mahasiswa->nama_lengkap) . '.pdf';
+                $namaFileExcel = 'Transkrip-' . ($mahasiswa->npm ?: $mahasiswa->id) . '-' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', (string)$mahasiswa->nama_lengkap) . '.xlsx';
             @endphp
-            <a href="{{ route('admin.transkrip-nilai.pdf', [$mahasiswa, 'download' => 1, 'fd' => 1]) }}"
-               download="{{ $namaFilePdf }}"
-               type="application/octet-stream"
-               class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 border border-emerald-500/40 transition text-sm font-semibold shadow-lg shadow-emerald-900/30 text-white">
-                <i class="fa-solid fa-file-arrow-down"></i>
-                Download PDF
+         
+            <a href="{{ route('admin.transkrip-nilai.excel', $mahasiswa) }}"
+               download="{{ $namaFileExcel }}"
+               class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-green-700 hover:bg-green-600 border border-green-500/40 transition text-sm font-semibold shadow-lg shadow-green-900/30 text-white">
+                <i class="fa-solid fa-file-excel"></i>
+                Download Excel
             </a>
         </div>
     </div>
@@ -237,10 +235,7 @@
                 <div class="kop-terakreditasi">TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021</div>
                 <div class="kop-alamat-line">Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang</div>
                 <div class="kop-alamat-line kop-email-web">E-mail : iaiddisidrap@gmail.com &nbsp;&nbsp; Website : www.yppddisrapp.ac.id</div>
-                <div class="kop-line-double">
-                    <div class="kop-line-top"></div>
-                    <div class="kop-line-bottom"></div>
-                </div>
+               
             </div>
 
             {{-- ===== JUDUL TRANSKRIP ===== --}}
@@ -264,7 +259,7 @@
                     <td class="bio-value right-val"><span class="bio-val">{{ $mahasiswa->fakultas ?? 'Fakultas Tarbiyah & Keguruan' }}</span></td>
                 </tr>
                 <tr>
-                    <td class="bio-label">NIK</td>
+                    <td class="bio-label">NO. Ijazah</td>
                     <td class="bio-value"><span class="bio-val">{{ $mahasiswa->nik ?? '-' }}</span></td>
                     <td class="bio-label right-label">Program Studi</td>
                     <td class="bio-value right-val"><span class="bio-val">{{ $mahasiswa->program_studi ?? '-' }}</span></td>
@@ -536,10 +531,10 @@
             display: block;
         }
         .kop-line-double .kop-line-top {
-            width: 100%; height: 0px; background: transparent;
+            width: 100%; height: 2px; background: #000000;
         }
         .kop-line-double .kop-line-bottom {
-            width: 100%; height: 0px; background: transparent; margin-top: 0;
+            width: 100%; height: 1.5px; background: #000000; margin-top: 2px;
         }
 
         .judul-box { text-align: center; margin-top: 10px; }

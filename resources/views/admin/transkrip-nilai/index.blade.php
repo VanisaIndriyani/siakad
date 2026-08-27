@@ -17,7 +17,7 @@
                        name="q"
                        value="{{ $q }}"
                        class="w-full h-11 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 focus:ring-emerald-400 focus:border-emerald-400 text-sm pl-10 pr-4"
-                       placeholder="Cari nama / NPM / NIK mahasiswa..." />
+                       placeholder="Cari nama / NPM / NO. Ijazah mahasiswa..." />
                 <div class="absolute left-3 top-1/2 -translate-y-1/2 text-white/40">
                     <i class="fa-solid fa-magnifying-glass"></i>
                 </div>
@@ -83,20 +83,11 @@
                                         <i class="fa-regular fa-file-lines text-emerald-300"></i>
                                         Lihat
                                     </a>
-                                    <a href="{{ route('admin.transkrip-nilai.pdf', $m) }}" target="_blank" rel="noopener" class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-xs">
-                                        <i class="fa-solid fa-print text-emerald-300"></i>
-                                        Cetak
-                                    </a>
+                                 
                                     @php
                                         $namaFilePdf = 'Transkrip-' . ($m->npm ?: $m->id) . '-' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', (string)$m->nama_lengkap) . '.pdf';
                                     @endphp
-                                    <a href="{{ route('admin.transkrip-nilai.pdf', [$m, 'download' => 1, 'fd' => 1]) }}"
-                                       download="{{ $namaFilePdf }}"
-                                       type="application/octet-stream"
-                                       class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition text-xs font-medium">
-                                        <i class="fa-solid fa-file-arrow-down"></i>
-                                        Download PDF
-                                    </a>
+                                   
                                 </div>
                             </td>
                         </tr>
