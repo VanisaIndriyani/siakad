@@ -24,9 +24,10 @@
             min-height: 330mm;
             background: #ffffff;
             color: #000000;
-            padding: 9mm 10mm 9mm 10mm !important; /* SIMETRIS ATAS-BAWAH 9mm & KIRI-KANAN 10mm */
+            padding: 8mm 9mm 8mm 8mm !important; /* KANAN DIBERI RUANG LEBIH BANYAK AGAR TIDAK KEPOTONG */
             box-sizing: border-box;
             font-family: 'Times New Roman', Times, serif;
+            overflow-x: hidden;
         }
         .wrap { width: 100%; }
 
@@ -95,11 +96,12 @@
             width: 25%;
             padding: 1.5px 0 1.5px 6px;
             color: #000000;
+            word-wrap: break-word; word-break: break-word; overflow-wrap: break-word;
         }
         .biodata td.bio-value.right-val {
             width: 30%;
         }
-        .bio-val { font-weight: 700; color: #000000; display: inline-block; }
+        .bio-val { font-weight: 700; color: #000000; display: inline-block; word-wrap: break-word; word-break: break-word; overflow-wrap: break-word; max-width: 100%; }
 
         table.nilai {
             width: 100%; border-collapse: collapse; margin-top: 14px;
@@ -186,6 +188,8 @@
         .ringkasan td.val-judul {
             text-align: left; color: #000000; line-height: 1.28; padding: 1.5px 0 1.5px 0;
             vertical-align: top; width: auto;
+            word-wrap: break-word; word-break: break-word; overflow-wrap: break-word;
+            font-size: 9.5px;
         }
 
         .ttd-foto-wrapper {
@@ -222,9 +226,9 @@
         .ttd-spacer-l { width: 0%; }
         .ttd-spacer-r { width: 0%; }
         .ttd-col { width: 100%; text-align: left; line-height: 1.32; color: #000000; padding-left: 0; font-size: 9.5px; }
-        .ttd-jabatan { margin-top: 3px; font-weight: 800; letter-spacing: 0.2px; }
-        .ttd-nama    { margin-top: 48px; font-weight: 800; text-decoration: underline; font-size: 9.5px; }
-        .ttd-nidk    { margin-top: 1px; font-size: 8.5px; letter-spacing: 0.1px; }
+        .ttd-jabatan { margin-top: 3px; font-weight: 800; letter-spacing: 0.1px; font-size: 9.2px; word-wrap: break-word; word-break: break-word; overflow-wrap: break-word; line-height: 1.25; }
+        .ttd-nama    { margin-top: 48px; font-weight: 800; text-decoration: underline; font-size: 9.3px; word-wrap: break-word; }
+        .ttd-nidk    { margin-top: 1px; font-size: 8.3px; letter-spacing: 0.1px; word-wrap: break-word; }
     </style>
 </head>
 <body>
@@ -593,8 +597,8 @@
     {{-- ===== RINGKASAN IPK, PREDIKAT, JUDUL SKRIPSI (SEJAJAR VERTIKAL + JUDUL INDENT) ===== --}}
     <table class="ringkasan" cellpadding="0" cellspacing="0">
         <colgroup>
-            <col style="width:290px;">
-            <col style="width:22px;">
+            <col style="width:245px;">
+            <col style="width:20px;">
             <col style="width:auto;">
         </colgroup>
         <tr>
@@ -615,7 +619,7 @@
     </table>
 
     {{-- ===== FOTO MAHASISWA 35mm × 45mm (KIRI BAWAH) + TANDA TANGAN DEKAN FAKULTAS (KANAN) ===== --}}
-    <div style="page-break-inside: avoid; padding-left:90mm !important; margin-top:4mm !important;">
+    <div style="page-break-inside: avoid; padding-left:78mm !important; margin-top:4mm !important;">
         <table class="ttd-foto-wrapper" cellpadding="0" cellspacing="0" style="padding-left:0 !important; margin:0 !important;">
         <tr>
             <td class="ttd-foto-col">
