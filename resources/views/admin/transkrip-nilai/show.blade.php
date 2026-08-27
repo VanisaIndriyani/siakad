@@ -706,7 +706,7 @@
 
         @page {
             size: 210mm 330mm;
-            margin: 0;
+            margin: 0 !important;
         }
         @media print {
             html, body {
@@ -714,9 +714,12 @@
                 padding: 0 !important;
                 width: 210mm !important;
                 height: 330mm !important;
+                min-height: 330mm !important;
+                max-height: 330mm !important;
                 background: #fff !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
+                overflow: hidden !important;
             }
             .transcript-preview {
                 display: block !important;
@@ -725,16 +728,22 @@
                 background: #fff !important;
                 width: 100% !important;
                 min-height: auto !important;
+                height: 330mm !important;
+                max-height: 330mm !important;
+                overflow: hidden !important;
             }
             .transcript-paper {
                 width: 210mm !important;
                 height: 330mm !important;
                 max-height: 330mm !important;
                 margin: 0 !important;
-                padding: 10mm 13mm 10mm !important;
+                padding: 8mm 11mm 8mm !important;
                 box-shadow: none !important;
                 border-radius: 0 !important;
                 overflow: hidden !important;
+                box-sizing: border-box !important;
+                page-break-after: avoid !important;
+                page-break-inside: avoid !important;
             }
             .no-print, aside, nav, header, [x-data] > aside, nav.sidebar { display: none !important; }
             main {
@@ -742,6 +751,8 @@
                 padding: 0 !important;
                 margin: 0 !important;
                 max-width: none !important;
+                width: 100% !important;
+                overflow: hidden !important;
             }
         }
     </style>
