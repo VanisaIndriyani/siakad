@@ -37,8 +37,8 @@
             font-family: 'Times New Roman', Times, serif;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
-            line-height: 1.18;
-            font-size: 10pt;
+            line-height: 1.0;
+            font-size: 9.5pt;
             overflow: visible !important;
         }
 
@@ -144,53 +144,56 @@
 
         table.nilai {
             width: 100%; border-collapse: collapse; margin-top: 0px;
-            font-size: 6.8px; color: #000000; table-layout: fixed;
+            font-size: 6.5px; color: #000000; table-layout: fixed;
         }
         table.nilai th {
             border: 1px solid #000; background: #e0f2ea; font-weight: 700; letter-spacing: 0.15px;
-            padding: 2.5px 1.5px; vertical-align: middle; line-height: 1.08; text-align: center;
+            padding: 0px 2px 0px 2px; vertical-align: middle; line-height: 1 !important; text-align: center;
+            height: 10px !important; overflow: hidden !important;
         }
-        table.nilai th.mk { text-align: left; padding: 2.5px 3px; width: 31%; }
-        table.nilai th.num { width: 4%; padding: 2.5px 1.5px; }
-        table.nilai th.sks { width: 5%; padding: 2.5px 1.5px; }
-        table.nilai th.nilaih { width: 5%; padding: 2.5px 1.5px; }
-        table.nilai th.m { width: 5%; padding: 2.5px 1.5px; }
+        table.nilai th.mk { text-align: left; padding: 0px 3px 0px 3px; width: 31%; height: 10px !important; overflow: hidden !important; }
+        table.nilai th.num { width: 4%; padding: 0px 2px 0px 2px; height: 10px !important; overflow: hidden !important; }
+        table.nilai th.sks { width: 5%; padding: 0px 2px 0px 2px; height: 10px !important; overflow: hidden !important; }
+        table.nilai th.nilaih { width: 5%; padding: 0px 2px 0px 2px; height: 10px !important; overflow: hidden !important; }
+        table.nilai th.m { width: 5%; padding: 0px 2px 0px 2px; height: 10px !important; overflow: hidden !important; }
         table.nilai td {
-            border: 1px solid #000; padding: 0.5px 1.5px; vertical-align: middle;
-            line-height: 1.08; text-align: center; color: #000000;
+            border: 1px solid #000; padding: 0px 2px 0px 2px; vertical-align: middle;
+            line-height: 1 !important; text-align: center; color: #000000;
+            height: 10px !important; overflow: hidden !important;
         }
-        table.nilai td.mk { text-align: left; padding: 0.5px 3px; width: 31%; }
-        table.nilai td.num { width: 4%; padding: 0.5px 1.5px; }
-        table.nilai td.sks { width: 5%; padding: 0.5px 1.5px; }
-        table.nilai td.nilaih { width: 5%; font-weight: 700; padding: 0.5px 1.5px; }
-        table.nilai td.m { width: 5%; padding: 0.5px 1.5px; }
+        table.nilai td.mk { text-align: left; padding: 0px 3px 0px 3px; width: 31%; height: 10px !important; overflow: hidden !important; }
+        table.nilai td.num { width: 4%; padding: 0px 2px 0px 2px; height: 10px !important; overflow: hidden !important; }
+        table.nilai td.sks { width: 5%; padding: 0px 2px 0px 2px; height: 10px !important; overflow: hidden !important; }
+        table.nilai td.nilaih { width: 5%; font-weight: 700; padding: 0px 2px 0px 2px; height: 10px !important; overflow: hidden !important; }
+        table.nilai td.m { width: 5%; padding: 0px 2px 0px 2px; height: 10px !important; overflow: hidden !important; }
         table.nilai tr.jumlah td {
-            background: #ffffff !important; font-weight: 700; padding: 0.5px 3px;
-            letter-spacing: 0.15px; line-height: 1.08;
+            background: #ffffff !important; font-weight: 700; padding: 0px 3px 0px 3px;
+            letter-spacing: 0.15px; line-height: 1 !important; height: 10px !important; overflow: hidden !important;
         }
-        table.nilai tr.jumlah td.mk { text-align: center; }
+        table.nilai tr.jumlah td.mk { text-align: center; height: 10px !important; overflow: hidden !important; }
         table.nilai tr.jumlah td.jumlah-dashed {
             background: #ffffff !important;
             border-top: 1px dashed #000000 !important;
             border-bottom: none !important;
+            height: 10px !important; overflow: hidden !important;
         }
         table.nilai tr.ujian-head td {
             background: #ffffff !important; font-weight: 700; letter-spacing: 0.15px;
-            padding: 0.5px 3px; line-height: 1.08; font-size: 6.8px;
+            padding: 0px 3px 0px 3px; line-height: 1 !important; font-size: 6.5px; height: 10px !important; overflow: hidden !important;
         }
-        table.nilai td.ujian-left-title { text-align: left; padding-left: 4px !important; }
+        table.nilai td.ujian-left-title { text-align: left; padding-left: 3px !important; height: 10px !important; overflow: hidden !important; }
         table.nilai td.ujian-left-spacer,
         table.nilai td.ujian-left-spacer-cell,
         table.nilai td.ujian-right-spacer,
         table.nilai td.ujian-right-title,
         table.nilai td.ujian-right-title-sks,
         table.nilai td.ujian-right-title-nilai,
-        table.nilai td.ujian-right-title-m { background: #ffffff !important; }
+        table.nilai td.ujian-right-title-m { background: #ffffff !important; height: 10px !important; overflow: hidden !important; }
         table.nilai tr.spacer-row td {
             background: #ffffff !important; border: 1px solid #000000;
-            height: 8px; padding: 0;
+            height: 6px; padding: 0; line-height: 1 !important; overflow: hidden !important;
         }
-        table.nilai tr.ujian-row td { font-size: 6.8px; padding: 0.5px 3px; line-height: 1.08; }
+        table.nilai tr.ujian-row td { font-size: 6.5px; padding: 0px 3px 0px 3px; line-height: 1 !important; height: 10px !important; overflow: hidden !important; }
 
         table.nilai tr.jumlah td.left-col,
         table.nilai tr.spacer-row td.left-col,
@@ -198,16 +201,18 @@
         table.nilai tr.ujian-row td.left-col {
             background: #ffffff !important;
             font-weight: 400 !important;
-            padding: 0.5px 1.5px !important;
+            padding: 0px 2px 0px 2px !important;
             text-align: center !important;
             letter-spacing: 0 !important;
+            height: 10px !important; overflow: hidden !important;
         }
         table.nilai tr.jumlah td.mk.left-col,
         table.nilai tr.spacer-row td.mk.left-col,
         table.nilai tr.ujian-head td.mk.left-col,
         table.nilai tr.ujian-row td.mk.left-col {
             text-align: left !important;
-            padding: 0.5px 3px !important;
+            padding: 0px 3px 0px 3px !important;
+            height: 10px !important; overflow: hidden !important;
         }
 
         .ringkasan {
