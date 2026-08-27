@@ -25,9 +25,14 @@
                 <i class="fa-solid fa-print"></i>
                 Cetak Halaman
             </button>
-            <a href="{{ route('admin.transkrip-nilai.pdf', [$mahasiswa, 'download' => 1]) }}"
+            @php
+                $namaFilePdf = 'Transkrip-' . ($mahasiswa->npm ?: $mahasiswa->id) . '-' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', (string)$mahasiswa->nama_lengkap) . '.pdf';
+            @endphp
+            <a href="{{ route('admin.transkrip-nilai.pdf', [$mahasiswa, 'download' => 1, 'fd' => 1]) }}"
+               download="{{ $namaFilePdf }}"
+               type="application/octet-stream"
                class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 border border-emerald-400/30 transition text-sm shadow-lg shadow-emerald-900/20">
-                <i class="fa-solid fa-file-pdf"></i>
+                <i class="fa-solid fa-file-arrow-down"></i>
                 Download PDF
             </a>
         </div>

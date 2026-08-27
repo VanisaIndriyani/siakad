@@ -87,7 +87,13 @@
                                         <i class="fa-solid fa-print text-emerald-300"></i>
                                         Cetak
                                     </a>
-                                    <a href="{{ route('admin.transkrip-nilai.pdf', [$m, 'download' => 1]) }}" class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition text-xs font-medium">
+                                    @php
+                                        $namaFilePdf = 'Transkrip-' . ($m->npm ?: $m->id) . '-' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', (string)$m->nama_lengkap) . '.pdf';
+                                    @endphp
+                                    <a href="{{ route('admin.transkrip-nilai.pdf', [$m, 'download' => 1, 'fd' => 1]) }}"
+                                       download="{{ $namaFilePdf }}"
+                                       type="application/octet-stream"
+                                       class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition text-xs font-medium">
                                         <i class="fa-solid fa-file-arrow-down"></i>
                                         Download PDF
                                     </a>

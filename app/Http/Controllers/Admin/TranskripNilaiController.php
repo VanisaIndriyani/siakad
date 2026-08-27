@@ -113,7 +113,7 @@ class TranskripNilaiController extends Controller
             ->with('success', 'Data transkrip berhasil disimpan.');
     }
 
-    public function pdf(Mahasiswa $mahasiswa)
+    public function pdf(Request $request, Mahasiswa $mahasiswa)
     {
         $data = $this->buildTranskripData($mahasiswa);
 
@@ -127,12 +127,34 @@ class TranskripNilaiController extends Controller
         $dompdf->setPaper('Folio', 'portrait');
         $dompdf->render();
 
-        $namafile = 'Transkrip-' . ($mahasiswa->npm ?: $mahasiswa->id) . '-' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', $mahasiswa->nama_lengkap) . '.pdf';
+        $namafile = 'Transkrip-' . ($mahasiswa->npm ?: $mahasiswa->id) . '-' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', (string) $mahasiswa->nama_lengkap) . '.pdf';
 
-        return response($dompdf->output(), 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="' . $namafile . '"',
-        ]);
+        $forceDownload = (string) $request->query('download', '') !== ''
+            || (string) $request->query('dl', '') !== ''
+            || (string) $request->query('fd', '') !== ''
+            || strtolower((string) $request->query('disposition', '')) === 'attachment';
+
+        $disposition = $forceDownload ? 'attachment' : 'inline';
+        $contentType = $forceDownload ? 'application/octet-stream' : 'application/pdf';
+
+        $output = $dompdf->output();
+        $contentLength = function_exists('mb_strlen') ? mb_strlen($output, '8bit') : strlen($output);
+        $namafileRaw = rawurlencode($namafile);
+
+        $headers = [
+            'Content-Type' => $contentType,
+            'Content-Disposition' => $disposition . '; filename="' . $namafile . '"; filename*=UTF-8\'\'' . $namafileRaw,
+            'Content-Length' => $contentLength,
+            'Content-Transfer-Encoding' => 'binary',
+            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0, private',
+            'Pragma' => 'public',
+            'Expires' => 'Sat, 26 Jul 1997 05:00:00 GMT',
+            'X-Content-Type-Options' => 'nosniff',
+            'Accept-Ranges' => 'bytes',
+            'Content-Description' => 'File Transfer',
+        ];
+
+        return response($output, 200, $headers);
     }
 
     private function nilaiMutuHuruf(string $huruf): float
