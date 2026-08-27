@@ -10,6 +10,10 @@
         /* =============================================================
            CSS UKURAN KERTAS & PAPER DIPAKSA 100% SAMA DENGAN
            @page + @media print DI show.blade.php (LINE 718-757)
+           TAMBAHAN KHUSUS DOMPDF:
+           - HAPUS overflow:hidden (akar Dompdf sisa overflow pindah halaman 2 putih)
+           - HAPUS page-break-inside:avoid (akar table panjang bikin Dompdf pindah ke halaman baru seluruh block)
+           - height:auto bukan fixed 330mm; @page TETAP SIZE 210x330mm
            ============================================================= */
         @page {
             size: 210mm 330mm;
@@ -23,9 +27,8 @@
         }
         body {
             width: 210mm !important;
-            height: 330mm !important;
             min-height: 330mm !important;
-            max-height: 330mm !important;
+            height: auto !important;
             background: #ffffff !important;
             color: #000000;
             margin: 0 !important;
@@ -36,49 +39,58 @@
             print-color-adjust: exact;
             line-height: 1.18;
             font-size: 10pt;
-            overflow: hidden !important;
+            overflow: visible !important;
         }
 
-        /* ===== .transcript-paper PERSIS show.blade.php @media print L740-L749 (padding 8mm hemat tinggi untuk mencegah halaman 2) ===== */
+        /* ===== .transcript-paper SAMA PERSIS show.blade.php @media print (padding 4/9/5mm, height:auto, overflow visible) ===== */
         .transcript-paper {
             width: 210mm !important;
-            height: 330mm !important;
             min-height: 330mm !important;
-            max-height: 330mm !important;
+            height: auto !important;
             background: #ffffff !important;
             color: #000000;
             margin: 0 !important;
-            padding: 8mm 13mm 8mm !important;
+            padding: 4mm 9mm 5mm !important;
             box-sizing: border-box;
             font-family: 'Times New Roman', Times, serif;
-            overflow: hidden !important;
-            page-break-inside: auto;
+            overflow: visible !important;
             box-shadow: none !important;
             border-radius: 0 !important;
+            page-break-inside: auto !important;
+            page-break-after: auto !important;
         }
 
-        .no-break { page-break-inside: avoid !important; }
+        /* ====== DOMPDF: HAPUS .no-break (page-break-inside:avoid bikin halaman 2 pd tabel panjang) ====== */
+        .no-break { page-break-inside: auto !important; }
+        .mk-table-wrapper, .biodata, .ringkasan, .ttd-foto-grid {
+            page-break-inside: auto !important;
+            page-break-before: auto !important;
+            page-break-after: auto !important;
+        }
+        table.nilai, table.biodata, table.ringkasan, table.ttd-foto-grid {
+            page-break-inside: auto !important;
+        }
 
-        /* ====== SEMUA CLASS DI BAWAH INI = PERSIS 1:1 DARI show.blade.php (USER LOCK LAYOUT) ====== */
+        /* ====== SEMUA CLASS DI BAWAH INI = 1:1 SAMA PERSIS @media print show.blade (setelah specificity fix L6f1d4d3) ====== */
         .kop-wrap { width: 100%; text-align: center; color: #000000; }
-        .kop-logo-center { width: 100%; text-align: center; margin-bottom: 2px; }
-        .kop-logo-center img { width: 78px; height: 78px; object-fit: contain; display: inline-block; }
+        .kop-logo-center { width: 100%; text-align: center; margin-bottom: 0px; }
+        .kop-logo-center img { width: 60px; height: 60px; object-fit: contain; display: inline-block; }
         .kop-title-a {
-            font-size: 18px; font-weight: 800; letter-spacing: 0.8px; line-height: 1.2; margin: 2px 0 0; padding: 0; color: #000000;
+            font-size: 14px; font-weight: 800; letter-spacing: 0.8px; line-height: 1.2; margin: 0px 0 0; padding: 0; color: #000000;
         }
-        .kop-title-a2 { margin-top: 1px; }
+        .kop-title-a2 { margin-top: 0px; }
         .kop-title-b {
-            font-size: 17px; font-weight: 800; letter-spacing: 0.8px; line-height: 1.2; margin: 2px 0 0; padding: 0; color: #000000;
+            font-size: 13px; font-weight: 800; letter-spacing: 0.8px; line-height: 1.2; margin: 0px 0 0; padding: 0; color: #000000;
         }
         .kop-terakreditasi {
-            font-size: 9px; margin-top: 3px; color: #000000; text-align: center; letter-spacing: 0.1px;
+            font-size: 7.5px; margin-top: 0.5px; color: #000000; text-align: center; letter-spacing: 0.1px;
         }
         .kop-alamat-line {
-            font-size: 9px; margin-top: 2px; line-height: 1.2; color: #000000; text-align: center;
+            font-size: 7.3px; margin-top: 0px; line-height: 1.2; color: #000000; text-align: center;
         }
-        .kop-email-web { margin-top: 1px; font-size: 9px; }
+        .kop-email-web { margin-top: 0px; font-size: 7.1px; }
         .kop-line-double {
-            margin-top: 2px;
+            margin-top: 1px;
             width: 100%;
             display: block;
         }
@@ -89,21 +101,21 @@
             width: 100%; height: 1.5px; background: #000000; margin-top: 2px;
         }
 
-        .judul-box { text-align: center; margin-top: 6px; }
+        .judul-box { text-align: center; margin-top: 1.5px; }
         .judul-text {
-            font-size: 13px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+            font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
             text-decoration: none; color: #000000;
         }
-        .judul-nomor { font-size: 8.5px; margin-top: 1px; color: #000000; }
+        .judul-nomor { font-size: 7.3px; margin-top: 0px; color: #000000; }
 
         .biodata {
-            width: 100%; margin-top: 6px; border-collapse: collapse;
-            font-size: 8.5px; color: #000000; table-layout: fixed;
+            width: 100%; margin-top: 0px; border-collapse: collapse;
+            font-size: 7.5px; color: #000000; table-layout: fixed;
         }
-        .biodata td { vertical-align: top; padding: 0; line-height: 1.2; }
+        .biodata td { vertical-align: top; padding: 0; line-height: 1.15; }
         .biodata td.bio-label {
             width: 25%;
-            padding: 1px 8px 1px 0;
+            padding: 0.5px 5px 0.5px 0;
             text-align: left;
             font-weight: 400;
             color: #000000;
@@ -116,13 +128,13 @@
             content: ":";
             position: absolute;
             right: 0px;
-            top: 1px;
+            top: 0.5px;
             display: inline-block;
             color: #000000;
         }
         .biodata td.bio-value {
             width: 25%;
-            padding: 1px 0 1px 4px;
+            padding: 0.5px 0 0.5px 3px;
             color: #000000;
         }
         .biodata td.bio-value.right-val {
@@ -131,30 +143,30 @@
         .bio-val { font-weight: 700; color: #000000; display: inline-block; }
 
         table.nilai {
-            width: 100%; border-collapse: collapse; margin-top: 6px;
-            font-size: 7.8px; color: #000000; table-layout: fixed;
+            width: 100%; border-collapse: collapse; margin-top: 0px;
+            font-size: 6.8px; color: #000000; table-layout: fixed;
         }
         table.nilai th {
             border: 1px solid #000; background: #e0f2ea; font-weight: 700; letter-spacing: 0.15px;
-            padding: 3px 2px; vertical-align: middle; line-height: 1.15; text-align: center;
+            padding: 2.5px 1.5px; vertical-align: middle; line-height: 1.08; text-align: center;
         }
-        table.nilai th.mk { text-align: left; padding: 3px 4px; width: 31%; }
-        table.nilai th.num { width: 4%; padding: 3px 2px; }
-        table.nilai th.sks { width: 5%; padding: 3px 2px; }
-        table.nilai th.nilaih { width: 5%; padding: 3px 2px; }
-        table.nilai th.m { width: 5%; padding: 3px 2px; }
+        table.nilai th.mk { text-align: left; padding: 2.5px 3px; width: 31%; }
+        table.nilai th.num { width: 4%; padding: 2.5px 1.5px; }
+        table.nilai th.sks { width: 5%; padding: 2.5px 1.5px; }
+        table.nilai th.nilaih { width: 5%; padding: 2.5px 1.5px; }
+        table.nilai th.m { width: 5%; padding: 2.5px 1.5px; }
         table.nilai td {
-            border: 1px solid #000; padding: 2px 2px; vertical-align: middle;
-            line-height: 1.15; text-align: center; color: #000000;
+            border: 1px solid #000; padding: 0.5px 1.5px; vertical-align: middle;
+            line-height: 1.08; text-align: center; color: #000000;
         }
-        table.nilai td.mk { text-align: left; padding: 2px 4px; width: 31%; }
-        table.nilai td.num { width: 4%; padding: 2px 2px; }
-        table.nilai td.sks { width: 5%; padding: 2px 2px; }
-        table.nilai td.nilaih { width: 5%; font-weight: 700; padding: 2px 2px; }
-        table.nilai td.m { width: 5%; padding: 2px 2px; }
+        table.nilai td.mk { text-align: left; padding: 0.5px 3px; width: 31%; }
+        table.nilai td.num { width: 4%; padding: 0.5px 1.5px; }
+        table.nilai td.sks { width: 5%; padding: 0.5px 1.5px; }
+        table.nilai td.nilaih { width: 5%; font-weight: 700; padding: 0.5px 1.5px; }
+        table.nilai td.m { width: 5%; padding: 0.5px 1.5px; }
         table.nilai tr.jumlah td {
-            background: #ffffff !important; font-weight: 700; padding: 2px 4px;
-            letter-spacing: 0.15px; line-height: 1.15;
+            background: #ffffff !important; font-weight: 700; padding: 0.5px 3px;
+            letter-spacing: 0.15px; line-height: 1.08;
         }
         table.nilai tr.jumlah td.mk { text-align: center; }
         table.nilai tr.jumlah td.jumlah-dashed {
@@ -164,9 +176,9 @@
         }
         table.nilai tr.ujian-head td {
             background: #ffffff !important; font-weight: 700; letter-spacing: 0.15px;
-            padding: 2px 4px; line-height: 1.15; font-size: 7.8px;
+            padding: 0.5px 3px; line-height: 1.08; font-size: 6.8px;
         }
-        table.nilai td.ujian-left-title { text-align: left; padding-left: 6px !important; }
+        table.nilai td.ujian-left-title { text-align: left; padding-left: 4px !important; }
         table.nilai td.ujian-left-spacer,
         table.nilai td.ujian-left-spacer-cell,
         table.nilai td.ujian-right-spacer,
@@ -176,9 +188,9 @@
         table.nilai td.ujian-right-title-m { background: #ffffff !important; }
         table.nilai tr.spacer-row td {
             background: #ffffff !important; border: 1px solid #000000;
-            height: 12px; padding: 0;
+            height: 8px; padding: 0;
         }
-        table.nilai tr.ujian-row td { font-size: 7.8px; padding: 2px 4px; line-height: 1.15; }
+        table.nilai tr.ujian-row td { font-size: 6.8px; padding: 0.5px 3px; line-height: 1.08; }
 
         table.nilai tr.jumlah td.left-col,
         table.nilai tr.spacer-row td.left-col,
@@ -186,7 +198,7 @@
         table.nilai tr.ujian-row td.left-col {
             background: #ffffff !important;
             font-weight: 400 !important;
-            padding: 2px 2px !important;
+            padding: 0.5px 1.5px !important;
             text-align: center !important;
             letter-spacing: 0 !important;
         }
@@ -195,38 +207,38 @@
         table.nilai tr.ujian-head td.mk.left-col,
         table.nilai tr.ujian-row td.mk.left-col {
             text-align: left !important;
-            padding: 2px 4px !important;
+            padding: 0.5px 3px !important;
         }
 
         .ringkasan {
-            width: 100%; margin-top: 4px; border-collapse: collapse;
-            font-size: 8.5px; color: #000000; table-layout: auto;
+            width: 100%; margin-top: 0.5px; border-collapse: collapse;
+            font-size: 7px; color: #000000; table-layout: auto;
         }
-        .ringkasan td { vertical-align: top; padding: 1px 0; line-height: 1.2; }
+        .ringkasan td { vertical-align: top; padding: 0.5px 0; line-height: 1.15; }
         .ringkasan td.label {
-            width: auto; white-space: nowrap; font-weight: 700; color: #000000; padding-right: 8px;
+            width: auto; white-space: nowrap; font-weight: 700; color: #000000; padding-right: 5px;
         }
         .ringkasan td.label-top {
-            width: auto; white-space: nowrap; font-weight: 700; color: #000000; padding: 1px 8px 0 0;
+            width: auto; white-space: nowrap; font-weight: 700; color: #000000; padding: 0.5px 5px 0 0;
         }
-        .ringkasan td.sep   { width: auto; text-align: left; padding-right: 6px; }
-        .ringkasan td.sep-top { width: auto; text-align: left; padding: 1px 6px 0 0; }
-        .ringkasan td.val   { font-weight: 800; color: #000000; font-size: 8.8px; width: auto; white-space: nowrap; }
+        .ringkasan td.sep   { width: auto; text-align: left; padding-right: 4px; }
+        .ringkasan td.sep-top { width: auto; text-align: left; padding: 0.5px 4px 0 0; }
+        .ringkasan td.val   { font-weight: 800; color: #000000; font-size: 7.3px; width: auto; white-space: nowrap; }
         .ringkasan td.val-judul {
-            text-align: left; color: #000000; line-height: 1.2; padding: 1px 0 1px 0;
+            text-align: left; color: #000000; line-height: 1.15; padding: 0.5px 0 0.5px 0;
             vertical-align: top; width: auto;
         }
 
-        /* Tabel TTD + FOTO: 2 kolom lebar 50% masing-masing → TIDAK GUNAKAN padding-left 90mm yang DOMPDF suka hitung beda */
+        /* Tabel TTD + FOTO DOMPDF: 2 kolom lebar 50% masing-masing, tidak overflow hidden, height:auto */
         .ttd-foto-grid {
-            width: 100%; border-collapse: collapse; margin-top: 4px !important;
+            width: 100%; border-collapse: collapse; margin-top: 0px !important;
             padding: 0 !important;
         }
         .ttd-foto-grid td {
             width: 50%; vertical-align: top; padding: 0;
         }
         .ttd-foto-col-inner {
-            width: 28mm;
+            width: 26mm;
             margin-left: auto;
             margin-right: 0;
             padding: 0 !important;
@@ -238,12 +250,12 @@
         }
         .ttd-foto-wrapper td { vertical-align: top; padding: 0; }
         .ttd-foto-col {
-            width: 21mm; padding-right: 1mm;
+            width: 18mm; padding-right: 0.5mm;
         }
         .ttd-foto-box {
-            width: 18mm; height: 25mm;
+            width: 13mm; height: 17mm;
             border: 1px solid #333; background: #fdfdfd;
-            overflow: hidden; box-sizing: border-box;
+            overflow: visible; box-sizing: border-box;
             position: relative;
             margin: 0;
         }
@@ -253,25 +265,25 @@
         .ttd-foto-empty {
             position: absolute; inset: 0;
             display: block;
-            padding: 4px 2px;
+            padding: 3px 2px;
             text-align: center;
-            color: #888; font-size: 9px; font-weight: 400;
-            line-height: 1.2;
+            color: #888; font-size: 7.3px; font-weight: 400;
+            line-height: 1.15;
             background: #ffffff;
             box-sizing: border-box;
         }
         .ttd-col-wrapper { width: auto; }
         .ttd-box {
             width: 100%; margin-top: 0; border-collapse: collapse;
-            font-size: 8.3px; color: #000000;
+            font-size: 7.9px; color: #000000;
         }
         .ttd-box td { vertical-align: top; }
         .ttd-spacer-l { width: 0%; }
         .ttd-spacer-r { width: 0%; }
-        .ttd-col { width: 100%; text-align: left; line-height: 1.22; color: #000000; padding-left: 0; font-size: 8.3px; }
-        .ttd-jabatan { margin-top: 1px; font-weight: 800; letter-spacing: 0.15px; }
-        .ttd-nama    { margin-top: 22px; font-weight: 800; text-decoration: underline; font-size: 8.3px; }
-        .ttd-nidk    { margin-top: 1px; font-size: 7.8px; letter-spacing: 0.1px; }
+        .ttd-col { width: 100%; text-align: left; line-height: 1.22; color: #000000; padding-left: 0; font-size: 7.9px; }
+        .ttd-jabatan { margin-top: 0.5px; font-weight: 800; letter-spacing: 0.15px; }
+        .ttd-nama    { margin-top: 2px; font-weight: 800; text-decoration: underline; font-size: 7.9px; }
+        .ttd-nidk    { margin-top: 0.5px; font-size: 7.2px; letter-spacing: 0.1px; }
     </style>
 </head>
 <body>

@@ -131,7 +131,7 @@ class TranskripNilaiController extends Controller
             'isHtml5ParserEnabled' => true,
             'isPhpEnabled' => true,
             'defaultFont' => 'times',
-            'fontHeightRatio' => 0.88,
+            'fontHeightRatio' => 0.78,
             'dpi' => 150,
             'isJavascriptEnabled' => false,
             'isFontSubsettingEnabled' => true,
@@ -147,7 +147,7 @@ class TranskripNilaiController extends Controller
         $dompdf->getOptions()->setIsRemoteEnabled(true);
         $dompdf->getOptions()->setDefaultFont('times');
         $dompdf->getOptions()->setIsFontSubsettingEnabled(true);
-        $dompdf->getOptions()->setFontHeightRatio(0.88);
+        $dompdf->getOptions()->setFontHeightRatio(0.78);
         $dompdf->getOptions()->setDpi(150);
 
         $dompdf->loadHtml($html, 'UTF-8');
