@@ -228,10 +228,6 @@
                 <div class="kop-terakreditasi">TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021</div>
                 <div class="kop-alamat-line">Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang</div>
                 <div class="kop-alamat-line kop-email-web">E-mail : iaiddisidrap@gmail.com &nbsp;&nbsp; Website : www.yppddisrapp.ac.id</div>
-                <div class="kop-line-double">
-                    <div class="kop-line-top"></div>
-                    <div class="kop-line-bottom"></div>
-                </div>
             </div>
 
             {{-- ===== JUDUL TRANSKRIP ===== --}}
@@ -504,36 +500,25 @@
         /* ====== SEMUA CLASS DI BAWAH INI = PERSIS SAMA DENGAN pdf.blade.php ====== */
         .wrap { width: 100%; }
 
-        .kop-wrap { width: 100%; text-align: center; color: #000000; }
-        .kop-logo-center { width: 100%; text-align: center; margin-bottom: 8px; }
+        .kop-wrap { width: 100%; text-align: center; color: #000000; padding-bottom: 8px; border-bottom: 1.2px solid #1a1a1a; }
+        .kop-logo-center { width: 100%; text-align: center; margin-bottom: 12px; }
         .kop-logo-center img { width: 110px; height: 110px; object-fit: contain; display: inline-block; }
         .kop-title-a {
-            font-size: 24px; font-weight: 800; letter-spacing: 0.8px; line-height: 1.2; margin: 3px 0 0; padding: 0; color: #000000;
+            font-size: 24px; font-weight: 800; letter-spacing: 0.8px; line-height: 1.3; margin: 0; padding: 0; color: #000000;
         }
-        .kop-title-a2 { margin-top: 1px; }
+        .kop-title-a2 { margin-top: 5px; }
         .kop-title-b {
-            font-size: 23px; font-weight: 800; letter-spacing: 0.8px; line-height: 1.2; margin: 3px 0 0; padding: 0; color: #000000;
+            font-size: 23px; font-weight: 800; letter-spacing: 0.8px; line-height: 1.3; margin: 5px 0 0; padding: 0; color: #000000;
         }
         .kop-terakreditasi {
-            font-size: 11px; margin-top: 6px; color: #000000; text-align: center; letter-spacing: 0.1px;
+            font-size: 11.5px; margin-top: 9px; color: #000000; text-align: center; letter-spacing: 0.1px; line-height: 1.4;
         }
         .kop-alamat-line {
-            font-size: 10.5px; margin-top: 4px; line-height: 1.25; color: #000000; text-align: center;
+            font-size: 11px; margin-top: 6px; line-height: 1.4; color: #000000; text-align: center;
         }
-        .kop-email-web { margin-top: 2px; }
-        .kop-line-double {
-            margin-top: 3px;
-            width: 100%;
-            display: block;
-        }
-        .kop-line-double .kop-line-top {
-            width: 100%; height: 0px; background: transparent;
-        }
-        .kop-line-double .kop-line-bottom {
-            width: 100%; height: 0px; background: transparent; margin-top: 0;
-        }
+        .kop-email-web { margin-top: 3px; }
 
-        .judul-box { text-align: center; margin-top: 10px; }
+        .judul-box { text-align: center; margin-top: 12px; }
         .judul-text {
             font-size: 16px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
             text-decoration: none; color: #000000;
@@ -541,13 +526,13 @@
         .judul-nomor { font-size: 9.2px; margin-top: 1px; color: #000000; }
 
         .biodata {
-            width: 100%; margin-top: 10px; border-collapse: collapse;
+            width: 100%; margin-top: 11px; border-collapse: collapse;
             font-size: 9.5px; color: #000000; table-layout: fixed;
         }
-        .biodata td { vertical-align: top; padding: 0; line-height: 1.3; }
+        .biodata td { vertical-align: top; padding: 0; line-height: 1.35; }
         .biodata td.bio-label {
             width: 25%;
-            padding: 1.5px 10px 1.5px 0;
+            padding: 1.8px 16px 1.8px 0;
             text-align: left;
             font-weight: 400;
             color: #000000;
@@ -560,13 +545,13 @@
             content: ":";
             position: absolute;
             right: 0px;
-            top: 1.5px;
+            top: 1.8px;
             display: inline-block;
             color: #000000;
         }
         .biodata td.bio-value {
             width: 25%;
-            padding: 1.5px 0 1.5px 6px;
+            padding: 1.8px 0 1.8px 10px;
             color: #000000;
         }
         .biodata td.bio-value.right-val {

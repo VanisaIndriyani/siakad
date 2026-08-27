@@ -78,14 +78,18 @@
                             <td class="px-4 py-3">{{ $m->program_studi ?? '-' }}</td>
                             <td class="px-4 py-3">{{ $m->angkatan ?? '-' }}</td>
                             <td class="px-4 py-3 text-right">
-                                <div class="inline-flex items-center gap-2">
+                                <div class="inline-flex items-center gap-2 flex-wrap justify-end">
                                     <a href="{{ route('admin.transkrip-nilai.show', $m) }}" class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-xs">
                                         <i class="fa-regular fa-file-lines text-emerald-300"></i>
                                         Lihat
                                     </a>
-                                    <a href="{{ route('admin.transkrip-nilai.pdf', $m) }}" target="_blank" rel="noopener" class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition text-xs font-medium">
-                                        <i class="fa-solid fa-file-pdf"></i>
-                                        Cetak PDF
+                                    <a href="{{ route('admin.transkrip-nilai.pdf', $m) }}" target="_blank" rel="noopener" class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-xs">
+                                        <i class="fa-solid fa-print text-emerald-300"></i>
+                                        Cetak
+                                    </a>
+                                    <a href="{{ route('admin.transkrip-nilai.pdf', [$m, 'download' => 1]) }}" class="h-9 px-3 inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition text-xs font-medium">
+                                        <i class="fa-solid fa-file-arrow-down"></i>
+                                        Download PDF
                                     </a>
                                 </div>
                             </td>
