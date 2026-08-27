@@ -25,7 +25,11 @@
                 <i class="fa-solid fa-print"></i>
                 Cetak Halaman
             </button>
-          
+            <a href="{{ route('admin.transkrip-nilai.pdf', [$mahasiswa, 'download' => 1]) }}"
+               class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 border border-emerald-400/30 transition text-sm shadow-lg shadow-emerald-900/20">
+                <i class="fa-solid fa-file-pdf"></i>
+                Download PDF
+            </a>
         </div>
     </div>
 
@@ -185,12 +189,6 @@
         $ujianKompre = $ujianKompre ?? [];
         $ujianAda = array_values(array_filter(array_map(fn($v) => trim((string)$v), $ujianKompre), fn($v) => $v !== ''));
         $ujianCount = count($ujianAda);
-
-        $tglLahir = $mahasiswa->tanggal_lahir ? \Illuminate\Support\Carbon::parse($mahasiswa->tanggal_lahir)->translatedFormat('d F Y') : '-';
-        $tempatTgl = trim(($mahasiswa->tempat_lahir ? $mahasiswa->tempat_lahir.', ' : '') . $tglLahir);
-        $tanggalLulus = $mahasiswa->tanggal_lulus ? \Illuminate\Support\Carbon::parse($mahasiswa->tanggal_lulus)->translatedFormat('d F Y') : '-';
-        $skBanpt = trim($mahasiswa->nomor_sk_banpt ?: '-');
-        $judulSkripsi = trim($mahasiswa->judul_skripsi ?: '-');
     @endphp
 
     <div class="transcript-preview">
@@ -453,7 +451,7 @@
                                 <tr>
                                     <td class="ttd-spacer-l"></td>
                                     <td class="ttd-col">
-                                        <div>Pangkajene, {{ ($mahasiswa->tanggal_lulus ? \Illuminate\Support\Carbon::parse($mahasiswa->tanggal_lulus) : now())->translatedFormat('d F Y') }}</div>
+                                        <div>{{ $tanggalTtd }}</div>
                                         <div class="ttd-jabatan">{{ $ttdJabatan }}</div>
                                         <div class="ttd-nama">{{ $ttdNama }}</div>
                                         <div class="ttd-nidk">{{ $ttdNomorLabel }}. {{ $ttdNomor }}</div>

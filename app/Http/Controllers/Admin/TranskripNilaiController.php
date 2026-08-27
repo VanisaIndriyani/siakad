@@ -159,6 +159,43 @@ class TranskripNilaiController extends Controller
         return 'Kurang';
     }
 
+    private function formatTanggalID($tanggal, string $fallback = '-'): string
+    {
+        try {
+            if ($tanggal === null || $tanggal === '') {
+                return $fallback;
+            }
+            $c = $tanggal instanceof \Illuminate\Support\Carbon || $tanggal instanceof \DateTimeInterface
+                ? \Illuminate\Support\Carbon::instance($tanggal)
+                : \Illuminate\Support\Carbon::parse($tanggal);
+            if (!$c) return $fallback;
+
+            $bulanID = [
+                1  => 'Januari',
+                2  => 'Februari',
+                3  => 'Maret',
+                4  => 'April',
+                5  => 'Mei',
+                6  => 'Juni',
+                7  => 'Juli',
+                8  => 'Agustus',
+                9  => 'September',
+                10 => 'Oktober',
+                11 => 'November',
+                12 => 'Desember',
+            ];
+
+            $hari   = (int) $c->format('j');
+            $bulan  = (int) $c->format('n');
+            $tahun  = (int) $c->format('Y');
+            $namaBulan = $bulanID[$bulan] ?? $c->format('F');
+
+            return sprintf('%02d %s %04d', $hari, $namaBulan, $tahun);
+        } catch (\Throwable $e) {
+            return $fallback;
+        }
+    }
+
     private function defaultUjianKompre(): array
     {
         return [
@@ -260,9 +297,7 @@ class TranskripNilaiController extends Controller
 
         $tempatLahir = (string) ($mahasiswa->tempat_lahir ?? '-');
         if ($tempatLahir === '') $tempatLahir = '-';
-        $tglLahir = $mahasiswa->tanggal_lahir
-            ? \Illuminate\Support\Carbon::parse($mahasiswa->tanggal_lahir)->translatedFormat('d F Y')
-            : '-';
+        $tglLahir = $this->formatTanggalID($mahasiswa->tanggal_lahir, '-');
         if ($tempatLahir !== '-' && $tglLahir !== '-') {
             $tempatTgl = "{$tempatLahir}, {$tglLahir}";
         } else {
@@ -270,9 +305,12 @@ class TranskripNilaiController extends Controller
             $tempatTgl = $gabung !== '' ? $gabung : '-';
         }
 
-        $tanggalLulus = $mahasiswa->tanggal_lulus
-            ? \Illuminate\Support\Carbon::parse($mahasiswa->tanggal_lulus)->translatedFormat('d F Y')
-            : '-';
+        $tanggalLulus = $this->formatTanggalID($mahasiswa->tanggal_lulus, '-');
+
+        $tglTtd = $mahasiswa->tanggal_lulus
+            ? \Illuminate\Support\Carbon::parse($mahasiswa->tanggal_lulus)
+            : now();
+        $tanggalTtd = 'Pangkajene, ' . $this->formatTanggalID($tglTtd, now()->format('d F Y'));
 
         $skBanpt = (string) ($mahasiswa->nomor_sk_banpt ?? '');
         if ($skBanpt === '') {
@@ -398,6 +436,7 @@ class TranskripNilaiController extends Controller
             'judulSkripsi' => $judulSkripsi,
             'tempatTgl' => $tempatTgl,
             'tanggalLulus' => $tanggalLulus,
+            'tanggalTtd' => $tanggalTtd,
             'skBanpt' => $skBanpt,
             'fotoMahasiswa' => $fotoMahasiswa,
             'ttdJabatan' => $ttdJabatan,

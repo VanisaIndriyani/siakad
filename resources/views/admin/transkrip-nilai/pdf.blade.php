@@ -390,12 +390,6 @@
     $ujianKompre = $ujianKompre ?? [];
     $ujianAda = array_values(array_filter(array_map(fn($v) => trim((string)$v), $ujianKompre), fn($v) => $v !== ''));
     $ujianCount = count($ujianAda);
-
-    $tglLahir = $mahasiswa->tanggal_lahir ? \Illuminate\Support\Carbon::parse($mahasiswa->tanggal_lahir)->translatedFormat('d F Y') : '-';
-    $tempatTgl = trim(($mahasiswa->tempat_lahir ? $mahasiswa->tempat_lahir.', ' : '') . $tglLahir);
-    $tanggalLulus = $mahasiswa->tanggal_lulus ? \Illuminate\Support\Carbon::parse($mahasiswa->tanggal_lulus)->translatedFormat('d F Y') : '-';
-    $skBanpt = trim($mahasiswa->nomor_sk_banpt ?: '-');
-    $judulSkripsi = trim($mahasiswa->judul_skripsi ?: '-');
 @endphp
 <div class="wrap">
     {{-- ===== KOP SURAT (LOGO DI TENGAH, SESUAI CONTOH WILDAH ASLI) ===== --}}
@@ -640,7 +634,7 @@
                     <tr>
                         <td class="ttd-spacer-l"></td>
                         <td class="ttd-col">
-                            <div>Pangkajene, {{ ($mahasiswa->tanggal_lulus ? \Illuminate\Support\Carbon::parse($mahasiswa->tanggal_lulus) : now())->translatedFormat('d F Y') }}</div>
+                            <div>{{ $tanggalTtd }}</div>
                             <div class="ttd-jabatan">{{ $ttdJabatan }}</div>
                             <div class="ttd-nama">{{ $ttdNama }}</div>
                             <div class="ttd-nidk">{{ $ttdNomorLabel }}. {{ $ttdNomor }}</div>
