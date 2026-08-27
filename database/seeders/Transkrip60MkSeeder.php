@@ -126,6 +126,21 @@ class Transkrip60MkSeeder extends Seeder
         }
         $this->command->info("Total mata kuliah direncanakan: {$totalMk}");
 
+        $this->command->warn("(1/4) Reset KRS/KHS/KhsItem/KrsItem LAMA mahasiswa target (NPM {$mhs->npm}) agar tidak bentrok data lama (Nama MK cingcong Ekonomi Syariah / HKI)...");
+        $khsIdsLama = Khs::query()->where('mahasiswa_id', $mhs->id)->pluck('id')->all();
+        $krsIdsLama = Krs::query()->where('mahasiswa_id', $mhs->id)->pluck('id')->all();
+        if (!empty($khsIdsLama)) {
+            KhsItem::query()->whereIn('khs_id', $khsIdsLama)->delete();
+            Khs::query()->whereIn('id', $khsIdsLama)->delete();
+        }
+        if (!empty($krsIdsLama)) {
+            KrsItem::query()->whereIn('krs_id', $krsIdsLama)->delete();
+            Krs::query()->whereIn('id', $krsIdsLama)->delete();
+        }
+
+        $this->command->warn("(2/4) REWRITE 75 MataKuliah (TRK101 s/d TRK804) → GANTI NAMA/PRODI/SKS (hapus semua nama cingcong \"Ekonomi Syariah Sem X (MK Y)\" diganti nama AUD asli)...");
+        $forceUpdateMkJikaSudahAda = true;
+
         $bobotHuruf = [
             ['angka_min' => 92, 'huruf' => 'A'],
             ['angka_min' => 86, 'huruf' => 'A-'],
@@ -191,13 +206,14 @@ class Transkrip60MkSeeder extends Seeder
                         'dosen_id' => $dosenId,
                     ]
                 );
-                if (!$mk->wasRecentlyCreated) {
-                    $mk->nama = $namaMk;
-                    $mk->jurusan = $jurusan;
-                    $mk->sks = $sks;
-                    $mk->semester = $smt;
-                    if ($dosenId && !$mk->dosen_id) $mk->dosen_id = $dosenId;
-                    $mk->save();
+                if ($forceUpdateMkJikaSudahAda || !$mk->wasRecentlyCreated) {
+                    $changed = false;
+                    if ($mk->nama !== $namaMk) { $mk->nama = $namaMk; $changed = true; }
+                    if ($mk->jurusan !== $jurusan) { $mk->jurusan = $jurusan; $changed = true; }
+                    if ((int) $mk->sks !== $sks) { $mk->sks = $sks; $changed = true; }
+                    if ((int) $mk->semester !== $smt) { $mk->semester = $smt; $changed = true; }
+                    if ($dosenId && !$mk->dosen_id) { $mk->dosen_id = $dosenId; $changed = true; }
+                    if ($changed) $mk->save();
                 }
 
                 KrsItem::query()->firstOrCreate([
