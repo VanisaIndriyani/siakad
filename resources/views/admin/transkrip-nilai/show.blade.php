@@ -259,7 +259,7 @@
                     <td class="bio-value right-val"><span class="bio-val">{{ $mahasiswa->fakultas ?? 'Fakultas Tarbiyah & Keguruan' }}</span></td>
                 </tr>
                 <tr>
-                    <td class="bio-label">No. IJAZAH</td>
+                    <td class="bio-label">No. Ijazah</td>
                     <td class="bio-value"><span class="bio-val">{{ $mahasiswa->nik ?? '-' }}</span></td>
                     <td class="bio-label right-label">Program Studi</td>
                     <td class="bio-value right-val"><span class="bio-val">{{ $mahasiswa->program_studi ?? '-' }}</span></td>
@@ -455,7 +455,7 @@
                                 <tr>
                                     <td class="ttd-spacer-l"></td>
                                     <td class="ttd-col">
-                                        <div>Pangkajene, {{ ($mahasiswa->tanggal_lulus ? \Illuminate\Support\Carbon::parse($mahasiswa->tanggal_lulus) : now())->translatedFormat('d F Y') }}</div>
+                                        <div>{{ $tanggalTtd }}</div>
                                         <div class="ttd-jabatan">{{ $ttdJabatan }}</div>
                                         <div class="ttd-nama">{{ $ttdNama }}</div>
                                         <div class="ttd-nidk">{{ $ttdNomorLabel }}. {{ $ttdNomor }}</div>

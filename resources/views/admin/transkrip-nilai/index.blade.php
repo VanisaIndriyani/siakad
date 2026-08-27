@@ -17,7 +17,7 @@
                        name="q"
                        value="{{ $q }}"
                        class="w-full h-11 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 focus:ring-emerald-400 focus:border-emerald-400 text-sm pl-10 pr-4"
-                       placeholder="Cari nama / NPM / No. IJAZAH mahasiswa..." />
+                       placeholder="Cari nama / NPM / No. Ijazah mahasiswa..." />
                 <div class="absolute left-3 top-1/2 -translate-y-1/2 text-white/40">
                     <i class="fa-solid fa-magnifying-glass"></i>
                 </div>

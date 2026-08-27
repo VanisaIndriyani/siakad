@@ -14,7 +14,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
-use PhpOffice\PhpSpreadsheet\Style\Font;
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use PhpOffice\PhpSpreadsheet\Worksheet\MemoryDrawing;
 
 class TranskripNilaiController extends Controller
@@ -214,9 +214,10 @@ class TranskripNilaiController extends Controller
             'color' => ['argb' => 'FFD9EAD3'],
         ]];
 
-        // ===== LOGO INSTITUSI (DI TENGAH ATAS) =====
+        // ===== LOGO INSTITUSI (DI TENGAH ATAS) — FALLBACK CHAIN LAYERED AGAR MUNCUL DI HOSTING =====
+        $logoInserted = false;
+        $logoCandidates = [];
         try {
-            $logoCandidates = [];
             try { $logoCandidates[] = rtrim(public_path(), '\\/') . DIRECTORY_SEPARATOR . 'img' . DIRECTORY_SEPARATOR . 'lo.jpeg'; } catch (\Throwable $e) {}
             try {
                 $bp = rtrim(str_replace('\\', '/', base_path()), '/');
@@ -225,45 +226,85 @@ class TranskripNilaiController extends Controller
                     $logoCandidates[] = $bp . '/public_html/img/lo.jpeg';
                 }
             } catch (\Throwable $e) {}
-            $logoPath = null;
-            foreach ($logoCandidates as $lc) {
-                $lc = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string)$lc);
-                if (@is_file($lc) && @is_readable($lc)) { $logoPath = $lc; break; }
-            }
-            if ($logoPath) {
-                $logoDrawing = new MemoryDrawing();
+            try {
+                $docRoot = rtrim(str_replace('\\', '/', (string) ($_SERVER['DOCUMENT_ROOT'] ?? '')), '/');
+                if ($docRoot !== '') {
+                    $logoCandidates[] = $docRoot . '/img/lo.jpeg';
+                    $logoCandidates[] = $docRoot . '/public/img/lo.jpeg';
+                }
+            } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {}
+        $logoPath = null;
+        foreach ($logoCandidates as $lc) {
+            $lc = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string)$lc);
+            if (@is_file($lc) && @is_readable($lc)) { $logoPath = $lc; break; }
+        }
+        if ($logoPath) {
+            // ===== LAYER 1: Drawing (file-based, TIDAK BUTUH GD FUNCTION — PALING AMAN DI HOSTING) =====
+            try {
+                $logoDrawing = new Drawing();
                 $logoDrawing->setName('Logo IAI DDI Sidrap');
                 $logoDrawing->setDescription('Logo IAI DDI Sidrap');
-                $imgInfo = @getimagesize($logoPath);
-                $mime = $imgInfo ? ($imgInfo['mime'] ?? '') : '';
-                $ext = strtolower(pathinfo($logoPath, PATHINFO_EXTENSION));
-                if ($ext === 'png' || $mime === 'image/png') {
-                    $gd = @imagecreatefrompng($logoPath);
-                    if ($gd !== false) { $logoDrawing->setImageResource($gd); $logoDrawing->setRenderingFunction(MemoryDrawing::RENDERING_PNG); $logoDrawing->setMimeType(MemoryDrawing::MIMETYPE_PNG); }
-                } elseif ($ext === 'gif' || $mime === 'image/gif') {
-                    $gd = @imagecreatefromgif($logoPath);
-                    if ($gd !== false) { $logoDrawing->setImageResource($gd); $logoDrawing->setRenderingFunction(MemoryDrawing::RENDERING_GIF); $logoDrawing->setMimeType(MemoryDrawing::MIMETYPE_GIF); }
-                } else {
-                    $gd = @imagecreatefromjpeg($logoPath);
-                    if ($gd !== false) { $logoDrawing->setImageResource($gd); $logoDrawing->setRenderingFunction(MemoryDrawing::RENDERING_JPEG); $logoDrawing->setMimeType(MemoryDrawing::MIMETYPE_DEFAULT); }
-                }
-                if (isset($gd) && $gd !== false) {
-                    $logoDrawing->setHeight(95);
-                    $logoDrawing->setWidth(95);
-                    // POSISI TENGAH HORIZONTAL (total lebar kolom A-J ≈ 142 char unit → ~995px; logo 95px → offset ~445px tepat ditengah)
-                    $logoDrawing->setOffsetX(445);
-                    $logoDrawing->setOffsetY(2);
-                    $logoDrawing->setCoordinates('A1');
-                    $logoDrawing->setWorksheet($sheet);
-                    $sheet->mergeCells('A1:J4');
-                    $sheet->getRowDimension(1)->setRowHeight(24);
-                    $sheet->getRowDimension(2)->setRowHeight(24);
-                    $sheet->getRowDimension(3)->setRowHeight(24);
-                    $sheet->getRowDimension(4)->setRowHeight(24);
-                }
+                $logoDrawing->setPath($logoPath, false);
+                $logoDrawing->setHeight(95);
+                $logoDrawing->setWidth(95);
+                $logoDrawing->setOffsetX(445);
+                $logoDrawing->setOffsetY(2);
+                $logoDrawing->setCoordinates('A1');
+                $logoDrawing->setWorksheet($sheet);
+                $logoInserted = true;
+            } catch (\Throwable $e) {
+                // ===== LAYER 2: MemoryDrawing (GD-based) — fallback jika setPath tidak diizinkan hosting =====
+                try {
+                    $imgInfo = @getimagesize($logoPath);
+                    $mime = $imgInfo ? ($imgInfo['mime'] ?? '') : '';
+                    $ext = strtolower(pathinfo($logoPath, PATHINFO_EXTENSION));
+                    $gd = null;
+                    if ($ext === 'png' || $mime === 'image/png') {
+                        $gd = function_exists('imagecreatefrompng') ? @imagecreatefrompng($logoPath) : false;
+                    } elseif ($ext === 'gif' || $mime === 'image/gif') {
+                        $gd = function_exists('imagecreatefromgif') ? @imagecreatefromgif($logoPath) : false;
+                    } else {
+                        $gd = function_exists('imagecreatefromjpeg') ? @imagecreatefromjpeg($logoPath) : false;
+                    }
+                    if ($gd !== false && $gd !== null) {
+                        $logoDrawing2 = new MemoryDrawing();
+                        $logoDrawing2->setName('Logo IAI DDI Sidrap');
+                        $logoDrawing2->setDescription('Logo IAI DDI Sidrap');
+                        $logoDrawing2->setImageResource($gd);
+                        if ($ext === 'png' || $mime === 'image/png') {
+                            $logoDrawing2->setRenderingFunction(MemoryDrawing::RENDERING_PNG);
+                            $logoDrawing2->setMimeType(MemoryDrawing::MIMETYPE_PNG);
+                        } elseif ($ext === 'gif' || $mime === 'image/gif') {
+                            $logoDrawing2->setRenderingFunction(MemoryDrawing::RENDERING_GIF);
+                            $logoDrawing2->setMimeType(MemoryDrawing::MIMETYPE_GIF);
+                        } else {
+                            $logoDrawing2->setRenderingFunction(MemoryDrawing::RENDERING_JPEG);
+                            $logoDrawing2->setMimeType(MemoryDrawing::MIMETYPE_DEFAULT);
+                        }
+                        $logoDrawing2->setHeight(95);
+                        $logoDrawing2->setWidth(95);
+                        $logoDrawing2->setOffsetX(445);
+                        $logoDrawing2->setOffsetY(2);
+                        $logoDrawing2->setCoordinates('A1');
+                        $logoDrawing2->setWorksheet($sheet);
+                        $logoInserted = true;
+                    }
+                } catch (\Throwable $e2) { $logoInserted = false; }
             }
-        } catch (\Throwable $e) {
-            $logoPath = null;
+        }
+        // ===== AREA LOGO SELALU ADA (MERGE ROW 1-4) + TEXT FALLBACK KALAU GAMBAR GAGAL INSERT =====
+        $sheet->mergeCells('A1:J4');
+        $sheet->getRowDimension(1)->setRowHeight(24);
+        $sheet->getRowDimension(2)->setRowHeight(24);
+        $sheet->getRowDimension(3)->setRowHeight(24);
+        $sheet->getRowDimension(4)->setRowHeight(24);
+        if (!$logoInserted) {
+            $sheet->setCellValue('A1', 'LOGO IAI DDI SIDRAP');
+            $sheet->getStyle('A1')->applyFromArray(array_merge(
+                $boldFont, $centerAlign,
+                ['font' => ['size' => 14, 'bold' => true, 'color' => ['argb' => 'FF1B6B3B']]]
+            ));
         }
 
         $sheet->setCellValue('A6', 'INSTITUT AGAMA ISLAM DARUD DA\'WAH WAL IRSYAD');
@@ -299,7 +340,7 @@ class TranskripNilaiController extends Controller
         $biodata = [
             ['Nama', $mahasiswa->nama_lengkap, 'Program Pendidikan', 'Strata Satu (S1)'],
             ['No. Pokok Mahasiswa', $mahasiswa->npm ?? '-', 'Fakultas', $mahasiswa->fakultas ?? 'Fakultas Tarbiyah & Keguruan'],
-            ['No. IJAZAH', $mahasiswa->nik ?? '-', 'Program Studi', $mahasiswa->program_studi ?? '-'],
+            ['No. Ijazah', $mahasiswa->nik ?? '-', 'Program Studi', $mahasiswa->program_studi ?? '-'],
             ['Tempat / Tanggal Lahir', $data['tempatTgl'], 'No. SK BAN-PT', $data['skBanpt']],
             ['Tanggal, Bulan dan Tahun Lulus', $data['tanggalLulus'], '', ''],
         ];
@@ -634,7 +675,12 @@ class TranskripNilaiController extends Controller
             $hari   = (int) $c->format('j');
             $bulan  = (int) $c->format('n');
             $tahun  = (int) $c->format('Y');
-            $namaBulan = $bulanID[$bulan] ?? $c->format('F');
+            $namaBulan = $bulanID[$bulan] ?? strtr((string)$c->format('F'), [
+                'January' => 'Januari', 'February' => 'Februari', 'March' => 'Maret',
+                'April' => 'April', 'May' => 'Mei', 'June' => 'Juni',
+                'July' => 'Juli', 'August' => 'Agustus', 'September' => 'September',
+                'October' => 'Oktober', 'November' => 'November', 'December' => 'Desember',
+            ]);
 
             return sprintf('%02d %s %04d', $hari, $namaBulan, $tahun);
         } catch (\Throwable $e) {
@@ -756,7 +802,18 @@ class TranskripNilaiController extends Controller
         $tglTtd = $mahasiswa->tanggal_lulus
             ? \Illuminate\Support\Carbon::parse($mahasiswa->tanggal_lulus)
             : now();
-        $tanggalTtd = 'Pangkajene, ' . $this->formatTanggalID($tglTtd, now()->format('d F Y'));
+        $tglTtdStr = $this->formatTanggalID($tglTtd, '');
+        if ($tglTtdStr === '' || $tglTtdStr === '-') {
+            try {
+                $bulanIDFallback = [
+                    1=>'Januari', 2=>'Februari', 3=>'Maret', 4=>'April', 5=>'Mei', 6=>'Juni',
+                    7=>'Juli', 8=>'Agustus', 9=>'September', 10=>'Oktober', 11=>'November', 12=>'Desember',
+                ];
+                $nowFallback = $tglTtd instanceof \Illuminate\Support\Carbon ? $tglTtd : now();
+                $tglTtdStr = sprintf('%02d %s %04d', (int)$nowFallback->day, $bulanIDFallback[(int)$nowFallback->month] ?? 'Agustus', (int)$nowFallback->year);
+            } catch (\Throwable $e) { $tglTtdStr = date('d ') . 'Agustus ' . date('Y'); }
+        }
+        $tanggalTtd = 'Pangkajene, ' . $tglTtdStr;
 
         $skBanpt = (string) ($mahasiswa->nomor_sk_banpt ?? '');
         if ($skBanpt === '') {
@@ -794,7 +851,23 @@ class TranskripNilaiController extends Controller
             $ttdJabatan = trim((string) ($dekan->jabatan_struktural ?? ''));
             if ($ttdJabatan === '') {
                 $fakultasTtd = (string) ($dekan->fakultas ?: ($mahasiswa->fakultas ?? ''));
-                $ttdJabatan = $fakultasTtd !== '' ? "DEKAN FAKULTAS " . strtoupper($fakultasTtd) : "DEKAN FAKULTAS";
+                if ($fakultasTtd !== '') {
+                    // Hindari "DEKAN FAKULTAS FAKULTAS EKONOMI..." dobel kata FAKULTAS
+                    $fakultasClean = $fakultasTtd;
+                    if (preg_match('/^fakultas\s+/i', $fakultasClean)) {
+                        $fakultasClean = preg_replace('/^fakultas\s+/i', '', $fakultasClean, 1);
+                    }
+                    $ttdJabatan = "DEKAN FAKULTAS " . strtoupper(trim((string)$fakultasClean));
+                } else {
+                    $ttdJabatan = "DEKAN FAKULTAS";
+                }
+            } else {
+                // Normalisasi: jika jabatan struktural "DEKAN FAKULTAS EKONOMI" tapi masih ada dobel karena db, trim dobel FAKULTAS juga
+                $jab = $ttdJabatan;
+                if (preg_match('/^dekan\s+fakultas\s+fakultas\s+/i', $jab)) {
+                    $ttdJabatan = preg_replace('/^dekan\s+fakultas\s+/i', 'DEKAN FAKULTAS ', $jab, 1);
+                }
+                $ttdJabatan = strtoupper(trim((string)$ttdJabatan));
             }
             $ttdNama = (string) ($dekan->nama ?? '');
             $nomorInduk = (string) ($dekan->nidn ?? '');
