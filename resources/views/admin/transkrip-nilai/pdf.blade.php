@@ -483,7 +483,7 @@
         <div class="kop-title-a">INSTITUT AGAMA ISLAM</div>
         <div class="kop-title-a kop-title-a2">DARUD DA'WAH WAL IRSYAD</div>
         <div class="kop-title-b">SIDENRENG RAPPANG</div>
-        <div class="kop-terakreditasi">TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021</div>
+        <div class="kop-terakreditasi">TERAKREDITASI INSTITUSI • SK : 337/SK/BAN-PT/Ak-S/2.0/PT/VI/2026</div>
         <div class="kop-alamat-line">Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang</div>
         <div class="kop-alamat-line kop-email-web">E-mail : iaiddisidrap@gmail.com &nbsp;&nbsp; Website : www.yppddisrapp.ac.id</div>
         <div class="kop-line-double">
@@ -513,7 +513,7 @@
             <td class="bio-value right-val"><span class="bio-val">{{ $mahasiswa->fakultas ?? 'Fakultas Tarbiyah & Keguruan' }}</span></td>
         </tr>
         <tr>
-            <td class="bio-label">NO. Ijazah</td>
+            <td class="bio-label">No. IJAZAH</td>
             <td class="bio-value"><span class="bio-val">{{ $mahasiswa->nik ?? '-' }}</span></td>
             <td class="bio-label right-label">Program Studi</td>
             <td class="bio-value right-val"><span class="bio-val">{{ $mahasiswa->program_studi ?? '-' }}</span></td>

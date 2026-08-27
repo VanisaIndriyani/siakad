@@ -274,7 +274,7 @@ class TranskripNilaiController extends Controller
         $sheet->mergeCells('A7:J7');
         $sheet->getStyle('A7')->applyFromArray(array_merge($boldFont, $centerAlign, ['font' => ['bold' => true, 'size' => 17]]));
 
-        $sheet->setCellValue('A8', 'TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021');
+        $sheet->setCellValue('A8', 'TERAKREDITASI INSTITUSI • SK : 337/SK/BAN-PT/Ak-S/2.0/PT/VI/2026');
         $sheet->mergeCells('A8:J8');
         $sheet->getStyle('A8')->applyFromArray(array_merge($centerAlign, ['font' => ['size' => 10]]));
 
@@ -299,7 +299,7 @@ class TranskripNilaiController extends Controller
         $biodata = [
             ['Nama', $mahasiswa->nama_lengkap, 'Program Pendidikan', 'Strata Satu (S1)'],
             ['No. Pokok Mahasiswa', $mahasiswa->npm ?? '-', 'Fakultas', $mahasiswa->fakultas ?? 'Fakultas Tarbiyah & Keguruan'],
-            ['NO. Ijazah', $mahasiswa->nik ?? '-', 'Program Studi', $mahasiswa->program_studi ?? '-'],
+            ['No. IJAZAH', $mahasiswa->nik ?? '-', 'Program Studi', $mahasiswa->program_studi ?? '-'],
             ['Tempat / Tanggal Lahir', $data['tempatTgl'], 'No. SK BAN-PT', $data['skBanpt']],
             ['Tanggal, Bulan dan Tahun Lulus', $data['tanggalLulus'], '', ''],
         ];
@@ -760,10 +760,7 @@ class TranskripNilaiController extends Controller
 
         $skBanpt = (string) ($mahasiswa->nomor_sk_banpt ?? '');
         if ($skBanpt === '') {
-            $tahunLulus = $mahasiswa->tanggal_lulus
-                ? (int) \Illuminate\Support\Carbon::parse($mahasiswa->tanggal_lulus)->format('Y')
-                : (int) date('Y');
-            $skBanpt = "281/SK/LAMDIK/AK/V/III/{$tahunLulus}";
+            $skBanpt = '337/SK/BAN-PT/Ak-S/2.0/PT/VI/2026';
         }
 
         $ujianAda = $ujianKompre;
