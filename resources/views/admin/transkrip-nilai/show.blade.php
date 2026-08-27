@@ -25,16 +25,7 @@
                 <i class="fa-solid fa-print"></i>
                 Cetak Halaman
             </button>
-            @php
-                $namaFilePdf = 'Transkrip-' . ($mahasiswa->npm ?: $mahasiswa->id) . '-' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', (string)$mahasiswa->nama_lengkap) . '.pdf';
-            @endphp
-            <a href="{{ route('admin.transkrip-nilai.pdf', [$mahasiswa, 'download' => 1, 'fd' => 1]) }}"
-               download="{{ $namaFilePdf }}"
-               type="application/octet-stream"
-               class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 border border-emerald-400/30 transition text-sm shadow-lg shadow-emerald-900/20">
-                <i class="fa-solid fa-file-arrow-down"></i>
-                Download PDF
-            </a>
+          
         </div>
     </div>
 
@@ -233,6 +224,10 @@
                 <div class="kop-terakreditasi">TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021</div>
                 <div class="kop-alamat-line">Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang</div>
                 <div class="kop-alamat-line kop-email-web">E-mail : iaiddisidrap@gmail.com &nbsp;&nbsp; Website : www.yppddisrapp.ac.id</div>
+                <div class="kop-line-double">
+                    <div class="kop-line-top"></div>
+                    <div class="kop-line-bottom"></div>
+                </div>
             </div>
 
             {{-- ===== JUDUL TRANSKRIP ===== --}}
@@ -413,9 +408,9 @@
             {{-- ===== RINGKASAN IPK, PREDIKAT, JUDUL SKRIPSI (SEJAJAR VERTIKAL + JUDUL INDENT) ===== --}}
             <table class="ringkasan" cellpadding="0" cellspacing="0">
                 <colgroup>
-                    <col style="width:34%;">
-                    <col style="width:2%;">
-                    <col style="width:64%;">
+                    <col style="width:290px;">
+                    <col style="width:22px;">
+                    <col style="width:auto;">
                 </colgroup>
                 <tr>
                     <td class="label">INDEKS PRESTASI KUMULATIF (IPK)</td>
@@ -434,9 +429,9 @@
                 </tr>
             </table>
 
-            {{-- ===== FOTO MAHASISWA 35mm × 45mm (KIRI BAWAH) + TANDA TANGAN DEKAN FAKULTAS (KANAN) ===== --}}
-            <div style="page-break-inside: avoid; padding-left:0 !important; margin-top:10px !important; width:100%;">
-                <table class="ttd-foto-wrapper" cellpadding="0" cellspacing="0">
+            {{-- ===== FOTO MAHASISWA 35mm × 45mm (KIRI BAWAH) + TANDA TANGAN WR AK AKADEMIK (KANAN) ===== --}}
+            <div style="page-break-inside: avoid; padding-left:90mm !important; margin-top:10px !important;">
+                <table class="ttd-foto-wrapper" cellpadding="0" cellspacing="0" style="padding-left:0 !important; margin:0 !important;">
                     <tr>
                         <td class="ttd-foto-col">
                             <div class="ttd-foto-box">
@@ -452,7 +447,7 @@
                                 <tr>
                                     <td class="ttd-spacer-l"></td>
                                     <td class="ttd-col">
-                                        <div>{{ $tanggalTtd }}</div>
+                                        <div>Pangkajene, {{ ($mahasiswa->tanggal_lulus ? \Illuminate\Support\Carbon::parse($mahasiswa->tanggal_lulus) : now())->translatedFormat('d F Y') }}</div>
                                         <div class="ttd-jabatan">{{ $ttdJabatan }}</div>
                                         <div class="ttd-nama">{{ $ttdNama }}</div>
                                         <div class="ttd-nidk">{{ $ttdNomorLabel }}. {{ $ttdNomor }}</div>
@@ -505,25 +500,36 @@
         /* ====== SEMUA CLASS DI BAWAH INI = PERSIS SAMA DENGAN pdf.blade.php ====== */
         .wrap { width: 100%; }
 
-        .kop-wrap { width: 100%; text-align: center; color: #000000; padding-bottom: 8px; border-bottom: 1.2px solid #1a1a1a; }
-        .kop-logo-center { width: 100%; text-align: center; margin-bottom: 12px; }
+        .kop-wrap { width: 100%; text-align: center; color: #000000; }
+        .kop-logo-center { width: 100%; text-align: center; margin-bottom: 8px; }
         .kop-logo-center img { width: 110px; height: 110px; object-fit: contain; display: inline-block; }
         .kop-title-a {
-            font-size: 24px; font-weight: 800; letter-spacing: 0.8px; line-height: 1.3; margin: 0; padding: 0; color: #000000;
+            font-size: 24px; font-weight: 800; letter-spacing: 0.8px; line-height: 1.2; margin: 3px 0 0; padding: 0; color: #000000;
         }
-        .kop-title-a2 { margin-top: 5px; }
+        .kop-title-a2 { margin-top: 1px; }
         .kop-title-b {
-            font-size: 23px; font-weight: 800; letter-spacing: 0.8px; line-height: 1.3; margin: 5px 0 0; padding: 0; color: #000000;
+            font-size: 23px; font-weight: 800; letter-spacing: 0.8px; line-height: 1.2; margin: 3px 0 0; padding: 0; color: #000000;
         }
         .kop-terakreditasi {
-            font-size: 11.5px; margin-top: 9px; color: #000000; text-align: center; letter-spacing: 0.1px; line-height: 1.4;
+            font-size: 11px; margin-top: 6px; color: #000000; text-align: center; letter-spacing: 0.1px;
         }
         .kop-alamat-line {
-            font-size: 11px; margin-top: 6px; line-height: 1.4; color: #000000; text-align: center;
+            font-size: 10.5px; margin-top: 4px; line-height: 1.25; color: #000000; text-align: center;
         }
-        .kop-email-web { margin-top: 3px; }
+        .kop-email-web { margin-top: 2px; }
+        .kop-line-double {
+            margin-top: 3px;
+            width: 100%;
+            display: block;
+        }
+        .kop-line-double .kop-line-top {
+            width: 100%; height: 0px; background: transparent;
+        }
+        .kop-line-double .kop-line-bottom {
+            width: 100%; height: 0px; background: transparent; margin-top: 0;
+        }
 
-        .judul-box { text-align: center; margin-top: 12px; }
+        .judul-box { text-align: center; margin-top: 10px; }
         .judul-text {
             font-size: 16px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
             text-decoration: none; color: #000000;
@@ -531,13 +537,13 @@
         .judul-nomor { font-size: 9.2px; margin-top: 1px; color: #000000; }
 
         .biodata {
-            width: 100%; margin-top: 11px; border-collapse: collapse;
+            width: 100%; margin-top: 10px; border-collapse: collapse;
             font-size: 9.5px; color: #000000; table-layout: fixed;
         }
-        .biodata td { vertical-align: top; padding: 0; line-height: 1.35; }
+        .biodata td { vertical-align: top; padding: 0; line-height: 1.3; }
         .biodata td.bio-label {
             width: 25%;
-            padding: 1.8px 16px 1.8px 0;
+            padding: 1.5px 10px 1.5px 0;
             text-align: left;
             font-weight: 400;
             color: #000000;
@@ -550,13 +556,13 @@
             content: ":";
             position: absolute;
             right: 0px;
-            top: 1.8px;
+            top: 1.5px;
             display: inline-block;
             color: #000000;
         }
         .biodata td.bio-value {
             width: 25%;
-            padding: 1.8px 0 1.8px 10px;
+            padding: 1.5px 0 1.5px 6px;
             color: #000000;
         }
         .biodata td.bio-value.right-val {
@@ -634,27 +640,26 @@
 
         .ringkasan {
             width: 100%; margin-top: 9px; border-collapse: collapse;
-            font-size: 9.5px; color: #000000; table-layout: fixed;
+            font-size: 9.5px; color: #000000; table-layout: auto;
         }
         .ringkasan td { vertical-align: top; padding: 1.5px 0; line-height: 1.28; }
         .ringkasan td.label {
-            width: 34%; white-space: nowrap; font-weight: 700; color: #000000; padding-right: 10px;
+            width: auto; white-space: nowrap; font-weight: 700; color: #000000; padding-right: 12px;
         }
         .ringkasan td.label-top {
-            width: 34%; white-space: nowrap; font-weight: 700; color: #000000; padding: 1.5px 10px 0 0;
+            width: auto; white-space: nowrap; font-weight: 700; color: #000000; padding: 1.5px 12px 0 0;
         }
-        .ringkasan td.sep   { width: 2%; text-align: left; padding-right: 8px; }
-        .ringkasan td.sep-top { width: 2%; text-align: left; padding: 1.5px 8px 0 0; }
-        .ringkasan td.val   { font-weight: 800; color: #000000; font-size: 9.8px; width: 64%; word-wrap: break-word; overflow-wrap: break-word; }
+        .ringkasan td.sep   { width: auto; text-align: left; padding-right: 10px; }
+        .ringkasan td.sep-top { width: auto; text-align: left; padding: 1.5px 10px 0 0; }
+        .ringkasan td.val   { font-weight: 800; color: #000000; font-size: 9.8px; width: auto; white-space: nowrap; }
         .ringkasan td.val-judul {
             text-align: left; color: #000000; line-height: 1.28; padding: 1.5px 0 1.5px 0;
-            vertical-align: top; width: 64%; word-wrap: break-word; overflow-wrap: break-word;
+            vertical-align: top; width: auto;
         }
 
         .ttd-foto-wrapper {
-            width: 100%; margin: 6mm 0 0 0; border-collapse: collapse;
-            padding-left: 55mm; /* SESUAI USER: foto+ttd di offset 55mm dari kiri (jgn diubah lg) */
-            table-layout: fixed;
+            width: 100%; margin: 0 !important; border-collapse: collapse;
+            padding-left: 0 !important; /* DIV LUAR yang handle geser ke kanan, TABLE INI TIDAK USAH PADDING LAGI, biar tidak konflik */
         }
         .ttd-foto-wrapper td { vertical-align: top; padding: 0; }
         .ttd-foto-col {
