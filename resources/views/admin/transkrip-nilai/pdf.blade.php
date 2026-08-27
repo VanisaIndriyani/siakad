@@ -19,19 +19,37 @@
             -webkit-text-size-adjust: 100%;
         }
         body {
-            width: 100%;
-            max-width: 210mm;
+            width: 210mm;
+            height: 330mm;
+            max-height: 330mm;
             min-height: 330mm;
             background: #ffffff;
             color: #000000;
-            padding: 8mm 9mm 8mm 8mm !important; /* KANAN DIBERI RUANG LEBIH BANYAK AGAR TIDAK KEPOTONG */
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
             font-family: 'Times New Roman', Times, serif;
-            overflow-x: hidden;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
+
+        /* ====== WRAPPER KERTAS = PERSIS 1:1 DARI show.blade.php .transcript-paper ====== */
+        .transcript-paper {
+            width: 210mm;
+            height: 330mm;
+            max-height: 330mm;
+            background: #ffffff;
+            color: #000000;
+            padding: 10mm 13mm 10mm !important; /* PERSIS SHOW */
+            box-sizing: border-box;
+            font-family: 'Times New Roman', Times, serif;
+            overflow: hidden !important; /* PERSIS SHOW @media print overflow hidden */
+            margin: 0;
+        }
+
+        /* ====== SEMUA CLASS DI BAWAH INI = PERSIS 1:1 DARI show.blade.php (USER LOCK LAYOUT) ====== */
         .wrap { width: 100%; }
 
-        /* ====== SEMUA CLASS DI BAWAH INI = PERSIS 1:1 DARI show.blade.php ====== */
         .kop-wrap { width: 100%; text-align: center; color: #000000; }
         .kop-logo-center { width: 100%; text-align: center; margin-bottom: 8px; }
         .kop-logo-center img { width: 110px; height: 110px; object-fit: contain; display: inline-block; }
@@ -96,12 +114,11 @@
             width: 25%;
             padding: 1.5px 0 1.5px 6px;
             color: #000000;
-            word-wrap: break-word; word-break: break-word; overflow-wrap: break-word;
         }
         .biodata td.bio-value.right-val {
             width: 30%;
         }
-        .bio-val { font-weight: 700; color: #000000; display: inline-block; word-wrap: break-word; word-break: break-word; overflow-wrap: break-word; max-width: 100%; }
+        .bio-val { font-weight: 700; color: #000000; display: inline-block; }
 
         table.nilai {
             width: 100%; border-collapse: collapse; margin-top: 14px;
@@ -188,13 +205,11 @@
         .ringkasan td.val-judul {
             text-align: left; color: #000000; line-height: 1.28; padding: 1.5px 0 1.5px 0;
             vertical-align: top; width: auto;
-            word-wrap: break-word; word-break: break-word; overflow-wrap: break-word;
-            font-size: 9.5px;
         }
 
         .ttd-foto-wrapper {
             width: 100%; margin: 0 !important; border-collapse: collapse;
-            padding-left: 0 !important; /* DIV LUAR yang handle geser ke kanan, TABLE INI TIDAK USAH PADDING LAGI, biar tidak konflik */
+            padding-left: 0 !important;
         }
         .ttd-foto-wrapper td { vertical-align: top; padding: 0; }
         .ttd-foto-col {
@@ -226,9 +241,9 @@
         .ttd-spacer-l { width: 0%; }
         .ttd-spacer-r { width: 0%; }
         .ttd-col { width: 100%; text-align: left; line-height: 1.32; color: #000000; padding-left: 0; font-size: 9.5px; }
-        .ttd-jabatan { margin-top: 3px; font-weight: 800; letter-spacing: 0.1px; font-size: 9.2px; word-wrap: break-word; word-break: break-word; overflow-wrap: break-word; line-height: 1.25; }
-        .ttd-nama    { margin-top: 48px; font-weight: 800; text-decoration: underline; font-size: 9.3px; word-wrap: break-word; }
-        .ttd-nidk    { margin-top: 1px; font-size: 8.3px; letter-spacing: 0.1px; word-wrap: break-word; }
+        .ttd-jabatan { margin-top: 3px; font-weight: 800; letter-spacing: 0.2px; }
+        .ttd-nama    { margin-top: 48px; font-weight: 800; text-decoration: underline; font-size: 9.5px; }
+        .ttd-nidk    { margin-top: 1px; font-size: 8.5px; letter-spacing: 0.1px; }
     </style>
 </head>
 <body>
@@ -258,132 +273,161 @@
         return null;
     }
 
-    $globPatterns = [
-        '[Ll][Oo].[Jj][Pp][Ee][Gg]',
-        '[Ll][Oo].[Jj][Pp][Gg]',
-        '[Ll][Oo][Gg][Oo].[Jj][Pp][Ee][Gg]',
-        '[Ll][Oo][Gg][Oo].[Jj][Pp][Gg]',
-        '[Ll][Oo][Gg][Oo].[Pp][Nn][Gg]',
-    ];
-
-    $logoCandidates = [
-        ['rel' => 'img/lo.jpeg',     'public' => true,  'type' => 'image/jpeg'],
-        ['rel' => 'img/lo.jpg',      'public' => true,  'type' => 'image/jpeg'],
-        ['rel' => 'img/logo.jpeg',   'public' => true,  'type' => 'image/jpeg'],
-        ['rel' => 'img/logo.jpg',    'public' => true,  'type' => 'image/jpeg'],
-        ['rel' => 'img/logo.png',    'public' => true,  'type' => 'image/png'],
-        ['rel' => 'img/Logo.png',    'public' => true,  'type' => 'image/png'],
-        ['rel' => 'img/LOGO.png',    'public' => true,  'type' => 'image/png'],
-        ['rel' => 'img/Lo.jpeg',     'public' => true,  'type' => 'image/jpeg'],
-        ['rel' => 'img/LO.JPEG',     'public' => true,  'type' => 'image/jpeg'],
-        ['rel' => 'img/LO.jpeg',     'public' => true,  'type' => 'image/jpeg'],
-    ];
-
-    function __mimeByPath($p) {
-        $ext = strtolower(pathinfo((string)$p, PATHINFO_EXTENSION));
-        if ($ext === 'png') return 'image/png';
-        if ($ext === 'jpg' || $ext === 'jpeg' || $ext === 'jfif' || $ext === 'pjpeg') return 'image/jpeg';
-        if ($ext === 'gif') return 'image/gif';
-        if ($ext === 'webp') return 'image/webp';
-        if ($ext === 'svg') return 'image/svg+xml';
-        return 'image/jpeg';
-    }
-
-    $extraPaths = [];
+    $logoAbsPath = null;
     try {
-        $base = rtrim(str_replace('\\', '/', base_path()), '/');
-        $extraPaths[] = $base . '/public';
-        $extraPaths[] = $base . '/public_html';
-        $extraPaths[] = $base . '/../public_html';
-        $extraPaths[] = $base . '/../../public_html';
-    } catch (\Throwable $e) {
-        $extraPaths = [];
-    }
-
-    $baseDirs = [];
-    try { $baseDirs[] = public_path(); } catch (\Throwable $e) {}
-    foreach ($extraPaths as $ep) $baseDirs[] = $ep;
-    $baseDirs = array_values(array_unique(array_filter($baseDirs, fn($v) => is_string($v) && $v !== '')));
-
-    $logoData = null;
-
-    try {
-        $found = __logoGlobFind($baseDirs, 'img', $globPatterns);
-        if (is_array($found) && !empty($found['path'])) {
-            try {
-                $mime = __mimeByPath($found['path']);
-                $content = file_get_contents($found['path']);
-                if (is_string($content) && $content !== '') {
-                    $logoData = 'data:' . $mime . ';base64,' . base64_encode($content);
+        $baseDirs = [];
+        try { $baseDirs[] = public_path(); } catch (\Throwable $e) {}
+        try {
+            $bp = rtrim(str_replace('\\', '/', base_path()), '/');
+            if ($bp !== '') {
+                $baseDirs[] = $bp . '/public';
+                $baseDirs[] = $bp . '/public_html';
+                $baseDirs[] = $bp . '/../public_html';
+                $baseDirs[] = $bp . '/../../public_html';
+            }
+        } catch (\Throwable $e) {}
+        try {
+            if (isset($_SERVER['DOCUMENT_ROOT']) && is_string($_SERVER['DOCUMENT_ROOT']) && $_SERVER['DOCUMENT_ROOT'] !== '') {
+                $dr = rtrim(str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']), '/');
+                if ($dr !== '') {
+                    $baseDirs[] = $dr;
+                    $baseDirs[] = $dr . '/../siakad/public';
+                    $baseDirs[] = $dr . '/../siakad/public_html';
                 }
-            } catch (\Throwable $e) {
-                $logoData = null;
             }
-        }
-    } catch (\Throwable $e) {
-        $logoData = null;
-    }
+        } catch (\Throwable $e) {}
+        try {
+            if (isset($_SERVER['SCRIPT_FILENAME']) && is_string($_SERVER['SCRIPT_FILENAME']) && $_SERVER['SCRIPT_FILENAME'] !== '') {
+                $sf = rtrim(str_replace('\\', '/', $_SERVER['SCRIPT_FILENAME']), '/');
+                if (dirname($sf) !== '') $baseDirs[] = dirname($sf);
+            }
+        } catch (\Throwable $e) {}
+        try {
+            if (function_exists('getcwd')) {
+                $cwd = @getcwd();
+                if (is_string($cwd) && $cwd !== '') {
+                    $cwd = rtrim(str_replace('\\', '/', $cwd), '/');
+                    if ($cwd !== '') {
+                        $baseDirs[] = $cwd . '/public';
+                        $baseDirs[] = $cwd . '/public_html';
+                    }
+                }
+            }
+        } catch (\Throwable $e) {}
 
-    if (!$logoData) {
-        foreach ($logoCandidates as $c) {
-            $rel = ltrim(str_replace('\\', '/', $c['rel']), '/');
-            $absCandidates = [];
-            try { $absCandidates[] = public_path($rel); } catch (\Throwable $e) {}
-            foreach ($extraPaths as $ep) {
-                $absCandidates[] = rtrim($ep, '/') . '/' . $rel;
-            }
-            $absCandidates = array_values(array_filter(array_unique($absCandidates), fn($p) => is_string($p) && $p !== ''));
-            $foundPath = null;
-            foreach ($absCandidates as $ap) {
+        $patterns = [
+            '[Ll][Oo].[Jj][Pp][Ee][Gg]',
+            '[Ll][Oo].[Jj][Pp][Gg]',
+            '[Ll][Oo][Gg][Oo].[Jj][Pp][Ee][Gg]',
+            '[Ll][Oo][Gg][Oo].[Jj][Pp][Gg]',
+            '[Ll][Oo][Gg][Oo].[Pp][Nn][Gg]',
+            'lo.jpeg',
+            'lo.jpg',
+            'logo.jpeg',
+            'logo.jpg',
+            'logo.png',
+        ];
+
+        $found = __logoGlobFind(array_values(array_unique($baseDirs)), 'img', $patterns);
+        if ($found && isset($found['path'])) {
+            $logoAbsPath = $found['path'];
+        } else {
+            $tryList = [
+                public_path('img/lo.jpeg'),
+                public_path('img/lo.jpg'),
+                public_path('img/logo.jpeg'),
+                public_path('img/logo.jpg'),
+                public_path('img/logo.png'),
+            ];
+            foreach ($tryList as $t) {
                 try {
-                    if (@file_exists($ap) && @is_file($ap) && @is_readable($ap)) {
-                        $foundPath = $ap;
+                    if (@file_exists($t) && @is_file($t) && @is_readable($t)) {
+                        $logoAbsPath = $t;
                         break;
                     }
-                } catch (\Throwable $e) {
-                    continue;
-                }
+                } catch (\Throwable $e) {}
             }
-            if ($foundPath) {
-                try {
-                    $logoData = 'data:' . $c['type'] . ';base64,' . base64_encode(file_get_contents($foundPath));
-                    break;
-                } catch (\Throwable $e) {
-                    $logoData = null;
-                }
+        }
+    } catch (\Throwable $e) {
+        $logoAbsPath = null;
+    }
+
+    $logoSrcFinal = null;
+    if ($logoAbsPath && @is_file($logoAbsPath) && @is_readable($logoAbsPath)) {
+        try {
+            $ext = strtolower(pathinfo($logoAbsPath, PATHINFO_EXTENSION));
+            if ($ext === 'jpg' || $ext === 'jpeg') $mime = 'image/jpeg';
+            elseif ($ext === 'png') $mime = 'image/png';
+            else $mime = 'image/jpeg';
+            $data = @file_get_contents($logoAbsPath);
+            if ($data && is_string($data) && strlen($data) > 0) {
+                $logoSrcFinal = 'data:' . $mime . ';base64,' . base64_encode($data);
             }
+        } catch (\Throwable $e) {
+            $logoSrcFinal = null;
         }
     }
 
-    if (!$logoData) {
+    if (!$logoSrcFinal) {
         try {
-            $urlCandidates = [
-                [asset('img/lo.jpeg'),   'image/jpeg'],
-                [asset('img/lo.jpg'),    'image/jpeg'],
-                [asset('img/logo.jpeg'), 'image/jpeg'],
-                [asset('img/logo.jpg'),  'image/jpeg'],
-                [asset('img/logo.png'),  'image/png'],
-            ];
-            $urlEnabled = @ini_get('allow_url_fopen') && filter_var(asset('img/logo.png'), FILTER_VALIDATE_URL);
-            if ($urlEnabled) {
-                foreach ($urlCandidates as [$u, $t]) {
-                    try {
-                        $ctx = stream_context_create([
-                            'http' => ['timeout' => 5, 'method' => 'GET'],
-                            'ssl'  => ['verify_peer' => false, 'verify_peer_name' => false],
-                        ]);
-                        $content = @file_get_contents($u, false, $ctx);
-                        if (is_string($content) && $content !== '') {
-                            $logoData = 'data:' . $t . ';base64,' . base64_encode($content);
-                            break;
-                        }
-                    } catch (\Throwable $e) {
-                        continue;
-                    }
+            $remoteUrl = config('app.url') ? rtrim((string)config('app.url'), '/') . '/img/lo.jpeg' : 'https://siakadiaiddisidrap.com/img/lo.jpeg';
+            try {
+                $ctx = @stream_context_create(['http' => ['timeout' => 4, 'ignore_errors' => true, 'user_agent' => 'Mozilla/5.0 (DomPDF)']]);
+                $data = @file_get_contents($remoteUrl, false, $ctx);
+                if ($data && is_string($data) && strlen($data) > 200) {
+                    $logoSrcFinal = 'data:image/jpeg;base64,' . base64_encode($data);
                 }
+            } catch (\Throwable $e) {
+                $logoSrcFinal = null;
             }
         } catch (\Throwable $e) {
-            $logoData = null;
+            $logoSrcFinal = null;
+        }
+    }
+
+    if (!$logoSrcFinal) {
+        try {
+            $ctx = @stream_context_create(['http' => ['timeout' => 5, 'ignore_errors' => true, 'user_agent' => 'Mozilla/5.0 (DomPDF)']]);
+            $data = @file_get_contents('https://siakadiaiddisidrap.com/img/lo.jpeg', false, $ctx);
+            if ($data && is_string($data) && strlen($data) > 200) {
+                $logoSrcFinal = 'data:image/jpeg;base64,' . base64_encode($data);
+            }
+        } catch (\Throwable $e) {}
+    }
+
+    $fotoSrcFinal = null;
+    if (!empty($fotoMahasiswa) && is_string($fotoMahasiswa)) {
+        if (str_starts_with($fotoMahasiswa, 'data:')) {
+            $fotoSrcFinal = $fotoMahasiswa;
+        } elseif (str_starts_with($fotoMahasiswa, 'http://') || str_starts_with($fotoMahasiswa, 'https://')) {
+            try {
+                $ctx = @stream_context_create(['http' => ['timeout' => 5, 'ignore_errors' => true, 'user_agent' => 'Mozilla/5.0 (DomPDF)']]);
+                $data = @file_get_contents($fotoMahasiswa, false, $ctx);
+                if ($data && is_string($data) && strlen($data) > 200) {
+                    $fotoSrcFinal = 'data:image/jpeg;base64,' . base64_encode($data);
+                }
+            } catch (\Throwable $e) {
+                $fotoSrcFinal = null;
+            }
+        } else {
+            try {
+                $abs = ltrim((string)$fotoMahasiswa, '/');
+                foreach ([public_path($abs), base_path($abs)] as $cand) {
+                    try {
+                        if (@file_exists($cand) && @is_file($cand) && @is_readable($cand)) {
+                            $data = @file_get_contents($cand);
+                            if ($data && is_string($data) && strlen($data) > 200) {
+                                $ext = strtolower(pathinfo($cand, PATHINFO_EXTENSION));
+                                $mime = in_array($ext, ['png','jpg','jpeg']) ? ($ext === 'png' ? 'image/png' : 'image/jpeg') : 'image/jpeg';
+                                $fotoSrcFinal = 'data:' . $mime . ';base64,' . base64_encode($data);
+                                break;
+                            }
+                        }
+                    } catch (\Throwable $e) {}
+                }
+            } catch (\Throwable $e) {
+                $fotoSrcFinal = null;
+            }
         }
     }
 
@@ -397,12 +441,15 @@
     $ujianAda = array_values(array_filter(array_map(fn($v) => trim((string)$v), $ujianKompre), fn($v) => $v !== ''));
     $ujianCount = count($ujianAda);
 @endphp
-<div class="wrap">
+
+<div class="transcript-paper">
     {{-- ===== KOP SURAT (LOGO DI TENGAH, SESUAI CONTOH WILDAH ASLI) ===== --}}
     <div class="kop-wrap">
         <div class="kop-logo-center">
-            @if($logoData)
-                <img src="{{ $logoData }}" alt="Logo">
+            @if($logoSrcFinal)
+                <img src="{{ $logoSrcFinal }}"
+                     alt="Logo IAI DDI Sidrap"
+                     width="110" height="110">
             @endif
         </div>
         <div class="kop-title-a">INSTITUT AGAMA ISLAM</div>
@@ -411,6 +458,10 @@
         <div class="kop-terakreditasi">TERAKREDITASI INSTITUSI • SK : 576/SK/BAN-PT/Akred/PT/IV/2021</div>
         <div class="kop-alamat-line">Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang</div>
         <div class="kop-alamat-line kop-email-web">E-mail : iaiddisidrap@gmail.com &nbsp;&nbsp; Website : www.yppddisrapp.ac.id</div>
+        <div class="kop-line-double">
+            <div class="kop-line-top"></div>
+            <div class="kop-line-bottom"></div>
+        </div>
     </div>
 
     {{-- ===== JUDUL TRANSKRIP ===== --}}
@@ -421,12 +472,6 @@
 
     {{-- ===== BIODATA 50/50 URUTAN SESUAI CONTOH WILDAH ===== --}}
     <table class="biodata" cellpadding="0" cellspacing="0">
-        <colgroup>
-            <col style="width:25%;">
-            <col style="width:25%;">
-            <col style="width:20%;">
-            <col style="width:30%;">
-        </colgroup>
         <tr>
             <td class="bio-label">Nama</td>
             <td class="bio-value"><span class="bio-val">{{ $mahasiswa->nama_lengkap }}</span></td>
@@ -597,8 +642,8 @@
     {{-- ===== RINGKASAN IPK, PREDIKAT, JUDUL SKRIPSI (SEJAJAR VERTIKAL + JUDUL INDENT) ===== --}}
     <table class="ringkasan" cellpadding="0" cellspacing="0">
         <colgroup>
-            <col style="width:245px;">
-            <col style="width:20px;">
+            <col style="width:290px;">
+            <col style="width:22px;">
             <col style="width:auto;">
         </colgroup>
         <tr>
@@ -618,35 +663,35 @@
         </tr>
     </table>
 
-    {{-- ===== FOTO MAHASISWA 35mm × 45mm (KIRI BAWAH) + TANDA TANGAN DEKAN FAKULTAS (KANAN) ===== --}}
-    <div style="page-break-inside: avoid; padding-left:78mm !important; margin-top:4mm !important;">
+    {{-- ===== FOTO MAHASISWA 24mm × 32mm (KIRI BAWAH) + TANDA TANGAN DEKAN FAKULTAS (KANAN) ===== --}}
+    <div style="page-break-inside: avoid; padding-left:90mm !important; margin-top:10px !important;">
         <table class="ttd-foto-wrapper" cellpadding="0" cellspacing="0" style="padding-left:0 !important; margin:0 !important;">
-        <tr>
-            <td class="ttd-foto-col">
-                <div class="ttd-foto-box">
-                    @if($fotoMahasiswa)
-                        <img src="{{ $fotoMahasiswa }}" alt="Foto {{ $mahasiswa->nama_lengkap }}">
-                    @else
-                        <div class="ttd-foto-empty">Foto<br>3 × 4</div>
-                    @endif
-                </div>
-            </td>
-            <td class="ttd-col-wrapper">
-                <table class="ttd-box" cellpadding="0" cellspacing="0">
-                    <tr>
-                        <td class="ttd-spacer-l"></td>
-                        <td class="ttd-col">
-                            <div>{{ $tanggalTtd }}</div>
-                            <div class="ttd-jabatan">{{ $ttdJabatan }}</div>
-                            <div class="ttd-nama">{{ $ttdNama }}</div>
-                            <div class="ttd-nidk">{{ $ttdNomorLabel }}. {{ $ttdNomor }}</div>
-                        </td>
-                        <td class="ttd-spacer-r"></td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
+            <tr>
+                <td class="ttd-foto-col">
+                    <div class="ttd-foto-box">
+                        @if($fotoSrcFinal)
+                            <img src="{{ $fotoSrcFinal }}" alt="Foto {{ $mahasiswa->nama_lengkap }}">
+                        @else
+                            <div class="ttd-foto-empty">Foto<br>3 × 4</div>
+                        @endif
+                    </div>
+                </td>
+                <td class="ttd-col-wrapper">
+                    <table class="ttd-box" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td class="ttd-spacer-l"></td>
+                            <td class="ttd-col">
+                                <div>{{ $tanggalTtd }}</div>
+                                <div class="ttd-jabatan">{{ $ttdJabatan }}</div>
+                                <div class="ttd-nama">{{ $ttdNama }}</div>
+                                <div class="ttd-nidk">{{ $ttdNomorLabel }}. {{ $ttdNomor }}</div>
+                            </td>
+                            <td class="ttd-spacer-r"></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
     </div>
 </div>
 </body>
