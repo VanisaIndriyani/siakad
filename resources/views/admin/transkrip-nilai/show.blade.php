@@ -413,9 +413,9 @@
             {{-- ===== RINGKASAN IPK, PREDIKAT, JUDUL SKRIPSI (SEJAJAR VERTIKAL + JUDUL INDENT) ===== --}}
             <table class="ringkasan" cellpadding="0" cellspacing="0">
                 <colgroup>
-                    <col style="width:290px;">
-                    <col style="width:22px;">
-                    <col style="width:auto;">
+                    <col style="width:34%;">
+                    <col style="width:2%;">
+                    <col style="width:64%;">
                 </colgroup>
                 <tr>
                     <td class="label">INDEKS PRESTASI KUMULATIF (IPK)</td>
@@ -434,9 +434,9 @@
                 </tr>
             </table>
 
-            {{-- ===== FOTO MAHASISWA 35mm × 45mm (KIRI BAWAH) + TANDA TANGAN WR AK AKADEMIK (KANAN) ===== --}}
-            <div style="page-break-inside: avoid; padding-left:90mm !important; margin-top:10px !important;">
-                <table class="ttd-foto-wrapper" cellpadding="0" cellspacing="0" style="padding-left:0 !important; margin:0 !important;">
+            {{-- ===== FOTO MAHASISWA 35mm × 45mm (KIRI BAWAH) + TANDA TANGAN DEKAN FAKULTAS (KANAN) ===== --}}
+            <div style="page-break-inside: avoid; padding-left:0 !important; margin-top:10px !important; width:100%;">
+                <table class="ttd-foto-wrapper" cellpadding="0" cellspacing="0">
                     <tr>
                         <td class="ttd-foto-col">
                             <div class="ttd-foto-box">
@@ -634,26 +634,27 @@
 
         .ringkasan {
             width: 100%; margin-top: 9px; border-collapse: collapse;
-            font-size: 9.5px; color: #000000; table-layout: auto;
+            font-size: 9.5px; color: #000000; table-layout: fixed;
         }
         .ringkasan td { vertical-align: top; padding: 1.5px 0; line-height: 1.28; }
         .ringkasan td.label {
-            width: auto; white-space: nowrap; font-weight: 700; color: #000000; padding-right: 12px;
+            width: 34%; white-space: nowrap; font-weight: 700; color: #000000; padding-right: 10px;
         }
         .ringkasan td.label-top {
-            width: auto; white-space: nowrap; font-weight: 700; color: #000000; padding: 1.5px 12px 0 0;
+            width: 34%; white-space: nowrap; font-weight: 700; color: #000000; padding: 1.5px 10px 0 0;
         }
-        .ringkasan td.sep   { width: auto; text-align: left; padding-right: 10px; }
-        .ringkasan td.sep-top { width: auto; text-align: left; padding: 1.5px 10px 0 0; }
-        .ringkasan td.val   { font-weight: 800; color: #000000; font-size: 9.8px; width: auto; white-space: nowrap; }
+        .ringkasan td.sep   { width: 2%; text-align: left; padding-right: 8px; }
+        .ringkasan td.sep-top { width: 2%; text-align: left; padding: 1.5px 8px 0 0; }
+        .ringkasan td.val   { font-weight: 800; color: #000000; font-size: 9.8px; width: 64%; word-wrap: break-word; overflow-wrap: break-word; }
         .ringkasan td.val-judul {
             text-align: left; color: #000000; line-height: 1.28; padding: 1.5px 0 1.5px 0;
-            vertical-align: top; width: auto;
+            vertical-align: top; width: 64%; word-wrap: break-word; overflow-wrap: break-word;
         }
 
         .ttd-foto-wrapper {
-            width: 100%; margin: 0 !important; border-collapse: collapse;
-            padding-left: 0 !important; /* DIV LUAR yang handle geser ke kanan, TABLE INI TIDAK USAH PADDING LAGI, biar tidak konflik */
+            width: 100%; margin: 6mm 0 0 0; border-collapse: collapse;
+            padding-left: 55mm; /* SESUAI USER: foto+ttd di offset 55mm dari kiri (jgn diubah lg) */
+            table-layout: fixed;
         }
         .ttd-foto-wrapper td { vertical-align: top; padding: 0; }
         .ttd-foto-col {

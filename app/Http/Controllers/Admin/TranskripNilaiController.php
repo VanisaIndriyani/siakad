@@ -122,9 +122,19 @@ class TranskripNilaiController extends Controller
         $dompdf = new Dompdf([
             'isRemoteEnabled' => true,
             'isHtml5ParserEnabled' => true,
+            'isPhpEnabled' => true,
+            'defaultFont' => 'dejavu sans',
+            'fontHeightRatio' => 1.0,
+            'dpi' => 96,
         ]);
-        $dompdf->loadHtml($html);
-        $dompdf->setPaper('Folio', 'portrait');
+        $dompdf->getOptions()->setIsRemoteEnabled(true);
+        $dompdf->getOptions()->setDefaultFont('dejavu sans');
+
+        $dompdf->loadHtml($html, 'UTF-8');
+
+        // FOLIO / F4 INDONESIA: 210mm x 330mm = 595.28pt x 935.43pt
+        // Paper size diset EXACT + margin 0 di sini, sisanya atur via @page CSS & .print-area padding
+        $dompdf->setPaper(array(0.0, 0.0, 595.275591, 935.433071), 'portrait');
         $dompdf->render();
 
         $namafile = 'Transkrip-' . ($mahasiswa->npm ?: $mahasiswa->id) . '-' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', (string) $mahasiswa->nama_lengkap) . '.pdf';
