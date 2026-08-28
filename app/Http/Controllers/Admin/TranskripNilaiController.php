@@ -122,69 +122,95 @@ class TranskripNilaiController extends Controller
 
     public function pdf(Request $request, Mahasiswa $mahasiswa)
     {
-        $data = $this->buildTranskripData($mahasiswa);
+        // ===== MATIKAN SEMENTARA WARNING / ERROR OUTPUT (akar PDF corrupt "0 of 0") =====
+        $prevDisplayErrors = ini_get('display_errors');
+        $prevErrorReporting = error_reporting();
+        ini_set('display_errors', '0');
+        error_reporting($prevErrorReporting & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED & ~E_STRICT);
 
-        $html = view('admin.transkrip-nilai.pdf', $data)->render();
+        // ===== BERSIHKAN SEMUA OUTPUT BUFFER SEBELUM RENDER (jika ada echo / warning sisa) =====
+        while (ob_get_level() > 0) {
+            if (!@ob_end_clean()) {
+                break;
+            }
+        }
+        ob_start();
 
-        $dompdf = new Dompdf([
-            'isRemoteEnabled' => true,
-            'isHtml5ParserEnabled' => true,
-            'isPhpEnabled' => true,
-            'defaultFont' => 'times',
-            'fontHeightRatio' => 0.92,
-            'dpi' => 96,
-            'isJavascriptEnabled' => false,
-            'isFontSubsettingEnabled' => true,
-            'debugPng' => false,
-            'debugKeepTemp' => false,
-            'debugCss' => false,
-            'debugLayout' => false,
-            'debugLayoutLines' => false,
-            'debugLayoutBlocks' => false,
-            'debugLayoutInline' => false,
-            'debugLayoutPaddingBox' => false,
-        ]);
-        $dompdf->getOptions()->setIsRemoteEnabled(true);
-        $dompdf->getOptions()->setDefaultFont('times');
-        $dompdf->getOptions()->setIsFontSubsettingEnabled(true);
-        $dompdf->getOptions()->setFontHeightRatio(0.92);
-        $dompdf->getOptions()->setDpi(96);
+        try {
+            $data = $this->buildTranskripData($mahasiswa);
+            $html = view('admin.transkrip-nilai.pdf', $data)->render();
 
-        $dompdf->loadHtml($html, 'UTF-8');
+            $dompdf = new Dompdf([
+                'isRemoteEnabled' => true,
+                'isHtml5ParserEnabled' => true,
+                'isPhpEnabled' => true,
+                'defaultFont' => 'times',
+                'fontHeightRatio' => 0.92,
+                'dpi' => 96,
+                'isJavascriptEnabled' => false,
+                'isFontSubsettingEnabled' => true,
+                'debugPng' => false,
+                'debugKeepTemp' => false,
+                'debugCss' => false,
+                'debugLayout' => false,
+                'debugLayoutLines' => false,
+                'debugLayoutBlocks' => false,
+                'debugLayoutInline' => false,
+                'debugLayoutPaddingBox' => false,
+            ]);
+            $dompdf->getOptions()->setIsRemoteEnabled(true);
+            $dompdf->getOptions()->setDefaultFont('times');
+            $dompdf->getOptions()->setIsFontSubsettingEnabled(true);
+            $dompdf->getOptions()->setFontHeightRatio(0.92);
+            $dompdf->getOptions()->setDpi(96);
 
-        // FOLIO / F4 INDONESIA: 210mm x 330mm = 595.28pt x 935.43pt
-        // Paper size diset EXACT + margin 0 di sini, sisanya atur via @page CSS & .print-area padding
-        $dompdf->setPaper(array(0.0, 0.0, 595.275591, 935.433071), 'portrait');
-        $dompdf->render();
+            $dompdf->loadHtml($html, 'UTF-8');
+            $dompdf->setPaper(array(0.0, 0.0, 595.275591, 935.433071), 'portrait');
+            $dompdf->render();
 
-        $namafile = 'Transkrip-' . ($mahasiswa->npm ?: $mahasiswa->id) . '-' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', (string) $mahasiswa->nama_lengkap) . '.pdf';
+            $namafile = 'Transkrip-' . ($mahasiswa->npm ?: $mahasiswa->id) . '-' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', (string) $mahasiswa->nama_lengkap) . '.pdf';
 
-        $forceDownload = (string) $request->query('download', '') !== ''
-            || (string) $request->query('dl', '') !== ''
-            || (string) $request->query('fd', '') !== ''
-            || strtolower((string) $request->query('disposition', '')) === 'attachment';
+            $forceDownload = (string) $request->query('download', '') !== ''
+                || (string) $request->query('dl', '') !== ''
+                || (string) $request->query('fd', '') !== ''
+                || strtolower((string) $request->query('disposition', '')) === 'attachment';
 
-        $disposition = $forceDownload ? 'attachment' : 'inline';
-        $contentType = $forceDownload ? 'application/octet-stream' : 'application/pdf';
+            // Bersihkan buffer lagi sebelum ambil output PDF (menghindari warning tercampur binary PDF)
+            while (ob_get_level() > 0) {
+                @ob_end_clean();
+            }
 
-        $output = $dompdf->output();
-        $contentLength = function_exists('mb_strlen') ? mb_strlen($output, '8bit') : strlen($output);
-        $namafileRaw = rawurlencode($namafile);
+            $outputPdf = $dompdf->output();
 
-        $headers = [
-            'Content-Type' => $contentType,
-            'Content-Disposition' => $disposition . '; filename="' . $namafile . '"; filename*=UTF-8\'\'' . $namafileRaw,
-            'Content-Length' => $contentLength,
-            'Content-Transfer-Encoding' => 'binary',
-            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0, private',
-            'Pragma' => 'public',
-            'Expires' => 'Sat, 26 Jul 1997 05:00:00 GMT',
-            'X-Content-Type-Options' => 'nosniff',
-            'Accept-Ranges' => 'bytes',
-            'Content-Description' => 'File Transfer',
-        ];
+            // PAKAI streamDownload Laravel yang ROBUST (otomatis header, tanpa hitung Content-Length manual sering bikin 0 byte)
+            $callback = function () use ($outputPdf) {
+                echo $outputPdf;
+            };
 
-        return response($output, 200, $headers);
+            $response = response()->streamDownload($callback, $namafile, [
+                'Content-Type' => $forceDownload ? 'application/octet-stream' : 'application/pdf',
+                'Content-Transfer-Encoding' => 'binary',
+                'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0, private',
+                'Pragma' => 'public',
+                'Expires' => 'Sat, 26 Jul 1997 05:00:00 GMT',
+                'X-Content-Type-Options' => 'nosniff',
+                'Content-Description' => 'File Transfer',
+            ], $forceDownload ? 'attachment' : 'inline');
+
+            // KEMBALIKAN SEMULA setting error PHP
+            ini_set('display_errors', $prevDisplayErrors);
+            error_reporting($prevErrorReporting);
+
+            return $response;
+        } catch (\Throwable $e) {
+            // Restore error settings meskipun terjadi exception
+            while (ob_get_level() > 0) {
+                @ob_end_clean();
+            }
+            ini_set('display_errors', $prevDisplayErrors);
+            error_reporting($prevErrorReporting);
+            throw $e;
+        }
     }
 
     public function excel(Request $request, Mahasiswa $mahasiswa)
