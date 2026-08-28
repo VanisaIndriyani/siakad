@@ -43,8 +43,42 @@ class KrsController extends Controller
         ];
     }
 
-    private function ensureAbsensiForMahasiswa(int $mahasiswaId, string $jurusan, int $semester, array $mataKuliahIds): void
+    /**
+     * =============== DETEKTOR SEMESTER LALU ===============
+     * TRUE  -> MAHASISWA SUDAH PUNYA KRS di SEMESTER LEBIH TINGGI dari semester target
+     *          (artinya semester target ini = SEMESTER LALU yang di-input manual belakangan)
+     *          => AUTO CREATE ABSENSI + KHS DITIDAK AKTIFKAN.
+     * FALSE -> Ini adalah semester TERBARU / semester aktif mahasiswa => PROSES NORMAL.
+     * Parameter $excludeCurrentKrsId dipakai saat edit/update (exclude KRS yang lagi diedit dari max calculation).
+     */
+    private function isPastSemesterForMahasiswa(int $mahasiswaId, int $targetSemester, ?int $excludeCurrentKrsId = null): bool
     {
+        if ($mahasiswaId <= 0) {
+            return false;
+        }
+
+        $q = Krs::query()
+            ->where('mahasiswa_id', $mahasiswaId)
+            ->selectRaw('COALESCE(MAX(CAST(semester AS SIGNED)), 0) AS max_semester')
+            ->limit(1);
+
+        if ($excludeCurrentKrsId !== null && (int) $excludeCurrentKrsId > 0) {
+            $q->where('id', '<>', (int) $excludeCurrentKrsId);
+        }
+
+        $row = $q->first();
+        $maxExisting = (int) ($row->max_semester ?? 0);
+
+        return ($maxExisting > 0) && ($targetSemester < $maxExisting);
+    }
+
+    private function ensureAbsensiForMahasiswa(int $mahasiswaId, string $jurusan, int $semester, array $mataKuliahIds, ?int $excludeCurrentKrsId = null): void
+    {
+        // ===== JIKA SEMESTER LALU -> SKIP pembuatan absensi otomatis =====
+        if ($this->isPastSemesterForMahasiswa($mahasiswaId, $semester, $excludeCurrentKrsId)) {
+            return;
+        }
+
         $mataKuliahIds = array_values(array_unique(array_map('intval', $mataKuliahIds)));
         if (count($mataKuliahIds) === 0) {
             return;
@@ -77,8 +111,13 @@ class KrsController extends Controller
         }
     }
 
-    private function removeAbsensiForMahasiswa(int $mahasiswaId, string $jurusan, int $semester, array $mataKuliahIds): void
+    private function removeAbsensiForMahasiswa(int $mahasiswaId, string $jurusan, int $semester, array $mataKuliahIds, ?int $excludeCurrentKrsId = null): void
     {
+        // ===== JIKA SEMESTER LALU -> JANGAN otomatis hapus absensi (data dikelola manual) =====
+        if ($this->isPastSemesterForMahasiswa($mahasiswaId, $semester, $excludeCurrentKrsId)) {
+            return;
+        }
+
         $mataKuliahIds = array_values(array_unique(array_map('intval', $mataKuliahIds)));
         if (count($mataKuliahIds) === 0) {
             return;
@@ -177,7 +216,7 @@ class KrsController extends Controller
             ]);
         }
 
-        $this->ensureAbsensiForMahasiswa($mahasiswa->id, (string) $mahasiswa->program_studi, (int) $validated['semester'], (array) $validated['mata_kuliah_id']);
+        $this->ensureAbsensiForMahasiswa($mahasiswa->id, (string) $mahasiswa->program_studi, (int) $validated['semester'], (array) $validated['mata_kuliah_id'], (int) $krs->id);
 
         return redirect()->route('mahasiswa.krs.show', $krs)->with('success', 'KRS berhasil dibuat dan menunggu approval.');
     }
@@ -323,8 +362,8 @@ class KrsController extends Controller
 
         $jurusan = (string) $user->mahasiswa->program_studi;
         if ($jurusan !== '') {
-            $this->removeAbsensiForMahasiswa((int) $user->mahasiswa->id, $jurusan, (int) $krs->semester, (array) $toDelete);
-            $this->ensureAbsensiForMahasiswa((int) $user->mahasiswa->id, $jurusan, (int) $krs->semester, (array) $incoming);
+            $this->removeAbsensiForMahasiswa((int) $user->mahasiswa->id, $jurusan, (int) $krs->semester, (array) $toDelete, (int) $krs->id);
+            $this->ensureAbsensiForMahasiswa((int) $user->mahasiswa->id, $jurusan, (int) $krs->semester, (array) $incoming, (int) $krs->id);
         }
 
         return redirect()->route('mahasiswa.krs.show', $krs)->with('success', 'KRS berhasil diperbarui dan menunggu approval.');

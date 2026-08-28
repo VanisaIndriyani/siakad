@@ -520,6 +520,7 @@ Route::prefix('dosen')
         Route::get('/nilai/{mataKuliah}/{semester}', [DosenNilaiController::class, 'edit'])->name('nilai.edit');
         Route::get('/nilai/{mataKuliah}/{semester}/pdf', [DosenNilaiController::class, 'exportPdf'])->name('nilai.pdf');
         Route::put('/nilai/{mataKuliah}/{semester}', [DosenNilaiController::class, 'update'])->name('nilai.update');
+        Route::delete('/nilai/{mataKuliah}/{semester}/bulk-reset', [DosenNilaiController::class, 'bulkResetNilai'])->name('nilai.bulk-reset');
 
         Route::get('/kuesioner', [DosenQuestionnaireController::class, 'index'])->name('kuesioner.index');
         Route::get('/kuesioner/rekap/pdf', [DosenQuestionnaireController::class, 'exportSummaryPdf'])->name('kuesioner.summary.pdf');

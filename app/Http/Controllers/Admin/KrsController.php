@@ -121,49 +121,53 @@ class KrsController extends Controller
         if ($validated['status_approval'] === 'approved') {
             $krs->loadMissing(['items', 'mahasiswa']);
 
-            $khs = Khs::query()->firstOrCreate(
-                [
-                    'mahasiswa_id' => $krs->mahasiswa_id,
-                    'semester' => $krs->semester,
-                ],
-                [
-                    'tahun_ajaran' => $krs->tahun_ajaran,
-                ]
-            );
+            $isPastSemester = $this->isPastSemesterForMahasiswa((int) $krs->mahasiswa_id, (int) $krs->semester);
 
-            foreach ($krs->items as $item) {
-                KhsItem::query()->firstOrCreate([
-                    'khs_id' => $khs->id,
-                    'mata_kuliah_id' => $item->mata_kuliah_id,
-                ]);
-            }
+            if (! $isPastSemester) {
+                $khs = Khs::query()->firstOrCreate(
+                    [
+                        'mahasiswa_id' => $krs->mahasiswa_id,
+                        'semester' => $krs->semester,
+                    ],
+                    [
+                        'tahun_ajaran' => $krs->tahun_ajaran,
+                    ]
+                );
 
-            $jurusan = (string) ($krs->mahasiswa?->program_studi ?? '');
-            if ($jurusan !== '') {
-                $mkIds = $krs->items->pluck('mata_kuliah_id')->map(fn ($v) => (int) $v)->all();
-                foreach ($mkIds as $mkId) {
-                    foreach (range(1, 16) as $pertemuan) {
-                        $absensi = Absensi::query()->firstOrCreate(
-                            [
-                                'jurusan' => $jurusan,
-                                'semester' => (int) $krs->semester,
-                                'mata_kuliah_id' => $mkId,
-                                'pertemuan' => $pertemuan,
-                            ],
-                            [
-                                'created_by_user_id' => null,
-                            ]
-                        );
+                foreach ($krs->items as $item) {
+                    KhsItem::query()->firstOrCreate([
+                        'khs_id' => $khs->id,
+                        'mata_kuliah_id' => $item->mata_kuliah_id,
+                    ]);
+                }
 
-                        AbsensiItem::query()->firstOrCreate(
-                            [
-                                'absensi_id' => $absensi->id,
-                                'mahasiswa_id' => (int) $krs->mahasiswa_id,
-                            ],
-                            [
-                                'status' => null,
-                            ]
-                        );
+                $jurusan = (string) ($krs->mahasiswa?->program_studi ?? '');
+                if ($jurusan !== '') {
+                    $mkIds = $krs->items->pluck('mata_kuliah_id')->map(fn ($v) => (int) $v)->all();
+                    foreach ($mkIds as $mkId) {
+                        foreach (range(1, 16) as $pertemuan) {
+                            $absensi = Absensi::query()->firstOrCreate(
+                                [
+                                    'jurusan' => $jurusan,
+                                    'semester' => (int) $krs->semester,
+                                    'mata_kuliah_id' => $mkId,
+                                    'pertemuan' => $pertemuan,
+                                ],
+                                [
+                                    'created_by_user_id' => null,
+                                ]
+                            );
+
+                            AbsensiItem::query()->firstOrCreate(
+                                [
+                                    'absensi_id' => $absensi->id,
+                                    'mahasiswa_id' => (int) $krs->mahasiswa_id,
+                                ],
+                                [
+                                    'status' => null,
+                                ]
+                            );
+                        }
                     }
                 }
             }
@@ -178,6 +182,21 @@ class KrsController extends Controller
         }
 
         return redirect()->route('admin.krs.show', $krs)->with('success', 'Status KRS berhasil diperbarui.');
+    }
+
+    private function isPastSemesterForMahasiswa(int $mahasiswaId, int $targetSemester, ?int $excludeCurrentKrsId = null): bool
+    {
+        $query = Krs::query()
+            ->where('mahasiswa_id', $mahasiswaId)
+            ->selectRaw('COALESCE(MAX(CAST(semester AS SIGNED)), 0) AS max_sem');
+
+        if ($excludeCurrentKrsId !== null) {
+            $query->where('id', '<>', $excludeCurrentKrsId);
+        }
+
+        $maxExisting = (int) ($query->value('max_sem') ?? 0);
+
+        return ($maxExisting > 0) && ($targetSemester < $maxExisting);
     }
 
     private function cleanupDerivedRecordsForKrs(Krs $krs): void

@@ -230,6 +230,107 @@ class NilaiController extends Controller
             ->with('success', $message);
     }
 
+    /**
+     * HAPUS / RESET NILAI KOMPONEN + HASIL (tm/quis/mid/final/angka/huruf) jadi NULL
+     * untuk MAHASISWA YANG DIPILIH via CEKLIS, lalu recalc IPS/IPK.
+     */
+    public function bulkResetNilai(Request $request, MataKuliah $mataKuliah, int $semester): RedirectResponse
+    {
+        $dosen = $request->user()?->dosen;
+        abort_unless($dosen && in_array((int) $dosen->id, [(int) $mataKuliah->dosen_id, (int) $mataKuliah->dosen_id_2], true), 403);
+
+        $validated = $request->validate([
+            'reset_ids' => ['required', 'array', 'min:1'],
+            'reset_ids.*' => ['required', 'integer', 'min:1'],
+        ]);
+
+        $requested = collect((array) $validated['reset_ids'])
+            ->map(fn ($v) => (int) $v)
+            ->filter(fn ($v) => $v > 0)
+            ->unique()
+            ->values()
+            ->all();
+
+        if (count($requested) === 0) {
+            return redirect()
+                ->route('dosen.nilai.edit', [$mataKuliah, $semester])
+                ->with('error', 'Belum ada mahasiswa yang dipilih.');
+        }
+
+        $allowedIds = Krs::query()
+            ->where('status_approval', 'approved')
+            ->where('semester', $semester)
+            ->whereHas('items', function ($sub) use ($mataKuliah) {
+                $sub->where('mata_kuliah_id', $mataKuliah->id);
+            })
+            ->pluck('mahasiswa_id')
+            ->map(fn ($v) => (int) $v)
+            ->unique()
+            ->values()
+            ->all();
+
+        $allowedSet = array_fill_keys($allowedIds, true);
+        $targetIds = array_values(array_filter($requested, fn ($id) => isset($allowedSet[$id])));
+
+        if (count($targetIds) === 0) {
+            return redirect()
+                ->route('dosen.nilai.edit', [$mataKuliah, $semester])
+                ->with('error', 'Tidak ada mahasiswa yang valid untuk dihapus nilainya.');
+        }
+
+        $khsList = Khs::query()
+            ->with(['items' => function ($sub) use ($mataKuliah) {
+                $sub->where('mata_kuliah_id', $mataKuliah->id);
+            }])
+            ->where('semester', $semester)
+            ->whereIn('mahasiswa_id', $targetIds)
+            ->get();
+
+        $resetCount = 0;
+        foreach ($khsList as $khs) {
+            $item = $khs->items->first();
+            if (! $item) {
+                continue;
+            }
+            $item->update([
+                'nilai_tm' => null,
+                'nilai_quis' => null,
+                'nilai_mid' => null,
+                'nilai_final' => null,
+                'nilai_angka' => null,
+                'nilai_huruf' => null,
+            ]);
+            $resetCount++;
+        }
+
+        $resetMahasiswaIds = $khsList
+            ->pluck('mahasiswa_id')
+            ->map(fn ($v) => (int) $v)
+            ->unique()
+            ->values()
+            ->all();
+
+        foreach ($resetMahasiswaIds as $mahasiswaId) {
+            $this->recalculateIpsIpk((int) $mahasiswaId, (int) $semester);
+        }
+
+        if ($resetCount === 0) {
+            return redirect()
+                ->route('dosen.nilai.edit', [$mataKuliah, $semester])
+                ->with('error', 'Tidak ada nilai yang dihapus (mahasiswa belum punya KHS / item nilai).');
+        }
+
+        $skipped = count($requested) - $resetCount;
+        $message = 'Berhasil menghapus nilai untuk '.$resetCount.' mahasiswa yang dipilih.';
+        if ($skipped > 0) {
+            $message .= ' ('.$skipped.' dilewati: KHS / item nilai belum ada).';
+        }
+
+        return redirect()
+            ->route('dosen.nilai.edit', [$mataKuliah, $semester])
+            ->with('success', $message);
+    }
+
     public static function hitungTotalNilai(?float $tm, ?float $quis, ?float $mid, ?float $final): ?float
     {
         $filled = array_filter([$tm, $quis, $mid, $final], fn ($v) => $v !== null);

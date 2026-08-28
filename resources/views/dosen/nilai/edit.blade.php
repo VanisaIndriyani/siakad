@@ -44,6 +44,12 @@
                 <table class="min-w-full text-sm">
                     <thead class="bg-white/5 text-emerald-100/80">
                         <tr>
+                            <th class="text-center font-medium px-3 py-3 w-12">
+                                <input id="selectAllReset"
+                                       type="checkbox"
+                                       title="Pilih semua mahasiswa untuk hapus nilai"
+                                       class="w-4 h-4 rounded border-white/20 bg-white/5 text-emerald-500 focus:ring-emerald-400" />
+                            </th>
                             <th class="text-left font-medium px-4 py-3">Mahasiswa</th>
                             <th class="text-center font-medium px-3 py-3">TM (50%)</th>
                             <th class="text-center font-medium px-3 py-3">Tugas (20%)</th>
@@ -59,6 +65,11 @@
                                 $mhs = $row->mahasiswa;
                                 $existingItem = $existing->get($row->mahasiswa_id);
                                 $isReady = (bool) $existingItem;
+                                $hasAnyNilai = $isReady && (
+                                    $existingItem->nilai_tm !== null || $existingItem->nilai_quis !== null
+                                    || $existingItem->nilai_mid !== null || $existingItem->nilai_final !== null
+                                    || $existingItem->nilai_angka !== null || $existingItem->nilai_huruf !== null
+                                );
                                 $tm = old('nilai_tm.'.$row->mahasiswa_id, $existingItem?->nilai_tm);
                                 $quis = old('nilai_quis.'.$row->mahasiswa_id, $existingItem?->nilai_quis);
                                 $mid = old('nilai_mid.'.$row->mahasiswa_id, $existingItem?->nilai_mid);
@@ -67,6 +78,15 @@
                                 $huruf = old('nilai_huruf.'.$row->mahasiswa_id, $existingItem?->nilai_huruf);
                             @endphp
                             <tr class="hover:bg-white/5">
+                                <td class="px-3 py-3 text-center align-middle">
+                                    <input type="checkbox"
+                                           form="bulkResetForm"
+                                           name="reset_ids[]"
+                                           value="{{ (int) $row->mahasiswa_id }}"
+                                           class="row-reset-check w-4 h-4 rounded border-white/20 bg-white/5 text-red-500 focus:ring-red-400 align-middle"
+                                           @disabled(! $hasAnyNilai)
+                                           title="{{ $hasAnyNilai ? 'Pilih untuk hapus / reset nilai mahasiswa ini' : 'Belum ada nilai untuk dihapus' }}" />
+                                </td>
                                 <td class="px-4 py-3">
                                     <div class="font-medium">{{ $mhs?->nama_lengkap }}</div>
                                     <div class="text-xs text-emerald-100/60">{{ $mhs?->npm }}</div>
@@ -130,7 +150,7 @@
                         @endforeach
                         @if ($krs->count() === 0)
                             <tr>
-                                <td colspan="7" class="px-4 py-10 text-center text-emerald-100/70">Tidak ada mahasiswa pada mata kuliah ini (KRS approved).</td>
+                                <td colspan="8" class="px-4 py-10 text-center text-emerald-100/70">Tidak ada mahasiswa pada mata kuliah ini (KRS approved).</td>
                             </tr>
                         @endif
                     </tbody>
@@ -138,9 +158,43 @@
             </div>
         </div>
 
-        <div class="mt-6 flex items-center justify-end">
+        <div class="mt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div class="text-xs text-emerald-100/60">
+                <i class="fa-solid fa-circle-info mr-1"></i>
+                Centang kolom kiri untuk reset/hapus nilai mahasiswa (TM, Tugas, MID, Final, Total, Mutu menjadi kosong), kemudian klik tombol merah di bawah.
+            </div>
             <button class="h-11 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition font-medium">
                 Simpan Nilai
+            </button>
+        </div>
+    </form>
+
+    {{-- ===== FORM BULK RESET / HAPUS NILAI (terpisah dari form simpan update) ===== --}}
+    <form id="bulkResetForm"
+          method="POST"
+          action="{{ route('dosen.nilai.bulk-reset', [$mataKuliah, $semester]) }}"
+          onsubmit="return confirmResetSelected(this);"
+          class="mt-6 rounded-2xl border border-red-500/30 bg-red-500/5 p-5">
+        @csrf
+        @method('DELETE')
+
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <div class="font-semibold text-red-100 flex items-center gap-2">
+                    <i class="fa-solid fa-trash"></i>
+                    Hapus / Reset Nilai Terpilih
+                </div>
+                <div class="text-xs text-red-200/70 mt-1">
+                    Total mahasiswa tercentang: <span id="resetSelectedCount" class="font-semibold text-red-100">0</span> orang.
+                    Nilai yang dihapus: TM, Tugas, MID, Final, Total Angka, dan Nilai Mutu.
+                </div>
+            </div>
+            <button id="btnResetSubmit"
+                    type="submit"
+                    disabled
+                    class="h-11 px-5 rounded-xl bg-red-600/90 hover:bg-red-500 active:bg-red-700 disabled:bg-red-900/40 disabled:text-red-200/50 disabled:cursor-not-allowed transition font-medium text-white">
+                <i class="fa-solid fa-trash-can mr-1"></i>
+                Hapus Nilai Terpilih
             </button>
         </div>
     </form>
@@ -215,6 +269,56 @@
             });
 
             rowIds.forEach((id) => hitungRow(id));
+
+            /* ===== BULK RESET / HAPUS NILAI CHECKBOX LOGIC ===== */
+            const selectAll = document.getElementById('selectAllReset');
+            const rowChecks = Array.prototype.slice.call(document.querySelectorAll('input.row-reset-check'));
+            const countEl = document.getElementById('resetSelectedCount');
+            const btnReset = document.getElementById('btnResetSubmit');
+
+            function updateResetUi() {
+                const enabled = rowChecks.filter((c) => !c.disabled);
+                const checkedN = rowChecks.filter((c) => c.checked).length;
+                if (countEl) countEl.textContent = String(checkedN);
+                if (btnReset) btnReset.disabled = checkedN === 0;
+                if (selectAll) {
+                    if (enabled.length === 0) {
+                        selectAll.checked = false;
+                        selectAll.indeterminate = false;
+                    } else if (checkedN === 0) {
+                        selectAll.checked = false;
+                        selectAll.indeterminate = false;
+                    } else if (checkedN === enabled.length) {
+                        selectAll.checked = true;
+                        selectAll.indeterminate = false;
+                    } else {
+                        selectAll.checked = false;
+                        selectAll.indeterminate = true;
+                    }
+                }
+            }
+
+            if (selectAll) {
+                selectAll.addEventListener('change', function () {
+                    const want = !!this.checked;
+                    rowChecks.forEach((c) => {
+                        if (!c.disabled) c.checked = want;
+                    });
+                    updateResetUi();
+                });
+            }
+            rowChecks.forEach((c) => c.addEventListener('change', updateResetUi));
+            updateResetUi();
+
+            window.confirmResetSelected = function (formEl) {
+                const checkedN = rowChecks.filter((c) => c.checked).length;
+                if (checkedN === 0) {
+                    alert('Belum ada mahasiswa yang dipilih. Silakan centang kolom kiri terlebih dahulu.');
+                    return false;
+                }
+                const msg = 'Anda yakin akan MENGHAPUS / MERESSET NILAI untuk ' + checkedN + ' mahasiswa yang dipilih?\n\nSemua nilai (TM, Tugas, MID, Final, Total Angka, Nilai Mutu) akan menjadi KOSONG, dan IPS/IPK akan dihitung ulang.\n\nTindakan ini tidak dapat dibatalkan.';
+                return confirm(msg);
+            };
         })();
     </script>
 </x-portal-layout>
