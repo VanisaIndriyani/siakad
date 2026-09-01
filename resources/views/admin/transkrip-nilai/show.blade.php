@@ -31,7 +31,7 @@
                 $namaFileExcel = 'Transkrip-' . ($mahasiswa->npm ?: $mahasiswa->id) . '-' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', (string)$mahasiswa->nama_lengkap) . '.xlsx';
             @endphp
 
-            <a href="{{ route('admin.transkrip-nilai.pdf', $mahasiswa) }}"
+            <a href="{{ route('admin.transkrip-nilai.pdf', $mahasiswa) }}?dl=1"
                download="{{ $namaFilePdf }}"
                class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-red-600 hover:bg-red-500 border border-red-400/40 transition text-sm font-semibold shadow-lg shadow-red-900/30 text-white">
                 <i class="fa-solid fa-file-pdf"></i>
@@ -303,6 +303,34 @@
                 </thead>
                 <tbody>
                     @php
+                        /* ============== INJECT DUMMY 16 MK (TEST SAMPAI 91 MK TOTAL) — UNTUK TEST SHOW & PDF ============== */
+                        $dummyList = [];
+                        $gradeMap = ['A'=>4,'A-'=>3.7,'B+'=>3.3,'B'=>3,'B-'=>2.7,'C+'=>2.3,'C'=>2,'D'=>1,'E'=>0];
+                        $prodiDummy = ['Ekonomi Syariah','Perbankan Syariah','Perbankan Syariah','Ekonomi Syariah','Perbankan Syariah','Ekonomi Syariah','Perbankan Syariah','Perbankan Syariah','Ekonomi Syariah','Perbankan Syariah','Perbankan Syariah','Ekonomi Syariah','Perbankan Syariah','Ekonomi Syariah','Perbankan Syariah','Ekonomi Syariah'];
+                        $smtDummy   = [9,9,9,9,10,10,10,10,11,11,11,11,12,12,12,12];
+                        $mkNoDummy  = [1,2,3,4,1,2,3,4,1,2,3,4,1,2,3,4];
+                        $sksDummy   = [3,2,3,3,3,2,3,2,3,3,2,3,3,2,3,3];
+                        $gradeDummy = ['A-','C+','A','B+','A-','B','D','B+','A','A-','D','B-','A-','A','B','D'];
+                        for($z=0;$z<16;$z++){
+                            $g = $gradeDummy[$z];
+                            $gb = $gradeMap[$g] ?? 0;
+                            $sksZ = (int)$sksDummy[$z];
+                            $obj = new \stdClass();
+                            $obj->nama_mata_kuliah = $prodiDummy[$z].' - Semester '.$smtDummy[$z].' (MK '.$mkNoDummy[$z].')';
+                            $obj->sks = $sksZ;
+                            $obj->nilai_huruf = $g;
+                            $obj->nilai_m = round($sksZ * $gb, 2);
+                            $dummyList[] = $obj;
+                        }
+                        if (is_array($daftarMataKuliah)) {
+                            $daftarMataKuliah = array_merge($daftarMataKuliah, $dummyList);
+                        } elseif (is_object($daftarMataKuliah) && $daftarMataKuliah instanceof \Illuminate\Support\Collection) {
+                            $daftarMataKuliah = $daftarMataKuliah->merge(collect($dummyList));
+                        }
+                        unset($dummyList,$gradeMap,$prodiDummy,$smtDummy,$mkNoDummy,$sksDummy,$gradeDummy,$z,$g,$gb,$sksZ,$obj);
+                        /* ============== END INJECT DUMMY 16 MK ============== */
+                    @endphp
+                    @php
                         $semuaMK = $daftarMataKuliah;
                         $totalMK = count($semuaMK);
                         $barisBawah = 3 + $ujianCount;
@@ -335,13 +363,13 @@
                             <td class="num">{{ $noL }}</td>
                             <td class="mk">{{ $namaL }}</td>
                             <td class="sks">{{ $sksL }}</td>
-                            <td class="nilaih">{{ $nhL }}</td>
-                            <td class="m">{{ $mutuL }}</td>
+                            <td class="nilaih">{{ $mutuL }}</td>
+                            <td class="m">{{ $nhL }}</td>
                             <td class="num">{{ $noR }}</td>
                             <td class="mk">{{ $namaR }}</td>
                             <td class="sks">{{ $sksR }}</td>
-                            <td class="nilaih">{{ $nhR }}</td>
-                            <td class="m">{{ $mutuR }}</td>
+                            <td class="nilaih">{{ $mutuR }}</td>
+                            <td class="m">{{ $nhR }}</td>
                         </tr>
                     @endfor
 
@@ -371,8 +399,8 @@
                         <td class="num left-col">{{ $noLanjutTampil }}</td>
                         <td class="mk left-col">{{ $namaLL }}</td>
                         <td class="sks left-col">{{ $sksLL }}</td>
-                        <td class="nilaih left-col">{{ $nhLL }}</td>
-                        <td class="m left-col">{{ $mutuLL }}</td>
+                        <td class="nilaih left-col">{{ $mutuLL }}</td>
+                        <td class="m left-col">{{ $nhLL }}</td>
                         <td class="num jumlah-dashed"></td>
                         <td class="mk">Jumlah</td>
                         <td class="sks">{{ $totalSks }}</td>
@@ -384,8 +412,8 @@
                         <td class="num left-col">{{ $noLanjutTampil }}</td>
                         <td class="mk left-col">{{ $namaLL }}</td>
                         <td class="sks left-col">{{ $sksLL }}</td>
-                        <td class="nilaih left-col">{{ $nhLL }}</td>
-                        <td class="m left-col">{{ $mutuLL }}</td>
+                        <td class="nilaih left-col">{{ $mutuLL }}</td>
+                        <td class="m left-col">{{ $nhLL }}</td>
                         <td class="num"></td>
                         <td class="mk"></td>
                         <td class="sks"></td>
@@ -397,8 +425,8 @@
                         <td class="num left-col">{{ $noLanjutTampil }}</td>
                         <td class="mk left-col">{{ $namaLL }}</td>
                         <td class="sks left-col">{{ $sksLL }}</td>
-                        <td class="nilaih left-col">{{ $nhLL }}</td>
-                        <td class="m left-col">{{ $mutuLL }}</td>
+                        <td class="nilaih left-col">{{ $mutuLL }}</td>
+                        <td class="m left-col">{{ $nhLL }}</td>
                         <td class="num ujian-right-spacer"></td>
                         <td class="mk ujian-left-title" colspan="4">Ujian Kompetensi</td>
                     </tr>
@@ -407,13 +435,13 @@
                         <td class="num left-col">{{ $noLanjutTampil }}</td>
                         <td class="mk left-col">{{ $namaLL }}</td>
                         <td class="sks left-col">{{ $sksLL }}</td>
-                        <td class="nilaih left-col">{{ $nhLL }}</td>
-                        <td class="m left-col">{{ $mutuLL }}</td>
+                        <td class="nilaih left-col">{{ $mutuLL }}</td>
+                        <td class="m left-col">{{ $nhLL }}</td>
                         <td class="num">{{ $uNo }}</td>
                         <td class="mk">{{ $uNama }}</td>
                         <td class="sks">0</td>
-                        <td class="nilaih">A</td>
-                        <td class="m">0</td>
+                        <td class="nilaih">0</td>
+                        <td class="m">A</td>
                     </tr>
                         @endif
                     @endfor
@@ -499,7 +527,7 @@
             max-height: none;
             background: #ffffff;
             color: #000000;
-            padding: 10mm 13mm 10mm;
+            padding: 7mm 10mm 7mm;
             box-shadow: 0 8px 30px rgba(0,0,0,.15);
             box-sizing: border-box;
             font-family: 'Times New Roman', Times, serif;
@@ -510,7 +538,7 @@
         }
         @media (max-width: 900px) {
             .transcript-preview { padding: 20px 10px; }
-            .transcript-paper { padding: 10mm 8mm; width: 100%; height: auto; }
+            .transcript-paper { padding: 7mm 6mm; width: 100%; height: auto; }
         }
 
         /* ====== SEMUA CLASS DI BAWAH INI = PERSIS SAMA DENGAN pdf.blade.php ====== */
@@ -520,11 +548,11 @@
         .kop-logo-center { width: 100%; text-align: center; margin-bottom: 8px; }
         .kop-logo-center img { width: 110px; height: 110px; object-fit: contain; display: inline-block; }
         .kop-title-a {
-            font-size: 24px; font-weight: 800; letter-spacing: 0.8px; line-height: 1.2; margin: 3px 0 0; padding: 0; color: #000000;
+            font-size: 20px; font-weight: 800; letter-spacing: 0.7px; line-height: 1.18; margin: 2px 0 0; padding: 0; color: #000000;
         }
         .kop-title-a2 { margin-top: 1px; }
         .kop-title-b {
-            font-size: 23px; font-weight: 800; letter-spacing: 0.8px; line-height: 1.2; margin: 3px 0 0; padding: 0; color: #000000;
+            font-size: 19px; font-weight: 800; letter-spacing: 0.7px; line-height: 1.18; margin: 2px 0 0; padding: 0; color: #000000;
         }
         .kop-terakreditasi {
             font-size: 11px; margin-top: 6px; color: #000000; text-align: center; letter-spacing: 0.1px;
@@ -587,30 +615,30 @@
         .bio-val { font-weight: 700; color: #000000; display: inline-block; }
 
         table.nilai {
-            width: 100%; border-collapse: collapse; margin-top: 14px;
-            font-size: 9px; color: #000000; table-layout: fixed;
+            width: 100%; border-collapse: collapse; margin-top: 10px;
+            font-size: 8.2px; color: #000000; table-layout: fixed;
         }
         table.nilai th {
-            border: 1px solid #000; background: #e0f2ea; font-weight: 700; letter-spacing: 0.2px;
-            padding: 5px 3px; vertical-align: middle; line-height: 1.22; text-align: center;
+            border: 1px solid #000; background: #e0f2ea; font-weight: 700; letter-spacing: 0.15px;
+            padding: 4px 2px; vertical-align: middle; line-height: 1.15; text-align: center;
         }
-        table.nilai th.mk { text-align: left; padding: 5px 6px; width: 31%; }
-        table.nilai th.num { width: 4%; padding: 5px 2px; }
-        table.nilai th.sks { width: 5%; padding: 5px 2px; }
-        table.nilai th.nilaih { width: 5%; padding: 5px 2px; }
-        table.nilai th.m { width: 5%; padding: 5px 2px; }
+        table.nilai th.mk { text-align: left; padding: 4px 5px; width: 29%; }
+        table.nilai th.num { width: 4.5%; padding: 4px 2px; }
+        table.nilai th.sks { width: 5.5%; padding: 4px 2px; }
+        table.nilai th.nilaih { width: 5.5%; padding: 4px 2px; }
+        table.nilai th.m { width: 5.5%; padding: 4px 2px; }
         table.nilai td {
-            border: 1px solid #000; padding: 3px 4px; vertical-align: middle;
-            line-height: 1.22; text-align: center; color: #000000;
+            border: 1px solid #000; padding: 2px 3px; vertical-align: middle;
+            line-height: 1.15; text-align: center; color: #000000;
         }
-        table.nilai td.mk { text-align: left; padding: 3px 6px; width: 31%; }
-        table.nilai td.num { width: 4%; padding: 3px 2px; }
-        table.nilai td.sks { width: 5%; padding: 3px 2px; }
-        table.nilai td.nilaih { width: 5%; font-weight: 700; padding: 3px 2px; }
-        table.nilai td.m { width: 5%; padding: 3px 2px; }
+        table.nilai td.mk { text-align: left; padding: 2px 5px; width: 29%; }
+        table.nilai td.num { width: 4.5%; padding: 2px 2px; }
+        table.nilai td.sks { width: 5.5%; padding: 2px 2px; }
+        table.nilai td.nilaih { width: 5.5%; font-weight: 700; padding: 2px 2px; }
+        table.nilai td.m { width: 5.5%; padding: 2px 2px; }
         table.nilai tr.jumlah td {
-            background: #ffffff !important; font-weight: 700; padding: 3.5px 6px;
-            letter-spacing: 0.2px; line-height: 1.22;
+            background: #ffffff !important; font-weight: 700; padding: 2.5px 5px;
+            letter-spacing: 0.2px; line-height: 1.15;
         }
         table.nilai tr.jumlah td.mk { text-align: center; }
         table.nilai tr.jumlah td.jumlah-dashed {
@@ -619,10 +647,10 @@
             border-bottom: none !important;
         }
         table.nilai tr.ujian-head td {
-            background: #ffffff !important; font-weight: 700; letter-spacing: 0.2px;
-            padding: 3.5px 6px; line-height: 1.22; font-size: 9px;
+            background: #ffffff !important; font-weight: 700; letter-spacing: 0.15px;
+            padding: 2.5px 5px; line-height: 1.15; font-size: 8.2px;
         }
-        table.nilai td.ujian-left-title { text-align: left; padding-left: 8px !important; }
+        table.nilai td.ujian-left-title { text-align: left; padding-left: 7px !important; }
         table.nilai td.ujian-left-spacer,
         table.nilai td.ujian-left-spacer-cell,
         table.nilai td.ujian-right-spacer,
@@ -632,9 +660,9 @@
         table.nilai td.ujian-right-title-m { background: #ffffff !important; }
         table.nilai tr.spacer-row td {
             background: #ffffff !important; border: 1px solid #000000;
-            height: 18px; padding: 0;
+            height: 15px; padding: 0;
         }
-        table.nilai tr.ujian-row td { font-size: 9px; padding: 3px 5px; line-height: 1.22; }
+        table.nilai tr.ujian-row td { font-size: 8.2px; padding: 2px 3px; line-height: 1.15; }
 
         table.nilai tr.jumlah td.left-col,
         table.nilai tr.spacer-row td.left-col,
