@@ -27,6 +27,7 @@ use App\Http\Controllers\Admin\KknAbsensiController as AdminKknAbsensiController
 use App\Http\Controllers\Admin\TranskripNilaiController as AdminTranskripNilaiController;
 use App\Http\Controllers\Admin\KegiatanController as AdminKegiatanController;
 use App\Http\Controllers\Mahasiswa\KegiatanController as MahasiswaKegiatanController;
+use App\Http\Controllers\Dosen\KegiatanController as DosenKegiatanController;
 use App\Http\Controllers\Mahasiswa\KknController as MahasiswaKknController;
 use App\Http\Controllers\Mahasiswa\KknJurnalController as MahasiswaKknJurnalController;
 use App\Http\Controllers\Mahasiswa\KknAbsensiController as MahasiswaKknAbsensiController;
@@ -696,6 +697,12 @@ Route::prefix('dosen')
         Route::delete('/laporan/bulk-delete', [DosenPengajuanLaporanController::class, 'bulkDestroy'])->name('laporan.bulk-delete');
         Route::get('/laporan/{laporan}', [DosenPengajuanLaporanController::class, 'show'])->name('laporan.show');
         Route::post('/laporan/{laporan}/pesan', [DosenPengajuanLaporanController::class, 'storeMessage'])->name('laporan.pesan.store');
+
+        Route::get('/kegiatan', [DosenKegiatanController::class, 'index'])->name('kegiatan.index');
+        Route::get('/kegiatan/sertifikat', [DosenKegiatanController::class, 'sertifikatSaya'])->name('kegiatan.sertifikat-saya');
+        Route::get('/kegiatan/{kegiatan}', [DosenKegiatanController::class, 'show'])->name('kegiatan.show');
+        Route::post('/kegiatan/{kegiatan}/daftar', [DosenKegiatanController::class, 'daftar'])->name('kegiatan.daftar');
+        Route::get('/kegiatan/{kegiatan}/sertifikat/download', [DosenKegiatanController::class, 'downloadSertifikat'])->name('kegiatan.download-sertifikat');
 
         Route::get('/publikasi', [\App\Http\Controllers\PublikasiKkController::class, 'index'])->name('publikasi.index');
         Route::get('/publikasi/export-excel', [\App\Http\Controllers\PublikasiKkController::class, 'exportExcel'])->name('publikasi.export-excel');

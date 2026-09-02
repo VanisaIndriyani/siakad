@@ -28,6 +28,9 @@
                 <label class="text-sm text-emerald-100/80">Jenis Kegiatan <span class="text-rose-400">*</span></label>
                 <select required name="jenis_kegiatan" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400">
                     <option value="">-- Pilih Jenis --</option>
+                    <option value="Kuliah Perdana" @selected(old('jenis_kegiatan') === 'Kuliah Perdana')>Kuliah Perdana</option>
+                    <option value="Kuliah Umum" @selected(old('jenis_kegiatan') === 'Kuliah Umum')>Kuliah Umum</option>
+                    <option value="Kuliah Tamu" @selected(old('jenis_kegiatan') === 'Kuliah Tamu')>Kuliah Tamu</option>
                     <option value="Seminar" @selected(old('jenis_kegiatan') === 'Seminar')>Seminar</option>
                     <option value="Workshop" @selected(old('jenis_kegiatan') === 'Workshop')>Workshop</option>
                     <option value="Pelatihan" @selected(old('jenis_kegiatan') === 'Pelatihan')>Pelatihan</option>
@@ -113,9 +116,9 @@
             </div>
 
             <div>
-                <label class="text-sm text-emerald-100/80">Upload File Sertifikat Peserta (PDF)</label>
-                <input name="sertifikat_file_upload" type="file" accept="application/pdf,.pdf" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400 text-white/90 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-emerald-800 file:text-emerald-50 hover:file:bg-emerald-700" />
-                <div class="text-xs text-emerald-100/50 mt-1">Upload file sertifikat master PDF. Satu file ini akan berlaku untuk SEMUA peserta yang hadir. (Bisa juga upload nanti di halaman detail kegiatan)</div>
+                <label class="text-sm text-emerald-100/80">Upload File Sertifikat Peserta <span class="text-emerald-200/50">(PDF / Gambar PNG/JPG/WEBP)</span></label>
+                <input name="sertifikat_file_upload" type="file" accept="application/pdf,.pdf,image/png,.png,image/jpeg,.jpg,.jpeg,image/webp,.webp" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400 text-white/90 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-emerald-800 file:text-emerald-50 hover:file:bg-emerald-700" />
+                <div class="text-xs text-emerald-100/50 mt-1">Upload file sertifikat master (PDF atau Gambar JPG/PNG/WEBP). Satu file ini akan berlaku untuk SEMUA peserta yang hadir. (Bisa juga upload nanti di halaman detail kegiatan)</div>
                 @error('sertifikat_file_upload') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
             </div>
 

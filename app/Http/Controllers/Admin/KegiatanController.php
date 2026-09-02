@@ -87,7 +87,7 @@ class KegiatanController extends Controller
             'rektor_nama' => ['nullable', 'string', 'max:255'],
             'rektor_nip' => ['nullable', 'string', 'max:50'],
             'gambar' => ['nullable', 'image', 'max:4096'],
-            'sertifikat_file_upload' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+            'sertifikat_file_upload' => ['nullable', 'file', 'mimes:pdf,png,jpg,jpeg,webp', 'max:10240'],
             'is_published' => ['nullable', 'boolean'],
             'sertifikat_aktif' => ['nullable', 'boolean'],
             'nomor_sertifikat_prefix' => ['nullable', 'string', 'max:50'],
@@ -164,7 +164,7 @@ class KegiatanController extends Controller
             'rektor_nip' => ['nullable', 'string', 'max:50'],
             'gambar' => ['nullable', 'image', 'max:4096'],
             'hapus_gambar' => ['nullable', 'boolean'],
-            'sertifikat_file_upload' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+            'sertifikat_file_upload' => ['nullable', 'file', 'mimes:pdf,png,jpg,jpeg,webp', 'max:10240'],
             'hapus_sertifikat_upload' => ['nullable', 'boolean'],
             'is_published' => ['nullable', 'boolean'],
             'sertifikat_aktif' => ['nullable', 'boolean'],
@@ -418,7 +418,7 @@ class KegiatanController extends Controller
     {
         $validated = $request->validate([
             'peserta_id' => ['required', 'exists:peserta_kegiatan,id'],
-            'file_sertifikat' => ['required', 'file', 'mimes:pdf', 'max:10240'],
+            'file_sertifikat' => ['required', 'file', 'mimes:pdf,png,jpg,jpeg,webp', 'max:10240'],
         ]);
 
         $peserta = PesertaKegiatan::query()->where('kegiatan_id', $kegiatan->id)->findOrFail($validated['peserta_id']);
@@ -462,9 +462,19 @@ class KegiatanController extends Controller
             abort(404, 'File sertifikat tidak ditemukan di storage.');
         }
 
-        $filename = 'Sertifikat-Master-' . \Illuminate\Support\Str::slug($kegiatan->judul) . '.pdf';
+        $ext = strtolower(pathinfo($kegiatan->sertifikat_upload_path, PATHINFO_EXTENSION));
+        if ($ext === '') $ext = 'pdf';
+        $mimeMap = [
+            'pdf' => 'application/pdf',
+            'png' => 'image/png',
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'webp' => 'image/webp',
+        ];
+        $mime = $mimeMap[$ext] ?? $disk->mimeType($kegiatan->sertifikat_upload_path) ?? 'application/octet-stream';
+        $filename = 'Sertifikat-Master-' . \Illuminate\Support\Str::slug($kegiatan->judul) . '.' . $ext;
         return $disk->download($kegiatan->sertifikat_upload_path, $filename, [
-            'Content-Type' => 'application/pdf',
+            'Content-Type' => $mime,
         ]);
     }
 
@@ -503,9 +513,19 @@ class KegiatanController extends Controller
             try { $peserta->update(['sertifikat_diunduh_at' => now()]); } catch (\Throwable $e) {}
         }
 
-        $filename = 'Sertifikat-' . \Illuminate\Support\Str::slug($peserta->nama_lengkap) . '-' . \Illuminate\Support\Str::slug($kegiatan->judul) . '.pdf';
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        if ($ext === '') $ext = 'pdf';
+        $mimeMap = [
+            'pdf' => 'application/pdf',
+            'png' => 'image/png',
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'webp' => 'image/webp',
+        ];
+        $mime = $mimeMap[$ext] ?? $disk->mimeType($path) ?? 'application/octet-stream';
+        $filename = 'Sertifikat-' . \Illuminate\Support\Str::slug($peserta->nama_lengkap) . '-' . \Illuminate\Support\Str::slug($kegiatan->judul) . '.' . $ext;
         return $disk->response($path, $filename, [
-            'Content-Type' => 'application/pdf',
+            'Content-Type' => $mime,
             'Content-Disposition' => 'inline; filename="' . $filename . '"',
         ]);
     }
@@ -524,9 +544,19 @@ class KegiatanController extends Controller
         try { $peserta->update(['sertifikat_diunduh_at' => now()]); } catch (\Throwable $e) {}
 
         $disk = Storage::disk('public');
-        $filename = 'Sertifikat-' . \Illuminate\Support\Str::slug($peserta->nama_lengkap) . '-' . \Illuminate\Support\Str::slug($kegiatan->judul) . '.pdf';
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        if ($ext === '') $ext = 'pdf';
+        $mimeMap = [
+            'pdf' => 'application/pdf',
+            'png' => 'image/png',
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'webp' => 'image/webp',
+        ];
+        $mime = $mimeMap[$ext] ?? $disk->mimeType($path) ?? 'application/octet-stream';
+        $filename = 'Sertifikat-' . \Illuminate\Support\Str::slug($peserta->nama_lengkap) . '-' . \Illuminate\Support\Str::slug($kegiatan->judul) . '.' . $ext;
         return $disk->download($path, $filename, [
-            'Content-Type' => 'application/pdf',
+            'Content-Type' => $mime,
         ]);
     }
 

@@ -351,7 +351,7 @@
                                                     <form method="POST" action="{{ route('admin.kegiatan.upload-sertifikat-peserta', $kegiatan) }}" class="flex items-center gap-1" enctype="multipart/form-data">
                                                         @csrf
                                                         <input type="hidden" name="peserta_id" value="{{ $p->id }}">
-                                                        <input type="file" required accept="application/pdf,.pdf" name="file_sertifikat" class="w-[130px] h-8 text-[10px] file:mr-1.5 file:h-6 file:px-2 file:rounded-md file:bg-sky-800/60 file:border-0 file:text-sky-100 hover:file:bg-sky-700 rounded-md bg-white/5 border border-white/10 text-white/80 p-0.5" title="Upload sertifikat khusus peserta ini (override master)">
+                                                        <input type="file" required accept="application/pdf,.pdf,image/png,.png,image/jpeg,.jpg,.jpeg,image/webp,.webp" name="file_sertifikat" class="w-[130px] h-8 text-[10px] file:mr-1.5 file:h-6 file:px-2 file:rounded-md file:bg-sky-800/60 file:border-0 file:text-sky-100 hover:file:bg-sky-700 rounded-md bg-white/5 border border-white/10 text-white/80 p-0.5" title="Upload sertifikat khusus peserta ini (PDF / Gambar) — override file master kegiatan">
                                                         <button class="h-8 px-2 inline-flex items-center justify-center rounded-md bg-sky-700/80 hover:bg-sky-600 transition text-white text-[10px] font-semibold" title="Upload sertifikat per-orangan">
                                                             <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Up
                                                         </button>
