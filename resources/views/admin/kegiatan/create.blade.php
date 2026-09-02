@@ -49,9 +49,15 @@
             </div>
 
             <div>
-                <label class="text-sm text-emerald-100/80">Tanggal Kegiatan <span class="text-rose-400">*</span></label>
+                <label class="text-sm text-emerald-100/80">Tanggal Mulai <span class="text-rose-400">*</span></label>
                 <input required type="date" name="tanggal_kegiatan" value="{{ old('tanggal_kegiatan') }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
                 @error('tanggal_kegiatan') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
+            </div>
+
+            <div>
+                <label class="text-sm text-emerald-100/80">Tanggal Selesai <span class="text-emerald-200/40">(Kosongkan jika 1 hari)</span></label>
+                <input type="date" name="tanggal_selesai" value="{{ old('tanggal_selesai') }}" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
+                @error('tanggal_selesai') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
             </div>
 
             <div>

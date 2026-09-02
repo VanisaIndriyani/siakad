@@ -20,6 +20,7 @@ class Kegiatan extends Model
         'deskripsi',
         'lokasi',
         'tanggal_kegiatan',
+        'tanggal_selesai',
         'waktu_mulai',
         'waktu_selesai',
         'penyelenggara',
@@ -43,6 +44,7 @@ class Kegiatan extends Model
     {
         return [
             'tanggal_kegiatan' => 'date',
+            'tanggal_selesai' => 'date',
             'is_published' => 'boolean',
             'tampilkan_ke_dosen' => 'boolean',
             'sertifikat_aktif' => 'boolean',
@@ -108,7 +110,7 @@ class Kegiatan extends Model
 
     public function getTanggalWaktuAttribute(): string
     {
-        $result = $this->tanggal_kegiatan?->format('d M Y') ?? '-';
+        $result = $this->getTanggalRangeAttribute;
 
         if ($this->waktu_mulai) {
             $result .= ', ' . substr($this->waktu_mulai, 0, 5);
@@ -118,6 +120,31 @@ class Kegiatan extends Model
         }
 
         return $result;
+    }
+
+    public function getTanggalRangeAttribute(): string
+    {
+        $start = $this->tanggal_kegiatan;
+        if (empty($start)) return '-';
+
+        $end = $this->tanggal_selesai;
+
+        $startDt = is_string($start) ? \Illuminate\Support\Carbon::parse($start) : $start;
+        if (empty($end)) {
+            return $startDt->format('d M Y');
+        }
+
+        $endDt = is_string($end) ? \Illuminate\Support\Carbon::parse($end) : $end;
+
+        if ($startDt->isSameDay($endDt)) {
+            return $startDt->format('d M Y');
+        }
+
+        if ($startDt->format('m Y') === $endDt->format('m Y')) {
+            return $startDt->format('d') . ' - ' . $endDt->format('d M Y');
+        }
+
+        return $startDt->format('d M Y') . ' - ' . $endDt->format('d M Y');
     }
 
     public function scopePublished($query)

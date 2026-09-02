@@ -85,7 +85,7 @@
                                 </span>
                             </td>
                             <td class="px-4 py-3 text-emerald-100/80 text-xs">
-                                <div>{{ $item->tanggal_kegiatan?->format('d M Y') }}</div>
+                                <div>{{ $item->tanggal_range }}</div>
                                 @if($item->waktu_mulai)
                                     <div class="text-emerald-100/60 mt-0.5">{{ substr($item->waktu_mulai,0,5) }} - {{ $item->waktu_selesai ? substr($item->waktu_selesai,0,5).' WIB' : '' }}</div>
                                 @endif
