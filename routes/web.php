@@ -25,6 +25,8 @@ use App\Http\Controllers\Admin\KknController as AdminKknController;
 use App\Http\Controllers\Admin\KknJurnalController as AdminKknJurnalController;
 use App\Http\Controllers\Admin\KknAbsensiController as AdminKknAbsensiController;
 use App\Http\Controllers\Admin\TranskripNilaiController as AdminTranskripNilaiController;
+use App\Http\Controllers\Admin\KegiatanController as AdminKegiatanController;
+use App\Http\Controllers\Mahasiswa\KegiatanController as MahasiswaKegiatanController;
 use App\Http\Controllers\Mahasiswa\KknController as MahasiswaKknController;
 use App\Http\Controllers\Mahasiswa\KknJurnalController as MahasiswaKknJurnalController;
 use App\Http\Controllers\Mahasiswa\KknAbsensiController as MahasiswaKknAbsensiController;
@@ -246,6 +248,24 @@ Route::prefix('admin')
         Route::put('/informasi/{informasi}', [AdminInformasiController::class, 'update'])->name('informasi.update');
         Route::patch('/informasi/{informasi}/toggle', [AdminInformasiController::class, 'toggleAktif'])->name('informasi.toggle');
         Route::delete('/informasi/{informasi}', [AdminInformasiController::class, 'destroy'])->name('informasi.destroy');
+
+        Route::get('/kegiatan', [AdminKegiatanController::class, 'index'])->name('kegiatan.index');
+        Route::get('/kegiatan/create', [AdminKegiatanController::class, 'create'])->name('kegiatan.create');
+        Route::post('/kegiatan', [AdminKegiatanController::class, 'store'])->name('kegiatan.store');
+        Route::get('/kegiatan/{kegiatan}', [AdminKegiatanController::class, 'show'])->name('kegiatan.show');
+        Route::get('/kegiatan/{kegiatan}/edit', [AdminKegiatanController::class, 'edit'])->name('kegiatan.edit');
+        Route::put('/kegiatan/{kegiatan}', [AdminKegiatanController::class, 'update'])->name('kegiatan.update');
+        Route::delete('/kegiatan/{kegiatan}', [AdminKegiatanController::class, 'destroy'])->name('kegiatan.destroy');
+        Route::patch('/kegiatan/{kegiatan}/toggle-publish', [AdminKegiatanController::class, 'togglePublish'])->name('kegiatan.toggle-publish');
+        Route::post('/kegiatan/{kegiatan}/import-mahasiswa', [AdminKegiatanController::class, 'importMahasiswa'])->name('kegiatan.import-mahasiswa');
+        Route::post('/kegiatan/{kegiatan}/tambah-peserta', [AdminKegiatanController::class, 'tambahPesertaManual'])->name('kegiatan.tambah-peserta');
+        Route::delete('/kegiatan/{kegiatan}/peserta/{peserta}', [AdminKegiatanController::class, 'hapusPeserta'])->name('kegiatan.hapus-peserta');
+        Route::post('/kegiatan/{kegiatan}/peserta/{peserta}/toggle-hadir', [AdminKegiatanController::class, 'toggleHadir'])->name('kegiatan.toggle-hadir');
+        Route::post('/kegiatan/{kegiatan}/tandai-semua-hadir', [AdminKegiatanController::class, 'tandaiSemuaHadir'])->name('kegiatan.tandai-semua-hadir');
+        Route::get('/kegiatan/{kegiatan}/daftar-hadir/pdf', [AdminKegiatanController::class, 'daftarHadirPdf'])->name('kegiatan.daftar-hadir.pdf');
+        Route::get('/kegiatan/{kegiatan}/daftar-hadir/download', [AdminKegiatanController::class, 'downloadDaftarHadirPdf'])->name('kegiatan.daftar-hadir.download');
+        Route::get('/kegiatan/{kegiatan}/sertifikat/{peserta}/pdf', [AdminKegiatanController::class, 'sertifikatPdf'])->name('kegiatan.sertifikat.pdf');
+        Route::get('/kegiatan/{kegiatan}/sertifikat/{peserta}/download', [AdminKegiatanController::class, 'downloadSertifikatPdf'])->name('kegiatan.sertifikat.download');
 
         Route::get('/laporan', [AdminPengajuanLaporanController::class, 'index'])->name('laporan.index');
         Route::delete('/laporan/bulk-delete', [AdminPengajuanLaporanController::class, 'bulkDestroy'])->name('laporan.bulk-delete');
@@ -490,6 +510,12 @@ Route::prefix('mahasiswa')
         Route::post('/laporan', [MahasiswaPengajuanLaporanController::class, 'store'])->name('laporan.store');
         Route::get('/laporan/{laporan}', [MahasiswaPengajuanLaporanController::class, 'show'])->name('laporan.show');
         Route::post('/laporan/{laporan}/pesan', [MahasiswaPengajuanLaporanController::class, 'storeMessage'])->name('laporan.pesan.store');
+
+        Route::get('/kegiatan', [MahasiswaKegiatanController::class, 'index'])->name('kegiatan.index');
+        Route::get('/kegiatan/sertifikat', [MahasiswaKegiatanController::class, 'sertifikatSaya'])->name('kegiatan.sertifikat-saya');
+        Route::get('/kegiatan/{kegiatan}', [MahasiswaKegiatanController::class, 'show'])->name('kegiatan.show');
+        Route::post('/kegiatan/{kegiatan}/daftar', [MahasiswaKegiatanController::class, 'daftar'])->name('kegiatan.daftar');
+        Route::get('/kegiatan/{kegiatan}/sertifikat/download', [MahasiswaKegiatanController::class, 'downloadSertifikat'])->name('kegiatan.download-sertifikat');
 
         Route::get('/biodata/pdf', BiodataPdfController::class)->name('biodata.pdf');
     });

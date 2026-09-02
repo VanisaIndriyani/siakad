@@ -15,6 +15,24 @@
                 body { background: white !important; color: black !important; }
                 .lg\:pl-72 { padding-left: 0 !important; }
             }
+
+            select,
+            select option,
+            select optgroup {
+                color-scheme: dark;
+            }
+            select option {
+                background-color: #0f2a22;
+                color: #d1fae5;
+            }
+            select option:checked,
+            select option:selected {
+                background-color: #059669 !important;
+                color: #ffffff !important;
+            }
+            select::-ms-expand {
+                filter: invert(1);
+            }
         </style>
     </head>
     <body class="font-sans antialiased bg-brand-950 text-white">

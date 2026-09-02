@@ -13,6 +13,16 @@
     <i class="fa-solid fa-calendar-days text-emerald-300"></i>
     <span class="text-sm font-medium">Kalender Akademik</span>
 </a>
+<a href="{{ route('mahasiswa.kegiatan.index') }}"
+   class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('mahasiswa.kegiatan.index') || request()->routeIs('mahasiswa.kegiatan.show') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+    <i class="fa-solid fa-calendar-check text-emerald-300"></i>
+    <span class="text-sm font-medium">Kegiatan / Seminar</span>
+</a>
+<a href="{{ route('mahasiswa.kegiatan.sertifikat-saya') }}"
+   class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('mahasiswa.kegiatan.sertifikat-saya') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+    <i class="fa-solid fa-certificate text-sky-300"></i>
+    <span class="text-sm font-medium">Sertifikat Saya</span>
+</a>
 <a href="{{ route('mahasiswa.skripsi.index') }}"
    class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('mahasiswa.skripsi.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
     <i class="fa-solid fa-graduation-cap text-emerald-300"></i>
