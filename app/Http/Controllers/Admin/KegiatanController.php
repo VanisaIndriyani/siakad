@@ -341,10 +341,10 @@ class KegiatanController extends Controller
             $dosen = \App\Models\Dosen::find($validated['dosen_id']);
             if ($dosen) {
                 $payload['dosen_id'] = $dosen->id;
-                $payload['nama_lengkap'] = $dosen->nama_lengkap ?? $validated['nama_lengkap'] ?? null;
+                $payload['nama_lengkap'] = $dosen->nama ?? $validated['nama_lengkap'] ?? null;
                 $payload['nidn'] = $dosen->nidn ?? $validated['nidn'] ?? null;
                 $payload['program_studi'] = $dosen->program_studi ?? $validated['program_studi'] ?? null;
-                $payload['nomor_telp'] = $dosen->no_telepon ?? $dosen->nomor_telp ?? $validated['nomor_telp'] ?? null;
+                $payload['nomor_telp'] = $dosen->nomor_hp ?? $validated['nomor_telp'] ?? null;
                 $payload['email'] = $dosen->email ?? $validated['email'] ?? null;
             }
         } else {

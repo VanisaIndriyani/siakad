@@ -177,11 +177,11 @@
                             <select name="dosen_id" id="select_dosen_show" class="mt-1 w-full h-9 rounded-lg bg-white/5 border border-white/10 focus:border-sky-400 focus:ring-sky-400 text-sm">
                                 <option value="">-- Pilih Dosen (Opsional) --</option>
                                 @php
-                                    $listDosen = \App\Models\Dosen::query()->orderBy('nama_lengkap')->get(['id', 'nama_lengkap', 'nidn', 'program_studi']);
+                                    $listDosen = \App\Models\Dosen::query()->orderBy('nama')->get(['id', 'nama', 'nidn', 'program_studi', 'nomor_hp', 'email']);
                                 @endphp
                                 @foreach($listDosen as $ds)
-                                    <option value="{{ $ds->id }}" data-nama="{{ $ds->nama_lengkap }}" data-nidn="{{ $ds->nidn ?? '' }}" data-prodi="{{ $ds->program_studi ?? '' }}">
-                                        {{ $ds->nama_lengkap }} @if($ds->nidn) (NIDN. {{ $ds->nidn }}) @endif
+                                    <option value="{{ $ds->id }}" data-nama="{{ $ds->nama }}" data-nidn="{{ $ds->nidn ?? '' }}" data-prodi="{{ $ds->program_studi ?? '' }}" data-telp="{{ $ds->nomor_hp ?? '' }}" data-email="{{ $ds->email ?? '' }}">
+                                        {{ $ds->nama }} @if($ds->nidn) (NIDN. {{ $ds->nidn }}) @endif
                                     </option>
                                 @endforeach
                             </select>
