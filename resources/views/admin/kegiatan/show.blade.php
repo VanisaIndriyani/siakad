@@ -165,6 +165,55 @@
                     </form>
                 </div>
 
+                <div class="rounded-xl border border-white/10 bg-white/5 p-4 mb-4 space-y-3">
+                    <div class="text-sm font-medium text-sky-200 flex items-center gap-2">
+                        <i class="fa-solid fa-chalkboard-user"></i>
+                        Tambah Dosen sebagai Peserta
+                    </div>
+                    <form method="POST" action="{{ route('admin.kegiatan.tambah-dosen', $kegiatan) }}" class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end" enctype="multipart/form-data">
+                        @csrf
+                        <div class="md:col-span-2">
+                            <label class="text-xs text-emerald-100/60">Pilih Dosen dari Data Dosen <span class="text-emerald-200/40">(Auto isi nama/NIDN/Prodi)</span></label>
+                            <select name="dosen_id" id="select_dosen_show" class="mt-1 w-full h-9 rounded-lg bg-white/5 border border-white/10 focus:border-sky-400 focus:ring-sky-400 text-sm">
+                                <option value="">-- Pilih Dosen (Opsional) --</option>
+                                @php
+                                    $listDosen = \App\Models\Dosen::query()->orderBy('nama_lengkap')->get(['id', 'nama_lengkap', 'nidn', 'program_studi']);
+                                @endphp
+                                @foreach($listDosen as $ds)
+                                    <option value="{{ $ds->id }}" data-nama="{{ $ds->nama_lengkap }}" data-nidn="{{ $ds->nidn ?? '' }}" data-prodi="{{ $ds->program_studi ?? '' }}">
+                                        {{ $ds->nama_lengkap }} @if($ds->nidn) (NIDN. {{ $ds->nidn }}) @endif
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs text-emerald-100/60">Atau isi Nama Lengkap Manual *</label>
+                            <input name="nama_lengkap" id="dosen_nama_show" placeholder="Nama lengkap dosen..." value="{{ old('nama_lengkap') }}" class="mt-1 w-full h-9 rounded-lg bg-white/5 border border-white/10 focus:border-sky-400 focus:ring-sky-400 text-sm" />
+                        </div>
+                        <div>
+                            <label class="text-xs text-emerald-100/60">NIDN</label>
+                            <input name="nidn" id="dosen_nidn_show" placeholder="NIDN Dosen..." value="{{ old('nidn') }}" class="mt-1 w-full h-9 rounded-lg bg-white/5 border border-white/10 focus:border-sky-400 focus:ring-sky-400 text-sm" />
+                        </div>
+                        <div>
+                            <label class="text-xs text-emerald-100/60">Program Studi</label>
+                            <input name="program_studi" id="dosen_prodi_show" placeholder="Prodi..." value="{{ old('program_studi') }}" class="mt-1 w-full h-9 rounded-lg bg-white/5 border border-white/10 focus:border-sky-400 focus:ring-sky-400 text-sm" />
+                        </div>
+                        <div>
+                            <label class="text-xs text-emerald-100/60">No. Telp</label>
+                            <input name="nomor_telp" placeholder="08xx..." value="{{ old('nomor_telp') }}" class="mt-1 w-full h-9 rounded-lg bg-white/5 border border-white/10 focus:border-sky-400 focus:ring-sky-400 text-sm" />
+                        </div>
+                        <div>
+                            <label class="text-xs text-emerald-100/60">Email</label>
+                            <input type="email" name="email" placeholder="email@example.com" value="{{ old('email') }}" class="mt-1 w-full h-9 rounded-lg bg-white/5 border border-white/10 focus:border-sky-400 focus:ring-sky-400 text-sm" />
+                        </div>
+                        <div class="md:col-span-2 flex items-center justify-end gap-2">
+                            <button class="h-9 px-4 rounded-lg bg-sky-600 hover:bg-sky-500 active:bg-sky-700 transition text-sm font-medium">
+                                <i class="fa-solid fa-plus mr-1"></i> Tambah Dosen Peserta
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
                 <div class="rounded-xl border border-white/10 overflow-hidden">
                     <div class="overflow-x-auto max-h-[520px]">
                         <table class="min-w-full text-sm">
@@ -172,11 +221,12 @@
                                 <tr>
                                     <th class="text-left font-medium px-3 py-2.5 whitespace-nowrap">#</th>
                                     <th class="text-left font-medium px-3 py-2.5 whitespace-nowrap">Nama</th>
-                                    <th class="text-left font-medium px-3 py-2.5 whitespace-nowrap">NPM</th>
+                                    <th class="text-left font-medium px-3 py-2.5 whitespace-nowrap">Jenis</th>
+                                    <th class="text-left font-medium px-3 py-2.5 whitespace-nowrap">NPM / NIDN</th>
                                     <th class="text-left font-medium px-3 py-2.5 whitespace-nowrap">Prodi</th>
                                     <th class="text-left font-medium px-3 py-2.5 whitespace-nowrap">Status Hadir</th>
                                     <th class="text-left font-medium px-3 py-2.5 whitespace-nowrap">Waktu Hadir</th>
-                                    <th class="text-left font-medium px-3 py-2.5 whitespace-nowrap">No. Sertifikat</th>
+                                    <th class="text-left font-medium px-3 py-2.5 whitespace-nowrap">Sertifikat</th>
                                     <th class="text-right font-medium px-3 py-2.5 whitespace-nowrap">Aksi</th>
                                 </tr>
                             </thead>
@@ -194,13 +244,32 @@
                                                 </div>
                                             @endif
                                         </td>
-                                        <td class="px-3 py-2.5 text-xs text-emerald-100/70 whitespace-nowrap">{{ $p->npm ?? '-' }}</td>
+                                        <td class="px-3 py-2.5 whitespace-nowrap">
+                                            @php
+                                                $jenisLbl = strtoupper($p->jenis_peserta_label ?? 'MAHASISWA');
+                                                $jenisIsDosen = ($p->jenis_peserta === 'dosen');
+                                            @endphp
+                                            @if($jenisIsDosen)
+                                                <span class="inline-flex items-center gap-1 px-2 h-6 rounded-full text-[10px] font-semibold bg-sky-500/15 text-sky-200 border border-sky-500/20">
+                                                    <i class="fa-solid fa-chalkboard-user text-[9px]"></i> DOSEN
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center gap-1 px-2 h-6 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-200 border border-emerald-500/20">
+                                                    <i class="fa-solid fa-user-graduate text-[9px]"></i> MHS
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td class="px-3 py-2.5 text-xs text-emerald-100/70 whitespace-nowrap font-mono">{{ $p->nomor_identitas }}</td>
                                         <td class="px-3 py-2.5 text-xs text-emerald-100/70 whitespace-nowrap">
                                             @if($p->program_studi)
                                                 {{ $p->program_studi }}
-                                                @if($p->fakultas)<div class="text-[11px] text-emerald-100/50">{{ $p->fakultas }}</div>@endif
+                                                @if(!$jenisIsDosen && $p->fakultas)<div class="text-[11px] text-emerald-100/50">{{ $p->fakultas }}</div>@endif
                                             @else
-                                                -
+                                                @if($jenisIsDosen)
+                                                    <span class="text-sky-200/60 italic">Dosen IAI DDI</span>
+                                                @else
+                                                    -
+                                                @endif
                                             @endif
                                         </td>
                                         <td class="px-3 py-2.5 whitespace-nowrap">
@@ -215,48 +284,88 @@
                                             @endif
                                         </td>
                                         <td class="px-3 py-2.5 text-[11px] text-emerald-100/60 whitespace-nowrap">{{ $p->waktu_hadir_format ?? '-' }}</td>
-                                        <td class="px-3 py-2.5 text-[11px] text-emerald-100/70 whitespace-nowrap font-mono">
-                                            @if($p->nomor_sertifikat)
-                                                <span class="text-sky-300">{{ $p->nomor_sertifikat }}</span>
-                                                @if($p->sertifikat_diunduh_at)
-                                                    <div class="text-[10px] text-emerald-100/40">Diunduh: {{ $p->sertifikat_diunduh_at?->format('d/m/y H:i') }}</div>
-                                                @endif
+                                        <td class="px-3 py-2.5 whitespace-nowrap">
+                                            @if(!$kegiatan->sertifikat_aktif)
+                                                <span class="text-[10px] text-white/40 italic">Nonaktif</span>
+                                            @elseif(!$p->status_hadir)
+                                                <span class="text-[10px] text-amber-200/60 italic">Belum Hadir</span>
                                             @else
-                                                -
+                                                @php
+                                                    $hasPerOrangan = !empty($p->sertifikat_peserta_path) && \Illuminate\Support\Facades\Storage::disk('public')->exists($p->sertifikat_peserta_path);
+                                                    $hasMaster = !empty($kegiatan->sertifikat_upload_path) && \Illuminate\Support\Facades\Storage::disk('public')->exists($kegiatan->sertifikat_upload_path);
+                                                @endphp
+                                                <div class="space-y-1.5 min-w-[160px]">
+                                                    @if($hasPerOrangan)
+                                                        <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-500/15 text-purple-200 border border-purple-500/20 text-[10px] font-semibold">
+                                                            <i class="fa-solid fa-file-pdf text-[9px]"></i> Per Orangan
+                                                        </div>
+                                                    @elseif($hasMaster)
+                                                        <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-200 border border-emerald-500/20 text-[10px] font-semibold">
+                                                            <i class="fa-solid fa-layer-group text-[9px]"></i> Master Kegiatan
+                                                        </div>
+                                                    @else
+                                                        <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/5 text-white/50 border border-white/10 text-[10px] italic">
+                                                            <i class="fa-solid fa-clock text-[9px]"></i> Belum diupload
+                                                        </div>
+                                                    @endif
+                                                    @if($p->sertifikat_diunduh_at)
+                                                        <div class="text-[10px] text-emerald-100/40">Diunduh: {{ $p->sertifikat_diunduh_at?->format('d/m/y H:i') }}</div>
+                                                    @endif
+                                                </div>
                                             @endif
                                         </td>
                                         <td class="px-3 py-2.5 whitespace-nowrap">
-                                            <div class="flex items-center justify-end gap-1">
-                                                <form method="POST" action="{{ route('admin.kegiatan.toggle-hadir', [$kegiatan, $p]) }}" onsubmit="return confirm('Ubah status kehadiran peserta ini?')">
-                                                    @csrf
-                                                    <button class="h-8 w-8 inline-flex items-center justify-center rounded-lg bg-white/5 hover:bg-emerald-500/10 border border-white/10 hover:border-emerald-500/20 transition text-emerald-200" title="Toggle Hadir">
-                                                        <i class="fa-solid fa-user-check text-xs"></i>
-                                                    </button>
-                                                </form>
+                                            <div class="flex flex-col items-end gap-1.5">
+                                                <div class="flex items-center justify-end gap-1">
+                                                    <form method="POST" action="{{ route('admin.kegiatan.toggle-hadir', [$kegiatan, $p]) }}" onsubmit="return confirm('Ubah status kehadiran peserta ini?')">
+                                                        @csrf
+                                                        <button class="h-8 w-8 inline-flex items-center justify-center rounded-lg bg-white/5 hover:bg-emerald-500/10 border border-white/10 hover:border-emerald-500/20 transition text-emerald-200" title="Toggle Hadir">
+                                                            <i class="fa-solid fa-user-check text-xs"></i>
+                                                        </button>
+                                                    </form>
+                                                    @if($kegiatan->sertifikat_aktif && $p->status_hadir && ($hasPerOrangan || $hasMaster))
+                                                        <a href="{{ route('admin.kegiatan.sertifikat.pdf', [$kegiatan, $p]) }}" target="_blank" class="h-8 w-8 inline-flex items-center justify-center rounded-lg bg-white/5 hover:bg-sky-500/10 border border-white/10 hover:border-sky-500/20 transition text-sky-200" title="Lihat Sertifikat">
+                                                            <i class="fa-solid fa-eye text-xs"></i>
+                                                        </a>
+                                                        <a href="{{ route('admin.kegiatan.sertifikat.download', [$kegiatan, $p]) }}" class="h-8 w-8 inline-flex items-center justify-center rounded-lg bg-white/5 hover:bg-indigo-500/10 border border-white/10 hover:border-indigo-500/20 transition text-indigo-200" title="Download Sertifikat">
+                                                            <i class="fa-solid fa-download text-xs"></i>
+                                                        </a>
+                                                        @if($hasPerOrangan)
+                                                            <form method="POST" action="{{ route('admin.kegiatan.hapus-sertifikat-peserta', [$kegiatan, $p]) }}" onsubmit="return confirm('Hapus file sertifikat per-orangan ini? Akan kembali pakai sertifikat master kegiatan.')">
+                                                                @csrf
+                                                                <button class="h-8 w-8 inline-flex items-center justify-center rounded-lg bg-white/5 hover:bg-rose-500/10 border border-white/10 hover:border-rose-500/20 transition text-rose-200" title="Hapus Sertifikat Per-Orangan">
+                                                                    <i class="fa-solid fa-xmark text-xs"></i>
+                                                                </button>
+                                                            </form>
+                                                        @endif
+                                                    @endif
+                                                    <form method="POST" action="{{ route('admin.kegiatan.hapus-peserta', [$kegiatan, $p]) }}" onsubmit="return confirm('Hapus peserta ini?')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button class="h-8 w-8 inline-flex items-center justify-center rounded-lg bg-white/5 hover:bg-rose-500/10 border border-white/10 hover:border-rose-500/20 transition text-rose-200" title="Hapus Peserta">
+                                                            <i class="fa-solid fa-trash text-xs"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
                                                 @if($kegiatan->sertifikat_aktif && $p->status_hadir)
-                                                    <a href="{{ route('admin.kegiatan.sertifikat.pdf', [$kegiatan, $p]) }}" target="_blank" class="h-8 w-8 inline-flex items-center justify-center rounded-lg bg-white/5 hover:bg-sky-500/10 border border-white/10 hover:border-sky-500/20 transition text-sky-200" title="Preview Sertifikat">
-                                                        <i class="fa-solid fa-award text-xs"></i>
-                                                    </a>
-                                                    <a href="{{ route('admin.kegiatan.sertifikat.download', [$kegiatan, $p]) }}" class="h-8 w-8 inline-flex items-center justify-center rounded-lg bg-white/5 hover:bg-indigo-500/10 border border-white/10 hover:border-indigo-500/20 transition text-indigo-200" title="Download Sertifikat">
-                                                        <i class="fa-solid fa-download text-xs"></i>
-                                                    </a>
+                                                    <form method="POST" action="{{ route('admin.kegiatan.upload-sertifikat-peserta', $kegiatan) }}" class="flex items-center gap-1" enctype="multipart/form-data">
+                                                        @csrf
+                                                        <input type="hidden" name="peserta_id" value="{{ $p->id }}">
+                                                        <input type="file" required accept="application/pdf,.pdf" name="file_sertifikat" class="w-[130px] h-8 text-[10px] file:mr-1.5 file:h-6 file:px-2 file:rounded-md file:bg-sky-800/60 file:border-0 file:text-sky-100 hover:file:bg-sky-700 rounded-md bg-white/5 border border-white/10 text-white/80 p-0.5" title="Upload sertifikat khusus peserta ini (override master)">
+                                                        <button class="h-8 px-2 inline-flex items-center justify-center rounded-md bg-sky-700/80 hover:bg-sky-600 transition text-white text-[10px] font-semibold" title="Upload sertifikat per-orangan">
+                                                            <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Up
+                                                        </button>
+                                                    </form>
                                                 @endif
-                                                <form method="POST" action="{{ route('admin.kegiatan.hapus-peserta', [$kegiatan, $p]) }}" onsubmit="return confirm('Hapus peserta ini?')">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button class="h-8 w-8 inline-flex items-center justify-center rounded-lg bg-white/5 hover:bg-rose-500/10 border border-white/10 hover:border-rose-500/20 transition text-rose-200" title="Hapus Peserta">
-                                                        <i class="fa-solid fa-trash text-xs"></i>
-                                                    </button>
-                                                </form>
                                             </div>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="8" class="px-4 py-10 text-center text-emerald-100/60 text-sm">
+                                        <td colspan="9" class="px-4 py-10 text-center text-emerald-100/60 text-sm">
                                             <i class="fa-solid fa-users text-3xl mb-3 opacity-40 block"></i>
                                             Belum ada peserta.<br />
-                                            <span class="text-xs text-emerald-100/50">Gunakan form "Import Mahasiswa" di atas untuk menambahkan peserta otomatis dari data Siakad.</span>
+                                            <span class="text-xs text-emerald-100/50">Gunakan form "Import Mahasiswa" di atas untuk menambahkan peserta otomatis dari data Siakad, atau tambahkan dosen / manual.</span>
                                         </td>
                                     </tr>
                                 @endforelse

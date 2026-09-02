@@ -5,11 +5,10 @@ namespace App\Http\Controllers\Mahasiswa;
 use App\Http\Controllers\Controller;
 use App\Models\Kegiatan;
 use App\Models\PesertaKegiatan;
-use Dompdf\Dompdf;
-use Dompdf\Options;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class KegiatanController extends Controller
 {
@@ -114,7 +113,7 @@ class KegiatanController extends Controller
         return back()->with('success', 'Anda berhasil terdaftar sebagai peserta kegiatan.');
     }
 
-    public function downloadSertifikat(Request $request, Kegiatan $kegiatan): StreamedResponse
+    public function downloadSertifikat(Request $request, Kegiatan $kegiatan): BinaryFileResponse
     {
         abort_if(!$kegiatan->is_published, 404, 'Kegiatan tidak tersedia.');
         abort_if(!$kegiatan->sertifikat_aktif, 403, 'Sertifikat untuk kegiatan ini tidak tersedia.');
@@ -129,12 +128,22 @@ class KegiatanController extends Controller
 
         abort_if(!$peserta->status_hadir, 403, 'Anda belum tercatat hadir pada kegiatan ini. Sertifikat hanya tersedia untuk peserta yang hadir.');
 
-        if (empty($peserta->nomor_sertifikat)) {
-            $peserta->update([
-                'nomor_sertifikat' => $kegiatan->generateNomorSertifikat($peserta),
-            ]);
-            $peserta->refresh();
+        $disk = Storage::disk('public');
+        $sertifikatPath = null;
+
+        $pesertaPath = trim((string) ($peserta->sertifikat_peserta_path ?? ''));
+        if ($pesertaPath !== '' && $disk->exists($pesertaPath)) {
+            $sertifikatPath = $pesertaPath;
         }
+
+        if ($sertifikatPath === null) {
+            $masterPath = trim((string) ($kegiatan->sertifikat_upload_path ?? ''));
+            if ($masterPath !== '' && $disk->exists($masterPath)) {
+                $sertifikatPath = $masterPath;
+            }
+        }
+
+        abort_if($sertifikatPath === null, 404, 'Sertifikat belum diupload oleh admin. Silakan hubungi panitia kegiatan.');
 
         if (empty($peserta->sertifikat_diunduh_at)) {
             $peserta->update([
@@ -142,16 +151,17 @@ class KegiatanController extends Controller
             ]);
         }
 
-        $filename = 'Sertifikat-' . \Illuminate\Support\Str::slug($peserta->nama_lengkap) . '-' . \Illuminate\Support\Str::slug($kegiatan->judul) . '.pdf';
+        $ext = strtolower(pathinfo($sertifikatPath, PATHINFO_EXTENSION));
+        if ($ext === '') $ext = 'pdf';
 
-        return $this->generatePdfResponse(
-            'admin.kegiatan.pdf-sertifikat',
-            compact('kegiatan', 'peserta'),
-            $filename,
-            true,
-            'a4',
-            'landscape'
-        );
+        $filename = 'Sertifikat-' . \Illuminate\Support\Str::slug($peserta->nama_lengkap) . '-' . \Illuminate\Support\Str::slug($kegiatan->judul) . '.' . $ext;
+
+        return $disk->download($sertifikatPath, $filename, [
+            'Content-Type' => 'application/pdf',
+            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0, private',
+            'Pragma' => 'public',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
     }
 
     public function sertifikatSaya(Request $request): View
@@ -170,86 +180,5 @@ class KegiatanController extends Controller
             'pesertas' => $pesertas,
             'mahasiswa' => $mahasiswa,
         ]);
-    }
-
-    private function generatePdfResponse(string $viewName, array $data, string $filename, bool $forceDownload = false, string $paperSize = 'a4', string $orientation = 'portrait'): StreamedResponse
-    {
-        $prevDisplayErrors = ini_get('display_errors');
-        $prevErrorReporting = error_reporting();
-        ini_set('display_errors', '0');
-        error_reporting(E_ALL & ~E_WARNING & ~E_NOTICE & ~E_DEPRECATED & ~E_STRICT);
-
-        try {
-            while (ob_get_level() > 0) {
-                @ob_end_clean();
-            }
-
-            $paperMap = [
-                'a4'        => [0.0, 0.0, 595.275591, 841.889764],
-                'folio'     => [0.0, 0.0, 595.275591, 935.433071],
-                'f4'        => [0.0, 0.0, 595.275591, 935.433071],
-                'letter'    => [0.0, 0.0, 612.0, 792.0],
-                'legal'     => [0.0, 0.0, 612.0, 1008.0],
-            ];
-            $paper = $paperMap[strtolower($paperSize)] ?? $paperMap['a4'];
-
-            $html = view($viewName, $data)->render();
-
-            $options = new Options([
-                'tempDir'           => sys_get_temp_dir(),
-                'fontDir'           => storage_path('fonts'),
-                'fontCache'         => storage_path('fonts'),
-                'chroot'            => base_path(),
-                'isRemoteEnabled'   => true,
-                'isHtml5ParserEnabled' => true,
-                'defaultFont'       => 'times',
-                'dpi'               => 96,
-                'isFontSubsettingEnabled' => true,
-                'fontHeightRatio'   => 0.92,
-            ]);
-
-            $dompdf = new Dompdf($options);
-            $dompdf->getOptions()->setIsRemoteEnabled(true);
-            $dompdf->getOptions()->setDefaultFont('times');
-            $dompdf->getOptions()->setIsFontSubsettingEnabled(true);
-            $dompdf->getOptions()->setFontHeightRatio(0.92);
-            $dompdf->getOptions()->setDpi(96);
-
-            $dompdf->loadHtml($html, 'UTF-8');
-            $dompdf->setPaper($paper, strtolower($orientation) === 'landscape' ? 'landscape' : 'portrait');
-            $dompdf->render();
-
-            while (ob_get_level() > 0) {
-                @ob_end_clean();
-            }
-
-            $outputPdf = $dompdf->output();
-
-            $callback = function () use ($outputPdf) {
-                echo $outputPdf;
-            };
-
-            $response = response()->streamDownload($callback, $filename, [
-                'Content-Type' => $forceDownload ? 'application/octet-stream' : 'application/pdf',
-                'Content-Transfer-Encoding' => 'binary',
-                'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0, private',
-                'Pragma' => 'public',
-                'Expires' => 'Sat, 26 Jul 1997 05:00:00 GMT',
-                'X-Content-Type-Options' => 'nosniff',
-                'Content-Description' => 'File Transfer',
-            ], $forceDownload ? 'attachment' : 'inline');
-
-            ini_set('display_errors', $prevDisplayErrors);
-            error_reporting($prevErrorReporting);
-
-            return $response;
-        } catch (\Throwable $e) {
-            while (ob_get_level() > 0) {
-                @ob_end_clean();
-            }
-            ini_set('display_errors', $prevDisplayErrors);
-            error_reporting($prevErrorReporting);
-            throw $e;
-        }
     }
 }

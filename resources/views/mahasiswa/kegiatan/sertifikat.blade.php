@@ -21,7 +21,7 @@
         <div class="rounded-2xl bg-white/5 border border-white/10 p-12 text-center">
             <i class="fa-solid fa-certificate text-5xl mb-4 opacity-30 text-sky-300"></i>
             <div class="text-lg font-medium mb-2">Anda Belum Memiliki Sertifikat</div>
-            <div class="text-sm text-emerald-100/60 mb-4">Ikuti kegiatan kampus dan hadir untuk mendapatkan sertifikat.</div>
+            <div class="text-sm text-emerald-100/60 mb-4">Ikuti kegiatan kampus dan hadir untuk mendapatkan sertifikat.<br />Sertifikat akan diupload oleh admin panitia setelah kegiatan selesai.</div>
             <a href="{{ route('mahasiswa.kegiatan.index') }}" class="h-10 px-5 inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition text-sm font-medium">
                 <i class="fa-solid fa-list"></i>
                 Lihat Daftar Kegiatan
@@ -30,6 +30,11 @@
     @else
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             @foreach($pesertas as $p)
+                @php
+                    $hasPerOrangan = !empty($p->sertifikat_peserta_path) && \Illuminate\Support\Facades\Storage::disk('public')->exists($p->sertifikat_peserta_path);
+                    $hasMaster = !empty($p->kegiatan?->sertifikat_upload_path) && \Illuminate\Support\Facades\Storage::disk('public')->exists($p->kegiatan?->sertifikat_upload_path);
+                    $adaFile = $hasPerOrangan || $hasMaster;
+                @endphp
                 <div class="rounded-2xl overflow-hidden bg-gradient-to-br from-white/[0.07] to-white/[0.03] border border-white/10 hover:border-sky-500/30 transition group">
                     <div class="relative h-40 bg-gradient-to-br from-emerald-700/50 via-sky-700/50 to-purple-700/50 flex items-center justify-center overflow-hidden">
                         <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 18px 18px;"></div>
@@ -64,15 +69,37 @@
                             </div>
                         </div>
                         <div class="pt-2 border-t border-white/10 space-y-1.5">
-                            <div class="text-[10px] uppercase tracking-wide text-sky-300/80">Nomor Sertifikat</div>
-                            <div class="font-mono text-xs text-sky-200 bg-sky-500/10 border border-sky-500/20 rounded-lg px-3 py-1.5">
-                                {{ $p->nomor_sertifikat ?? '-' }}
-                            </div>
+                            <div class="text-[10px] uppercase tracking-wide text-sky-300/80">Status File</div>
+                            @if($adaFile)
+                                @if($hasPerOrangan)
+                                    <div class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-500/15 text-purple-200 border border-purple-500/20 text-[10px] font-semibold">
+                                        <i class="fa-solid fa-file-pdf text-[9px]"></i> Sertifikat Personal Anda
+                                    </div>
+                                @else
+                                    <div class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-200 border border-emerald-500/20 text-[10px] font-semibold">
+                                        <i class="fa-solid fa-layer-group text-[9px]"></i> Sertifikat Peserta (Master)
+                                    </div>
+                                @endif
+                            @else
+                                <div class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-200 border border-amber-500/20 text-[10px] font-semibold">
+                                    <i class="fa-solid fa-clock text-[9px]"></i> Belum diupload Panitia
+                                </div>
+                                <div class="text-[10px] text-emerald-100/50 italic mt-1">
+                                    Admin panitia sedang memproses sertifikat. Cek kembali nanti ya!
+                                </div>
+                            @endif
                         </div>
-                        <a href="{{ route('mahasiswa.kegiatan.download-sertifikat', $p->kegiatan) }}" class="w-full h-10 inline-flex items-center justify-center gap-2 rounded-xl bg-sky-600 hover:bg-sky-500 active:bg-sky-700 transition text-sm font-medium">
-                            <i class="fa-solid fa-download"></i>
-                            {{ $p->sertifikat_diunduh_at ? 'Download Ulang' : 'Download Sertifikat' }}
-                        </a>
+                        @if($adaFile)
+                            <a href="{{ route('mahasiswa.kegiatan.download-sertifikat', $p->kegiatan) }}" class="w-full h-10 inline-flex items-center justify-center gap-2 rounded-xl bg-sky-600 hover:bg-sky-500 active:bg-sky-700 transition text-sm font-medium">
+                                <i class="fa-solid fa-download"></i>
+                                {{ $p->sertifikat_diunduh_at ? 'Download Ulang' : 'Download Sertifikat' }}
+                            </a>
+                        @else
+                            <button type="button" disabled class="w-full h-10 inline-flex items-center justify-center gap-2 rounded-xl bg-white/10 border border-white/10 text-white/40 cursor-not-allowed text-sm font-medium">
+                                <i class="fa-solid fa-lock"></i>
+                                Menunggu Upload Panitia
+                            </button>
+                        @endif
                     </div>
                 </div>
             @endforeach

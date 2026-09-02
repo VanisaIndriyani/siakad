@@ -87,6 +87,7 @@ class KegiatanController extends Controller
             'rektor_nama' => ['nullable', 'string', 'max:255'],
             'rektor_nip' => ['nullable', 'string', 'max:50'],
             'gambar' => ['nullable', 'image', 'max:4096'],
+            'sertifikat_file_upload' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
             'is_published' => ['nullable', 'boolean'],
             'sertifikat_aktif' => ['nullable', 'boolean'],
             'nomor_sertifikat_prefix' => ['nullable', 'string', 'max:50'],
@@ -115,6 +116,10 @@ class KegiatanController extends Controller
 
         if ($request->hasFile('gambar')) {
             $payload['gambar_path'] = $request->file('gambar')->store('kegiatan', 'public');
+        }
+
+        if ($request->hasFile('sertifikat_file_upload')) {
+            $payload['sertifikat_upload_path'] = $request->file('sertifikat_file_upload')->store('kegiatan-sertifikat', 'public');
         }
 
         $kegiatan = Kegiatan::query()->create($payload);
@@ -159,6 +164,8 @@ class KegiatanController extends Controller
             'rektor_nip' => ['nullable', 'string', 'max:50'],
             'gambar' => ['nullable', 'image', 'max:4096'],
             'hapus_gambar' => ['nullable', 'boolean'],
+            'sertifikat_file_upload' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+            'hapus_sertifikat_upload' => ['nullable', 'boolean'],
             'is_published' => ['nullable', 'boolean'],
             'sertifikat_aktif' => ['nullable', 'boolean'],
             'nomor_sertifikat_prefix' => ['nullable', 'string', 'max:50'],
@@ -196,6 +203,18 @@ class KegiatanController extends Controller
             $payload['gambar_path'] = $request->file('gambar')->store('kegiatan', 'public');
         }
 
+        if (!empty($validated['hapus_sertifikat_upload']) && !empty($kegiatan->sertifikat_upload_path)) {
+            Storage::disk('public')->delete($kegiatan->sertifikat_upload_path);
+            $payload['sertifikat_upload_path'] = null;
+        }
+
+        if ($request->hasFile('sertifikat_file_upload')) {
+            if (!empty($kegiatan->sertifikat_upload_path)) {
+                Storage::disk('public')->delete($kegiatan->sertifikat_upload_path);
+            }
+            $payload['sertifikat_upload_path'] = $request->file('sertifikat_file_upload')->store('kegiatan-sertifikat', 'public');
+        }
+
         $kegiatan->update($payload);
 
         return back()->with('success', 'Kegiatan berhasil diperbarui.');
@@ -205,6 +224,9 @@ class KegiatanController extends Controller
     {
         if (!empty($kegiatan->gambar_path)) {
             Storage::disk('public')->delete($kegiatan->gambar_path);
+        }
+        if (!empty($kegiatan->sertifikat_upload_path)) {
+            Storage::disk('public')->delete($kegiatan->sertifikat_upload_path);
         }
 
         $kegiatan->delete();
@@ -264,6 +286,7 @@ class KegiatanController extends Controller
             if (!$exists) {
                 PesertaKegiatan::query()->create([
                     'kegiatan_id' => $kegiatan->id,
+                    'jenis_peserta' => 'mahasiswa',
                     'mahasiswa_id' => $mhs->id,
                     'nama_lengkap' => $mhs->nama_lengkap,
                     'npm' => $mhs->npm,
@@ -292,15 +315,72 @@ class KegiatanController extends Controller
 
         PesertaKegiatan::query()->create(array_merge($validated, [
             'kegiatan_id' => $kegiatan->id,
+            'jenis_peserta' => 'mahasiswa',
         ]));
 
         return back()->with('success', 'Peserta berhasil ditambahkan.');
+    }
+
+    public function tambahDosenPeserta(Request $request, Kegiatan $kegiatan): RedirectResponse
+    {
+        $validated = $request->validate([
+            'dosen_id' => ['nullable', 'exists:dosen,id'],
+            'nama_lengkap' => ['nullable', 'required_without:dosen_id', 'string', 'max:255'],
+            'nidn' => ['nullable', 'string', 'max:50'],
+            'program_studi' => ['nullable', 'string', 'max:100'],
+            'nomor_telp' => ['nullable', 'string', 'max:50'],
+            'email' => ['nullable', 'email', 'max:255'],
+        ]);
+
+        $payload = [
+            'kegiatan_id' => $kegiatan->id,
+            'jenis_peserta' => 'dosen',
+        ];
+
+        if (!empty($validated['dosen_id'])) {
+            $dosen = \App\Models\Dosen::find($validated['dosen_id']);
+            if ($dosen) {
+                $payload['dosen_id'] = $dosen->id;
+                $payload['nama_lengkap'] = $dosen->nama_lengkap ?? $validated['nama_lengkap'] ?? null;
+                $payload['nidn'] = $dosen->nidn ?? $validated['nidn'] ?? null;
+                $payload['program_studi'] = $dosen->program_studi ?? $validated['program_studi'] ?? null;
+                $payload['nomor_telp'] = $dosen->no_telepon ?? $dosen->nomor_telp ?? $validated['nomor_telp'] ?? null;
+                $payload['email'] = $dosen->email ?? $validated['email'] ?? null;
+            }
+        } else {
+            $payload['nama_lengkap'] = $validated['nama_lengkap'];
+            $payload['nidn'] = $validated['nidn'] ?? null;
+            $payload['program_studi'] = $validated['program_studi'] ?? null;
+            $payload['nomor_telp'] = $validated['nomor_telp'] ?? null;
+            $payload['email'] = $validated['email'] ?? null;
+        }
+
+        $existsCheck = PesertaKegiatan::query()
+            ->where('kegiatan_id', $kegiatan->id)
+            ->where('jenis_peserta', 'dosen');
+        if (!empty($payload['dosen_id'])) {
+            $existsCheck = $existsCheck->where(function ($q) use ($payload) {
+                $q->where('dosen_id', $payload['dosen_id'])->orWhere('nama_lengkap', $payload['nama_lengkap']);
+            });
+        } else {
+            $existsCheck = $existsCheck->where('nama_lengkap', $payload['nama_lengkap']);
+        }
+        if ($existsCheck->exists()) {
+            return back()->with('error', 'Dosen tersebut sudah terdaftar sebagai peserta kegiatan.');
+        }
+
+        PesertaKegiatan::query()->create($payload);
+
+        return back()->with('success', 'Dosen berhasil ditambahkan sebagai peserta.');
     }
 
     public function hapusPeserta(Kegiatan $kegiatan, PesertaKegiatan $peserta): RedirectResponse
     {
         if ($peserta->kegiatan_id !== $kegiatan->id) {
             abort(404);
+        }
+        if (!empty($peserta->sertifikat_peserta_path)) {
+            try { Storage::disk('public')->delete($peserta->sertifikat_peserta_path); } catch (\Throwable $e) {}
         }
         $peserta->delete();
 
@@ -318,12 +398,6 @@ class KegiatanController extends Controller
             'waktu_hadir' => !$peserta->status_hadir ? now() : null,
         ]);
 
-        if (!$peserta->status_hadir && empty($peserta->nomor_sertifikat) && $kegiatan->sertifikat_aktif) {
-            $peserta->update([
-                'nomor_sertifikat' => $kegiatan->generateNomorSertifikat($peserta),
-            ]);
-        }
-
         return back()->with('success', 'Status kehadiran peserta berhasil diperbarui.');
     }
 
@@ -335,18 +409,125 @@ class KegiatanController extends Controller
                 'status_hadir' => true,
                 'waktu_hadir' => $now,
             ]);
-
-            if ($kegiatan->sertifikat_aktif) {
-                $pesertaBelumNomor = $kegiatan->peserta()->whereNull('nomor_sertifikat')->get();
-                foreach ($pesertaBelumNomor as $peserta) {
-                    $peserta->update([
-                        'nomor_sertifikat' => $kegiatan->generateNomorSertifikat($peserta),
-                    ]);
-                }
-            }
         });
 
         return back()->with('success', 'Semua peserta berhasil ditandai hadir.');
+    }
+
+    public function uploadSertifikatPerPeserta(Request $request, Kegiatan $kegiatan): RedirectResponse
+    {
+        $validated = $request->validate([
+            'peserta_id' => ['required', 'exists:peserta_kegiatan,id'],
+            'file_sertifikat' => ['required', 'file', 'mimes:pdf', 'max:10240'],
+        ]);
+
+        $peserta = PesertaKegiatan::query()->where('kegiatan_id', $kegiatan->id)->findOrFail($validated['peserta_id']);
+
+        if (!empty($peserta->sertifikat_peserta_path)) {
+            try { Storage::disk('public')->delete($peserta->sertifikat_peserta_path); } catch (\Throwable $e) {}
+        }
+
+        $path = $request->file('file_sertifikat')->store('kegiatan-sertifikat/peserta', 'public');
+        $peserta->update([
+            'sertifikat_peserta_path' => $path,
+        ]);
+
+        return back()->with('success', 'Sertifikat untuk ' . $peserta->nama_lengkap . ' berhasil diupload.');
+    }
+
+    public function hapusSertifikatPeserta(Kegiatan $kegiatan, PesertaKegiatan $peserta): RedirectResponse
+    {
+        if ($peserta->kegiatan_id !== $kegiatan->id) { abort(404); }
+
+        if (!empty($peserta->sertifikat_peserta_path)) {
+            try { Storage::disk('public')->delete($peserta->sertifikat_peserta_path); } catch (\Throwable $e) {}
+        }
+
+        $peserta->update([
+            'sertifikat_peserta_path' => null,
+            'sertifikat_diunduh_at' => null,
+        ]);
+
+        return back()->with('success', 'Sertifikat peserta berhasil dihapus.');
+    }
+
+    public function downloadSertifikatMaster(Kegiatan $kegiatan)
+    {
+        if (empty($kegiatan->sertifikat_upload_path)) {
+            abort(404, 'Belum ada file sertifikat master yang diupload.');
+        }
+
+        $disk = Storage::disk('public');
+        if (!$disk->exists($kegiatan->sertifikat_upload_path)) {
+            abort(404, 'File sertifikat tidak ditemukan di storage.');
+        }
+
+        $filename = 'Sertifikat-Master-' . \Illuminate\Support\Str::slug($kegiatan->judul) . '.pdf';
+        return $disk->download($kegiatan->sertifikat_upload_path, $filename, [
+            'Content-Type' => 'application/pdf',
+        ]);
+    }
+
+    protected function resolveSertifikatPesertaPath(Kegiatan $kegiatan, PesertaKegiatan $peserta): ?string
+    {
+        if ($peserta->kegiatan_id !== $kegiatan->id) { return null; }
+        if (!$peserta->status_hadir) { return null; }
+        if (!$kegiatan->sertifikat_aktif) { return null; }
+
+        $perPath = (string)($peserta->sertifikat_peserta_path ?? '');
+        if ($perPath !== '' && Storage::disk('public')->exists($perPath)) {
+            return $perPath;
+        }
+
+        $masterPath = (string)($kegiatan->sertifikat_upload_path ?? '');
+        if ($masterPath !== '' && Storage::disk('public')->exists($masterPath)) {
+            return $masterPath;
+        }
+
+        return null;
+    }
+
+    public function lihatSertifikatPeserta(Kegiatan $kegiatan, PesertaKegiatan $peserta)
+    {
+        if ($peserta->kegiatan_id !== $kegiatan->id) { abort(404); }
+        if (!$peserta->status_hadir) { abort(403, 'Peserta belum hadir, sertifikat tidak tersedia.'); }
+        if (!$kegiatan->sertifikat_aktif) { abort(403, 'Sertifikat untuk kegiatan ini tidak aktif.'); }
+
+        $path = $this->resolveSertifikatPesertaPath($kegiatan, $peserta);
+        if ($path === null) {
+            abort(404, 'File sertifikat belum tersedia. Silakan hubungi admin untuk upload sertifikat.');
+        }
+
+        $disk = Storage::disk('public');
+        if (empty($peserta->sertifikat_diunduh_at)) {
+            try { $peserta->update(['sertifikat_diunduh_at' => now()]); } catch (\Throwable $e) {}
+        }
+
+        $filename = 'Sertifikat-' . \Illuminate\Support\Str::slug($peserta->nama_lengkap) . '-' . \Illuminate\Support\Str::slug($kegiatan->judul) . '.pdf';
+        return $disk->response($path, $filename, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $filename . '"',
+        ]);
+    }
+
+    public function downloadSertifikatPeserta(Kegiatan $kegiatan, PesertaKegiatan $peserta)
+    {
+        if ($peserta->kegiatan_id !== $kegiatan->id) { abort(404); }
+        if (!$peserta->status_hadir) { abort(403, 'Peserta belum hadir, sertifikat tidak tersedia.'); }
+        if (!$kegiatan->sertifikat_aktif) { abort(403, 'Sertifikat untuk kegiatan ini tidak aktif.'); }
+
+        $path = $this->resolveSertifikatPesertaPath($kegiatan, $peserta);
+        if ($path === null) {
+            abort(404, 'File sertifikat belum tersedia. Silakan hubungi admin untuk upload sertifikat.');
+        }
+
+        try { $peserta->update(['sertifikat_diunduh_at' => now()]); } catch (\Throwable $e) {}
+
+        $disk = Storage::disk('public');
+        $filename = 'Sertifikat-' . \Illuminate\Support\Str::slug($peserta->nama_lengkap) . '-' . \Illuminate\Support\Str::slug($kegiatan->judul) . '.pdf';
+        return $disk->download($path, $filename, [
+            'Content-Type' => 'application/pdf',
+        ]);
     }
 
     public function daftarHadirPdf(Kegiatan $kegiatan): StreamedResponse
@@ -373,78 +554,6 @@ class KegiatanController extends Controller
 
         return $this->generatePdfResponse(
             'admin.kegiatan.pdf-daftar-hadir',
-            compact('kegiatan', 'peserta'),
-            $filename,
-            true,
-            'a4',
-            'landscape'
-        );
-    }
-
-    public function sertifikatPdf(Kegiatan $kegiatan, PesertaKegiatan $peserta): StreamedResponse
-    {
-        if ($peserta->kegiatan_id !== $kegiatan->id) {
-            abort(404);
-        }
-
-        if (!$peserta->status_hadir) {
-            abort(403, 'Peserta belum hadir, sertifikat tidak tersedia.');
-        }
-
-        if (!$kegiatan->sertifikat_aktif) {
-            abort(403, 'Sertifikat untuk kegiatan ini tidak aktif.');
-        }
-
-        if (empty($peserta->nomor_sertifikat)) {
-            $peserta->update([
-                'nomor_sertifikat' => $kegiatan->generateNomorSertifikat($peserta),
-            ]);
-            $peserta->refresh();
-        }
-
-        $filename = 'Sertifikat-' . \Illuminate\Support\Str::slug($peserta->nama_lengkap) . '-' . \Illuminate\Support\Str::slug($kegiatan->judul) . '.pdf';
-
-        return $this->generatePdfResponse(
-            'admin.kegiatan.pdf-sertifikat',
-            compact('kegiatan', 'peserta'),
-            $filename,
-            false,
-            'a4',
-            'landscape'
-        );
-    }
-
-    public function downloadSertifikatPdf(Kegiatan $kegiatan, PesertaKegiatan $peserta): StreamedResponse
-    {
-        if ($peserta->kegiatan_id !== $kegiatan->id) {
-            abort(404);
-        }
-
-        if (!$peserta->status_hadir) {
-            abort(403, 'Peserta belum hadir, sertifikat tidak tersedia.');
-        }
-
-        if (!$kegiatan->sertifikat_aktif) {
-            abort(403, 'Sertifikat untuk kegiatan ini tidak aktif.');
-        }
-
-        if (empty($peserta->nomor_sertifikat)) {
-            $peserta->update([
-                'nomor_sertifikat' => $kegiatan->generateNomorSertifikat($peserta),
-            ]);
-            $peserta->refresh();
-        }
-
-        if (empty($peserta->sertifikat_diunduh_at)) {
-            $peserta->update([
-                'sertifikat_diunduh_at' => now(),
-            ]);
-        }
-
-        $filename = 'Sertifikat-' . \Illuminate\Support\Str::slug($peserta->nama_lengkap) . '-' . \Illuminate\Support\Str::slug($kegiatan->judul) . '.pdf';
-
-        return $this->generatePdfResponse(
-            'admin.kegiatan.pdf-sertifikat',
             compact('kegiatan', 'peserta'),
             $filename,
             true,

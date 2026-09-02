@@ -124,19 +124,38 @@
             </div>
 
             <div>
-                <label class="text-sm text-emerald-100/80">Prefix Nomor Sertifikat</label>
-                <input name="nomor_sertifikat_prefix" value="{{ old('nomor_sertifikat_prefix', $kegiatan->nomor_sertifikat_prefix) }}" placeholder="Contoh: SERT/SEMINAR/IAI" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
-                <div class="text-xs text-emerald-100/50 mt-1">Format: PREFIX/0001/MM/YYYY</div>
+                <label class="text-sm text-emerald-100/80">Upload / Ganti File Sertifikat Peserta (PDF)</label>
+                @if(!empty($kegiatan->sertifikat_upload_url))
+                    <div class="mt-2 mb-2 p-3 rounded-xl bg-emerald-900/30 border border-emerald-600/40">
+                        <div class="text-emerald-200 text-sm font-semibold mb-1">✅ File sertifikat master sudah diupload</div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <a href="{{ $kegiatan->sertifikat_upload_url }}" target="_blank" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-700 text-white text-xs hover:bg-emerald-600 transition font-semibold">
+                                <span>📄</span> Lihat / Download File Saat Ini
+                            </a>
+                            <label class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 text-red-200 text-xs cursor-pointer hover:bg-white/20 transition">
+                                <input type="checkbox" name="hapus_sertifikat_upload" value="1" class="rounded border-white/20 bg-white/10 text-red-500 focus:ring-red-400">
+                                Hapus / Reset File Sertifikat
+                            </label>
+                        </div>
+                    </div>
+                @endif
+                <input name="sertifikat_file_upload" type="file" accept="application/pdf,.pdf" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400 text-white/90 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-emerald-800 file:text-emerald-50 hover:file:bg-emerald-700" />
+                <div class="text-xs text-emerald-100/50 mt-1">Upload file sertifikat master PDF. Satu file ini berlaku untuk SEMUA peserta yang hadir.</div>
+                @error('sertifikat_file_upload') <div class="mt-2 text-sm text-red-200">{{ $message }}</div> @enderror
             </div>
 
-            <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-white/10">
+            <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 border-t border-white/10">
                 <label class="flex items-center gap-3 px-4 h-11 rounded-xl bg-white/5 border border-white/10 cursor-pointer">
                     <input type="checkbox" name="is_published" value="1" @checked((bool) old('is_published', $kegiatan->is_published)) class="rounded border-white/20 bg-white/10 text-emerald-500 focus:ring-emerald-400" />
-                    <span class="text-sm text-emerald-100/90">Publish & Tampilkan ke Mahasiswa</span>
+                    <span class="text-sm text-emerald-100/90">🎓 Publikasikan ke Mahasiswa</span>
+                </label>
+                <label class="flex items-center gap-3 px-4 h-11 rounded-xl bg-white/5 border border-white/10 cursor-pointer">
+                    <input type="checkbox" name="tampilkan_ke_dosen" value="1" @checked((bool) old('tampilkan_ke_dosen', $kegiatan->tampilkan_ke_dosen ?? true)) class="rounded border-white/20 bg-white/10 text-sky-500 focus:ring-sky-400" />
+                    <span class="text-sm text-emerald-100/90">👨‍🏫 Tampilkan ke Dosen</span>
                 </label>
                 <label class="flex items-center gap-3 px-4 h-11 rounded-xl bg-white/5 border border-white/10 cursor-pointer">
                     <input type="checkbox" name="sertifikat_aktif" value="1" @checked((bool) old('sertifikat_aktif', $kegiatan->sertifikat_aktif)) class="rounded border-white/20 bg-white/10 text-emerald-500 focus:ring-emerald-400" />
-                    <span class="text-sm text-emerald-100/90">Aktifkan Sertifikat untuk Peserta Hadir</span>
+                    <span class="text-sm text-emerald-100/90">🏆 Aktifkan Sertifikat Peserta Hadir</span>
                 </label>
             </div>
         </div>

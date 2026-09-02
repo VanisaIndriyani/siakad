@@ -31,9 +31,11 @@ class Kegiatan extends Model
         'rektor_nip',
         'gambar_path',
         'is_published',
+        'tampilkan_ke_dosen',
         'sertifikat_aktif',
         'nomor_sertifikat_prefix',
         'template_sertifikat',
+        'sertifikat_upload_path',
         'created_by',
     ];
 
@@ -42,6 +44,7 @@ class Kegiatan extends Model
         return [
             'tanggal_kegiatan' => 'date',
             'is_published' => 'boolean',
+            'tampilkan_ke_dosen' => 'boolean',
             'sertifikat_aktif' => 'boolean',
         ];
     }
@@ -81,6 +84,25 @@ class Kegiatan extends Model
             return asset('storage/' . ltrim($cleanPath, '/'));
         }
 
+        return asset('storage/' . ltrim($path, '/'));
+    }
+
+    public function getSertifikatUploadUrlAttribute(): ?string
+    {
+        if (empty($this->sertifikat_upload_path)) {
+            return null;
+        }
+        $path = (string) $this->sertifikat_upload_path;
+        if (preg_match('#^https?://#i', $path)) {
+            return $path;
+        }
+        if (str_starts_with($path, 'storage/') || str_starts_with($path, '/storage/')) {
+            $cleanPath = ltrim($path, '/');
+            if (str_starts_with($cleanPath, 'storage/')) {
+                $cleanPath = substr($cleanPath, strlen('storage/'));
+            }
+            return asset('storage/' . ltrim($cleanPath, '/'));
+        }
         return asset('storage/' . ltrim($path, '/'));
     }
 
