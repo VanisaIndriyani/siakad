@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class KegiatanController extends Controller
 {
@@ -144,7 +146,7 @@ class KegiatanController extends Controller
         return back()->with('success', 'Anda berhasil terdaftar sebagai peserta kegiatan.');
     }
 
-    public function downloadSertifikat(Request $request, Kegiatan $kegiatan): BinaryFileResponse
+    public function downloadSertifikat(Request $request, Kegiatan $kegiatan): Response|BinaryFileResponse|StreamedResponse
     {
         abort_if(!$kegiatan->is_published, 404, 'Kegiatan tidak tersedia.');
         abort_if(!$kegiatan->sertifikat_aktif, 403, 'Sertifikat untuk kegiatan ini tidak tersedia.');

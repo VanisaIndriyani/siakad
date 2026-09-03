@@ -110,7 +110,7 @@ class Kegiatan extends Model
 
     public function getTanggalWaktuAttribute(): string
     {
-        $result = $this->getTanggalRangeAttribute;
+        $result = $this->getTanggalRangeAttribute();
 
         if ($this->waktu_mulai) {
             $result .= ', ' . substr($this->waktu_mulai, 0, 5);

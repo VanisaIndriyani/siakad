@@ -71,6 +71,8 @@ class KegiatanController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $this->normalizeWaktuRequest($request);
+
         $validated = $request->validate([
             'judul' => ['required', 'string', 'max:255'],
             'jenis_kegiatan' => ['required', 'string', 'max:100'],
@@ -78,8 +80,8 @@ class KegiatanController extends Controller
             'lokasi' => ['nullable', 'string', 'max:255'],
             'tanggal_kegiatan' => ['required', 'date'],
             'tanggal_selesai' => ['nullable', 'date', 'after_or_equal:tanggal_kegiatan'],
-            'waktu_mulai' => ['nullable', 'date_format:H:i'],
-            'waktu_selesai' => ['nullable', 'date_format:H:i', 'after:waktu_mulai'],
+            'waktu_mulai' => ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
+            'waktu_selesai' => ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/', 'after:waktu_mulai'],
             'penyelenggara' => ['nullable', 'string', 'max:255'],
             'narasumber' => ['nullable', 'string', 'max:255'],
             'ketua_panitia_nama' => ['nullable', 'string', 'max:255'],
@@ -101,8 +103,8 @@ class KegiatanController extends Controller
             'lokasi' => $validated['lokasi'] ?? null,
             'tanggal_kegiatan' => $validated['tanggal_kegiatan'],
             'tanggal_selesai' => $validated['tanggal_selesai'] ?? null,
-            'waktu_mulai' => $validated['waktu_mulai'] ?? null,
-            'waktu_selesai' => $validated['waktu_selesai'] ?? null,
+            'waktu_mulai' => $this->truncateWaktu($validated['waktu_mulai'] ?? null),
+            'waktu_selesai' => $this->truncateWaktu($validated['waktu_selesai'] ?? null),
             'penyelenggara' => $validated['penyelenggara'] ?? null,
             'narasumber' => $validated['narasumber'] ?? null,
             'ketua_panitia_nama' => $validated['ketua_panitia_nama'] ?? null,
@@ -149,6 +151,8 @@ class KegiatanController extends Controller
 
     public function update(Request $request, Kegiatan $kegiatan): RedirectResponse
     {
+        $this->normalizeWaktuRequest($request);
+
         $validated = $request->validate([
             'judul' => ['required', 'string', 'max:255'],
             'jenis_kegiatan' => ['required', 'string', 'max:100'],
@@ -156,8 +160,8 @@ class KegiatanController extends Controller
             'lokasi' => ['nullable', 'string', 'max:255'],
             'tanggal_kegiatan' => ['required', 'date'],
             'tanggal_selesai' => ['nullable', 'date', 'after_or_equal:tanggal_kegiatan'],
-            'waktu_mulai' => ['nullable', 'date_format:H:i'],
-            'waktu_selesai' => ['nullable', 'date_format:H:i', 'after:waktu_mulai'],
+            'waktu_mulai' => ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/'],
+            'waktu_selesai' => ['nullable', 'regex:/^\d{2}:\d{2}(:\d{2})?$/', 'after:waktu_mulai'],
             'penyelenggara' => ['nullable', 'string', 'max:255'],
             'narasumber' => ['nullable', 'string', 'max:255'],
             'ketua_panitia_nama' => ['nullable', 'string', 'max:255'],
@@ -181,8 +185,8 @@ class KegiatanController extends Controller
             'lokasi' => $validated['lokasi'] ?? null,
             'tanggal_kegiatan' => $validated['tanggal_kegiatan'],
             'tanggal_selesai' => $validated['tanggal_selesai'] ?? null,
-            'waktu_mulai' => $validated['waktu_mulai'] ?? null,
-            'waktu_selesai' => $validated['waktu_selesai'] ?? null,
+            'waktu_mulai' => $this->truncateWaktu($validated['waktu_mulai'] ?? null),
+            'waktu_selesai' => $this->truncateWaktu($validated['waktu_selesai'] ?? null),
             'penyelenggara' => $validated['penyelenggara'] ?? null,
             'narasumber' => $validated['narasumber'] ?? null,
             'ketua_panitia_nama' => $validated['ketua_panitia_nama'] ?? null,
@@ -594,6 +598,37 @@ class KegiatanController extends Controller
             'a4',
             'landscape'
         );
+    }
+
+    protected function normalizeWaktuRequest(Request $request): void
+    {
+        $fields = ['waktu_mulai', 'waktu_selesai'];
+        $merge = [];
+        foreach ($fields as $f) {
+            $v = $request->input($f);
+            if ($v === null || is_string($v) && trim($v) === '') {
+                continue;
+            }
+            $v = trim((string) $v);
+            if (preg_match('/^\d{1,2}:\d{1,2}(:\d{1,2})?$/', $v)) {
+                $parts = explode(':', $v);
+                $h = str_pad((string) (int) ($parts[0] ?? 0), 2, '0', STR_PAD_LEFT);
+                $i = str_pad((string) (int) ($parts[1] ?? 0), 2, '0', STR_PAD_LEFT);
+                $merge[$f] = "{$h}:{$i}";
+            }
+        }
+        if ($merge !== []) {
+            $request->merge($merge);
+        }
+    }
+
+    protected function truncateWaktu(?string $waktu): ?string
+    {
+        if ($waktu === null || trim($waktu) === '') return null;
+        if (preg_match('/^(\d{2}:\d{2})(:\d{2})?$/', $waktu, $m)) {
+            return $m[1];
+        }
+        return $waktu;
     }
 
     private function generatePdfResponse(string $viewName, array $data, string $filename, bool $forceDownload = false, string $paperSize = 'a4', string $orientation = 'portrait'): StreamedResponse

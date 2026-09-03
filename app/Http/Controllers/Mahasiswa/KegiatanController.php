@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class KegiatanController extends Controller
 {
@@ -113,7 +115,7 @@ class KegiatanController extends Controller
         return back()->with('success', 'Anda berhasil terdaftar sebagai peserta kegiatan.');
     }
 
-    public function downloadSertifikat(Request $request, Kegiatan $kegiatan): BinaryFileResponse
+    public function downloadSertifikat(Request $request, Kegiatan $kegiatan): Response|BinaryFileResponse|StreamedResponse
     {
         abort_if(!$kegiatan->is_published, 404, 'Kegiatan tidak tersedia.');
         abort_if(!$kegiatan->sertifikat_aktif, 403, 'Sertifikat untuk kegiatan ini tidak tersedia.');
@@ -154,10 +156,19 @@ class KegiatanController extends Controller
         $ext = strtolower(pathinfo($sertifikatPath, PATHINFO_EXTENSION));
         if ($ext === '') $ext = 'pdf';
 
+        $mimeMap = [
+            'pdf' => 'application/pdf',
+            'png' => 'image/png',
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'webp' => 'image/webp',
+        ];
+        $mime = $mimeMap[$ext] ?? $disk->mimeType($sertifikatPath) ?? 'application/octet-stream';
+
         $filename = 'Sertifikat-' . \Illuminate\Support\Str::slug($peserta->nama_lengkap) . '-' . \Illuminate\Support\Str::slug($kegiatan->judul) . '.' . $ext;
 
         return $disk->download($sertifikatPath, $filename, [
-            'Content-Type' => 'application/pdf',
+            'Content-Type' => $mime,
             'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0, private',
             'Pragma' => 'public',
             'X-Content-Type-Options' => 'nosniff',
