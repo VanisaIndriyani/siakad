@@ -46,6 +46,10 @@
     if ($tempatVal === '') $tempatVal = '-';
     $penyelenggaraVal = trim((string)($kegiatan->penyelenggara ?? ''));
     if ($penyelenggaraVal === '') $penyelenggaraVal = 'IAI DDI SIDRAP';
+    $ketuaPanitiaNama = trim((string)($kegiatan->ketua_panitia_nama ?? ''));
+    $ketuaPanitiaNip = trim((string)($kegiatan->ketua_panitia_nip ?? ''));
+    $rektorNama = trim((string)($kegiatan->rektor_nama ?? ''));
+    $rektorNip = trim((string)($kegiatan->rektor_nip ?? ''));
 
     $nowCetak = \Illuminate\Support\Carbon::now()->setTimezone('Asia/Makassar');
 @endphp
@@ -67,7 +71,7 @@
             position: relative;
             width: 210mm;
             min-height: 297mm;
-            padding: 6mm 10mm 7mm 10mm;
+            padding: 5mm 10mm 6mm 10mm;
             margin: 0 auto;
             page-break-after: always;
         }
@@ -76,8 +80,7 @@
             table-layout: fixed;
             width: 100%;
             padding: 0;
-            margin: 0 0 0.8mm 0;
-            vertical-align: middle;
+            margin: 0 0 0.5mm 0;
         }
         .kop-logo-side {
             display: table-cell;
@@ -105,42 +108,42 @@
             font-size: 19px;
             font-weight: 700;
             letter-spacing: 0.6px;
-            line-height: 1.15;
-            margin: 0 0 1mm 0;
+            line-height: 1.1;
+            margin: 0 0 0.5mm 0;
             text-align: center;
         }
         .kop-text .kop-institusi-2 {
             font-size: 18px;
             font-weight: 700;
             letter-spacing: 0.6px;
-            line-height: 1.15;
-            margin: 0 0 1mm 0;
+            line-height: 1.1;
+            margin: 0 0 0.5mm 0;
             text-align: center;
         }
         .kop-text .kop-kota {
             font-size: 18px;
             font-weight: 700;
             letter-spacing: 0.6px;
-            line-height: 1.15;
-            margin: 0 0 1.2mm 0;
+            line-height: 1.1;
+            margin: 0 0 0.7mm 0;
             text-align: center;
         }
         .kop-text .kop-akreditasi {
-            font-size: 10.5px;
+            font-size: 10px;
             font-weight: 600;
-            line-height: 1.2;
-            margin: 0 0 0.6mm 0;
+            line-height: 1.15;
+            margin: 0 0 0.3mm 0;
             text-align: center;
         }
         .kop-text .kop-alamat {
-            font-size: 10px;
-            line-height: 1.2;
-            margin: 0 0 0.4mm 0;
+            font-size: 9.5px;
+            line-height: 1.15;
+            margin: 0 0 0.2mm 0;
             text-align: center;
         }
         .kop-text .kop-kontak {
-            font-size: 10px;
-            line-height: 1.2;
+            font-size: 9.5px;
+            line-height: 1.15;
             margin: 0;
             text-align: center;
         }
@@ -421,16 +424,16 @@
                 <div class="ttd-sub">Ketua Panitia</div>
                 <div class="ttd-space">&nbsp;</div>
                 <div class="ttd-garis">&nbsp;</div>
-                <div class="ttd-nama">_______________________________</div>
-                <div class="ttd-nip">NIP. _____________________</div>
+                <div class="ttd-nama">{!! $ketuaPanitiaNama !== '' ? e(strtoupper($ketuaPanitiaNama)) : '_______________________________' !!}</div>
+                <div class="ttd-nip">{!! $ketuaPanitiaNip !== '' ? 'NIP. '.e($ketuaPanitiaNip) : 'NIP. _____________________' !!}</div>
             </td>
             <td class="ttd-col" style="width:50%;">
                 <div class="ttd-label">Sidrap, {{ $nowCetak->format('j') }} {{ bulanIndo($nowCetak->month) }} {{ $nowCetak->format('Y') }}</div>
                 <div class="ttd-sub">Pimpinan / Penanggung Jawab</div>
                 <div class="ttd-space">&nbsp;</div>
                 <div class="ttd-garis">&nbsp;</div>
-                <div class="ttd-nama">_______________________________</div>
-                <div class="ttd-nip">Rektor IAI DDI Sidrap</div>
+                <div class="ttd-nama">{!! $rektorNama !== '' ? e(strtoupper($rektorNama)) : '_______________________________' !!}</div>
+                <div class="ttd-nip">{!! $rektorNip !== '' ? 'NIP. '.e($rektorNip) : 'Rektor IAI DDI Sidrap' !!}</div>
             </td>
         </tr>
     </table>
