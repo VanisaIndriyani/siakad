@@ -414,8 +414,7 @@ $nowCetak = \Illuminate\Support\Carbon::now()->setTimezone('Asia/Makassar');
         $isFirst = $halaman === 1;
         $isLast  = $halaman === $totalHalaman;
         $chunkCount = $pagePeserta->count();
-        $blankNeeded = $PAGE_SIZE - $chunkCount;
-        if ($isLast && $blankNeeded > 3) $blankNeeded = 3;
+        $blankNeeded = 0;
     @endphp
     <div class="page {{ $isLast ? 'page-last' : '' }}">
         <div class="content">
