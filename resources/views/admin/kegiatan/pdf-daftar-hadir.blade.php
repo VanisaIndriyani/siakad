@@ -1,504 +1,363 @@
-<!doctype html>
-<html>
+@php
+    function hariIndo($d) {
+        $map = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+        return $map[$d] ?? '';
+    }
+    function bulanIndo($m) {
+        $map = [1=>'Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+        return $map[(int)$m] ?? '';
+    }
+    function formatTglIndo($tanggal) {
+        if (empty($tanggal)) return '-';
+        try {
+            $c = \Illuminate\Support\Carbon::parse($tanggal)->setTimezone('Asia/Makassar');
+            return hariIndo($c->dayOfWeek).', '.$c->format('j').' '.bulanIndo($c->month).' '.$c->format('Y');
+        } catch (\Throwable $e) { return '-'; }
+    }
+    function formatTglIndoSingkat($tanggal) {
+        if (empty($tanggal)) return '-';
+        try {
+            $c = \Illuminate\Support\Carbon::parse($tanggal)->setTimezone('Asia/Makassar');
+            return $c->format('j').' '.substr(bulanIndo($c->month),0,3).' '.$c->format('Y');
+        } catch (\Throwable $e) { return '-'; }
+    }
+
+    $logoPaths = [
+        public_path('img/lo.jpeg'), public_path('img/lo.jpg'), public_path('img/logo.jpeg'), public_path('img/logo.jpg'),
+        base_path('public_html/img/lo.jpeg'), base_path('public_html/img/lo.jpg'),
+        base_path('public/img/lo.jpeg'), base_path('public/img/lo.jpg'),
+    ];
+    $logoFinalSrc = '';
+    foreach ($logoPaths as $lp) { if (@file_exists($lp)) { $logoFinalSrc = $lp; break; } }
+    $logoBase64 = '';
+    if ($logoFinalSrc !== '') {
+        $ext = strtolower(pathinfo($logoFinalSrc, PATHINFO_EXTENSION));
+        $mime = in_array($ext,['jpeg','jpg']) ? 'image/jpeg' : 'image/png';
+        $raw = @file_get_contents($logoFinalSrc);
+        if ($raw !== false) $logoBase64 = 'data:'.$mime.';base64,'.base64_encode($raw);
+    }
+
+    $MAKS_BARIS = 35;
+    $totalPeserta = $peserta->count();
+    $totalBlank = max(0, $MAKS_BARIS - $totalPeserta);
+    if ($totalBlank > 15) $totalBlank = 15;
+
+    $tempatVal = trim((string)($kegiatan->tempat ?? ''));
+    if ($tempatVal === '') $tempatVal = '-';
+    $penyelenggaraVal = trim((string)($kegiatan->penyelenggara ?? ''));
+    if ($penyelenggaraVal === '') $penyelenggaraVal = 'IAI DDI SIDRAP';
+
+    $nowCetak = \Illuminate\Support\Carbon::now()->setTimezone('Asia/Makassar');
+@endphp
+<!DOCTYPE html>
+<html lang="id">
 <head>
-<meta charset="utf-8">
-<title>DAFTAR HADIR - {{ strtoupper($kegiatan->judul) }}</title>
-<style>
-@page {
-    size: A4 portrait;
-    margin: 0 !important;
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>DAFTAR HADIR PESERTA</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 0;
+            padding: 0;
+        }
+        * { -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box; }
+        html, body { margin:0; padding:0; font-family:'Times New Roman', Times, serif; color:#000; background:#fff; font-size:10px; }
+        .page {
+            position: relative;
+            width: 210mm;
+            min-height: 297mm;
+            padding: 6mm 10mm 7mm 10mm;
+            margin: 0 auto;
+            page-break-after: always;
+        }
+        .kop-wrap {
+            display: table;
+            table-layout: fixed;
+            width: 100%;
+            padding: 0;
+            margin: 0 0 0.8mm 0;
+            vertical-align: middle;
+        }
+        .kop-logo-side {
+            display: table-cell;
+            vertical-align: middle;
+            width: 22mm;
+            padding: 0;
+            margin: 0;
+            text-align: center;
+        }
+        .kop-logo-side img {
+            width: 20mm;
+            height: 20mm;
+            display: block;
+            margin: 0 auto;
+            transform: none;
+        }
+        .kop-text {
+            display: table-cell;
+            vertical-align: middle;
+            text-align: center;
+            padding: 0 1mm 0 3mm;
+            margin: 0;
+        }
+        .kop-text .kop-institusi {
+            font-size: 19px;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            line-height: 1.15;
+            margin: 0 0 1mm 0;
+            text-align: center;
+        }
+        .kop-text .kop-institusi-2 {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            line-height: 1.15;
+            margin: 0 0 1mm 0;
+            text-align: center;
+        }
+        .kop-text .kop-kota {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            line-height: 1.15;
+            margin: 0 0 1.2mm 0;
+            text-align: center;
+        }
+        .kop-text .kop-akreditasi {
+            font-size: 10.5px;
+            font-weight: 600;
+            line-height: 1.2;
+            margin: 0 0 0.6mm 0;
+            text-align: center;
+        }
+        .kop-text .kop-alamat {
+            font-size: 10px;
+            line-height: 1.2;
+            margin: 0 0 0.4mm 0;
+            text-align: center;
+        }
+        .kop-text .kop-kontak {
+            font-size: 10px;
+            line-height: 1.2;
+            margin: 0;
+            text-align: center;
+        }
+        .garis-tebal { 
+    width: 100%;
+    height: 2.4pt;
+    background: #000;
+    margin: 1.5mm 0 0.6mm 0;
 }
-*, *:before, *:after { box-sizing: border-box; }
-table, table th, table td { box-sizing: border-box; }
-html, body {
-    margin: 0 !important;
-    padding: 0 !important;
-    background: #fff !important;
-    color: #000 !important;
-    font-family: 'Times New Roman', Times, serif;
-    width: 210mm;
-    height: 297mm;
-    overflow: hidden;
-    position: relative;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-}
-.content {
-    position: absolute;
-    z-index: 10;
-    top: 6mm;
-    left: 7mm;
-    right: 7mm;
-    bottom: 7mm;
-    padding: 0 0.5mm;
-    overflow: hidden;
+       .garis-tipis { 
+    width:100%; 
+    height: 0.8pt; 
+    background:#000; 
+    margin: 0 0 2mm 0; 
 }
 
-/* BARIS KOP ATAS: KIRI = LOGO, KANAN = TEKS KOP (LURUS VERTIKAL - DI ATAS GARIS) */
-.kop-wrap {
+        .info-with-logo { display:block; width: 100%; margin: 0; padding: 0; }
+       .judul-box { 
     width: 100%;
-    color: #000;
-    margin-bottom: 1.2mm;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 4mm;
-}
-.kop-logo-side {
-    flex: 0 0 auto;
-    width: 22mm;
-    height: 22mm;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    align-self: center;
-    margin-top: 0;
-    padding-top: 0;
-}
-.kop-logo-side img {
-    width: 20mm;
-    height: 20mm;
-    object-fit: contain;
     display: block;
-    margin: 0 auto;
-    border: 0;
+    text-align: center;
+    margin: 0 0 2.5mm 0;
     padding: 0;
 }
-.kop-text {
-    flex: 1 1 auto;
-    display: block;
-    width: calc(100% - 22mm - 4mm);
-    margin: 0 auto;
-    text-align: center;
-}
-.kop-title-a {
-    display: block;
-    width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
-    font-size: 15.5px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    line-height: 1.15;
-    margin-top: 0;
-    margin-bottom: 0;
+        .judul-box .judul-utama {
+            font-size: 14px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            line-height: 1.2;
+            text-decoration: none;
+            color: #000;
+            margin: 0;
+        }
+
+       .info-table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    margin: 0;
     padding: 0;
-    color: #000;
-}
-.kop-title-a2 { margin-top: 0.25mm; }
-.kop-title-b {
-    display: block;
-    width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
-    font-size: 15px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    line-height: 1.15;
-    margin-top: 0.25mm;
-    margin-bottom: 0;
-    padding: 0;
-    color: #000;
-}
-.kop-terakreditasi {
-    display: block;
-    width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
-    font-size: 8.5px;
-    margin-top: 0.8mm;
-    color: #000;
-    letter-spacing: 0.1px;
-}
-.kop-alamat-line {
-    display: block;
-    width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
-    font-size: 8px;
-    margin-top: 0.3mm;
-    line-height: 1.2;
-    color: #000;
-}
-.kop-email-web { margin-top: 0.3mm; }
-
-.garis-tebal { border-top: 2.6pt solid #000; margin: 1.2mm 0 0.3mm 0; width: 100%; }
-.garis-tipis { border-top: 0.8pt solid #000; margin: 0 0 2mm 0; width: 100%; }
-
-/* AREA DI BAWAH GARIS KOP: FULL WIDTH JUDUL + INFO KEGIATAN (TANPA LOGO) */
-.info-with-logo {
-    display: block;
-    width: 100%;
-    margin-bottom: 0.5mm;
-}
-.info-right {
-    display: block;
-    width: 100%;
-    margin: 0 auto;
+    table-layout: auto;
 }
 
-.judul-box {
-    display: block;
-    width: 100%;
-    text-align: center;
-    margin-bottom: 2mm;
-}
-.judul-text {
-    display: block;
-    width: 100%;
-    text-align: center;
-    font-size: 14px;
-    font-weight: 800;
-    letter-spacing: 1.1px;
-    text-transform: uppercase;
-    color: #000;
-}
-.judul-nomor {
-    display: block;
-    width: 100%;
-    text-align: center;
-    font-size: 9px;
-    margin: 0.6mm auto 0;
-    color: #000;
-    font-style: italic;
+.info-table td {
+    border: none;
+    padding: 0.3mm 0;
+    vertical-align: top;
+    font-size: 9.5px;
+    line-height: 1.25;
 }
 
-.info-kegiatan {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    margin-bottom: 1.5mm;
-    font-size: 10px;
-    color: #000;
-}
-.info-kegiatan td { vertical-align: top; padding: 0.35mm 0; }
-.info-kegiatan td.label {
-    width: 26mm;
-    font-weight: 400;
-    position: relative;
+.info-table td.kiri {
+    width: 29mm;
     white-space: nowrap;
+    font-weight: 400;
 }
-.info-kegiatan td.label::after {
-    content: ":";
-    position: absolute;
-    left: 24.5mm;
-    top: 0.35mm;
-    display: inline-block;
-    color: #000;
-}
-.info-kegiatan td.value { padding-left: 5mm; font-weight: 700; }
-.info-kegiatan td.value-soft { padding-left: 5mm; font-weight: 400; }
-.info-row { display: flex; }
-.info-col { width: 50%; }
 
-table.daftar {
-    border-collapse: collapse;
-    width: 100%;
-    font-size: 8.5px;
-    color: #000;
-    table-layout: fixed;
-    margin-top: 0.5mm;
-}
-table.daftar thead th {
-    border: 1px solid #000;
-    background: #e0f2ea;
-    font-weight: 800;
-    letter-spacing: 0.1px;
-    padding: 0.8mm 0.4mm;
-    vertical-align: middle;
-    line-height: 1.15;
+.info-table td.titik-2 {
+    width: 3mm;
     text-align: center;
-    font-size: 8.5px;
+    padding: 0.3mm 1mm;
 }
-table.daftar tbody td {
-    border: 1px solid #000;
-    padding: 0.6mm 0.5mm;
-    line-height: 1.15;
-    vertical-align: middle;
-    height: 6mm;
-}
-table.daftar .col-no {
-    width: 6.5mm;
-    max-width: 6.5mm;
-    text-align: center;
-    padding: 0.6mm 0;
-}
-table.daftar .col-nama { width: 54mm; }
-table.daftar .col-npm { width: 25mm; text-align: center; }
-table.daftar .col-prodi { width: 36mm; }
-table.daftar .col-keterangan { width: 35mm; }
-table.daftar .col-ttd { width: 35mm; height: 6mm; }
-table.daftar tbody td.col-no { text-align: center; }
-table.daftar tbody td.col-npm { text-align: center; }
 
-.ttd-wrap-table { width: 100%; border-collapse: collapse; margin-top: 1.5mm; }
-.ttd-wrap-table td { vertical-align: top; width: 50%; padding: 0 2mm; font-size: 10px; color: #000; }
-.ttd-label { margin-bottom: 8mm; font-weight: 400; line-height: 1.3; }
-.ttd-label b { display: block; margin-bottom: 0.3mm; font-size: 10px; }
-.ttd-garis { border-top: 1px solid #000; margin: 0; padding-top: 0.4mm; }
-.ttd-nama { font-weight: 800; text-decoration: underline; text-underline-offset: 1px; font-size: 10px; }
-.ttd-nip { font-size: 9px; color: #000; }
-
-.footer {
-    clear: both;
-    margin-top: 0.8mm;
-    padding-top: 0.5mm;
-    border-top: 0.4px dashed #888;
-    font-size: 7.5px;
-    color: #555;
-    text-align: right;
-    font-style: italic;
+.info-table td.kanan {
+    padding-left: 1mm;
+    padding-right: 2mm;
+    white-space: normal;
+    word-wrap: break-word;
 }
-</style>
+        table.daftar-hadir {
+            width: 100% !important;
+            max-width: 100% !important;
+            border-collapse: collapse;
+            table-layout: fixed !important;
+            font-size: 8.5px;
+            color: #000;
+            margin: 1mm 0 0 0;
+            padding: 0;
+        }
+        table.daftar-hadir thead th {
+            border: 1px solid #000;
+            background: #e0f2ea;
+            font-weight: 800;
+            padding: 0.5mm 0.1mm;
+            line-height: 1.15;
+            vertical-align: middle;
+            text-align: center;
+            font-size: 8.5px;
+        }
+        table.daftar-hadir tbody td {
+            border: 1px solid #000;
+            padding: 0.3mm 0.1mm;
+            line-height: 1.15;
+            vertical-align: middle;
+            height: 5mm;
+            font-size: 8.5px;
+        }
+
+        .no-cell { width:5% !important; min-width:5% !important; max-width:5% !important; text-align:center; font-size:6.8px !important; line-height:1 !important; white-space:nowrap !important; padding: 0.3mm 0 !important; }
+        .nama-cell { width:30% !important; min-width:30% !important; max-width:30% !important; padding-left:0.6mm !important; padding-right:0.6mm !important; font-weight:700; }
+        .npm-cell { width:16% !important; min-width:16% !important; max-width:16% !important; text-align:center; padding-left:0.4mm !important; padding-right:0.4mm !important; font-family:'Courier New', monospace; }
+        .prodi-cell { width:20% !important; min-width:20% !important; max-width:20% !important; padding-left:0.5mm !important; padding-right:0.5mm !important; }
+        .status-cell { width:14% !important; min-width:14% !important; max-width:14% !important; text-align:center; padding-left:0.3mm !important; padding-right:0.3mm !important; font-weight:800; }
+        .ttd-cell { width:15% !important; min-width:15% !important; max-width:15% !important; text-align:center; height:5mm; }
+
+        .ttd-wrap-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 3mm;
+            table-layout: fixed;
+        }
+        .ttd-col {
+            width: 50%;
+            vertical-align: top;
+            padding: 0 4mm;
+            font-size: 10px;
+            line-height: 1.25;
+            text-align: center;
+        }
+        .ttd-label { font-weight:700; margin-bottom: 0.2mm; text-align:center; }
+        .ttd-sub { font-weight:600; margin-bottom: 8mm; text-align:center; }
+        .ttd-space { height: 0.2mm; line-height: 0.2mm; margin: 0; padding: 0; }
+        .ttd-garis {
+            height: 0.5mm;
+            width: 70%;
+            margin: 0 auto 0.8mm auto;
+            border-bottom: 1.2pt solid #000;
+        }
+        .ttd-nama { font-weight:700; text-align:center; margin-bottom: 0.5mm; }
+        .ttd-nip { font-style: italic; text-align:center; }
+
+        .footer-dashed {
+            width:100%; border-top:1px dashed #555; margin: 1.2mm 0 0.8mm 0; padding-top: 0.3mm;
+        }
+        .footer-text { font-size: 8px; text-align: right; color: #444; font-style: italic; }
+    </style>
 </head>
 <body>
-@php
-$logoFinalSrc = null;
-$logoCandidates = [];
-
-try { $logoCandidates[] = rtrim(public_path(), '\\/') . DIRECTORY_SEPARATOR . 'img' . DIRECTORY_SEPARATOR . 'lo.jpeg'; } catch (\Throwable $e) {}
-try { $logoCandidates[] = rtrim(public_path(), '\\/') . DIRECTORY_SEPARATOR . 'img' . DIRECTORY_SEPARATOR . 'lo.jpg'; } catch (\Throwable $e) {}
-try { $logoCandidates[] = rtrim(public_path(), '\\/') . DIRECTORY_SEPARATOR . 'img' . DIRECTORY_SEPARATOR . 'lo.png'; } catch (\Throwable $e) {}
-try { $logoCandidates[] = rtrim(public_path(), '\\/') . DIRECTORY_SEPARATOR . 'img' . DIRECTORY_SEPARATOR . 'logo.png'; } catch (\Throwable $e) {}
-try { $logoCandidates[] = rtrim(public_path(), '\\/') . DIRECTORY_SEPARATOR . 'img' . DIRECTORY_SEPARATOR . 'logo.jpeg'; } catch (\Throwable $e) {}
-
-try {
-    $bp = rtrim(base_path(), '\\/');
-    if ($bp !== '') {
-        $logoCandidates[] = $bp . '/public/img/lo.jpeg';
-        $logoCandidates[] = $bp . '/public_html/img/lo.jpeg';
-        $logoCandidates[] = $bp . '/../public_html/img/lo.jpeg';
-        $logoCandidates[] = $bp . '/../public/img/lo.jpeg';
-        $logoCandidates[] = $bp . '/public/img/lo.jpg';
-        $logoCandidates[] = $bp . '/public_html/img/lo.jpg';
-        $logoCandidates[] = $bp . '/public/img/logo.png';
-        $logoCandidates[] = $bp . '/public_html/img/logo.png';
-    }
-} catch (\Throwable $e) {}
-
-try {
-    $docRoot = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '\\/');
-    if ($docRoot !== '') {
-        $logoCandidates[] = $docRoot . '/img/lo.jpeg';
-        $logoCandidates[] = $docRoot . '/img/lo.jpg';
-        $logoCandidates[] = $docRoot . '/img/lo.png';
-        $logoCandidates[] = $docRoot . '/img/logo.png';
-        $logoCandidates[] = $docRoot . '/public/img/lo.jpeg';
-        $logoCandidates[] = $docRoot . '/../public/img/lo.jpeg';
-    }
-} catch (\Throwable $e) {}
-
-$logoCandidates = array_values(array_unique(array_filter($logoCandidates, static fn($p) => !empty($p) && is_string($p))));
-
-$logoNames = ['lo.jpeg', 'lo.jpg', 'lo.png', 'logo.jpeg', 'logo.jpg', 'logo.png'];
-foreach ($logoNames as $lname) {
-    try {
-        if (function_exists('resource_path')) { $logoCandidates[] = resource_path($lname); }
-    } catch (\Throwable $e) {}
-}
-
-foreach ($logoCandidates as $logoPath) {
-    try {
-        if (is_string($logoPath) && file_exists($logoPath) && is_file($logoPath) && is_readable($logoPath)) {
-            $data = @file_get_contents($logoPath);
-            if ($data && strlen($data) > 100 && strlen($data) < 400000) {
-                $ext = strtolower(pathinfo($logoPath, PATHINFO_EXTENSION));
-                $mime = ($ext === 'png') ? 'image/png' : (($ext === 'gif') ? 'image/gif' : 'image/jpeg');
-                $logoFinalSrc = 'data:' . $mime . ';base64,' . base64_encode($data);
-                break;
-            }
-        }
-    } catch (\Throwable $e) { $logoFinalSrc = null; }
-}
-unset($logoPath, $data, $ext, $mime, $logoCandidates, $logoNames, $bp, $docRoot);
-
-$totalPeserta = $peserta->count();
-$totalHadir   = $peserta->where('status_hadir', true)->count();
-$totalBelum   = $totalPeserta - $totalHadir;
-
-$MAKS_BARIS = 24;
-$totalBlank = 0;
-if ($totalPeserta < $MAKS_BARIS) {
-    $totalBlank = $MAKS_BARIS - $totalPeserta;
-}
-$pct = $totalPeserta > 0 ? round(($totalHadir / $totalPeserta) * 100, 1) : 0;
-
-$namaPanitia = trim($kegiatan->ketua_panitia_nama ?? '');
-if ($namaPanitia === '') $namaPanitia = trim($kegiatan->penyelenggara ?? 'Panitia Kegiatan');
-$nipPanitia  = trim($kegiatan->ketua_panitia_nip ?? '');
-if ($nipPanitia === '') $nipPanitia = '-';
-$keteranganPanitia = trim($kegiatan->penyelenggara ?? 'Panitia Penyelenggara');
-
-$namaRektor = trim($kegiatan->rektor_nama ?? '');
-if ($namaRektor === '') $namaRektor = 'Dr. H. Muh. Anshar, M.Ag.';
-$nipRektor  = trim($kegiatan->rektor_nip ?? '');
-if ($nipRektor === '') $nipRektor = '-';
-
-function hariIndo($inggris): string {
-    $map = [
-        'Monday' => 'Senin', 'Mon' => 'Senin',
-        'Tuesday' => 'Selasa', 'Tue' => 'Selasa',
-        'Wednesday' => 'Rabu', 'Wed' => 'Rabu',
-        'Thursday' => 'Kamis', 'Thu' => 'Kamis',
-        'Friday' => 'Jumat', 'Fri' => 'Jumat',
-        'Saturday' => 'Sabtu', 'Sat' => 'Sabtu',
-        'Sunday' => 'Minggu', 'Sun' => 'Minggu',
-    ];
-    return $map[$inggris] ?? $inggris;
-}
-function bulanIndo($inggris): string {
-    $map = [
-        'January' => 'Januari', 'Jan' => 'Januari',
-        'February' => 'Februari', 'Feb' => 'Februari',
-        'March' => 'Maret', 'Mar' => 'Maret',
-        'April' => 'April', 'Apr' => 'April',
-        'May' => 'Mei',
-        'June' => 'Juni', 'Jun' => 'Juni',
-        'July' => 'Juli', 'Jul' => 'Juli',
-        'August' => 'Agustus', 'Aug' => 'Agustus',
-        'September' => 'September', 'Sep' => 'Sept',
-        'October' => 'Oktober', 'Oct' => 'Okt',
-        'November' => 'November', 'Nov' => 'Nov',
-        'December' => 'Desember', 'Dec' => 'Des',
-    ];
-    return $map[$inggris] ?? $inggris;
-}
-function formatTglIndo($tanggal): string {
-    try {
-        if (empty($tanggal)) return '-';
-        $c = \Illuminate\Support\Carbon::parse($tanggal);
-        $hariInggris = $c->format('l');
-        $hari = hariIndo($hariInggris);
-        $tgl = $c->format('j');
-        $bulanInggris = $c->format('F');
-        $bulan = bulanIndo($bulanInggris);
-        $tahun = $c->format('Y');
-        return "{$hari}, {$tgl} {$bulan} {$tahun}";
-    } catch (\Throwable $e) {
-        return is_string($tanggal) ? $tanggal : '-';
-    }
-}
-function formatTglIndoSingkat($tanggal): string {
-    try {
-        if (empty($tanggal)) return '-';
-        $c = \Illuminate\Support\Carbon::parse($tanggal);
-        $tgl = $c->format('j');
-        $bulanInggris = $c->format('F');
-        $bulan = bulanIndo($bulanInggris);
-        $tahun = $c->format('Y');
-        return "{$tgl} {$bulan} {$tahun}";
-    } catch (\Throwable $e) {
-        return is_string($tanggal) ? $tanggal : '-';
-    }
-}
-@endphp
-
-<div class="content">
-    {{-- BARIS PERTAMA (ATAS GARIS): KIRI = LOGO, KANAN = TEKS KOP 6 BARIS LURUS VERTIKAL --}}
+<div class="page">
     <div class="kop-wrap">
         <div class="kop-logo-side">
-            @if($logoFinalSrc)
-                <img src="{{ $logoFinalSrc }}" alt="Logo IAI DDI Sidrap" width="80" height="80">
-            @else
-                <div style="width:20mm;height:20mm;margin:0 auto;border-radius:50%;background:#0f6244;color:#fff;font-size:9px;font-weight:800;line-height:20mm;text-align:center;">IAI DDI</div>
+            @if($logoBase64 !== '')
+                <img src="{{ $logoBase64 }}" alt="Logo IAI DDI">
             @endif
         </div>
         <div class="kop-text">
-            <div class="kop-title-a">INSTITUT AGAMA ISLAM</div>
-            <div class="kop-title-a kop-title-a2">DARUD DA'WAH WAL IRSYAD</div>
-            <div class="kop-title-b">SIDENRENG RAPPANG</div>
-            <div class="kop-terakreditasi">TERAKREDITASI INSTITUSI • SK : 337/SK/BAN-PT/Ak-S/2.0/PT/VI/2026</div>
-            <div class="kop-alamat-line">Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang</div>
-            <div class="kop-alamat-line kop-email-web">E-mail : iaiddisidrap@gmail.com &nbsp;&nbsp; Website : www.yppddisrapp.ac.id</div>
+            <div class="kop-institusi">INSTITUT AGAMA ISLAM</div>
+            <div class="kop-institusi-2">DARUD DA'WAH WAL IRSYAD</div>
+            <div class="kop-kota">SIDENRENG RAPPANG</div>
+            <div class="kop-akreditasi">TERAKREDITASI INSTITUSI &bull; SK : 337/SK/BAN-PT/Ak-S/2.0/PT/VI/2026</div>
+            <div class="kop-alamat">Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang</div>
+            <div class="kop-kontak">E-mail : iaiddisidrap@gmail.com &nbsp;&nbsp; Website : www.yppddisrapp.ac.id</div>
         </div>
     </div>
+
     <div class="garis-tebal"></div>
     <div class="garis-tipis"></div>
 
-    {{-- BARIS KEDUA (DI BAWAH GARIS KOP): FULL WIDTH JUDUL + INFO KEGIATAN (TANPA LOGO LAGI) --}}
     <div class="info-with-logo">
-        <div class="info-right">
-            <div class="judul-box">
-                <div class="judul-text">DAFTAR HADIR PESERTA</div>
-                <div class="judul-nomor">
-                    {{ strtoupper($kegiatan->jenis_kegiatan) }} &mdash;
-                    {{ strtoupper($kegiatan->judul) }}
-                </div>
-            </div>
-
-            <div class="info-row">
-                <div class="info-col">
-                    <table class="info-kegiatan" style="margin-bottom: 0;">
-                        <tr>
-                            <td class="label">Tema Kegiatan</td>
-                            <td class="value">{{ $kegiatan->judul }}</td>
-                        </tr>
-                        <tr>
-                            <td class="label">Jenis Kegiatan</td>
-                            <td class="value-soft">{{ $kegiatan->jenis_kegiatan }}</td>
-                        </tr>
-                        <tr>
-                            <td class="label">Hari / Tanggal</td>
-                            <td class="value-soft">
-                                @if(!empty($kegiatan->tanggal_kegiatan))
-                                    {{ formatTglIndo($kegiatan->tanggal_kegiatan) }}
-                                @else -
-                                @endif
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="label">Waktu</td>
-                            <td class="value-soft">
-                                @if(!empty($kegiatan->waktu_mulai))
-                                    {{ substr($kegiatan->waktu_mulai,0,5) }}
-                                    @if(!empty($kegiatan->waktu_selesai))
-                                        s/d {{ substr($kegiatan->waktu_selesai,0,5) }} WITA
-                                    @else WITA
-                                    @endif
-                                @else -
-                                @endif
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-                <div class="info-col">
-                    <table class="info-kegiatan" style="margin-bottom: 0;">
-                        <tr>
-                            <td class="label">Tempat / Lokasi</td>
-                            <td class="value-soft">{{ $kegiatan->lokasi ?? '-' }}</td>
-                        </tr>
-                        <tr>
-                            <td class="label">Penyelenggara</td>
-                            <td class="value-soft">{{ $kegiatan->penyelenggara ?? 'IAI DDI Sidrap' }}</td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
+        <div class="judul-box">
+            <div class="judul-utama">DAFTAR HADIR PESERTA</div>
         </div>
+
+        <table class="info-table">
+            <tr>
+                <td class="kiri">Tema Kegiatan</td>
+                <td class="titik-2">:</td>
+                <td class="kanan" style="font-weight:700;">{{ strtoupper($kegiatan->judul ?? '-') }}</td>
+                <td class="kiri" style="width:38mm;">Tempat / Lokasi</td>
+                <td class="titik-2">:</td>
+                <td class="kanan">{{ $tempatVal }}</td>
+            </tr>
+            <tr>
+                <td class="kiri">Jenis Kegiatan</td>
+                <td class="titik-2">:</td>
+                <td class="kanan">{{ strtoupper($kegiatan->jenis_kegiatan ?? '-') }}</td>
+                <td class="kiri" style="width:38mm;">Penyelenggara</td>
+                <td class="titik-2">:</td>
+                <td class="kanan">{{ $penyelenggaraVal }}</td>
+            </tr>
+            <tr>
+                <td class="kiri">Hari, Tanggal</td>
+                <td class="titik-2">:</td>
+                <td class="kanan">{{ formatTglIndo($kegiatan->tanggal_mulai ?? $kegiatan->tanggal ?? now()) }}</td>
+                <td class="kiri" style="width:38mm;">Jumlah Peserta</td>
+                <td class="titik-2">:</td>
+                <td class="kanan"><b>{{ $totalPeserta }}</b> orang (Maks. {{ $MAKS_BARIS }} baris)</td>
+            </tr>
+            <tr>
+                <td class="kiri">Waktu (WITA)</td>
+                <td class="titik-2">:</td>
+                <td class="kanan">
+                    @php
+                        $wm = $kegiatan->waktu_mulai ?? '';
+                        $ws = $kegiatan->waktu_selesai ?? '';
+                        if ($wm !== '') $wm = substr(trim((string)$wm), 0, 5);
+                        if ($ws !== '') $ws = substr(trim((string)$ws), 0, 5);
+                        if ($wm !== '' && $ws !== '') { echo $wm.' s/d '.$ws.' WITA'; }
+                        elseif ($wm !== '') { echo $wm.' WITA'; } else { echo '-'; }
+                    @endphp
+                </td>
+                <td class="kiri" style="width:38mm;"></td>
+                <td class="titik-2"></td>
+                <td class="kanan"></td>
+            </tr>
+        </table>
     </div>
 
-    {{-- TABEL DAFTAR HADIR --}}
-    <table class="daftar">
-        <colgroup>
-            <col class="col-no">
-            <col class="col-nama">
-            <col class="col-npm">
-            <col class="col-prodi">
-            <col class="col-keterangan">
-            <col class="col-ttd">
-        </colgroup>
+    <table class="daftar-hadir">
         <thead>
             <tr>
-                <th>NO</th>
-                <th>NAMA LENGKAP</th>
-                <th>NPM / NUPTK</th>
-                <th>PROGRAM STUDI</th>
-                <th>STATUS KEHADIRAN</th>
-                <th>TANDA TANGAN</th>
+                <th style="width:5% !important; min-width:5% !important; max-width:5% !important; font-size:7px !important; line-height:1 !important;">NO</th>
+                <th style="width:30% !important; min-width:30% !important; max-width:30% !important;">NAMA LENGKAP</th>
+                <th style="width:16% !important; min-width:16% !important; max-width:16% !important;">NPM / NUPTK</th>
+                <th style="width:20% !important; min-width:20% !important; max-width:20% !important;">PROGRAM STUDI</th>
+                <th style="width:14% !important; min-width:14% !important; max-width:14% !important;">STATUS KEHADIRAN</th>
+                <th style="width:15% !important; min-width:15% !important; max-width:15% !important;">TANDA TANGAN</th>
             </tr>
         </thead>
         <tbody>
@@ -507,55 +366,81 @@ function formatTglIndoSingkat($tanggal): string {
                 @php
                     $no = $i + 1;
                     $prodiTampil = trim((string)($p->program_studi ?? ''));
-                    if ($prodiTampil === '') $prodiTampil = $p->jenis_peserta === 'dosen' ? 'Dosen IAI DDI' : '-';
+                    if ($prodiTampil === '') {
+                        $prodiTampil = ($p->jenis_peserta === 'dosen') ? 'Dosen IAI DDI' : '-';
+                    }
                     $ket = $p->status_hadir ? 'HADIR' : 'TIDAK HADIR';
                     $ketColor = $p->status_hadir ? '#065f46' : '#991b1b';
                     $bgCell = $p->status_hadir ? '#ecfdf5' : '#fef2f2';
-                    $identitas = $p->jenis_peserta === 'dosen' ? ($p->nidn ?? '-') : ($p->npm ?? '-');
+                    try {
+                        $identitas = (string)$p->nomor_identitas;
+                    } catch (\Throwable $e) {
+                        $identitas = $p->jenis_peserta === 'dosen' ? (string)($p->nidn ?? '-') : (string)($p->npm ?? '-');
+                    }
                 @endphp
                 <tr>
-                    <td class="col-no">{{ $no }}</td>
-                    <td class="col-nama" style="font-weight: 700;">{{ strtoupper($p->nama_lengkap) }}</td>
-                    <td class="col-npm" style="font-family:'Courier New', monospace;">{{ $identitas }}</td>
-                    <td class="col-prodi">{{ $prodiTampil }}</td>
-                    <td class="col-keterangan" style="text-align:center; background: {{ $bgCell }}; color: {{ $ketColor }}; font-weight: 800;">
+                    <td class="no-cell" style="width:5% !important; min-width:5% !important; max-width:5% !important;">{{ $no }}.</td>
+                    <td class="nama-cell" style="width:30% !important; min-width:30% !important; max-width:30% !important;">{{ strtoupper($p->nama_lengkap) }}</td>
+                    <td class="npm-cell" style="width:16% !important; min-width:16% !important; max-width:16% !important;">{{ $identitas }}</td>
+                    <td class="prodi-cell" style="width:20% !important; min-width:20% !important; max-width:20% !important;">{{ $prodiTampil }}</td>
+                    <td class="status-cell" style="width:14% !important; min-width:14% !important; max-width:14% !important; background:{{ $bgCell }}; color:{{ $ketColor }};">
                         {{ $ket }}
                         @if($p->status_hadir && !empty($p->waktu_hadir))
-                            <div style="font-weight: 400; color:#333; font-size: 6.6px; margin-top:0.25mm;">
-                                {{ \Illuminate\Support\Carbon::parse($p->waktu_hadir)->format('H:i') }} WITA
+                            <div style="font-weight:400; color:#333; font-size:6.6px; margin-top:0.25mm;">
+                                {{ \Illuminate\Support\Carbon::parse($p->waktu_hadir)->setTimezone('Asia/Makassar')->format('H:i') }} WITA
                             </div>
                         @endif
                         @if(!empty($p->keterangan))
-                            <div style="font-weight: 400; color:#555; font-size:6.6px; margin-top:0.25mm;">
+                            <div style="font-weight:400; color:#555; font-size:6.6px; margin-top:0.25mm;">
                                 {{ \Illuminate\Support\Str::limit(strip_tags($p->keterangan), 38) }}
                             </div>
                         @endif
                     </td>
-                    <td class="col-ttd"></td>
+                    <td class="ttd-cell" style="width:15% !important; min-width:15% !important; max-width:15% !important;"></td>
                 </tr>
             @endforeach
 
             @for($b = 1; $b <= $totalBlank; $b++)
+                @php $blankNo = $totalPeserta + $b; @endphp
                 <tr>
-                    <td class="col-no">{{ $totalPeserta + $b }}</td>
-                    <td class="col-nama">&nbsp;</td>
-                    <td class="col-npm">&nbsp;</td>
-                    <td class="col-prodi">&nbsp;</td>
-                    <td class="col-keterangan">&nbsp;</td>
-                    <td class="col-ttd"></td>
+                    <td class="no-cell" style="width:5% !important; min-width:5% !important; max-width:5% !important;">{{ $blankNo }}.</td>
+                    <td class="nama-cell" style="width:30% !important; min-width:30% !important; max-width:30% !important;">&nbsp;</td>
+                    <td class="npm-cell" style="width:16% !important; min-width:16% !important; max-width:16% !important;">&nbsp;</td>
+                    <td class="prodi-cell" style="width:20% !important; min-width:20% !important; max-width:20% !important;">&nbsp;</td>
+                    <td class="status-cell" style="width:14% !important; min-width:14% !important; max-width:14% !important;">&nbsp;</td>
+                    <td class="ttd-cell" style="width:15% !important; min-width:15% !important; max-width:15% !important;"></td>
                 </tr>
             @endfor
         </tbody>
     </table>
 
-    {{-- TANDA TANGAN 2 KOLOM --}}
- 
+    <table class="ttd-wrap-table">
+        <tr>
+            <td class="ttd-col" style="width:50%;">
+                <div class="ttd-label">Mengetahui / Menyetujui,</div>
+                <div class="ttd-sub">Ketua Panitia</div>
+                <div class="ttd-space">&nbsp;</div>
+                <div class="ttd-garis">&nbsp;</div>
+                <div class="ttd-nama">_______________________________</div>
+                <div class="ttd-nip">NIP. _____________________</div>
+            </td>
+            <td class="ttd-col" style="width:50%;">
+                <div class="ttd-label">Sidrap, {{ $nowCetak->format('j') }} {{ bulanIndo($nowCetak->month) }} {{ $nowCetak->format('Y') }}</div>
+                <div class="ttd-sub">Pimpinan / Penanggung Jawab</div>
+                <div class="ttd-space">&nbsp;</div>
+                <div class="ttd-garis">&nbsp;</div>
+                <div class="ttd-nama">_______________________________</div>
+                <div class="ttd-nip">Rektor IAI DDI Sidrap</div>
+            </td>
+        </tr>
+    </table>
 
-    <div class="footer">
-        Dicetak otomatis oleh Sistem Informasi Akademik (SIAKAD) IAI DDI Sidrap pada
-        {{ formatTglIndo(now()) }} {{ \Illuminate\Support\Carbon::now()->format('H:i:s') }} WITA
+    <div class="footer-dashed"></div>
+    <div class="footer-text">
+        Dicetak otomatis oleh Sistem Informasi Akademik (SIAKAD) IAI DDI Sidrap
+        pada {{ hariIndo($nowCetak->dayOfWeek) }}, {{ $nowCetak->format('j') }} {{ bulanIndo($nowCetak->month) }} {{ $nowCetak->format('Y') }}
+        {{ $nowCetak->format('H:i') }} WITA
     </div>
 </div>
-
 </body>
 </html>
