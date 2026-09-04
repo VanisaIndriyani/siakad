@@ -225,17 +225,17 @@ table.daftar {
    ========================= */
 
 table.daftar col.col-no {
-    width: 8px !important;
+    width: 3mm !important;
 }
 
 table.daftar th.col-no,
 table.daftar td.col-no {
-    width: 8px !important;
-    min-width: 8px !important;
-    max-width: 8px !important;
+    width: 3mm !important;
+    min-width: 3mm !important;
+    max-width: 3mm !important;
 
-    padding-left: 0 !important;
-    padding-right: 0 !important;
+    padding-left: 0.2mm !important;
+    padding-right: 0.2mm !important;
 
     text-align: center !important;
     vertical-align: middle !important;
@@ -247,7 +247,7 @@ table.daftar td.col-no {
 /* Kolom lainnya */
 
 table.daftar col.col-nama {
-    width: 62mm !important;
+    width: 60mm !important;
 }
 
 table.daftar col.col-npm {
@@ -299,10 +299,11 @@ table.daftar tbody td {
 /* NO */
 
 table.daftar tbody td.col-no {
-    font-size: 7px !important;
+    font-size: 8.5px !important;
     font-weight: 400;
     text-align: center !important;
-    padding: 0 !important;
+    padding-left: 0.2mm !important;
+    padding-right: 0.2mm !important;
 }
 
 /* NPM */
