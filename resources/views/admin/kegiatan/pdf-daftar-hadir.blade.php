@@ -44,7 +44,7 @@ html, body {
 .kop-wrap {
     position: relative;
     width: 100%;
-    height: 24.5mm;
+    height: 23.2mm;
     color: #000;
     margin-bottom: 0;
     padding-bottom: 0;
@@ -89,7 +89,7 @@ html, body {
     padding: 0;
     color: #000;
 }
-.kop-title-a2 { margin-top: 0.25mm; }
+.kop-title-a2 { margin-top: 0.15mm; }
 .kop-title-b {
     display: block;
     width: 100%;
@@ -100,7 +100,7 @@ html, body {
     font-weight: 800;
     letter-spacing: 0.5px;
     line-height: 1.15;
-    margin-top: 0.25mm;
+    margin-top: 0.15mm;
     margin-bottom: 0;
     padding: 0;
     color: #000;
@@ -112,7 +112,7 @@ html, body {
     margin-right: auto;
     text-align: center;
     font-size: 8.5px;
-    margin-top: 0.8mm;
+    margin-top: 0.25mm;
     color: #000;
     letter-spacing: 0.1px;
 }
@@ -123,11 +123,11 @@ html, body {
     margin-right: auto;
     text-align: center;
     font-size: 8px;
-    margin-top: 0.3mm;
-    line-height: 1.2;
+    margin-top: 0.1mm;
+    line-height: 1.15;
     color: #000;
 }
-.kop-email-web { margin-top: 0.3mm; }
+.kop-email-web { margin-top: 0.05mm; margin-bottom: 0; padding-bottom: 0; }
 
 .garis-tebal { border-top: 2.6pt solid #000; margin: 0 0 0.1mm 0; width: 100%; padding-top: 0; padding-bottom: 0; }
 .garis-tipis { border-top: 0.8pt solid #000; margin: 0 0 0.8mm 0; width: 100%; padding-top: 0; padding-bottom: 0; }
