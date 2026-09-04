@@ -40,40 +40,36 @@ html, body {
     padding: 0 0.5mm;
 }
 
-/* BARIS KOP ATAS: KIRI = LOGO, KANAN = TEKS KOP */
+/* BARIS KOP ATAS: KIRI = LOGO ABSOLUTE, TENGAH = TEKS KOP ABSOLUTE (TENGAH HALAMAN A4) */
 .kop-wrap {
+    position: relative;
     width: 100%;
+    height: 27mm;
     color: #000;
     margin-bottom: 1.2mm;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 4mm;
 }
 .kop-logo-side {
-    flex: 0 0 auto;
-    width: 22mm;
-    height: 22mm;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    align-self: center;
-    margin-top: 0;
-    padding-top: 0;
+    position: absolute;
+    left: 0;
+    top: 1mm;
+    width: 23mm;
+    height: 23mm;
+    text-align: left;
 }
 .kop-logo-side img {
     width: 20mm;
     height: 20mm;
     object-fit: contain;
     display: block;
-    margin: 0 auto;
+    margin: 0;
     border: 0;
     padding: 0;
 }
 .kop-text {
-    flex: 1 1 auto;
-    display: block;
-    width: calc(100% - 22mm - 4mm);
+    position: absolute;
+    left: 23mm;
+    right: 0;
+    top: 0;
     margin: 0 auto;
     text-align: center;
 }
@@ -242,14 +238,14 @@ table.daftar tbody td {
     height: 6mm;
 }
 table.daftar .col-no {
-    width: 9mm;
-    max-width: 9mm;
+    width: 6.5mm;
+    max-width: 6.5mm;
     text-align: center;
     padding: 0.6mm 0;
-    font-size: 8.5px;
-    line-height: 1.15;
+    font-size: 8px;
+    line-height: 1.1;
 }
-table.daftar .col-nama { width: 51.5mm; }
+table.daftar .col-nama { width: 54mm; }
 table.daftar .col-npm { width: 25mm; text-align: center; }
 table.daftar .col-prodi { width: 36mm; }
 table.daftar .col-keterangan { width: 35mm; }
@@ -525,8 +521,8 @@ $nowCetak = \Illuminate\Support\Carbon::now()->setTimezone('Asia/Makassar');
 
             <table class="daftar">
                 <colgroup>
-                    <col style="width: 9mm;">
-                    <col style="width: 51.5mm;">
+                    <col style="width: 6.5mm;">
+                    <col style="width: 54mm;">
                     <col style="width: 25mm;">
                     <col style="width: 36mm;">
                     <col style="width: 35mm;">
