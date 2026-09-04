@@ -63,7 +63,7 @@ html, body {
 }
 .page {
     position: relative; width: 210mm; min-height: 297mm;
-    padding: 5mm 6mm 5mm 6mm; margin: 0 auto; page-break-after: always;
+    padding: 5mm 4mm 5mm 4mm; margin: 0 auto; page-break-after: always;
 }
 .kop-wrap { position: relative; width: 100%; height: 27mm; margin: 0; padding: 0; }
 .kop-logo-side { position: absolute; left: 0; top: 1mm; width: 23mm; height: 23mm; text-align: left; }
@@ -91,6 +91,11 @@ table.daftar-hadir {
     width: 100% !important; max-width: 100% !important;
     border-collapse: collapse; table-layout: fixed !important;
     font-size: 8.5px; color: #000; margin: 0.5mm 0 0 0;
+}
+table.daftar-hadir, table.daftar-hadir th, table.daftar-hadir td {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
 }
 table.daftar-hadir thead { display: table-header-group; }
 table.daftar-hadir thead th {
@@ -203,12 +208,12 @@ table.daftar-hadir tbody td {
         <table class="daftar-hadir">
             <thead>
                 <tr>
-                    <th style="width:5%; font-size:7px; line-height:1;">NO</th>
-                    <th style="width:31%;">NAMA LENGKAP</th>
-                    <th style="width:15%;">NPM / NUPTK</th>
+                    <th style="width:4%; font-size:7px; line-height:1;">NO</th>
+                    <th style="width:30%;">NAMA LENGKAP</th>
+                    <th style="width:14%;">NPM / NUPTK</th>
                     <th style="width:20%;">PROGRAM STUDI</th>
                     <th style="width:14%;">STATUS</th>
-                    <th style="width:15%;">TANDA TANGAN</th>
+                    <th style="width:14%;">TANDA TANGAN</th>
                 </tr>
             </thead>
             <tbody>
@@ -224,9 +229,9 @@ table.daftar-hadir tbody td {
                         try { $id = (string)$p->nomor_identitas; } catch (\Throwable $e) { $id = $p->jenis_peserta === 'dosen' ? (string)($p->nidn ?? '-') : (string)($p->npm ?? '-'); }
                     @endphp
                     <tr>
-                        <td style="width:5%; text-align:center; font-size:7px; line-height:1; white-space:nowrap;">{{ $no }}.</td>
-                        <td style="width:31%; padding:0.3mm 0.5mm; font-weight:700;">{{ strtoupper($p->nama_lengkap) }}</td>
-                        <td style="width:15%; text-align:center; padding:0.3mm 0.3mm; font-family:'Courier New', monospace;">{{ $id }}</td>
+                        <td style="width:4%; text-align:center; font-size:7px; line-height:1; white-space:nowrap;">{{ $no }}.</td>
+                        <td style="width:30%; padding:0.3mm 0.5mm; font-weight:700;">{{ strtoupper($p->nama_lengkap) }}</td>
+                        <td style="width:14%; text-align:center; padding:0.3mm 0.3mm; font-family:'Courier New', monospace;">{{ $id }}</td>
                         <td style="width:20%; padding:0.3mm 0.4mm;">{{ $prodiTampil }}</td>
                         <td style="width:14%; text-align:center; padding:0.3mm 0.2mm; font-weight:800; background:{{ $bgCell }}; color:{{ $ketColor }};">
                             {{ $ket }}
@@ -237,17 +242,17 @@ table.daftar-hadir tbody td {
                                 <div style="font-weight:400; color:#555; font-size:6.5px; margin-top:0.2mm;">{{ \Illuminate\Support\Str::limit(strip_tags($p->keterangan), 40) }}</div>
                             @endif
                         </td>
-                        <td style="width:15%; text-align:center; height:4.5mm;"></td>
+                        <td style="width:14%; text-align:center; height:4.5mm;"></td>
                     </tr>
                 @endforeach
                 @for($b = 1; $b <= $blankNeeded; $b++)
                     <tr>
-                        <td style="width:5%; text-align:center; font-size:7px; line-height:1;">{{ ($chunkIdx * $PAGE_SIZE + $chunkCount + $b) }}.</td>
-                        <td style="width:31%; padding:0.3mm 0.5mm;">&nbsp;</td>
-                        <td style="width:15%; text-align:center;">&nbsp;</td>
+                        <td style="width:4%; text-align:center; font-size:7px; line-height:1;">{{ ($chunkIdx * $PAGE_SIZE + $chunkCount + $b) }}.</td>
+                        <td style="width:30%; padding:0.3mm 0.5mm;">&nbsp;</td>
+                        <td style="width:14%; text-align:center;">&nbsp;</td>
                         <td style="width:20%;">&nbsp;</td>
                         <td style="width:14%; text-align:center;">&nbsp;</td>
-                        <td style="width:15%; text-align:center; height:4.5mm;"></td>
+                        <td style="width:14%; text-align:center; height:4.5mm;"></td>
                     </tr>
                 @endfor
             </tbody>
