@@ -88,10 +88,27 @@ html, body {
 .info-table td.titik-2 { width: 3mm; text-align: center; padding: 0.1mm 0.5mm; }
 .info-table td.kanan   { padding: 0.1mm 0; white-space: normal; word-wrap: break-word; }
 table.daftar-hadir {
-    width: 100% !important; max-width: 100% !important;
-    border-collapse: collapse; table-layout: fixed !important;
-    font-size: 8.5px; color: #000; margin: 0.5mm 0 0 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    border-collapse: collapse;
+    table-layout: fixed !important;
+    font-size: 8.5px;
+    color: #000;
+    margin: 0.5mm 0 0 0;
 }
+
+table.daftar-hadir th,
+table.daftar-hadir td {
+    box-sizing: border-box !important;
+    overflow: hidden;
+}
+
+.col-no     { width: 9mm !important; }
+.col-nama   { width: 61mm !important; }
+.col-npm    { width: 28mm !important; }
+.col-prodi  { width: 40mm !important; }
+.col-status { width: 28mm !important; }
+.col-ttd    { width: 36mm !important; }
 table.daftar-hadir, table.daftar-hadir th, table.daftar-hadir td {
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
@@ -197,62 +214,221 @@ table.daftar-hadir tbody td {
             </div>
         @endif
 
-        <table class="daftar-hadir">
-            <thead>
-                <tr>
-                    <th style="width:4%; font-size:7px; line-height:1;">NO</th>
-                    <th style="width:30%;">NAMA LENGKAP</th>
-                    <th style="width:14%;">NPM / NUPTK</th>
-                    <th style="width:20%;">PROGRAM STUDI</th>
-                    <th style="width:14%;">STATUS</th>
-                    <th style="width:14%;">TANDA TANGAN</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($pagePeserta as $i => $p)
-                    @php
-                        $no = $chunkIdx * $PAGE_SIZE + $i + 1;
-                        $prodiTampil = trim((string)($p->program_studi ?? ''));
-                        if ($prodiTampil === '') $prodiTampil = ($p->jenis_peserta === 'dosen') ? 'Dosen IAI DDI' : '-';
-                        $hadir = (bool)$p->status_hadir;
-                        $ket = $hadir ? 'HADIR' : 'TIDAK HADIR';
-                        $ketColor = $hadir ? '#065f46' : '#991b1b';
-                        $bgCell = $hadir ? '#ecfdf5' : '#fef2f2';
-                        try { $id = (string)$p->nomor_identitas; } catch (\Throwable $e) { $id = $p->jenis_peserta === 'dosen' ? (string)($p->nidn ?? '-') : (string)($p->npm ?? '-'); }
-                    @endphp
-                    <tr>
-                        <td style="width:4%; text-align:center; font-size:7px; line-height:1; white-space:nowrap;">{{ $no }}.</td>
-                        <td style="width:30%; padding:0.3mm 0.5mm; font-weight:700;">{{ strtoupper($p->nama_lengkap) }}</td>
-                        <td style="width:14%; text-align:center; padding:0.3mm 0.3mm; font-family:'Courier New', monospace;">{{ $id }}</td>
-                        <td style="width:20%; padding:0.3mm 0.4mm;">{{ $prodiTampil }}</td>
-                        <td style="width:14%; text-align:center; padding:0.3mm 0.2mm; font-weight:800; background:{{ $bgCell }}; color:{{ $ketColor }};">
-                            {{ $ket }}
-                            @if($hadir && !empty($p->waktu_hadir))
-                                <div style="font-weight:400; color:#333; font-size:6.5px; margin-top:0.2mm;">{{ \Illuminate\Support\Carbon::parse($p->waktu_hadir)->setTimezone('Asia/Makassar')->format('H:i') }} WITA</div>
-                            @endif
-                            @if(!empty($p->keterangan))
-                                <div style="font-weight:400; color:#555; font-size:6.5px; margin-top:0.2mm;">{{ \Illuminate\Support\Str::limit(strip_tags($p->keterangan), 40) }}</div>
-                            @endif
-                        </td>
-                        <td style="width:14%; text-align:center; height:4.5mm; vertical-align:bottom;">
-                            <div style="width:100%; border-bottom:1pt solid #000; margin:0; padding:0;"></div>
-                        </td>
-                    </tr>
-                @endforeach
-                @for($b = 1; $b <= $blankNeeded; $b++)
-                    <tr>
-                        <td style="width:4%; text-align:center; font-size:7px; line-height:1;">{{ ($chunkIdx * $PAGE_SIZE + $chunkCount + $b) }}.</td>
-                        <td style="width:30%; padding:0.3mm 0.5mm;">&nbsp;</td>
-                        <td style="width:14%; text-align:center;">&nbsp;</td>
-                        <td style="width:20%;">&nbsp;</td>
-                        <td style="width:14%; text-align:center;">&nbsp;</td>
-                        <td style="width:14%; text-align:center; height:4.5mm; vertical-align:bottom;">
-                            <div style="width:100%; border-bottom:1pt solid #000; margin:0; padding:0;"></div>
-                        </td>
-                    </tr>
-                @endfor
-            </tbody>
-        </table>
+      <table class="daftar-hadir">
+
+    <colgroup>
+        <col style="width: 9mm;">
+        <col style="width: 61mm;">
+        <col style="width: 28mm;">
+        <col style="width: 40mm;">
+        <col style="width: 28mm;">
+        <col style="width: 36mm;">
+    </colgroup>
+
+    <thead>
+        <tr>
+            <th>NO</th>
+            <th>NAMA LENGKAP</th>
+            <th>NPM / NUPTK</th>
+            <th>PROGRAM STUDI</th>
+            <th>STATUS</th>
+            <th>TANDA TANGAN</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        @foreach($pagePeserta as $i => $p)
+
+            @php
+                $no = $chunkIdx * $PAGE_SIZE + $i + 1;
+
+                $prodiTampil = trim((string)($p->program_studi ?? ''));
+
+                if ($prodiTampil === '') {
+                    $prodiTampil =
+                        ($p->jenis_peserta === 'dosen')
+                        ? 'Dosen IAI DDI'
+                        : '-';
+                }
+
+                $hadir = (bool)$p->status_hadir;
+
+                $ket = $hadir
+                    ? 'HADIR'
+                    : 'TIDAK HADIR';
+
+                $ketColor = $hadir
+                    ? '#065f46'
+                    : '#991b1b';
+
+                $bgCell = $hadir
+                    ? '#ecfdf5'
+                    : '#fef2f2';
+
+                try {
+                    $id = (string)$p->nomor_identitas;
+                } catch (\Throwable $e) {
+                    $id =
+                        $p->jenis_peserta === 'dosen'
+                        ? (string)($p->nidn ?? '-')
+                        : (string)($p->npm ?? '-');
+                }
+            @endphp
+
+            <tr>
+
+                {{-- NO --}}
+                <td style="
+                    text-align:center;
+                    font-size:7px;
+                    line-height:1;
+                    white-space:nowrap;
+                ">
+                    {{ $no }}.
+                </td>
+
+
+                {{-- NAMA --}}
+                <td style="
+                    padding:0.3mm 0.8mm;
+                    font-weight:700;
+                    word-wrap:break-word;
+                ">
+                    {{ strtoupper($p->nama_lengkap) }}
+                </td>
+
+
+                {{-- NPM --}}
+                <td style="
+                    text-align:center;
+                    padding:0.3mm 0.3mm;
+                    font-family:'Courier New', monospace;
+                    font-size:8px;
+                ">
+                    {{ $id }}
+                </td>
+
+
+                {{-- PRODI --}}
+                <td style="
+                    padding:0.3mm 0.5mm;
+                    word-wrap:break-word;
+                ">
+                    {{ $prodiTampil }}
+                </td>
+
+
+                {{-- STATUS --}}
+                <td style="
+                    text-align:center;
+                    padding:0.3mm 0.2mm;
+                    font-weight:800;
+                    background:{{ $bgCell }};
+                    color:{{ $ketColor }};
+                ">
+
+                    {{ $ket }}
+
+                    @if($hadir && !empty($p->waktu_hadir))
+
+                        <div style="
+                            font-weight:400;
+                            color:#333;
+                            font-size:6.5px;
+                            margin-top:0.2mm;
+                        ">
+                            {{
+                                \Illuminate\Support\Carbon::parse($p->waktu_hadir)
+                                ->setTimezone('Asia/Makassar')
+                                ->format('H:i')
+                            }}
+                            WITA
+                        </div>
+
+                    @endif
+
+                    @if(!empty($p->keterangan))
+
+                        <div style="
+                            font-weight:400;
+                            color:#555;
+                            font-size:6.5px;
+                            margin-top:0.2mm;
+                        ">
+                            {{
+                                \Illuminate\Support\Str::limit(
+                                    strip_tags($p->keterangan),
+                                    40
+                                )
+                            }}
+                        </div>
+
+                    @endif
+
+                </td>
+
+
+                {{-- TANDA TANGAN --}}
+                <td style="
+                    width:36mm;
+                    height:4.5mm;
+                    text-align:center;
+                    vertical-align:bottom;
+                    padding:0 0 0.8mm 0;
+                ">
+                    <div style="
+                        width:92%;
+                        border-bottom:1pt solid #000;
+                        margin:0 auto 0 auto;
+                    "></div>
+                </td>
+
+            </tr>
+
+        @endforeach
+
+
+        {{-- BARIS KOSONG --}}
+        @for($b = 1; $b <= $blankNeeded; $b++)
+
+            <tr>
+
+                <td style="
+                    text-align:center;
+                    font-size:7px;
+                ">
+                    {{ $chunkIdx * $PAGE_SIZE + $chunkCount + $b }}.
+                </td>
+
+                <td>&nbsp;</td>
+
+                <td>&nbsp;</td>
+
+                <td>&nbsp;</td>
+
+                <td>&nbsp;</td>
+
+                <td style="
+                    height:4.5mm;
+                    text-align:center;
+                    vertical-align:bottom;
+                    padding:0 0 0.8mm 0;
+                ">
+                    <div style="
+                        width:92%;
+                        border-bottom:1pt solid #000;
+                        margin:0 auto 0 auto;
+                    "></div>
+                </td>
+
+            </tr>
+
+        @endfor
+
+    </tbody>
+
+</table>
 
         @if($isLast)
             <table class="ttd-wrap-table">
