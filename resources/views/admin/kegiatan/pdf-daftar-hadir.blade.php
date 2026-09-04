@@ -88,20 +88,21 @@
             width: 22mm;
             padding: 0;
             margin: 0;
-            text-align: center;
+            text-align: left;
         }
         .kop-logo-side img {
             width: 20mm;
             height: 20mm;
             display: block;
-            margin: 0 auto;
+            margin: 0;
             transform: none;
+            float: left;
         }
         .kop-text {
             display: table-cell;
             vertical-align: middle;
-            text-align: center;
-            padding: 0 1mm 0 3mm;
+            text-align: left;
+            padding: 0 1mm 0 0;
             margin: 0;
         }
         .kop-text .kop-institusi {
@@ -110,7 +111,7 @@
             letter-spacing: 0.6px;
             line-height: 1.1;
             margin: 0 0 0.5mm 0;
-            text-align: center;
+            text-align: left;
         }
         .kop-text .kop-institusi-2 {
             font-size: 18px;
@@ -118,7 +119,7 @@
             letter-spacing: 0.6px;
             line-height: 1.1;
             margin: 0 0 0.5mm 0;
-            text-align: center;
+            text-align: left;
         }
         .kop-text .kop-kota {
             font-size: 18px;
@@ -126,26 +127,26 @@
             letter-spacing: 0.6px;
             line-height: 1.1;
             margin: 0 0 0.7mm 0;
-            text-align: center;
+            text-align: left;
         }
         .kop-text .kop-akreditasi {
             font-size: 10px;
             font-weight: 600;
             line-height: 1.15;
             margin: 0 0 0.3mm 0;
-            text-align: center;
+            text-align: left;
         }
         .kop-text .kop-alamat {
             font-size: 9.5px;
             line-height: 1.15;
             margin: 0 0 0.2mm 0;
-            text-align: center;
+            text-align: left;
         }
         .kop-text .kop-kontak {
             font-size: 9.5px;
             line-height: 1.15;
             margin: 0;
-            text-align: center;
+            text-align: left;
         }
         .garis-tebal { 
     width: 100%;
