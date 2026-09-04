@@ -219,81 +219,113 @@ table.daftar {
     table-layout: fixed;
     margin-top: 0.5mm;
 }
+
+/* =========================
+   KOLOM NO BENAR-BENAR KECIL
+   ========================= */
+
+table.daftar col.col-no {
+    width: 8px !important;
+}
+
+table.daftar th.col-no,
+table.daftar td.col-no {
+    width: 8px !important;
+    min-width: 8px !important;
+    max-width: 8px !important;
+
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+
+    text-align: center !important;
+    vertical-align: middle !important;
+
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+/* Kolom lainnya */
+
+table.daftar col.col-nama {
+    width: 57mm !important;
+}
+
+table.daftar col.col-npm {
+    width: 25mm !important;
+}
+
+table.daftar col.col-prodi {
+    width: 37mm !important;
+}
+
+table.daftar col.col-keterangan {
+    width: 36mm !important;
+}
+
+table.daftar col.col-ttd {
+    width: 36mm !important;
+}
+
+/* HEADER */
+
 table.daftar thead th {
     border: 1px solid #000;
     background: #e0f2ea;
     font-weight: 800;
     letter-spacing: 0.1px;
+
     padding: 0.8mm 0.4mm;
+
     vertical-align: middle;
     line-height: 1.15;
     text-align: center;
+
     font-size: 8.5px;
 }
+
+/* ISI */
+
 table.daftar tbody td {
     border: 1px solid #000;
+
     padding: 0.6mm 0.5mm;
+
     line-height: 1.15;
     vertical-align: middle;
+
     height: 6mm;
 }
 
-/* ============================================================
-   KOLOM NO (SESEMPIT MUNGKIN - SESUAI INSTRUKSI POIN 9)
-   ============================================================ */
-table.daftar .col-no {
-    width: 3.5mm !important;
-    max-width: 3.5mm !important;
-    min-width: 3.5mm !important;
+/* NO */
+
+table.daftar tbody td.col-no {
+    font-size: 7px !important;
+    font-weight: 400;
     text-align: center !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-    padding-top: 0.2mm !important;
-    padding-bottom: 0.2mm !important;
-    font-size: 8px !important;
-    line-height: 1.1 !important;
-    white-space: nowrap;
-}
-td.col-no,
-th.col-no {
-    width: 3.5mm !important;
-    max-width: 3.5mm !important;
-    min-width: 3.5mm !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-    text-align: center !important;
-    white-space: nowrap;
-    overflow: hidden;
+    padding: 0 !important;
 }
 
-/* ============================================================
-   KOLOM LAINNYA (TOTAL LEBAR TETAP 191.5mm = SISA DARI 196mm - 4.5mm PADDING CONTENT)
-   col-no = 3.5mm + col-nama = 57mm (tambah 1mm dari sebelumnya karena kolom NO berkurang 1mm)
-   col-npm = 25mm
-   col-prodi = 36mm
-   col-keterangan = 35mm
-   col-ttd = 35mm
-   TOTAL = 3.5 + 57 + 25 + 36 + 35 + 35 = 191.5mm ✅
-   ============================================================ */
-table.daftar .col-nama { width: 57mm !important; }
-table.daftar .col-npm { width: 25mm !important; text-align: center; }
-table.daftar .col-prodi { width: 36mm !important; }
-table.daftar .col-keterangan { width: 35mm !important; }
-table.daftar .col-ttd {
-    width: 35mm !important;
-    height: 6mm;
+/* NPM */
+
+table.daftar tbody td.col-npm {
+    text-align: center;
+    font-family: 'Courier New', monospace;
+}
+
+/* TANDA TANGAN */
+
+table.daftar td.col-ttd {
     position: relative;
-    padding: 0;
+    padding: 0 !important;
 }
-table.daftar .col-ttd .garis-ttd {
+
+table.daftar td.col-ttd .garis-ttd {
     position: absolute;
     bottom: 1.4mm;
     left: 4%;
     width: 92%;
     border-bottom: 1pt solid #000;
 }
-table.daftar tbody td.col-no { text-align: center; }
-table.daftar tbody td.col-npm { text-align: center; }
 
 .ttd-wrap-table {
     width: 100%;
@@ -559,6 +591,7 @@ $nowCetak = \Illuminate\Support\Carbon::now()->setTimezone('Asia/Makassar');
                     <col class="col-keterangan">
                     <col class="col-ttd">
                 </colgroup>
+
                 <thead>
                     <tr>
                         <th class="col-no">NO</th>
@@ -569,48 +602,102 @@ $nowCetak = \Illuminate\Support\Carbon::now()->setTimezone('Asia/Makassar');
                         <th class="col-ttd">TANDA TANGAN</th>
                     </tr>
                 </thead>
+
                 <tbody>
                     @foreach($pagePeserta as $i => $p)
                         @php
                             $no = $chunkIdx * $PAGE_SIZE + $i + 1;
+
                             $prodiTampil = trim((string)($p->program_studi ?? ''));
-                            if ($prodiTampil === '') $prodiTampil = $p->jenis_peserta === 'dosen' ? 'Dosen IAI DDI' : '-';
+                            if ($prodiTampil === '') {
+                                $prodiTampil = $p->jenis_peserta === 'dosen'
+                                    ? 'Dosen IAI DDI'
+                                    : '-';
+                            }
+
                             $hadir = (bool)$p->status_hadir;
                             $ket = $hadir ? 'HADIR' : 'TIDAK HADIR';
+
                             $ketColor = $hadir ? '#065f46' : '#991b1b';
                             $bgCell = $hadir ? '#ecfdf5' : '#fef2f2';
-                            try { $identitas = (string)$p->nomor_identitas; } catch (\Throwable $e) { $identitas = $p->jenis_peserta === 'dosen' ? (string)($p->nidn ?? '-') : (string)($p->npm ?? '-'); }
+
+                            try {
+                                $identitas = (string)$p->nomor_identitas;
+                            } catch (\Throwable $e) {
+                                $identitas = $p->jenis_peserta === 'dosen'
+                                    ? (string)($p->nidn ?? '-')
+                                    : (string)($p->npm ?? '-');
+                            }
                         @endphp
+
                         <tr>
                             <td class="col-no">{{ $no }}</td>
-                            <td class="col-nama" style="font-weight: 700;">{{ strtoupper($p->nama_lengkap) }}</td>
-                            <td class="col-npm" style="font-family:'Courier New', monospace;">{{ $identitas }}</td>
-                            <td class="col-prodi">{{ $prodiTampil }}</td>
-                            <td class="col-keterangan" style="text-align:center; background: {{ $bgCell }}; color: {{ $ketColor }}; font-weight: 800;">
+
+                            <td class="col-nama" style="font-weight:700;">
+                                {{ strtoupper($p->nama_lengkap) }}
+                            </td>
+
+                            <td class="col-npm">
+                                {{ $identitas }}
+                            </td>
+
+                            <td class="col-prodi">
+                                {{ $prodiTampil }}
+                            </td>
+
+                            <td class="col-keterangan"
+                                style="
+                                    text-align:center;
+                                    background:{{ $bgCell }};
+                                    color:{{ $ketColor }};
+                                    font-weight:800;
+                                ">
                                 {{ $ket }}
+
                                 @if($hadir && !empty($p->waktu_hadir))
-                                    <div style="font-weight: 400; color:#333; font-size: 6.6px; margin-top:0.25mm;">
-                                        {{ \Illuminate\Support\Carbon::parse($p->waktu_hadir)->setTimezone('Asia/Makassar')->format('H:i') }} WITA
+                                    <div style="
+                                        font-weight:400;
+                                        color:#333;
+                                        font-size:6.6px;
+                                        margin-top:0.25mm;
+                                    ">
+                                        {{ \Illuminate\Support\Carbon::parse($p->waktu_hadir)->setTimezone('Asia/Makassar')->format('H:i') }}
+                                        WITA
                                     </div>
                                 @endif
+
                                 @if(!empty($p->keterangan))
-                                    <div style="font-weight: 400; color:#555; font-size:6.6px; margin-top:0.25mm;">
+                                    <div style="
+                                        font-weight:400;
+                                        color:#555;
+                                        font-size:6.6px;
+                                        margin-top:0.25mm;
+                                    ">
                                         {{ \Illuminate\Support\Str::limit(strip_tags($p->keterangan), 38) }}
                                     </div>
                                 @endif
                             </td>
-                            <td class="col-ttd"><div class="garis-ttd"></div></td>
+
+                            <td class="col-ttd">
+                                <div class="garis-ttd"></div>
+                            </td>
                         </tr>
                     @endforeach
 
                     @for($b = 1; $b <= $blankNeeded; $b++)
                         <tr>
-                            <td class="col-no">{{ $chunkIdx * $PAGE_SIZE + $chunkCount + $b }}</td>
+                            <td class="col-no">
+                                {{ $chunkIdx * $PAGE_SIZE + $chunkCount + $b }}
+                            </td>
+
                             <td class="col-nama">&nbsp;</td>
                             <td class="col-npm">&nbsp;</td>
                             <td class="col-prodi">&nbsp;</td>
                             <td class="col-keterangan">&nbsp;</td>
-                            <td class="col-ttd"><div class="garis-ttd"></div></td>
+
+                            <td class="col-ttd">
+                                <div class="garis-ttd"></div>
+                            </td>
                         </tr>
                     @endfor
                 </tbody>
