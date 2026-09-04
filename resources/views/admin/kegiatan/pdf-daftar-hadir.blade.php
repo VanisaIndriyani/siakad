@@ -238,14 +238,14 @@ table.daftar tbody td {
     height: 6mm;
 }
 table.daftar .col-no {
-    width: 7.5mm;
-    max-width: 7.5mm;
+    width: 5.5mm;
+    max-width: 5.5mm;
     text-align: center;
     padding: 0.6mm 0;
-    font-size: 8.5px;
-    line-height: 1.15;
+    font-size: 8px;
+    line-height: 1.1;
 }
-table.daftar .col-nama { width: 53mm; }
+table.daftar .col-nama { width: 55mm; }
 table.daftar .col-npm { width: 25mm; text-align: center; }
 table.daftar .col-prodi { width: 36mm; }
 table.daftar .col-keterangan { width: 35mm; }
@@ -521,8 +521,8 @@ $nowCetak = \Illuminate\Support\Carbon::now()->setTimezone('Asia/Makassar');
 
             <table class="daftar">
                 <colgroup>
-                    <col style="width: 7.5mm;">
-                    <col style="width: 53mm;">
+                    <col style="width: 5.5mm;">
+                    <col style="width: 55mm;">
                     <col style="width: 25mm;">
                     <col style="width: 36mm;">
                     <col style="width: 35mm;">
