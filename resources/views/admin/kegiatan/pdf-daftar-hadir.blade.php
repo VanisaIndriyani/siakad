@@ -374,13 +374,17 @@ table.daftar-hadir tbody td {
                     width:36mm;
                     height:4.5mm;
                     text-align:center;
-                    vertical-align:bottom;
-                    padding:0 0 0.8mm 0;
+                    vertical-align:middle;
+                    padding:0 0.8mm 0 0.8mm;
+                    position:relative;
                 ">
                     <div style="
                         width:92%;
                         border-bottom:1pt solid #000;
-                        margin:0 auto 0 auto;
+                        margin: 0 auto;
+                        position: absolute;
+                        bottom: 1.2mm;
+                        left: 4%;
                     "></div>
                 </td>
 
@@ -412,13 +416,17 @@ table.daftar-hadir tbody td {
                 <td style="
                     height:4.5mm;
                     text-align:center;
-                    vertical-align:bottom;
-                    padding:0 0 0.8mm 0;
+                    vertical-align:middle;
+                    padding:0 0.8mm 0 0.8mm;
+                    position:relative;
                 ">
                     <div style="
                         width:92%;
                         border-bottom:1pt solid #000;
-                        margin:0 auto 0 auto;
+                        margin: 0 auto;
+                        position: absolute;
+                        bottom: 1.2mm;
+                        left: 4%;
                     "></div>
                 </td>
 
