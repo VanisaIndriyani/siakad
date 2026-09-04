@@ -237,21 +237,50 @@ table.daftar tbody td {
     vertical-align: middle;
     height: 6mm;
 }
+
+/* ============================================================
+   KOLOM NO (SESEMPIT MUNGKIN - SESUAI INSTRUKSI POIN 9)
+   ============================================================ */
 table.daftar .col-no {
-    width: 4.5mm;
-    max-width: 4.5mm;
-    min-width: 4.5mm;
-    text-align: center;
-    padding: 0.2mm 0;
-    font-size: 8px;
-    line-height: 1.1;
+    width: 3.5mm !important;
+    max-width: 3.5mm !important;
+    min-width: 3.5mm !important;
+    text-align: center !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-top: 0.2mm !important;
+    padding-bottom: 0.2mm !important;
+    font-size: 8px !important;
+    line-height: 1.1 !important;
+    white-space: nowrap;
 }
-table.daftar .col-nama { width: 56mm; }
-table.daftar .col-npm { width: 25mm; text-align: center; }
-table.daftar .col-prodi { width: 36mm; }
-table.daftar .col-keterangan { width: 35mm; }
+td.col-no,
+th.col-no {
+    width: 3.5mm !important;
+    max-width: 3.5mm !important;
+    min-width: 3.5mm !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    text-align: center !important;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+/* ============================================================
+   KOLOM LAINNYA (TOTAL LEBAR TETAP 191.5mm = SISA DARI 196mm - 4.5mm PADDING CONTENT)
+   col-no = 3.5mm + col-nama = 57mm (tambah 1mm dari sebelumnya karena kolom NO berkurang 1mm)
+   col-npm = 25mm
+   col-prodi = 36mm
+   col-keterangan = 35mm
+   col-ttd = 35mm
+   TOTAL = 3.5 + 57 + 25 + 36 + 35 + 35 = 191.5mm ✅
+   ============================================================ */
+table.daftar .col-nama { width: 57mm !important; }
+table.daftar .col-npm { width: 25mm !important; text-align: center; }
+table.daftar .col-prodi { width: 36mm !important; }
+table.daftar .col-keterangan { width: 35mm !important; }
 table.daftar .col-ttd {
-    width: 35mm;
+    width: 35mm !important;
     height: 6mm;
     position: relative;
     padding: 0;
@@ -520,23 +549,24 @@ $nowCetak = \Illuminate\Support\Carbon::now()->setTimezone('Asia/Makassar');
                 </div>
             @endif
 
+            {{-- TABEL DAFTAR HADIR --}}
             <table class="daftar">
                 <colgroup>
-                    <col style="width: 4.5mm;">
-                    <col style="width: 56mm;">
-                    <col style="width: 25mm;">
-                    <col style="width: 36mm;">
-                    <col style="width: 35mm;">
-                    <col style="width: 35mm;">
+                    <col class="col-no">
+                    <col class="col-nama">
+                    <col class="col-npm">
+                    <col class="col-prodi">
+                    <col class="col-keterangan">
+                    <col class="col-ttd">
                 </colgroup>
                 <thead>
                     <tr>
-                        <th>NO</th>
-                        <th>NAMA LENGKAP</th>
-                        <th>NPM / NUPTK</th>
-                        <th>PROGRAM STUDI</th>
-                        <th>STATUS KEHADIRAN</th>
-                        <th>TANDA TANGAN</th>
+                        <th class="col-no">NO</th>
+                        <th class="col-nama">NAMA LENGKAP</th>
+                        <th class="col-npm">NPM / NUPTK</th>
+                        <th class="col-prodi">PROGRAM STUDI</th>
+                        <th class="col-keterangan">STATUS KEHADIRAN</th>
+                        <th class="col-ttd">TANDA TANGAN</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -552,7 +582,7 @@ $nowCetak = \Illuminate\Support\Carbon::now()->setTimezone('Asia/Makassar');
                             try { $identitas = (string)$p->nomor_identitas; } catch (\Throwable $e) { $identitas = $p->jenis_peserta === 'dosen' ? (string)($p->nidn ?? '-') : (string)($p->npm ?? '-'); }
                         @endphp
                         <tr>
-                            <td class="col-no" style="width:4.5mm; max-width:4.5mm; min-width:4.5mm; text-align:center; padding:0.2mm 0; font-size:8px; line-height:1.1;">{{ $no }}</td>
+                            <td class="col-no">{{ $no }}</td>
                             <td class="col-nama" style="font-weight: 700;">{{ strtoupper($p->nama_lengkap) }}</td>
                             <td class="col-npm" style="font-family:'Courier New', monospace;">{{ $identitas }}</td>
                             <td class="col-prodi">{{ $prodiTampil }}</td>
@@ -575,7 +605,7 @@ $nowCetak = \Illuminate\Support\Carbon::now()->setTimezone('Asia/Makassar');
 
                     @for($b = 1; $b <= $blankNeeded; $b++)
                         <tr>
-                            <td class="col-no" style="width:4.5mm; max-width:4.5mm; min-width:4.5mm; text-align:center; padding:0.2mm 0; font-size:8px; line-height:1.1;">{{ $chunkIdx * $PAGE_SIZE + $chunkCount + $b }}</td>
+                            <td class="col-no">{{ $chunkIdx * $PAGE_SIZE + $chunkCount + $b }}</td>
                             <td class="col-nama">&nbsp;</td>
                             <td class="col-npm">&nbsp;</td>
                             <td class="col-prodi">&nbsp;</td>
