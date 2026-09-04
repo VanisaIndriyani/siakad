@@ -44,14 +44,15 @@ html, body {
 .kop-wrap {
     position: relative;
     width: 100%;
-    height: 27mm;
+    height: 24.5mm;
     color: #000;
-    margin-bottom: 1.2mm;
+    margin-bottom: 0;
+    padding-bottom: 0;
 }
 .kop-logo-side {
     position: absolute;
     left: 0;
-    top: 1mm;
+    top: 0.3mm;
     width: 23mm;
     height: 23mm;
     text-align: left;
@@ -128,8 +129,8 @@ html, body {
 }
 .kop-email-web { margin-top: 0.3mm; }
 
-.garis-tebal { border-top: 2.6pt solid #000; margin: 1.2mm 0 0.3mm 0; width: 100%; }
-.garis-tipis { border-top: 0.8pt solid #000; margin: 0 0 2mm 0; width: 100%; }
+.garis-tebal { border-top: 2.6pt solid #000; margin: 0 0 0.1mm 0; width: 100%; padding-top: 0; padding-bottom: 0; }
+.garis-tipis { border-top: 0.8pt solid #000; margin: 0 0 0.8mm 0; width: 100%; padding-top: 0; padding-bottom: 0; }
 
 .info-with-logo {
     display: block;
@@ -374,10 +375,9 @@ function formatTglIndoCetak($tanggal) {
     } catch (\Throwable $e) { return '-'; }
 }
 
-$peserta = $peserta->sortBy([
-    ['nama_lengkap', SORT_NATURAL | SORT_FLAG_CASE],
-    ['id', SORT_NUMERIC],
-])->values();
+$peserta = $peserta->sortBy(function ($item) {
+    return trim((string)($item->nama_lengkap ?? ''));
+}, SORT_NATURAL | SORT_FLAG_CASE | SORT_ASC)->values();
 
 $totalPeserta = $peserta->count();
 $totalHadir   = $peserta->where('status_hadir', true)->count();
@@ -406,6 +406,10 @@ $jenisKegiatanVal = trim((string)($kegiatan->jenis_kegiatan ?? ''));
 if ($jenisKegiatanVal === '') $jenisKegiatanVal = 'KEGIATAN';
 $tanggalKegiatanVal = !empty($kegiatan->tanggal_mulai) ? $kegiatan->tanggal_mulai : (!empty($kegiatan->tanggal_kegiatan) ? $kegiatan->tanggal_kegiatan : (!empty($kegiatan->tanggal) ? $kegiatan->tanggal : ''));
 $nowCetak = \Illuminate\Support\Carbon::now()->setTimezone('Asia/Makassar');
+@endphp
+
+@php
+    $globalNoCounter = 0;
 @endphp
 
 @foreach($chunks as $chunkIdx => $pagePeserta)
@@ -520,7 +524,8 @@ $nowCetak = \Illuminate\Support\Carbon::now()->setTimezone('Asia/Makassar');
                 <tbody>
                     @foreach($pagePeserta as $i => $p)
                         @php
-                            $no = $chunkIdx * $PAGE_SIZE + $i + 1;
+                            $globalNoCounter++;
+                            $no = $globalNoCounter;
 
                             $prodiTampil = trim((string)($p->program_studi ?? ''));
                             if ($prodiTampil === '') {
