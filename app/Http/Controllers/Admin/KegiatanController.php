@@ -570,7 +570,7 @@ class KegiatanController extends Controller
 
     public function daftarHadirPdf(Kegiatan $kegiatan): StreamedResponse
     {
-        $peserta = $kegiatan->peserta()->orderBy('nama_lengkap')->get();
+        $peserta = $kegiatan->peserta()->orderBy('nama_lengkap')->orderBy('id')->get();
 
         $filename = 'Daftar-Hadir-' . \Illuminate\Support\Str::slug($kegiatan->judul) . '.pdf';
 
@@ -580,13 +580,13 @@ class KegiatanController extends Controller
             $filename,
             false,
             'a4',
-            'landscape'
+            'portrait'
         );
     }
 
     public function downloadDaftarHadirPdf(Kegiatan $kegiatan): StreamedResponse
     {
-        $peserta = $kegiatan->peserta()->orderBy('nama_lengkap')->get();
+        $peserta = $kegiatan->peserta()->orderBy('nama_lengkap')->orderBy('id')->get();
 
         $filename = 'Daftar-Hadir-' . \Illuminate\Support\Str::slug($kegiatan->judul) . '.pdf';
 
@@ -596,7 +596,7 @@ class KegiatanController extends Controller
             $filename,
             true,
             'a4',
-            'landscape'
+            'portrait'
         );
     }
 

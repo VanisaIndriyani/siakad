@@ -247,7 +247,7 @@ table.daftar td.col-no {
 /* Kolom lainnya */
 
 table.daftar col.col-nama {
-    width: 57mm !important;
+    width: 62mm !important;
 }
 
 table.daftar col.col-npm {
@@ -255,7 +255,7 @@ table.daftar col.col-npm {
 }
 
 table.daftar col.col-prodi {
-    width: 37mm !important;
+    width: 38mm !important;
 }
 
 table.daftar col.col-keterangan {
@@ -263,14 +263,14 @@ table.daftar col.col-keterangan {
 }
 
 table.daftar col.col-ttd {
-    width: 36mm !important;
+    width: 33mm !important;
 }
 
 /* HEADER */
 
 table.daftar thead th {
     border: 1px solid #000;
-    background: #e0f2ea;
+    background: #d6f2e3;
     font-weight: 800;
     letter-spacing: 0.1px;
 
@@ -445,6 +445,11 @@ function formatTglIndoCetak($tanggal) {
     } catch (\Throwable $e) { return '-'; }
 }
 
+$peserta = $peserta->sortBy([
+    ['nama_lengkap', SORT_NATURAL | SORT_FLAG_CASE],
+    ['id', SORT_NUMERIC],
+])->values();
+
 $totalPeserta = $peserta->count();
 $totalHadir   = $peserta->where('status_hadir', true)->count();
 $totalBelum   = $totalPeserta - $totalHadir;
@@ -618,8 +623,8 @@ $nowCetak = \Illuminate\Support\Carbon::now()->setTimezone('Asia/Makassar');
                             $hadir = (bool)$p->status_hadir;
                             $ket = $hadir ? 'HADIR' : 'TIDAK HADIR';
 
-                            $ketColor = $hadir ? '#065f46' : '#991b1b';
-                            $bgCell = $hadir ? '#ecfdf5' : '#fef2f2';
+                            $ketColor = $hadir ? '#047857' : '#b91c1c';
+                            $bgCell = $hadir ? '#dcfce7' : '#fee2e2';
 
                             try {
                                 $identitas = (string)$p->nomor_identitas;
@@ -657,9 +662,9 @@ $nowCetak = \Illuminate\Support\Carbon::now()->setTimezone('Asia/Makassar');
                                 @if($hadir && !empty($p->waktu_hadir))
                                     <div style="
                                         font-weight:400;
-                                        color:#333;
-                                        font-size:6.6px;
-                                        margin-top:0.25mm;
+                                        color:{{ $ketColor }};
+                                        font-size:6.8px;
+                                        margin-top:0.2mm;
                                     ">
                                         {{ \Illuminate\Support\Carbon::parse($p->waktu_hadir)->setTimezone('Asia/Makassar')->format('H:i') }}
                                         WITA
@@ -669,9 +674,9 @@ $nowCetak = \Illuminate\Support\Carbon::now()->setTimezone('Asia/Makassar');
                                 @if(!empty($p->keterangan))
                                     <div style="
                                         font-weight:400;
-                                        color:#555;
+                                        color:{{ $ketColor }};
                                         font-size:6.6px;
-                                        margin-top:0.25mm;
+                                        margin-top:0.2mm;
                                     ">
                                         {{ \Illuminate\Support\Str::limit(strip_tags($p->keterangan), 38) }}
                                     </div>
