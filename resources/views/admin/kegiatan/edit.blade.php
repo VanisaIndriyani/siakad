@@ -105,8 +105,8 @@
             </div>
 
             <div>
-                <label class="text-sm text-emerald-100/80">NIP Rektor <span class="text-emerald-200/40">(Opsional)</span></label>
-                <input name="rektor_nip" value="{{ old('rektor_nip', $kegiatan->rektor_nip) }}" placeholder="Contoh: 196001011988121001" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
+                <label class="text-sm text-emerald-100/80">NIDN Rektor <span class="text-emerald-200/40">(Opsional)</span></label>
+                <input name="rektor_nid" value="{{ old('rektor_nid', $kegiatan->rektor_nid) }}" placeholder="Contoh: 196001011988121001" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
             </div>
 
             <div class="md:col-span-2">
