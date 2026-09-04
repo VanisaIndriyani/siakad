@@ -134,7 +134,7 @@ class KegiatanController extends Controller
     public function show(Kegiatan $kegiatan): View
     {
         $kegiatan->loadCount('peserta', 'pesertaHadir');
-        $peserta = $kegiatan->peserta()->orderBy('nama_lengkap')->paginate(50);
+        $peserta = $kegiatan->peserta()->orderBy('nama_lengkap')->orderBy('id')->paginate(50);
 
         return view('admin.kegiatan.show', [
             'kegiatan' => $kegiatan,

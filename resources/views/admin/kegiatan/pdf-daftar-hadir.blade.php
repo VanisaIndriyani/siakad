@@ -353,9 +353,7 @@ function formatTglIndoCetak($tanggal) {
     } catch (\Throwable $e) { return '-'; }
 }
 
-$peserta = $peserta->sortBy(function ($item) {
-    return trim((string)($item->nama_lengkap ?? ''));
-}, SORT_NATURAL | SORT_FLAG_CASE | SORT_ASC)->values();
+$peserta = $peserta->values();
 
 $totalPeserta = $peserta->count();
 $totalHadir   = $peserta->where('status_hadir', true)->count();
