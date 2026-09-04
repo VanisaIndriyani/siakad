@@ -242,14 +242,14 @@ table.daftar tbody td {
     height: 6mm;
 }
 table.daftar .col-no {
-    width: 5mm;
-    max-width: 5mm;
+    width: 9mm;
+    max-width: 9mm;
     text-align: center;
     padding: 0.6mm 0;
-    font-size: 7px;
-    line-height: 1;
+    font-size: 8.5px;
+    line-height: 1.15;
 }
-table.daftar .col-nama { width: 55.5mm; }
+table.daftar .col-nama { width: 51.5mm; }
 table.daftar .col-npm { width: 25mm; text-align: center; }
 table.daftar .col-prodi { width: 36mm; }
 table.daftar .col-keterangan { width: 35mm; }
@@ -525,8 +525,8 @@ $nowCetak = \Illuminate\Support\Carbon::now()->setTimezone('Asia/Makassar');
 
             <table class="daftar">
                 <colgroup>
-                    <col style="width: 5mm;">
-                    <col style="width: 55.5mm;">
+                    <col style="width: 9mm;">
+                    <col style="width: 51.5mm;">
                     <col style="width: 25mm;">
                     <col style="width: 36mm;">
                     <col style="width: 35mm;">
@@ -555,7 +555,7 @@ $nowCetak = \Illuminate\Support\Carbon::now()->setTimezone('Asia/Makassar');
                             try { $identitas = (string)$p->nomor_identitas; } catch (\Throwable $e) { $identitas = $p->jenis_peserta === 'dosen' ? (string)($p->nidn ?? '-') : (string)($p->npm ?? '-'); }
                         @endphp
                         <tr>
-                            <td class="col-no">{{ $no }}.</td>
+                            <td class="col-no">{{ $no }}</td>
                             <td class="col-nama" style="font-weight: 700;">{{ strtoupper($p->nama_lengkap) }}</td>
                             <td class="col-npm" style="font-family:'Courier New', monospace;">{{ $identitas }}</td>
                             <td class="col-prodi">{{ $prodiTampil }}</td>
@@ -578,7 +578,7 @@ $nowCetak = \Illuminate\Support\Carbon::now()->setTimezone('Asia/Makassar');
 
                     @for($b = 1; $b <= $blankNeeded; $b++)
                         <tr>
-                            <td class="col-no">{{ $chunkIdx * $PAGE_SIZE + $chunkCount + $b }}.</td>
+                            <td class="col-no">{{ $chunkIdx * $PAGE_SIZE + $chunkCount + $b }}</td>
                             <td class="col-nama">&nbsp;</td>
                             <td class="col-npm">&nbsp;</td>
                             <td class="col-prodi">&nbsp;</td>
