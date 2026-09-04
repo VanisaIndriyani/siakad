@@ -101,7 +101,7 @@
         .kop-text {
             display: table-cell;
             vertical-align: middle;
-            text-align: left;
+            text-align: center;
             padding: 0 1mm 0 0;
             margin: 0;
         }
@@ -111,7 +111,7 @@
             letter-spacing: 0.6px;
             line-height: 1.1;
             margin: 0 0 0.5mm 0;
-            text-align: left;
+            text-align: center;
         }
         .kop-text .kop-institusi-2 {
             font-size: 18px;
@@ -119,7 +119,7 @@
             letter-spacing: 0.6px;
             line-height: 1.1;
             margin: 0 0 0.5mm 0;
-            text-align: left;
+            text-align: center;
         }
         .kop-text .kop-kota {
             font-size: 18px;
@@ -127,26 +127,26 @@
             letter-spacing: 0.6px;
             line-height: 1.1;
             margin: 0 0 0.7mm 0;
-            text-align: left;
+            text-align: center;
         }
         .kop-text .kop-akreditasi {
             font-size: 10px;
             font-weight: 600;
             line-height: 1.15;
             margin: 0 0 0.3mm 0;
-            text-align: left;
+            text-align: center;
         }
         .kop-text .kop-alamat {
             font-size: 9.5px;
             line-height: 1.15;
             margin: 0 0 0.2mm 0;
-            text-align: left;
+            text-align: center;
         }
         .kop-text .kop-kontak {
             font-size: 9.5px;
             line-height: 1.15;
             margin: 0;
-            text-align: left;
+            text-align: center;
         }
         .garis-tebal { 
     width: 100%;
