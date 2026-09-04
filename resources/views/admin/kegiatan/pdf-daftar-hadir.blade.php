@@ -234,7 +234,9 @@ table.daftar-hadir tbody td {
                                 <div style="font-weight:400; color:#555; font-size:6.5px; margin-top:0.2mm;">{{ \Illuminate\Support\Str::limit(strip_tags($p->keterangan), 40) }}</div>
                             @endif
                         </td>
-                        <td style="width:14%; text-align:center; height:4.5mm;"></td>
+                        <td style="width:14%; text-align:center; height:4.5mm;">
+                            <div style="width:80%; border-bottom:0.8pt solid #000; margin: 3mm auto 0 auto;"></div>
+                        </td>
                     </tr>
                 @endforeach
                 @for($b = 1; $b <= $blankNeeded; $b++)
@@ -244,7 +246,9 @@ table.daftar-hadir tbody td {
                         <td style="width:14%; text-align:center;">&nbsp;</td>
                         <td style="width:20%;">&nbsp;</td>
                         <td style="width:14%; text-align:center;">&nbsp;</td>
-                        <td style="width:14%; text-align:center; height:4.5mm;"></td>
+                        <td style="width:14%; text-align:center; height:4.5mm;">
+                            <div style="width:80%; border-bottom:0.8pt solid #000; margin: 3mm auto 0 auto;"></div>
+                        </td>
                     </tr>
                 @endfor
             </tbody>
