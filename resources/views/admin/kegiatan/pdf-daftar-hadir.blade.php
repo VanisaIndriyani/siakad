@@ -37,10 +37,10 @@
         if ($raw !== false) $logoBase64 = 'data:'.$mime.';base64,'.base64_encode($raw);
     }
 
-    $MAKS_BARIS = 35;
+    $PAGE_SIZE = 30;
     $totalPeserta = $peserta->count();
-    $totalBlank = max(0, $MAKS_BARIS - $totalPeserta);
-    if ($totalBlank > 15) $totalBlank = 15;
+    $chunks = $peserta->chunk($PAGE_SIZE);
+    $totalHalaman = $chunks->count();
 
     $tempatVal = trim((string)($kegiatan->tempat ?? ''));
     if ($tempatVal === '') $tempatVal = '-';
@@ -282,7 +282,16 @@
     </style>
 </head>
 <body>
-<div class="page">
+@foreach($chunks as $chunkIdx => $pagePeserta)
+    @php
+        $halaman = $chunkIdx + 1;
+        $isFirst = $halaman === 1;
+        $isLast = $halaman === $totalHalaman;
+        $chunkCount = $pagePeserta->count();
+        $blankNeeded = $PAGE_SIZE - $chunkCount;
+        if ($blankNeeded > 15) $blankNeeded = 15;
+    @endphp
+<div class="page" style="page-break-after: {{ $isLast ? 'auto' : 'always' }};">
     <div class="kop-wrap">
         <div class="kop-logo-side">
             @if($logoBase64 !== '')
@@ -302,6 +311,7 @@
     <div class="garis-tebal"></div>
     <div class="garis-tipis"></div>
 
+    @if($isFirst)
     <div class="info-with-logo">
         <div class="judul-box">
             <div class="judul-utama">DAFTAR HADIR PESERTA</div>
@@ -330,7 +340,7 @@
                 <td class="kanan">{{ formatTglIndo($kegiatan->tanggal_mulai ?? $kegiatan->tanggal ?? now()) }}</td>
                 <td class="kiri" style="width:38mm;">Jumlah Peserta</td>
                 <td class="titik-2">:</td>
-                <td class="kanan"><b>{{ $totalPeserta }}</b> orang (Maks. {{ $MAKS_BARIS }} baris)</td>
+                <td class="kanan"><b>{{ $totalPeserta }}</b> orang &nbsp;•&nbsp; Halaman {{ $halaman }} dari {{ $totalHalaman }}</td>
             </tr>
             <tr>
                 <td class="kiri">Waktu (WITA)</td>
@@ -351,6 +361,19 @@
             </tr>
         </table>
     </div>
+    @else
+    <div class="info-with-logo">
+        <div class="judul-box" style="margin-bottom:1.5mm;">
+            <div class="judul-utama">DAFTAR HADIR PESERTA (LANJUTAN)</div>
+            <div style="margin-top:1mm; font-size:10px; font-weight:600; line-height:1.2;">
+                {{ strtoupper($kegiatan->judul ?? '-') }}
+            </div>
+            <div style="margin-top:0.5mm; font-size:9px; color:#333; font-style:italic; line-height:1.2;">
+                Halaman {{ $halaman }} dari {{ $totalHalaman }} &nbsp;•&nbsp; Total peserta: {{ $totalPeserta }} orang
+            </div>
+        </div>
+    </div>
+    @endif
 
     <table class="daftar-hadir">
         <thead>
@@ -364,10 +387,9 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($peserta as $i => $p)
-                @if($i >= $MAKS_BARIS) @break @endif
+            @foreach($pagePeserta as $i => $p)
                 @php
-                    $no = $i + 1;
+                    $no = $chunkIdx * $PAGE_SIZE + $i + 1;
                     $prodiTampil = trim((string)($p->program_studi ?? ''));
                     if ($prodiTampil === '') {
                         $prodiTampil = ($p->jenis_peserta === 'dosen') ? 'Dosen IAI DDI' : '-';
@@ -403,8 +425,8 @@
                 </tr>
             @endforeach
 
-            @for($b = 1; $b <= $totalBlank; $b++)
-                @php $blankNo = $totalPeserta + $b; @endphp
+            @for($b = 1; $b <= $blankNeeded; $b++)
+                @php $blankNo = $chunkIdx * $PAGE_SIZE + $chunkCount + $b; @endphp
                 <tr>
                     <td class="no-cell" style="width:5% !important; min-width:5% !important; max-width:5% !important;">{{ $blankNo }}.</td>
                     <td class="nama-cell" style="width:30% !important; min-width:30% !important; max-width:30% !important;">&nbsp;</td>
@@ -417,6 +439,7 @@
         </tbody>
     </table>
 
+    @if($isLast)
     <table class="ttd-wrap-table">
         <tr>
             <td class="ttd-col" style="width:50%;">
@@ -444,6 +467,8 @@
         pada {{ hariIndo($nowCetak->dayOfWeek) }}, {{ $nowCetak->format('j') }} {{ bulanIndo($nowCetak->month) }} {{ $nowCetak->format('Y') }}
         {{ $nowCetak->format('H:i') }} WITA
     </div>
+    @endif
 </div>
+@endforeach
 </body>
 </html>
