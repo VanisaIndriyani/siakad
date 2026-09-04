@@ -164,20 +164,12 @@ table.daftar-hadir tbody td {
                     <td class="kanan">{{ $tempatVal }}</td>
                 </tr>
                 <tr>
-                    <td class="kiri">Jenis Kegiatan</td>
-                    <td class="titik-2">:</td>
-                    <td class="kanan">{{ strtoupper($kegiatan->jenis_kegiatan ?? '-') }}</td>
-                    <td class="kiri" style="width:34mm;">Penyelenggara</td>
-                    <td class="titik-2">:</td>
-                    <td class="kanan">{{ $penyelenggaraVal }}</td>
-                </tr>
-                <tr>
                     <td class="kiri">Hari, Tanggal</td>
                     <td class="titik-2">:</td>
                     <td class="kanan">{{ formatTglIndo($kegiatan->tanggal_mulai ?? $kegiatan->tanggal ?? now()) }}</td>
-                    <td class="kiri" style="width:34mm;">Narasumber</td>
+                    <td class="kiri" style="width:34mm;">Penyelenggara</td>
                     <td class="titik-2">:</td>
-                    <td class="kanan">{{ $narasumberVal }}</td>
+                    <td class="kanan">{{ $penyelenggaraVal }}</td>
                 </tr>
                 <tr>
                     <td class="kiri">Waktu (WITA)</td>
@@ -192,16 +184,16 @@ table.daftar-hadir tbody td {
                             elseif ($wm !== '') { echo $wm.' WITA'; } else { echo '-'; }
                         @endphp
                     </td>
-                    <td class="kiri" style="width:34mm;">Jumlah Peserta</td>
+                    <td class="kiri" style="width:34mm;">Narasumber</td>
                     <td class="titik-2">:</td>
-                    <td class="kanan"><b>{{ $totalPeserta }}</b> org &bull; Hlm {{ $halaman }}/{{ $totalHalaman }}</td>
+                    <td class="kanan">{{ $narasumberVal }}</td>
                 </tr>
             </table>
         @else
-            <div class="judul-box" style="margin-bottom:1mm;">
+            <div class="judul-box" style="margin-bottom:0.5mm;">
                 <div class="judul-utama">DAFTAR HADIR PESERTA (LANJUTAN)</div>
-                <div style="margin-top:0.5mm; font-size:10px; font-weight:600; line-height:1.2;">{{ strtoupper($kegiatan->judul ?? '-') }}</div>
-                <div style="margin-top:0.3mm; font-size:8.5px; color:#333; font-style:italic; line-height:1.2;">Halaman {{ $halaman }} / {{ $totalHalaman }} &bull; Total: {{ $totalPeserta }} orang</div>
+                <div style="margin-top:0.4mm; font-size:10px; font-weight:600; line-height:1.1;">{{ strtoupper($kegiatan->judul ?? '-') }}</div>
+                <div style="margin-top:0.2mm; font-size:8.5px; color:#333; font-style:italic; line-height:1.1;">Halaman {{ $halaman }} / {{ $totalHalaman }} &bull; Total: {{ $totalPeserta }} orang</div>
             </div>
         @endif
 
