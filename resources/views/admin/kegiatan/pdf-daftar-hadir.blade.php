@@ -622,7 +622,7 @@ $nowCetak = \Illuminate\Support\Carbon::now()->setTimezone('Asia/Makassar');
                             <div class="ttd-garis">&nbsp;</div>
                             <div class="ttd-nama">{{ strtoupper($ketuaPanitiaNama) }}</div>
                             <div class="ttd-nip">
-                                @if($ketuaPanitiaNip !== '-') NIP. {{ $ketuaPanitiaNip }} @else Panitia Penyelenggara @endif
+                                @if($ketuaPanitiaNip !== '-') NIDN. {{ $ketuaPanitiaNip }} @else Panitia Penyelenggara @endif
                             </div>
                         </td>
                         <td style="width:50%;">
@@ -631,7 +631,7 @@ $nowCetak = \Illuminate\Support\Carbon::now()->setTimezone('Asia/Makassar');
                             <div class="ttd-garis">&nbsp;</div>
                             <div class="ttd-nama">{{ strtoupper($rektorNama) }}</div>
                             <div class="ttd-nip">
-                                @if($rektorNip !== '-') NIP. {{ $rektorNip }} @else Rektor IAI DDI Sidrap @endif
+                                @if($rektorNip !== '-') NIDN. {{ $rektorNip }} @else Rektor IAI DDI Sidrap @endif
                             </div>
                         </td>
                     </tr>
