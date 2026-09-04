@@ -80,13 +80,13 @@ html, body {
 .kop-text .kop-kontak       { font-size: 9.5px; line-height: 1.1; margin: 0; text-align: center; }
 .garis-tebal { width: 100%; height: 2.4pt; background: #000; margin: 0.5mm 0 0.5mm 0; }
 .garis-tipis { width: 100%; height: 0.8pt; background: #000; margin: 0 0 1.5mm 0; }
-.judul-box { width: 100%; display: block; text-align: center; margin: 0 0 1.5mm 0; padding: 0; }
-.judul-box .judul-utama { font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; line-height: 1.2; margin: 0; text-align: center; }
-.info-table { width: 100%; border-collapse: collapse; margin: 0 0 1mm 0; table-layout: fixed; }
-.info-table td { border: none; padding: 0.3mm 0; vertical-align: top; font-size: 9px; line-height: 1.2; }
+.judul-box { width: 100%; display: block; text-align: center; margin: 0 0 0.5mm 0; padding: 0; }
+.judul-box .judul-utama { font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; line-height: 1.1; margin: 0; text-align: center; }
+.info-table { width: 100%; border-collapse: collapse; margin: 0 0 0.5mm 0; table-layout: fixed; }
+.info-table td { border: none; padding: 0.1mm 0; vertical-align: top; font-size: 9px; line-height: 1.05; }
 .info-table td.kiri    { width: 26mm; white-space: nowrap; font-weight: 400; }
-.info-table td.titik-2 { width: 3mm; text-align: center; padding: 0.3mm 0.8mm; }
-.info-table td.kanan   { padding: 0.3mm 0; white-space: normal; word-wrap: break-word; }
+.info-table td.titik-2 { width: 3mm; text-align: center; padding: 0.1mm 0.5mm; }
+.info-table td.kanan   { padding: 0.1mm 0; white-space: normal; word-wrap: break-word; }
 table.daftar-hadir {
     width: 100% !important; max-width: 100% !important;
     border-collapse: collapse; table-layout: fixed !important;
