@@ -102,7 +102,7 @@
     | PAGINATION
     |--------------------------------------------------------------------------
     */
-    $PAGE_SIZE = 25;
+    $PAGE_SIZE = 20;
 
     $totalPeserta = $peserta->count();
 
@@ -200,7 +200,7 @@
             width: 210mm;
             min-height: 297mm;
 
-            padding: 5mm 7mm 7mm 7mm;
+            padding: 5mm 5mm 6mm 5mm;
 
             margin: 0 auto;
 
@@ -481,8 +481,8 @@
 
 
         .info-table td.kanan {
-            padding-left: 0.5mm;
-            padding-right: 0.5mm;
+            padding-left: 0.3mm;
+            padding-right: 0.3mm;
 
             white-space: normal;
 
@@ -669,9 +669,9 @@
 
             table-layout: fixed;
 
-            margin-top: 3mm;
+            margin-top: 2mm;
 
-            margin-bottom: 2mm;
+            margin-bottom: 1mm;
 
             page-break-inside: avoid;
 
@@ -691,11 +691,11 @@
 
             vertical-align: top;
 
-            padding: 0 5mm;
+            padding: 0 3mm;
 
             font-size: 9.5px;
 
-            line-height: 1.2;
+            line-height: 1.15;
 
             text-align: center;
         }
@@ -704,7 +704,7 @@
         .ttd-label {
             font-weight: 700;
 
-            margin-bottom: 0.5mm;
+            margin-bottom: 0.3mm;
 
             text-align: center;
         }
@@ -713,7 +713,7 @@
         .ttd-sub {
             font-weight: 600;
 
-            margin-bottom: 7mm;
+            margin-bottom: 3mm;
 
             text-align: center;
         }
@@ -820,8 +820,8 @@
 
         $blankNeeded = $PAGE_SIZE - $chunkCount;
 
-        if ($blankNeeded > 10) {
-            $blankNeeded = 10;
+        if ($blankNeeded > 5) {
+            $blankNeeded = 5;
         }
     @endphp
 
