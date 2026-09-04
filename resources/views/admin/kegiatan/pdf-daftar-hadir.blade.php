@@ -40,7 +40,7 @@ html, body {
     padding: 0 0.5mm;
 }
 
-/* BARIS KOP ATAS: KIRI = LOGO ABSOLUTE, TENGAH = TEKS KOP ABSOLUTE (TENGAH HALAMAN A4) */
+/* BARIS KOP ATAS */
 .kop-wrap {
     position: relative;
     width: 100%;
@@ -220,92 +220,27 @@ table.daftar {
     margin-top: 0.5mm;
 }
 
-/* =========================
-   KOLOM NO BENAR-BENAR KECIL
-   ========================= */
-
-table.daftar col.col-no {
-    width: 1.8mm !important;
-}
-
-table.daftar th.col-no,
-table.daftar td.col-no {
-    width: 1.8mm !important;
-    min-width: 1.8mm !important;
-    max-width: 1.8mm !important;
-
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-
-    text-align: center !important;
-    vertical-align: middle !important;
-
-    white-space: nowrap;
-    overflow: hidden;
-}
-
-/* Kolom lainnya */
-
-table.daftar col.col-nama {
-    width: 62mm !important;
-}
-
-table.daftar col.col-npm {
-    width: 25mm !important;
-}
-
-table.daftar col.col-prodi {
-    width: 38mm !important;
-}
-
-table.daftar col.col-keterangan {
-    width: 36mm !important;
-}
-
-table.daftar col.col-ttd {
-    width: 31.2mm !important;
-}
-
 /* HEADER */
-
 table.daftar thead th {
     border: 1px solid #000;
     background: #d6f2e3;
     font-weight: 800;
     letter-spacing: 0.1px;
-
-    padding: 0.8mm 0.4mm;
-
+    padding: 0.8mm 0.2mm;
     vertical-align: middle;
     line-height: 1.15;
     text-align: center;
-
     font-size: 8.5px;
 }
 
 /* ISI */
-
 table.daftar tbody td {
     border: 1px solid #000;
-
     padding: 0.6mm 0.5mm;
-
     line-height: 1.15;
     vertical-align: middle;
-
     height: 6mm;
 }
-
-/* NO */
-
-table.daftar tbody td.col-no {
-    font-size: 7.5px !important;
-    font-weight: 400;
-    text-align: center !important;
-    padding: 0 !important;
-}
-
-/* NPM */
 
 table.daftar tbody td.col-npm {
     text-align: center;
@@ -316,15 +251,9 @@ table.daftar tbody td.col-npm {
 
 table.daftar td.col-ttd {
     position: relative;
-    padding: 0 !important;
-}
-
-table.daftar td.col-ttd .garis-ttd {
-    position: absolute;
-    bottom: 1.4mm;
-    left: 4%;
-    width: 92%;
-    border-bottom: 1pt solid #000;
+    padding: 0.6mm 0.5mm !important;
+    vertical-align: middle;
+    height: 6mm;
 }
 
 .ttd-wrap-table {
@@ -487,7 +416,6 @@ $nowCetak = \Illuminate\Support\Carbon::now()->setTimezone('Asia/Makassar');
         $chunkCount = $pagePeserta->count();
         $blankNeeded = $PAGE_SIZE - $chunkCount;
         if ($isLast && $blankNeeded > 3) $blankNeeded = 3;
-        if (!$isLast && $blankNeeded > 0) { /* isi semua sisa halaman sebelumnya sampai PAGE_SIZE */ }
     @endphp
     <div class="page {{ $isLast ? 'page-last' : '' }}">
         <div class="content">
@@ -529,10 +457,7 @@ $nowCetak = \Illuminate\Support\Carbon::now()->setTimezone('Asia/Makassar');
                                         <td class="label">Tema Kegiatan</td>
                                         <td class="value">{{ $kegiatan->judul ?? '-' }}</td>
                                     </tr>
-                                    <tr>
-                                        <td class="label">Jenis Kegiatan</td>
-                                        <td class="value-soft">{{ $jenisKegiatanVal }}</td>
-                                    </tr>
+                                  
                                     <tr>
                                         <td class="label">Hari / Tanggal</td>
                                         <td class="value-soft">{{ formatTglIndo($tanggalKegiatanVal) }}</td>
@@ -566,13 +491,7 @@ $nowCetak = \Illuminate\Support\Carbon::now()->setTimezone('Asia/Makassar');
                                         <td class="label">Narasumber</td>
                                         <td class="value-soft">{{ $narasumberVal }}</td>
                                     </tr>
-                                    <tr>
-                                        <td class="label">Total Peserta</td>
-                                        <td class="value-soft">
-                                            {{ $totalPeserta }} orang
-                                            ({{ $totalHadir }} HADIR · {{ $totalBelum }} TIDAK · {{ $pct }}%)
-                                        </td>
-                                    </tr>
+                                   
                                 </table>
                             </div>
                         </div>
@@ -586,25 +505,16 @@ $nowCetak = \Illuminate\Support\Carbon::now()->setTimezone('Asia/Makassar');
                 </div>
             @endif
 
-            {{-- TABEL DAFTAR HADIR --}}
+            {{-- TABEL DAFTAR HADIR DENGAN PERSENTASE PERSISI UNTUK DOMPDF/MPDF --}}
             <table class="daftar">
-                <colgroup>
-                    <col class="col-no">
-                    <col class="col-nama">
-                    <col class="col-npm">
-                    <col class="col-prodi">
-                    <col class="col-keterangan">
-                    <col class="col-ttd">
-                </colgroup>
-
                 <thead>
                     <tr>
-                        <th class="col-no">NO</th>
-                        <th class="col-nama">NAMA LENGKAP</th>
-                        <th class="col-npm">NPM / NUPTK</th>
-                        <th class="col-prodi">PROGRAM STUDI</th>
-                        <th class="col-keterangan">STATUS KEHADIRAN</th>
-                        <th class="col-ttd">TANDA TANGAN</th>
+                        <th width="3%" style="padding-left:0; padding-right:0; text-align:center;">NO</th>
+                        <th width="33%">NAMA LENGKAP</th>
+                        <th width="15%">NPM / NUPTK</th>
+                        <th width="19%">PROGRAM STUDI</th>
+                        <th width="15%">STATUS KEHADIRAN</th>
+                        <th width="15%">TANDA TANGAN</th>
                     </tr>
                 </thead>
 
@@ -636,21 +546,21 @@ $nowCetak = \Illuminate\Support\Carbon::now()->setTimezone('Asia/Makassar');
                         @endphp
 
                         <tr>
-                            <td class="col-no">{{ $no }}</td>
+                            <td width="3%" style="text-align:center !important; padding-left:0 !important; padding-right:0 !important; font-size:7.5px;">{{ $no }}</td>
 
-                            <td class="col-nama" style="font-weight:700;">
+                            <td width="33%" class="col-nama" style="font-weight:700;">
                                 {{ strtoupper($p->nama_lengkap) }}
                             </td>
 
-                            <td class="col-npm">
+                            <td width="15%" class="col-npm">
                                 {{ $identitas }}
                             </td>
 
-                            <td class="col-prodi">
+                            <td width="19%" class="col-prodi">
                                 {{ $prodiTampil }}
                             </td>
 
-                            <td class="col-keterangan"
+                            <td width="15%" class="col-keterangan"
                                 style="
                                     text-align:center;
                                     background:{{ $bgCell }};
@@ -683,26 +593,22 @@ $nowCetak = \Illuminate\Support\Carbon::now()->setTimezone('Asia/Makassar');
                                 @endif
                             </td>
 
-                            <td class="col-ttd">
-                                <div class="garis-ttd"></div>
-                            </td>
+                            <td width="15%" class="col-ttd">&nbsp;</td>
                         </tr>
                     @endforeach
 
                     @for($b = 1; $b <= $blankNeeded; $b++)
                         <tr>
-                            <td class="col-no">
+                            <td width="3%" style="text-align:center !important; padding-left:0 !important; padding-right:0 !important; font-size:7.5px;">
                                 {{ $chunkIdx * $PAGE_SIZE + $chunkCount + $b }}
                             </td>
 
-                            <td class="col-nama">&nbsp;</td>
-                            <td class="col-npm">&nbsp;</td>
-                            <td class="col-prodi">&nbsp;</td>
-                            <td class="col-keterangan">&nbsp;</td>
+                            <td width="33%" class="col-nama">&nbsp;</td>
+                            <td width="15%" class="col-npm">&nbsp;</td>
+                            <td width="19%" class="col-prodi">&nbsp;</td>
+                            <td width="15%" class="col-keterangan">&nbsp;</td>
 
-                            <td class="col-ttd">
-                                <div class="garis-ttd"></div>
-                            </td>
+                            <td width="15%" class="col-ttd">&nbsp;</td>
                         </tr>
                     @endfor
                 </tbody>
