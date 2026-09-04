@@ -40,97 +40,76 @@ html, body {
     padding: 0 0.5mm;
 }
 
-/* BARIS KOP ATAS */
-.kop-wrap {
-    position: relative;
+/* BARIS KOP ATAS (TABEL AGAR NEMPEL PRESISI) */
+.table-kop {
     width: 100%;
-    height: 23.2mm;
-    color: #000;
-    margin-bottom: 0;
-    padding-bottom: 0;
+    border-collapse: collapse;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
 }
-.kop-logo-side {
-    position: absolute;
-    left: 0;
-    top: 0.3mm;
-    width: 23mm;
-    height: 23mm;
+.table-kop td {
+    padding: 0;
+    vertical-align: middle;
+}
+.td-logo {
+    width: 22mm;
     text-align: left;
 }
-.kop-logo-side img {
+.td-logo img {
     width: 20mm;
     height: 20mm;
     object-fit: contain;
     display: block;
-    margin: 0;
-    border: 0;
-    padding: 0;
 }
-.kop-text {
-    position: absolute;
-    left: 23mm;
-    right: 0;
-    top: 0;
-    margin: 0 auto;
+.td-text {
     text-align: center;
 }
 .kop-title-a {
     display: block;
-    width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
     font-size: 15.5px;
     font-weight: 800;
     letter-spacing: 0.5px;
-    line-height: 1.15;
-    margin-top: 0;
-    margin-bottom: 0;
-    padding: 0;
+    line-height: 1.1;
+    margin: 0;
     color: #000;
 }
-.kop-title-a2 { margin-top: 0.15mm; }
 .kop-title-b {
     display: block;
-    width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
     font-size: 15px;
     font-weight: 800;
     letter-spacing: 0.5px;
-    line-height: 1.15;
-    margin-top: 0.15mm;
-    margin-bottom: 0;
-    padding: 0;
+    line-height: 1.1;
+    margin-top: 0.2mm;
     color: #000;
 }
 .kop-terakreditasi {
     display: block;
-    width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
     font-size: 8.5px;
-    margin-top: 0.25mm;
+    margin-top: 0.4mm;
     color: #000;
     letter-spacing: 0.1px;
 }
 .kop-alamat-line {
     display: block;
-    width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
     font-size: 8px;
-    margin-top: 0.1mm;
-    line-height: 1.15;
+    margin-top: 0.2mm;
+    line-height: 1.1;
     color: #000;
 }
-.kop-email-web { margin-top: 0.05mm; margin-bottom: 0; padding-bottom: 0; }
 
-.garis-tebal { border-top: 2.6pt solid #000; margin: 0 0 0.1mm 0; width: 100%; padding-top: 0; padding-bottom: 0; }
-.garis-tipis { border-top: 0.8pt solid #000; margin: 0 0 0.8mm 0; width: 100%; padding-top: 0; padding-bottom: 0; }
+/* GARIS PEMBATAS NEMPEL TANPA GAP */
+.garis-tebal { 
+    border-top: 2.5pt solid #000; 
+    margin-top: 0.8mm; 
+    margin-bottom: 0;
+    width: 100%; 
+}
+.garis-tipis { 
+    border-top: 0.8pt solid #000; 
+    margin-top: 0.5pt; 
+    margin-bottom: 1.5mm; 
+    width: 100%; 
+}
 
 .info-with-logo {
     display: block;
@@ -249,7 +228,6 @@ table.daftar tbody td.col-npm {
 }
 
 /* TANDA TANGAN */
-
 table.daftar td.col-ttd {
     position: relative;
     padding: 0.6mm 0.5mm !important;
@@ -422,23 +400,28 @@ $nowCetak = \Illuminate\Support\Carbon::now()->setTimezone('Asia/Makassar');
     @endphp
     <div class="page {{ $isLast ? 'page-last' : '' }}">
         <div class="content">
-            <div class="kop-wrap">
-                <div class="kop-logo-side">
-                    @if($logoFinalSrc)
-                        <img src="{{ $logoFinalSrc }}" alt="Logo IAI DDI Sidrap" width="80" height="80">
-                    @else
-                        <div style="width:20mm;height:20mm;margin:0 auto;border-radius:50%;background:#0f6244;color:#fff;font-size:9px;font-weight:800;line-height:20mm;text-align:center;">IAI DDI</div>
-                    @endif
-                </div>
-                <div class="kop-text">
-                    <div class="kop-title-a">INSTITUT AGAMA ISLAM</div>
-                    <div class="kop-title-a kop-title-a2">DARUD DA'WAH WAL IRSYAD</div>
-                    <div class="kop-title-b">SIDENRENG RAPPANG</div>
-                    <div class="kop-terakreditasi">TERAKREDITASI INSTITUSI • SK : 337/SK/BAN-PT/Ak-S/2.0/PT/VI/2026</div>
-                    <div class="kop-alamat-line">Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang</div>
-                    <div class="kop-alamat-line kop-email-web">E-mail : iaiddisidrap@gmail.com &nbsp;&nbsp; Website : www.yppddisrapp.ac.id</div>
-                </div>
-            </div>
+            
+            {{-- KOP SURAT BERBASIS TABEL AGAR STRUKTUR NEMPEL PRESISI --}}
+            <table class="table-kop">
+                <tr>
+                    <td class="td-logo">
+                        @if($logoFinalSrc)
+                            <img src="{{ $logoFinalSrc }}" alt="Logo IAI DDI Sidrap">
+                        @else
+                            <div style="width:20mm;height:20mm;border-radius:50%;background:#0f6244;color:#fff;font-size:9px;font-weight:800;line-height:20mm;text-align:center;">IAI DDI</div>
+                        @endif
+                    </td>
+                    <td class="td-text">
+                        <div class="kop-title-a">INSTITUT AGAMA ISLAM</div>
+                        <div class="kop-title-a">DARUD DA'WAH WAL IRSYAD</div>
+                        <div class="kop-title-b">SIDENRENG RAPPANG</div>
+                        <div class="kop-terakreditasi">TERAKREDITASI INSTITUSI • SK : 337/SK/BAN-PT/Ak-S/2.0/PT/VI/2026</div>
+                        <div class="kop-alamat-line">Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang</div>
+                        <div class="kop-alamat-line">E-mail : iaiddisidrap@gmail.com &nbsp;&nbsp; Website : www.yppddisrapp.ac.id</div>
+                    </td>
+                </tr>
+            </table>
+
             <div class="garis-tebal"></div>
             <div class="garis-tipis"></div>
 
@@ -508,7 +491,7 @@ $nowCetak = \Illuminate\Support\Carbon::now()->setTimezone('Asia/Makassar');
                 </div>
             @endif
 
-            {{-- TABEL DAFTAR HADIR DENGAN PERSENTASE PERSISI UNTUK DOMPDF/MPDF --}}
+            {{-- TABEL DAFTAR HADIR --}}
             <table class="daftar">
                 <thead>
                     <tr>
