@@ -45,10 +45,12 @@
                     <thead class="bg-white/5 text-emerald-100/80">
                         <tr>
                             <th class="text-center font-medium px-3 py-3 w-12">
-                                <input id="selectAllReset"
-                                       type="checkbox"
-                                       title="Pilih semua mahasiswa untuk hapus nilai"
-                                       class="w-4 h-4 rounded border-white/20 bg-white/5 text-emerald-500 focus:ring-emerald-400" />
+                                <label for="selectAllReset" class="cursor-pointer inline-flex items-center justify-center w-full h-full">
+                                    <input id="selectAllReset"
+                                           type="checkbox"
+                                           title="Pilih semua mahasiswa untuk hapus nilai"
+                                           class="w-4 h-4 rounded border-white/20 bg-white/5 text-emerald-500 focus:ring-emerald-400 pointer-events-auto relative z-20" />
+                                </label>
                             </th>
                             <th class="text-left font-medium px-4 py-3">Mahasiswa</th>
                             <th class="text-center font-medium px-3 py-3">TM (50%)</th>
@@ -80,16 +82,18 @@
                             <tr class="hover:bg-white/5">
                                 <td class="px-3 py-3 text-center align-middle">
                                     <input type="checkbox"
+                                           id="resetCheck{{ (int) $row->mahasiswa_id }}"
                                            form="bulkResetForm"
                                            name="reset_ids[]"
                                            value="{{ (int) $row->mahasiswa_id }}"
-                                           class="row-reset-check w-4 h-4 rounded border-white/20 bg-white/5 text-red-500 focus:ring-red-400 align-middle"
-                                           @disabled(! $hasAnyNilai)
-                                           title="{{ $hasAnyNilai ? 'Pilih untuk hapus / reset nilai mahasiswa ini' : 'Belum ada nilai untuk dihapus' }}" />
+                                           class="row-reset-check w-4 h-4 rounded border-white/20 bg-white/5 text-red-500 focus:ring-red-400 align-middle pointer-events-auto relative z-20 cursor-pointer"
+                                           title="{{ $hasAnyNilai ? 'Pilih untuk hapus / reset nilai mahasiswa ini' : 'Belum ada nilai untuk dihapus. Anda tetap bisa memilih; sistem akan otomatis melewati jika nilainya kosong.' }}" />
                                 </td>
                                 <td class="px-4 py-3">
-                                    <div class="font-medium">{{ $mhs?->nama_lengkap }}</div>
-                                    <div class="text-xs text-emerald-100/60">{{ $mhs?->npm }}</div>
+                                    <label for="resetCheck{{ (int) $row->mahasiswa_id }}" class="cursor-pointer block">
+                                        <div class="font-medium">{{ $mhs?->nama_lengkap }}</div>
+                                        <div class="text-xs text-emerald-100/60">{{ $mhs?->npm }}</div>
+                                    </label>
                                     @if (! $isReady)
                                         <div class="text-xs text-red-200/90 mt-1">KHS belum disiapkan Admin.</div>
                                     @endif
