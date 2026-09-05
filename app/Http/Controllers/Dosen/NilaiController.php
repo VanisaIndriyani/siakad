@@ -231,8 +231,11 @@ class NilaiController extends Controller
     }
 
     /**
-     * HAPUS / RESET NILAI KOMPONEN + HASIL (tm/quis/mid/final/angka/huruf) jadi NULL
-     * untuk MAHASISWA YANG DIPILIH via CEKLIS, lalu recalc IPS/IPK.
+     * KELUARKAN MAHASISWA DARI MATA KULIAH INI.
+     * - Hapus KrsItem (serta AbsensiItem jika ada)
+     * - Hapus KhsItem (nilai)
+     * - Lalu recalc IPS/IPK.
+     * Setelah ini, mahasiswa TIDAK AKAN MUNCUL lagi di list nilai mata kuliah ini.
      */
     public function bulkResetNilai(Request $request, MataKuliah $mataKuliah, int $semester): RedirectResponse
     {
@@ -257,73 +260,81 @@ class NilaiController extends Controller
                 ->with('error', 'Belum ada mahasiswa yang dipilih.');
         }
 
-        $allowedIds = Krs::query()
+        $krsRows = Krs::query()
+            ->with('items')
             ->where('status_approval', 'approved')
             ->where('semester', $semester)
+            ->whereIn('mahasiswa_id', $requested)
             ->whereHas('items', function ($sub) use ($mataKuliah) {
                 $sub->where('mata_kuliah_id', $mataKuliah->id);
             })
-            ->pluck('mahasiswa_id')
-            ->map(fn ($v) => (int) $v)
-            ->unique()
-            ->values()
-            ->all();
-
-        $allowedSet = array_fill_keys($allowedIds, true);
-        $targetIds = array_values(array_filter($requested, fn ($id) => isset($allowedSet[$id])));
-
-        if (count($targetIds) === 0) {
-            return redirect()
-                ->route('dosen.nilai.edit', [$mataKuliah, $semester])
-                ->with('error', 'Tidak ada mahasiswa yang valid untuk dihapus nilainya.');
-        }
-
-        $khsList = Khs::query()
-            ->with(['items' => function ($sub) use ($mataKuliah) {
-                $sub->where('mata_kuliah_id', $mataKuliah->id);
-            }])
-            ->where('semester', $semester)
-            ->whereIn('mahasiswa_id', $targetIds)
             ->get();
 
-        $resetCount = 0;
-        foreach ($khsList as $khs) {
-            $item = $khs->items->first();
-            if (! $item) {
-                continue;
-            }
-            $item->update([
-                'nilai_tm' => null,
-                'nilai_quis' => null,
-                'nilai_mid' => null,
-                'nilai_final' => null,
-                'nilai_angka' => null,
-                'nilai_huruf' => null,
-            ]);
-            $resetCount++;
+        if ($krsRows->count() === 0) {
+            return redirect()
+                ->route('dosen.nilai.edit', [$mataKuliah, $semester])
+                ->with('error', 'Tidak ada mahasiswa yang valid untuk dikeluarkan.');
         }
 
-        $resetMahasiswaIds = $khsList
-            ->pluck('mahasiswa_id')
-            ->map(fn ($v) => (int) $v)
-            ->unique()
-            ->values()
-            ->all();
+        $removedCount = 0;
+        $affectedMahasiswaIds = [];
 
-        foreach ($resetMahasiswaIds as $mahasiswaId) {
+        foreach ($krsRows as $krs) {
+            $mhsId = (int) $krs->mahasiswa_id;
+
+            $krsItemDeleted = \App\Models\KrsItem::query()
+                ->where('krs_id', $krs->id)
+                ->where('mata_kuliah_id', $mataKuliah->id)
+                ->delete();
+
+            if ($krsItemDeleted > 0) {
+                $removedCount += $krsItemDeleted;
+                if (! in_array($mhsId, $affectedMahasiswaIds, true)) {
+                    $affectedMahasiswaIds[] = $mhsId;
+                }
+            }
+
+            $khs = Khs::query()
+                ->where('mahasiswa_id', $mhsId)
+                ->where('semester', $semester)
+                ->first();
+            if ($khs) {
+                \App\Models\KhsItem::query()
+                    ->where('khs_id', $khs->id)
+                    ->where('mata_kuliah_id', $mataKuliah->id)
+                    ->delete();
+            }
+
+            $absensiIds = \App\Models\Absensi::query()
+                ->where('jurusan', $krs->mahasiswa?->program_studi ?? '')
+                ->where('semester', $semester)
+                ->where('mata_kuliah_id', $mataKuliah->id)
+                ->pluck('id')
+                ->map(fn ($v) => (int) $v)
+                ->all();
+
+            if (count($absensiIds) > 0) {
+                \App\Models\AbsensiItem::query()
+                    ->whereIn('absensi_id', $absensiIds)
+                    ->where('mahasiswa_id', $mhsId)
+                    ->delete();
+            }
+        }
+
+        foreach ($affectedMahasiswaIds as $mahasiswaId) {
             $this->recalculateIpsIpk((int) $mahasiswaId, (int) $semester);
         }
 
-        if ($resetCount === 0) {
+        if ($removedCount === 0) {
             return redirect()
                 ->route('dosen.nilai.edit', [$mataKuliah, $semester])
-                ->with('error', 'Tidak ada nilai yang dihapus (mahasiswa belum punya KHS / item nilai).');
+                ->with('error', 'Gagal mengeluarkan mahasiswa (mata kuliah tidak terdaftar di KRS).');
         }
 
-        $skipped = count($requested) - $resetCount;
-        $message = 'Berhasil menghapus nilai untuk '.$resetCount.' mahasiswa yang dipilih.';
+        $skipped = count($requested) - count($affectedMahasiswaIds);
+        $message = 'Berhasil mengeluarkan '.$removedCount.' mahasiswa dari mata kuliah ini (nama sudah tidak muncul lagi di list).';
         if ($skipped > 0) {
-            $message .= ' ('.$skipped.' dilewati: KHS / item nilai belum ada).';
+            $message .= ' ('.$skipped.' dilewati: data tidak ditemukan).';
         }
 
         return redirect()

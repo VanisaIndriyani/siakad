@@ -30,6 +30,8 @@ class Kegiatan extends Model
         'narasumber_nip',
         'rektor_nama',
         'rektor_nip',
+        'sekretaris_panitia_nama',
+        'sekretaris_panitia_nip',
         'gambar_path',
         'is_published',
         'tampilkan_ke_dosen',

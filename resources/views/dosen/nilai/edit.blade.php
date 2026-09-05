@@ -48,8 +48,8 @@
                                 <label for="selectAllReset" class="cursor-pointer inline-flex items-center justify-center w-full h-full">
                                     <input id="selectAllReset"
                                            type="checkbox"
-                                           title="Pilih semua mahasiswa untuk hapus nilai"
-                                           class="w-4 h-4 rounded border-white/20 bg-white/5 text-emerald-500 focus:ring-emerald-400 pointer-events-auto relative z-20" />
+                                           title="Pilih semua mahasiswa untuk dikeluarkan dari mata kuliah ini"
+                                           class="w-4 h-4 rounded border-white/20 bg-white/5 text-red-500 focus:ring-red-400 pointer-events-auto relative z-20" />
                                 </label>
                             </th>
                             <th class="text-left font-medium px-4 py-3">Mahasiswa</th>
@@ -72,22 +72,23 @@
                                     || $existingItem->nilai_mid !== null || $existingItem->nilai_final !== null
                                     || $existingItem->nilai_angka !== null || $existingItem->nilai_huruf !== null
                                 );
-                                $tm = old('nilai_tm.'.$row->mahasiswa_id, $existingItem?->nilai_tm);
-                                $quis = old('nilai_quis.'.$row->mahasiswa_id, $existingItem?->nilai_quis);
-                                $mid = old('nilai_mid.'.$row->mahasiswa_id, $existingItem?->nilai_mid);
-                                $final = old('nilai_final.'.$row->mahasiswa_id, $existingItem?->nilai_final);
-                                $angka = old('nilai_angka.'.$row->mahasiswa_id, $existingItem?->nilai_angka);
-                                $huruf = old('nilai_huruf.'.$row->mahasiswa_id, $existingItem?->nilai_huruf);
+                                $skipOld = session('success') || session('error');
+                                $tm = $skipOld ? ($existingItem?->nilai_tm) : old('nilai_tm.'.$row->mahasiswa_id, $existingItem?->nilai_tm);
+                                $quis = $skipOld ? ($existingItem?->nilai_quis) : old('nilai_quis.'.$row->mahasiswa_id, $existingItem?->nilai_quis);
+                                $mid = $skipOld ? ($existingItem?->nilai_mid) : old('nilai_mid.'.$row->mahasiswa_id, $existingItem?->nilai_mid);
+                                $final = $skipOld ? ($existingItem?->nilai_final) : old('nilai_final.'.$row->mahasiswa_id, $existingItem?->nilai_final);
+                                $angka = $skipOld ? ($existingItem?->nilai_angka) : old('nilai_angka.'.$row->mahasiswa_id, $existingItem?->nilai_angka);
+                                $huruf = $skipOld ? ($existingItem?->nilai_huruf) : old('nilai_huruf.'.$row->mahasiswa_id, $existingItem?->nilai_huruf);
                             @endphp
                             <tr class="hover:bg-white/5">
-                                <td class="px-3 py-3 text-center align-middle">
+                                <td class="px-3 py-3 text-center">
                                     <input type="checkbox"
                                            id="resetCheck{{ (int) $row->mahasiswa_id }}"
                                            form="bulkResetForm"
                                            name="reset_ids[]"
                                            value="{{ (int) $row->mahasiswa_id }}"
                                            class="row-reset-check w-4 h-4 rounded border-white/20 bg-white/5 text-red-500 focus:ring-red-400 align-middle pointer-events-auto relative z-20 cursor-pointer"
-                                           title="{{ $hasAnyNilai ? 'Pilih untuk hapus / reset nilai mahasiswa ini' : 'Belum ada nilai untuk dihapus. Anda tetap bisa memilih; sistem akan otomatis melewati jika nilainya kosong.' }}" />
+                                           title="Centang untuk KELUARKAN mahasiswa ini dari mata kuliah (nama + nilai + absensi akan dihapus dan tidak akan muncul lagi di list)." />
                                 </td>
                                 <td class="px-4 py-3">
                                     <label for="resetCheck{{ (int) $row->mahasiswa_id }}" class="cursor-pointer block">
@@ -165,7 +166,7 @@
         <div class="mt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div class="text-xs text-emerald-100/60">
                 <i class="fa-solid fa-circle-info mr-1"></i>
-                Centang kolom kiri untuk reset/hapus nilai mahasiswa (TM, Tugas, MID, Final, Total, Mutu menjadi kosong), kemudian klik tombol merah di bawah.
+                Centang kolom kiri untuk <strong>KELUARKAN</strong> mahasiswa dari mata kuliah ini (mahasiswa akan dihapus dari daftar nilai + nilai + absensi dihapus otomatis).
             </div>
             <button class="h-11 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition font-medium">
                 Simpan Nilai
@@ -173,11 +174,10 @@
         </div>
     </form>
 
-    {{-- ===== FORM BULK RESET / HAPUS NILAI (terpisah dari form simpan update) ===== --}}
+    {{-- ===== FORM KELUARKAN MAHASISWA DARI MATA KULIAH ===== --}}
     <form id="bulkResetForm"
           method="POST"
           action="{{ route('dosen.nilai.bulk-reset', [$mataKuliah, $semester]) }}"
-          onsubmit="return confirmResetSelected(this);"
           class="mt-6 rounded-2xl border border-red-500/30 bg-red-500/5 p-5">
         @csrf
         @method('DELETE')
@@ -185,20 +185,20 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
                 <div class="font-semibold text-red-100 flex items-center gap-2">
-                    <i class="fa-solid fa-trash"></i>
-                    Hapus / Reset Nilai Terpilih
+                    <i class="fa-solid fa-user-minus"></i>
+                    Keluarkan Mahasiswa yang Tercentang dari Mata Kuliah Ini
                 </div>
                 <div class="text-xs text-red-200/70 mt-1">
                     Total mahasiswa tercentang: <span id="resetSelectedCount" class="font-semibold text-red-100">0</span> orang.
-                    Nilai yang dihapus: TM, Tugas, MID, Final, Total Angka, dan Nilai Mutu.
+                    Setelah disubmit, nama mahasiswa di atas <strong>TIDAK AKAN MUNCUL LAGI</strong> di list ini beserta nilai dan absensinya.
                 </div>
             </div>
             <button id="btnResetSubmit"
                     type="submit"
                     disabled
                     class="h-11 px-5 rounded-xl bg-red-600/90 hover:bg-red-500 active:bg-red-700 disabled:bg-red-900/40 disabled:text-red-200/50 disabled:cursor-not-allowed transition font-medium text-white">
-                <i class="fa-solid fa-trash-can mr-1"></i>
-                Hapus Nilai Terpilih
+                <i class="fa-solid fa-user-xmark mr-1"></i>
+                Keluarkan Terpilih
             </button>
         </div>
     </form>
@@ -279,6 +279,7 @@
             const rowChecks = Array.prototype.slice.call(document.querySelectorAll('input.row-reset-check'));
             const countEl = document.getElementById('resetSelectedCount');
             const btnReset = document.getElementById('btnResetSubmit');
+            const bulkResetFormEl = document.getElementById('bulkResetForm');
 
             function updateResetUi() {
                 const enabled = rowChecks.filter((c) => !c.disabled);
@@ -314,15 +315,42 @@
             rowChecks.forEach((c) => c.addEventListener('change', updateResetUi));
             updateResetUi();
 
-            window.confirmResetSelected = function (formEl) {
-                const checkedN = rowChecks.filter((c) => c.checked).length;
-                if (checkedN === 0) {
-                    alert('Belum ada mahasiswa yang dipilih. Silakan centang kolom kiri terlebih dahulu.');
-                    return false;
-                }
-                const msg = 'Anda yakin akan MENGHAPUS / MERESSET NILAI untuk ' + checkedN + ' mahasiswa yang dipilih?\n\nSemua nilai (TM, Tugas, MID, Final, Total Angka, Nilai Mutu) akan menjadi KOSONG, dan IPS/IPK akan dihitung ulang.\n\nTindakan ini tidak dapat dibatalkan.';
-                return confirm(msg);
-            };
+            /* ===== INJECT MANUAL reset_ids KE DALAM FORM BULK RESET (MENGATASI form="" attribute BROKEN DI MOBILE) ===== */
+            if (bulkResetFormEl) {
+                bulkResetFormEl.addEventListener('submit', function (evt) {
+                    const checkedN = rowChecks.filter((c) => c.checked).length;
+                    if (checkedN === 0) {
+                        alert('Belum ada mahasiswa yang dipilih. Silakan centang kolom kiri terlebih dahulu.');
+                        evt.preventDefault();
+                        return false;
+                    }
+
+                    const msg = 'PERINGATAN PENTING!\n\nAnda yakin akan MENGELUARKAN ' + checkedN + ' mahasiswa dari mata kuliah ini?\n\nDampaknya:\n- Mahasiswa ini TIDAK AKAN MUNCUL lagi di daftar nilai mata kuliah ini.\n- SEMUA data nilai untuk mata kuliah ini dihapus (TM, Tugas, MID, Final, Angka, Mutu).\n- Data absensi mahasiswa pada mata kuliah ini juga dihapus.\n- IPS / IPK mahasiswa akan dihitung ulang.\n\nTindakan ini TIDAK DAPAT DIBATALKAN.';
+                    const ok = confirm(msg);
+                    if (!ok) {
+                        evt.preventDefault();
+                        return false;
+                    }
+
+                    const existingHidden = bulkResetFormEl.querySelectorAll('input[name="reset_ids[]"]');
+                    existingHidden.forEach((n) => n.parentNode.removeChild(n));
+
+                    const checkedIds = rowChecks
+                        .filter((c) => c.checked && !Number.isNaN(Number(c.value)))
+                        .map((c) => Number(c.value))
+                        .filter((v) => v > 0);
+
+                    checkedIds.forEach((idVal) => {
+                        const inpHidden = document.createElement('input');
+                        inpHidden.type = 'hidden';
+                        inpHidden.name = 'reset_ids[]';
+                        inpHidden.value = String(idVal);
+                        bulkResetFormEl.appendChild(inpHidden);
+                    });
+
+                    return true;
+                });
+            }
         })();
     </script>
 </x-portal-layout>

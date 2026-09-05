@@ -372,10 +372,12 @@ $ketuaPanitiaNama = trim((string)($kegiatan->ketua_panitia_nama ?? ''));
 if ($ketuaPanitiaNama === '') $ketuaPanitiaNama = trim((string)($kegiatan->penyelenggara ?? 'Panitia Kegiatan'));
 $ketuaPanitiaNip  = trim((string)($kegiatan->ketua_panitia_nip ?? ''));
 if ($ketuaPanitiaNip === '') $ketuaPanitiaNip = '-';
-$rektorNama       = trim((string)($kegiatan->rektor_nama ?? ''));
-if ($rektorNama === '') $rektorNama = 'Dr. H. Muh. Anshar, M.Ag.';
-$rektorNip        = trim((string)($kegiatan->rektor_nip ?? ''));
-if ($rektorNip === '') $rektorNip = '-';
+
+$sekretarisPanitiaNama = trim((string)($kegiatan->sekretaris_panitia_nama ?? ''));
+if ($sekretarisPanitiaNama === '') $sekretarisPanitiaNama = trim((string)($kegiatan->rektor_nama ?? 'Panitia Kegiatan'));
+$sekretarisPanitiaNip  = trim((string)($kegiatan->sekretaris_panitia_nip ?? ''));
+if ($sekretarisPanitiaNip === '') $sekretarisPanitiaNip = trim((string)($kegiatan->rektor_nip ?? '-'));
+
 $narasumberVal    = trim((string)($kegiatan->narasumber ?? ''));
 if ($narasumberVal === '') $narasumberVal = '-';
 $jenisKegiatanVal = trim((string)($kegiatan->jenis_kegiatan ?? ''));
@@ -613,11 +615,11 @@ $nowCetak = \Illuminate\Support\Carbon::now()->setTimezone('Asia/Makassar');
                         </td>
                         <td style="width:50%;">
                             <div class="ttd-label">Sidrap, {{ formatTglIndoCetak($nowCetak) }}</div>
-                            <div class="ttd-sub">Pimpinan / Penanggung Jawab</div>
+                            <div class="ttd-sub">Sekretaris Panitia</div>
                             <div class="ttd-garis">&nbsp;</div>
-                            <div class="ttd-nama">{{ strtoupper($rektorNama) }}</div>
+                            <div class="ttd-nama">{{ strtoupper($sekretarisPanitiaNama) }}</div>
                             <div class="ttd-nip">
-                                @if($rektorNip !== '-') NIDN. {{ $rektorNip }} @else Rektor IAI DDI Sidrap @endif
+                                @if($sekretarisPanitiaNip !== '-') NIDN. {{ $sekretarisPanitiaNip }} @else Panitia Penyelenggara @endif
                             </div>
                         </td>
                     </tr>

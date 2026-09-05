@@ -143,6 +143,7 @@ class KrsController extends Controller
             ->with(['items.mataKuliah'])
             ->withCount('items')
             ->where('mahasiswa_id', $mahasiswa?->id)
+            ->orderByRaw('CAST(semester AS SIGNED) ASC')
             ->orderByDesc('id')
             ->paginate(10);
 

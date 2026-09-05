@@ -100,13 +100,13 @@
             </div>
 
             <div>
-                <label class="text-sm text-emerald-100/80">Nama Rektor <span class="text-emerald-200/40">(Default: Rektor IAI DDI)</span></label>
-                <input name="rektor_nama" value="{{ old('rektor_nama', $kegiatan->rektor_nama ?? 'Dr. H. Muh. Anshar, M.Ag.') }}" placeholder="Contoh: Prof. Dr. H. Muh. Anshar, M.Ag." class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
+                <label class="text-sm text-emerald-100/80">Nama Lengkap Sekretaris Panitia</label>
+                <input name="sekretaris_panitia_nama" value="{{ old('sekretaris_panitia_nama', $kegiatan->sekretaris_panitia_nama) }}" placeholder="Contoh: Dra. Hj. Siti Nurhaliza, M.Pd" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
             </div>
 
             <div>
-                <label class="text-sm text-emerald-100/80">NIDN Rektor <span class="text-emerald-200/40">(Opsional)</span></label>
-                <input name="rektor_nid" value="{{ old('rektor_nid', $kegiatan->rektor_nid) }}" placeholder="Contoh: 196001011988121001" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
+                <label class="text-sm text-emerald-100/80">NIP Sekretaris Panitia <span class="text-emerald-200/40">(Opsional)</span></label>
+                <input name="sekretaris_panitia_nip" value="{{ old('sekretaris_panitia_nip', $kegiatan->sekretaris_panitia_nip) }}" placeholder="Contoh: 197801012005012002" class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
             </div>
 
             <div class="md:col-span-2">

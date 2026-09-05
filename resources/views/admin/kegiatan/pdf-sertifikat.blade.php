@@ -529,15 +529,14 @@ if ($jenis == 'workshop') {
 
             <td>
                 <div class="ttd-pos">
-                    MENGETAHUI,<br />
-                    REKTOR
-                    <small>IAI DDI Sidrap</small>
+                    SEKRETARIS PANITIA
+                    <small>{{ $kegiatan->penyelenggara ?? 'Panitia Penyelenggara' }}</small>
                 </div>
                 <div class="ttd-spacer">&nbsp;</div>
                 <div class="ttd-garis">
-                    <div class="ttd-nama">{{ $kegiatan->rektor_nama ?? 'Dr. H. Muh. Anshar, M.Ag.' }}</div>
+                    <div class="ttd-nama">{{ $kegiatan->sekretaris_panitia_nama ?? ($kegiatan->rektor_nama ?? ($kegiatan->penyelenggara ?? 'Panitia Kegiatan')) }}</div>
                     <div class="ttd-nip">
-                        Rektor IAI DDI Sidrap &bull; NIP. {{ $kegiatan->rektor_nip ?? '-' }}
+                        NIP. {{ $kegiatan->sekretaris_panitia_nip ?? ($kegiatan->rektor_nip ?? '-') }}
                     </div>
                 </div>
             </td>
