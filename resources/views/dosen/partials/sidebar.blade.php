@@ -76,7 +76,7 @@
     </a>
 <a href="{{ route('dosen.kegiatan.index') }}"
    class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('dosen.kegiatan.*') && !request()->routeIs('dosen.kegiatan.sertifikat-saya') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
-    <i class="fa-solid fa-calendar-star text-emerald-300"></i>
+    <i class="fa-solid fa-calendar-check text-emerald-300"></i>
     <span class="text-sm font-medium">Kegiatan</span>
 </a>
 <a href="{{ route('dosen.kegiatan.sertifikat-saya') }}"
