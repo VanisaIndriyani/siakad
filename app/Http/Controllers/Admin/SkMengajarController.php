@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Dosen;
 use App\Models\MataKuliah;
 use App\Models\SkMengajar;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -80,7 +81,31 @@ class SkMengajarController extends Controller
             $validated['file_pdf'] = $this->storePdf($request, 'sk-mengajar', 'file_pdf_upload');
         }
 
-        SkMengajar::create($validated);
+        try {
+            SkMengajar::create($validated);
+        } catch (QueryException $e) {
+            if (isset($validated['file_pdf'] ?? null)) {
+                $this->deletePdf($validated['file_pdf']);
+            }
+            if ($e->getCode() === '23000' || (is_int($e->errorInfo[1] ?? null) && (int) $e->errorInfo[1] === 1062) {
+                $mkCode = '';
+                if (!empty($validated['mata_kuliah_id'])) {
+                    $mk = MataKuliah::query()->find($validated['mata_kuliah_id'], ['kode']);
+                    if ($mk) {
+                        $mkCode = $mk->kode;
+                    }
+                }
+                $msg = 'SK Mengajar untuk kombinasi ini SUDAH ADA sebelumnya (Mata Kuliah '
+                    .($mkCode !== '' ? $mkCode.' ' : '')
+                    .'• Dosen ID '.$validated['dosen_id']
+                    .' • Semester '.$validated['semester']
+                    .' • TA '.($validated['tahun_ajaran'] ?? '').').' Silakan <strong>EDIT</strong> data SK Mengajar yang sudah ada di halaman Index, jangan buat baru (CREATE) ulang!';
+                return redirect()->back()->withInput()->withErrors([
+                    'dosen_id' => $msg,
+                ]);
+            }
+            throw $e;
+        }
 
         return to_route('admin.sk-mengajar.index')
             ->with('success', 'SK Mengajar berhasil ditambahkan.');
@@ -119,7 +144,29 @@ class SkMengajarController extends Controller
             $validated['file_pdf'] = null;
         }
 
-        $skMengajar->update($validated);
+        try {
+            $skMengajar->update($validated);
+        } catch (QueryException $e) {
+            if ($e->getCode() === '23000' || (is_int($e->errorInfo[1] ?? null) && (int) $e->errorInfo[1] === 1062) {
+                $mkCode = '';
+                if (!empty($validated['mata_kuliah_id'])) {
+                    $mk = MataKuliah::query()->find($validated['mata_kuliah_id'], ['kode']);
+                    if ($mk) {
+                        $mkCode = $mk->kode;
+                    }
+                }
+                $msg = 'Gagal update: Kombinasi Mata Kuliah '
+                    .($mkCode !== '' ? $mkCode.' ' : '')
+                    .'• Dosen ID '.($validated['dosen_id'] ?? $skMengajar->dosen_id)
+                    .' • Semester '.($validated['semester'] ?? $skMengajar->semester)
+                    .' • TA '.($validated['tahun_ajaran'] ?? $skMengajar->tahun_ajaran ?? '')
+                    .' SUDAH ADA di record lain. Silakan pilih dosen / edit data yang sudah ada.';
+                return redirect()->back()->withInput()->withErrors([
+                    'dosen_id' => $msg,
+                ]);
+            }
+            throw $e;
+        }
 
         return to_route('admin.sk-mengajar.index')
             ->with('success', 'SK Mengajar berhasil diperbarui.');

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Dosen;
 use App\Models\MataKuliah;
 use App\Models\RosterUpload;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -78,7 +79,30 @@ class RosterController extends Controller
             $validated['file_pdf'] = $this->storePdf($request, 'file_pdf_upload');
         }
 
-        RosterUpload::create($validated);
+        try {
+            RosterUpload::create($validated);
+        } catch (QueryException $e) {
+            if (isset($validated['file_pdf'] ?? null)) {
+                $this->deletePdf($validated['file_pdf']);
+            }
+            if ($e->getCode() === '23000' || (is_int($e->errorInfo[1] ?? null) && (int) $e->errorInfo[1] === 1062) {
+                $mkCode = '';
+                if (!empty($validated['mata_kuliah_id'])) {
+                    $mk = MataKuliah::query()->find($validated['mata_kuliah_id'], ['kode']);
+                    if ($mk) {
+                        $mkCode = $mk->kode;
+                    }
+                }
+                $msg = 'Roster Kuliah untuk kombinasi ini SUDAH ADA sebelumnya (Mata Kuliah '
+                    .($mkCode !== '' ? $mkCode.' ' : '')
+                    .' • Semester '.($validated['semester'] ?? 1)
+                    .' • TA '.($validated['tahun_ajaran'] ?? '').'). Silakan <strong>EDIT</strong> data Roster yang sudah ada di halaman Index, jangan buat baru (CREATE) ulang!';
+                return redirect()->back()->withInput()->withErrors([
+                    'dosen_id' => $msg,
+                ]);
+            }
+            throw $e;
+        }
 
         return to_route('admin.roster.index')
             ->with('success', 'Roster Kuliah berhasil ditambahkan.');
@@ -116,7 +140,28 @@ class RosterController extends Controller
             $validated['file_pdf'] = null;
         }
 
-        $rosterUpload->update($validated);
+        try {
+            $rosterUpload->update($validated);
+        } catch (QueryException $e) {
+            if ($e->getCode() === '23000' || (is_int($e->errorInfo[1] ?? null) && (int) $e->errorInfo[1] === 1062) {
+                $mkCode = '';
+                if (!empty($validated['mata_kuliah_id'])) {
+                    $mk = MataKuliah::query()->find($validated['mata_kuliah_id'], ['kode']);
+                    if ($mk) {
+                        $mkCode = $mk->kode;
+                    }
+                }
+                $msg = 'Gagal update: Kombinasi Mata Kuliah '
+                    .($mkCode !== '' ? $mkCode.' ' : '')
+                    .' • Semester '.($validated['semester'] ?? $rosterUpload->semester)
+                    .' • TA '.($validated['tahun_ajaran'] ?? $rosterUpload->tahun_ajaran ?? '')
+                    .' SUDAH ADA di record lain. Silakan pilih dosen / edit data yang sudah ada.';
+                return redirect()->back()->withInput()->withErrors([
+                    'dosen_id' => $msg,
+                ]);
+            }
+            throw $e;
+        }
 
         return to_route('admin.roster.index')
             ->with('success', 'Roster Kuliah berhasil diperbarui.');
