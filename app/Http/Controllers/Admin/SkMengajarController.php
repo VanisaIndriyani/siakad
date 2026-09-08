@@ -70,6 +70,12 @@ class SkMengajarController extends Controller
         $validated = $this->prepareDefaults($validated, $request);
         $validated['created_by'] = Auth::id();
 
+        if (!$this->validateHasMataKuliah($validated, $request)) {
+            return redirect()->back()->withInput()->withErrors([
+                'dosen_id' => 'Dosen ini BELUM mengampu mata kuliah manapun. Silakan atur dosen sebagai pengampu di menu Mata Kuliah terlebih dahulu (pada kolom Dosen 1 atau Dosen 2).',
+            ]);
+        }
+
         if ($request->hasFile('file_pdf_upload') && $request->file('file_pdf_upload')->isValid()) {
             $validated['file_pdf'] = $this->storePdf($request, 'sk-mengajar', 'file_pdf_upload');
         }
@@ -92,6 +98,12 @@ class SkMengajarController extends Controller
         $validated = $this->validateForm($request, $skMengajar->id);
         $validated = $this->applyAutoFillFromDosen($validated, $request, $skMengajar);
         $validated = $this->prepareDefaults($validated, $request);
+
+        if (!$this->validateHasMataKuliah($validated, $request)) {
+            return redirect()->back()->withInput()->withErrors([
+                'dosen_id' => 'Dosen ini BELUM mengampu mata kuliah manapun. Silakan atur dosen sebagai pengampu di menu Mata Kuliah terlebih dahulu (pada kolom Dosen 1 atau Dosen 2).',
+            ]);
+        }
 
         if ($request->hasFile('file_pdf_upload') && $request->file('file_pdf_upload')->isValid()) {
             $oldPath = (string) $skMengajar->file_pdf;
@@ -208,6 +220,30 @@ class SkMengajarController extends Controller
         ];
     }
 
+    private function validateHasMataKuliah(array $payload, Request $request): bool
+    {
+        $mkId = (int) ($payload['mata_kuliah_id'] ?? 0);
+        if ($mkId >= 1) {
+            $exists = MataKuliah::query()->where('id', $mkId)->exists();
+            if ($exists) {
+                return true;
+            }
+        }
+
+        $dosenId = (int) ($payload['dosen_id'] ?? 0);
+        if ($dosenId >= 1) {
+            $mk = MataKuliah::query()
+                ->where(function ($q) use ($dosenId) {
+                    $q->where('dosen_id', $dosenId)->orWhere('dosen_id_2', $dosenId);
+                })
+                ->first(['id']);
+            if ($mk) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private function prepareDefaults(array $payload, Request $request): array
     {
         $mkId = (int) ($payload['mata_kuliah_id'] ?? 0);
@@ -221,9 +257,10 @@ class SkMengajarController extends Controller
             }
         }
 
-        if (!isset($payload['beban_sks']) || $payload['beban_sks'] === null || $payload['beban_sks'] === '') {
-            $payload['beban_sks'] = $fallbackSks;
-        }
+        $payload['beban_sks'] = isset($payload['beban_sks']) && $payload['beban_sks'] !== null && trim((string) $payload['beban_sks']) !== ''
+            ? (float) $payload['beban_sks']
+            : $fallbackSks;
+
         if (!isset($payload['program_studi']) || trim((string) $payload['program_studi']) === '') {
             $payload['program_studi'] = $fallbackProdi;
         }
@@ -238,7 +275,7 @@ class SkMengajarController extends Controller
             $payload['semester'] = (int) $payload['semester'];
         }
         if (empty($payload['mata_kuliah_id']) || (int) $payload['mata_kuliah_id'] < 1) {
-            $payload['mata_kuliah_id'] = $mkId > 0 ? $mkId : 0;
+            $payload['mata_kuliah_id'] = max(0, $mkId);
         } else {
             $payload['mata_kuliah_id'] = (int) $payload['mata_kuliah_id'];
         }

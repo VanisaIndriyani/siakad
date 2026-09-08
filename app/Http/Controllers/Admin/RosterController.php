@@ -68,6 +68,12 @@ class RosterController extends Controller
         $validated = $this->prepareDefaults($validated);
         $validated['created_by'] = Auth::id();
 
+        if (!$this->validateHasMataKuliah($validated)) {
+            return redirect()->back()->withInput()->withErrors([
+                'dosen_id' => 'Dosen ini BELUM mengampu mata kuliah manapun. Silakan atur dosen sebagai pengampu di menu Mata Kuliah terlebih dahulu (pada kolom Dosen 1 atau Dosen 2).',
+            ]);
+        }
+
         if ($request->hasFile('file_pdf_upload') && $request->file('file_pdf_upload')->isValid()) {
             $validated['file_pdf'] = $this->storePdf($request, 'file_pdf_upload');
         }
@@ -89,6 +95,12 @@ class RosterController extends Controller
         $validated = $this->validateForm($request, $rosterUpload->id);
         $validated = $this->applyAutoFillFromDosen($validated, $rosterUpload);
         $validated = $this->prepareDefaults($validated);
+
+        if (!$this->validateHasMataKuliah($validated)) {
+            return redirect()->back()->withInput()->withErrors([
+                'dosen_id' => 'Dosen ini BELUM mengampu mata kuliah manapun. Silakan atur dosen sebagai pengampu di menu Mata Kuliah terlebih dahulu (pada kolom Dosen 1 atau Dosen 2).',
+            ]);
+        }
 
         if ($request->hasFile('file_pdf_upload') && $request->file('file_pdf_upload')->isValid()) {
             $oldPath = (string) $rosterUpload->file_pdf;
@@ -186,6 +198,29 @@ class RosterController extends Controller
             'kelas' => 'A',
             'keterangan' => $ket,
         ];
+    }
+
+    private function validateHasMataKuliah(array $payload): bool
+    {
+        $mkId = (int) ($payload['mata_kuliah_id'] ?? 0);
+        if ($mkId >= 1) {
+            $exists = MataKuliah::query()->where('id', $mkId)->exists();
+            if ($exists) {
+                return true;
+            }
+        }
+        $dosenId = (int) ($payload['dosen_id'] ?? 0);
+        if ($dosenId >= 1) {
+            $mk = MataKuliah::query()
+                ->where(function ($q) use ($dosenId) {
+                    $q->where('dosen_id', $dosenId)->orWhere('dosen_id_2', $dosenId);
+                })
+                ->first(['id']);
+            if ($mk) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private function prepareDefaults(array $payload): array
