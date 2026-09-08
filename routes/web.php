@@ -172,6 +172,8 @@ Route::prefix('admin')
 
         Route::delete('/mata-kuliah/bulk-delete', [AdminMataKuliahController::class, 'bulkDestroy'])->name('mata-kuliah.bulk-delete');
         Route::get('/mata-kuliah/export-pdf', [AdminMataKuliahController::class, 'exportPdf'])->name('mata-kuliah.export-pdf');
+        Route::post('/mata-kuliah/upload-sk/{prodi}', [AdminMataKuliahController::class, 'uploadSkPdfProdi'])->name('mata-kuliah.upload-sk');
+        Route::post('/mata-kuliah/upload-roster/{prodi}', [AdminMataKuliahController::class, 'uploadRosterPdfProdi'])->name('mata-kuliah.upload-roster');
         Route::resource('mata-kuliah', AdminMataKuliahController::class)->except(['show']);
         Route::post('/mata-kuliah/{mataKuliah}/rps-admin', [AdminMataKuliahController::class, 'uploadRpsAdmin'])->name('mata-kuliah.rps-admin.upload');
         Route::get('/mata-kuliah/{mataKuliah}/rps-admin', [AdminMataKuliahController::class, 'downloadRpsAdmin'])->name('mata-kuliah.rps-admin.download');

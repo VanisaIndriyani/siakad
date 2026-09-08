@@ -14,6 +14,102 @@
         </a>
     </div>
 
+    <div class="mt-7 mb-8">
+        <h2 class="text-xl font-semibold mb-1">Upload SK Mengajar & Roster Kuliah Per Prodi</h2>
+        <div class="text-sm text-emerald-100/70 mb-4">Upload 1x per prodi → otomatis muncul untuk <strong>SEMUA dosen</strong> di prodi tersebut di halaman Input Nilai Dosen. Cukup upload disini, nanti otomatis menyesuaikan prodi masing-masing dosen.</div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            @foreach ($jurusanList as $j)
+                @php
+                    $sk = $skPerProdi->get($j);
+                    $rs = $rosterPerProdi->get($j);
+                    $skAda = $sk && !empty($sk->file_pdf) && \Illuminate\Support\Facades\Storage::disk('public')->exists($sk->file_pdf);
+                    $rsAda = $rs && !empty($rs->file_pdf) && \Illuminate\Support\Facades\Storage::disk('public')->exists($rs->file_pdf);
+                @endphp
+                <div class="rounded-2xl bg-white/5 border border-white/10 p-5 shadow-[0_0_40px_-12px_rgba(16,185,129,0.15)] hover:shadow-[0_0_50px_-10px_rgba(16,185,129,0.25)] transition">
+                    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-4">
+                        <div>
+                            <div class="text-lg font-semibold leading-tight">{{ $j }}</div>
+                            <div class="text-xs text-emerald-100/60 mt-1">Upload 1x untuk seluruh dosen</div>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border {{ $skAda ? 'bg-emerald-500/15 border-emerald-400/25 text-emerald-200' : 'bg-red-500/15 border-red-500/25 text-red-200' }}">
+                                <i class="fa-solid fa-file-signature text-[10px]"></i>
+                                SK {{ $skAda ? '✓' : 'Belum' }}
+                            </span>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border {{ $rsAda ? 'bg-blue-500/15 border-blue-400/25 text-blue-200' : 'bg-red-500/15 border-red-500/25 text-red-200' }}">
+                                <i class="fa-solid fa-calendar-days text-[10px]"></i>
+                                Roster {{ $rsAda ? '✓' : 'Belum' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <form method="POST" action="{{ route('admin.mata-kuliah.upload-sk', $j) }}" enctype="multipart/form-data" class="mb-3 rounded-xl border border-emerald-400/20 bg-emerald-500/5 p-3">
+                        @csrf
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                            <div class="inline-flex items-center gap-1.5 text-emerald-200">
+                                <i class="fa-solid fa-file-signature text-sm"></i>
+                                <span class="text-sm font-medium">SK Mengajar</span>
+                            </div>
+                            @if($skAda)
+                                <a href="{{ \Illuminate\Support\Facades\Storage::url($sk->file_pdf) }}" target="_blank" rel="noopener" class="text-[11px] text-emerald-300 hover:text-emerald-200 underline inline-flex items-center gap-1">
+                                    <i class="fa-solid fa-eye"></i>
+                                    Preview
+                                </a>
+                            @endif
+                        </div>
+                        @if($skAda)
+                            <div class="text-[11px] text-emerald-100/70 mb-2 truncate" title="{{ basename($sk->file_pdf) }}">
+                                <i class="fa-solid fa-paperclip mr-1"></i>{{ basename($sk->file_pdf) }}
+                            </div>
+                        @endif
+                        @error('sk_pdf')
+                            <div class="text-[11px] text-red-300 mb-2">{!! $message !!}</div>
+                        @enderror
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input type="file" name="file_pdf" accept="application/pdf,.pdf" required class="w-full h-9 px-2.5 text-xs rounded-lg bg-emerald-500/10 border border-emerald-400/20 focus:border-emerald-400 focus:ring-emerald-400 file:mr-2 file:mt-1.5 file:h-6 file:px-2.5 file:text-[11px] file:rounded-md file:bg-emerald-500 file:text-white file:border-0 file:cursor-pointer" />
+                            <button type="submit" class="h-9 px-3.5 inline-flex items-center justify-center gap-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 transition text-xs font-medium text-white shrink-0">
+                                <i class="fa-solid fa-upload"></i>
+                                Upload
+                            </button>
+                        </div>
+                    </form>
+
+                    <form method="POST" action="{{ route('admin.mata-kuliah.upload-roster', $j) }}" enctype="multipart/form-data" class="rounded-xl border border-blue-400/20 bg-blue-500/5 p-3">
+                        @csrf
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                            <div class="inline-flex items-center gap-1.5 text-blue-200">
+                                <i class="fa-solid fa-calendar-days text-sm"></i>
+                                <span class="text-sm font-medium">Roster Kuliah</span>
+                            </div>
+                            @if($rsAda)
+                                <a href="{{ \Illuminate\Support\Facades\Storage::url($rs->file_pdf) }}" target="_blank" rel="noopener" class="text-[11px] text-blue-300 hover:text-blue-200 underline inline-flex items-center gap-1">
+                                    <i class="fa-solid fa-eye"></i>
+                                    Preview
+                                </a>
+                            @endif
+                        </div>
+                        @if($rsAda)
+                            <div class="text-[11px] text-blue-100/70 mb-2 truncate" title="{{ basename($rs->file_pdf) }}">
+                                <i class="fa-solid fa-paperclip mr-1"></i>{{ basename($rs->file_pdf) }}
+                            </div>
+                        @endif
+                        @error('roster_pdf')
+                            <div class="text-[11px] text-red-300 mb-2">{!! $message !!}</div>
+                        @enderror
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input type="file" name="file_pdf" accept="application/pdf,.pdf" required class="w-full h-9 px-2.5 text-xs rounded-lg bg-blue-500/10 border border-blue-400/20 focus:border-blue-400 focus:ring-blue-400 file:mr-2 file:mt-1.5 file:h-6 file:px-2.5 file:text-[11px] file:rounded-md file:bg-blue-500 file:text-white file:border-0 file:cursor-pointer" />
+                            <button type="submit" class="h-9 px-3.5 inline-flex items-center justify-center gap-1 rounded-lg bg-blue-500 hover:bg-blue-400 active:bg-blue-600 transition text-xs font-medium text-white shrink-0">
+                                <i class="fa-solid fa-upload"></i>
+                                Upload
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            @endforeach
+        </div>
+    </div>
+
     <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
         @foreach ($jurusanList as $j)
             <a href="{{ route('admin.mata-kuliah.index', ['jurusan' => $j]) }}"
