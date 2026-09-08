@@ -82,10 +82,14 @@ class RosterController extends Controller
         try {
             RosterUpload::create($validated);
         } catch (QueryException $e) {
-            if (isset($validated['file_pdf'] ?? null)) {
+            if (!empty($validated['file_pdf'])) {
                 $this->deletePdf($validated['file_pdf']);
             }
-            if ($e->getCode() === '23000' || (is_int($e->errorInfo[1] ?? null) && (int) $e->errorInfo[1] === 1062) {
+            $duplicate = ((string) $e->getCode() === '23000');
+            if (!$duplicate && isset($e->errorInfo[1])) {
+                $duplicate = ((int) $e->errorInfo[1] === 1062);
+            }
+            if ($duplicate) {
                 $mkCode = '';
                 if (!empty($validated['mata_kuliah_id'])) {
                     $mk = MataKuliah::query()->find($validated['mata_kuliah_id'], ['kode']);
@@ -143,7 +147,11 @@ class RosterController extends Controller
         try {
             $rosterUpload->update($validated);
         } catch (QueryException $e) {
-            if ($e->getCode() === '23000' || (is_int($e->errorInfo[1] ?? null) && (int) $e->errorInfo[1] === 1062) {
+            $duplicate = ((string) $e->getCode() === '23000');
+            if (!$duplicate && isset($e->errorInfo[1])) {
+                $duplicate = ((int) $e->errorInfo[1] === 1062);
+            }
+            if ($duplicate) {
                 $mkCode = '';
                 if (!empty($validated['mata_kuliah_id'])) {
                     $mk = MataKuliah::query()->find($validated['mata_kuliah_id'], ['kode']);
