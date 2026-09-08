@@ -9,6 +9,7 @@ use App\Models\SkMengajar;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -56,6 +57,7 @@ class SkMengajarController extends Controller
             'jabatan_dosen' => '',
             'tugas_tambahan' => '',
             'catatan' => '',
+            'file_pdf' => null,
         ];
 
         return view('admin.sk-mengajar.form', ['row' => $default, 'isEdit' => false]);
@@ -66,6 +68,11 @@ class SkMengajarController extends Controller
         $validated = $this->validateForm($request);
         $validated = $this->prepareDefaults($validated, $request);
         $validated['created_by'] = Auth::id();
+
+        if ($request->hasFile('file_pdf_upload') && $request->file('file_pdf_upload')->isValid()) {
+            $validated['file_pdf'] = $this->storePdf($request, 'sk-mengajar', 'file_pdf_upload');
+        }
+
         SkMengajar::create($validated);
 
         return to_route('admin.sk-mengajar.index')
@@ -83,10 +90,37 @@ class SkMengajarController extends Controller
     {
         $validated = $this->validateForm($request, $skMengajar->id);
         $validated = $this->prepareDefaults($validated, $request);
+
+        if ($request->hasFile('file_pdf_upload') && $request->file('file_pdf_upload')->isValid()) {
+            $oldPath = (string) $skMengajar->file_pdf;
+            $validated['file_pdf'] = $this->storePdf($request, 'sk-mengajar', 'file_pdf_upload');
+            if ($oldPath !== '' && $oldPath !== '0') {
+                $this->deletePdf($oldPath);
+            }
+        } elseif (filter_var($request->get('hapus_file_pdf'), FILTER_VALIDATE_BOOLEAN)) {
+            $oldPath = (string) $skMengajar->file_pdf;
+            if ($oldPath !== '' && $oldPath !== '0') {
+                $this->deletePdf($oldPath);
+            }
+            $validated['file_pdf'] = null;
+        }
+
         $skMengajar->update($validated);
 
         return to_route('admin.sk-mengajar.index')
             ->with('success', 'SK Mengajar berhasil diperbarui.');
+    }
+
+    public function destroy(SkMengajar $skMengajar): RedirectResponse
+    {
+        $oldPath = (string) $skMengajar->file_pdf;
+        if ($oldPath !== '' && $oldPath !== '0') {
+            $this->deletePdf($oldPath);
+        }
+        $skMengajar->delete();
+
+        return to_route('admin.sk-mengajar.index')
+            ->with('success', 'SK Mengajar berhasil dihapus.');
     }
 
     private function prepareDefaults(array $payload, Request $request): array
@@ -116,12 +150,29 @@ class SkMengajarController extends Controller
         return $payload;
     }
 
-    public function destroy(SkMengajar $skMengajar): RedirectResponse
+    private function storePdf(Request $request, string $folder, string $inputName): string
     {
-        $skMengajar->delete();
+        $file = $request->file($inputName);
+        $ext = strtolower((string) $file->getClientOriginalExtension());
+        if ($ext === '') {
+            $ext = 'pdf';
+        }
+        $orig = (string) $file->getClientOriginalName();
+        $orig = preg_replace('/[^A-Za-z0-9._-]/', '_', $orig);
+        $ts = date('Ymd_His');
+        $filename = $ts.'_'.$orig;
+        $path = $file->storeAs('dokumen-kuliah/'.$folder, $filename, 'public');
+        return $path;
+    }
 
-        return to_route('admin.sk-mengajar.index')
-            ->with('success', 'SK Mengajar berhasil dihapus.');
+    private function deletePdf(string $storagePath): void
+    {
+        try {
+            if (Storage::disk('public')->exists($storagePath)) {
+                Storage::disk('public')->delete($storagePath);
+            }
+        } catch (\Throwable $e) {
+        }
     }
 
     private function validateForm(Request $request, ?int $id = null): array
@@ -150,6 +201,8 @@ class SkMengajarController extends Controller
             'jabatan_dosen' => 'nullable|string|max:120',
             'tugas_tambahan' => 'nullable|string|max:500',
             'catatan' => 'nullable|string|max:500',
+            'file_pdf_upload' => 'nullable|file|mimes:pdf|max:10240',
+            'hapus_file_pdf' => 'nullable|boolean',
         ]);
     }
 

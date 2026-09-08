@@ -251,9 +251,9 @@ Route::prefix('admin')
         Route::get('/roster', [AdminRosterController::class, 'index'])->name('roster.index');
         Route::get('/roster/create', [AdminRosterController::class, 'create'])->name('roster.create');
         Route::post('/roster', [AdminRosterController::class, 'store'])->name('roster.store');
-        Route::get('/roster/{roster}/edit', [AdminRosterController::class, 'edit'])->name('roster.edit');
-        Route::put('/roster/{roster}', [AdminRosterController::class, 'update'])->name('roster.update');
-        Route::delete('/roster/{roster}', [AdminRosterController::class, 'destroy'])->name('roster.destroy');
+        Route::get('/roster/{rosterUpload}/edit', [AdminRosterController::class, 'edit'])->name('roster.edit');
+        Route::put('/roster/{rosterUpload}', [AdminRosterController::class, 'update'])->name('roster.update');
+        Route::delete('/roster/{rosterUpload}', [AdminRosterController::class, 'destroy'])->name('roster.destroy');
 
         Route::resource('kalender-akademik', AdminAcademicCalendarController::class)
             ->parameters(['kalender-akademik' => 'kalender_akademik'])

@@ -6,7 +6,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div class="flex flex-col gap-2">
             <div class="text-xl font-semibold">SK Mengajar Dosen</div>
-            <div class="text-sm text-emerald-100/70">Input data SK Mengajar per mata kuliah dan semester. Data akan tampil di halaman Input Nilai Dosen sebagai PDF.</div>
+            <div class="text-sm text-emerald-100/70">Cukup upload file PDF SK Mengajar. File yang diupload akan langsung muncul & didownload di halaman Input Nilai Dosen.</div>
         </div>
         <div class="flex items-center gap-2">
             <a href="{{ route('admin.sk-mengajar.create', array_filter(['mata_kuliah_id' => request('mata_kuliah_id'), 'dosen_id' => $dosenId, 'semester' => $semester, 'tahun_ajaran' => request('tahun_ajaran')])) }}" class="h-11 px-5 inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition">
@@ -48,7 +48,8 @@
                         <th class="text-left font-medium px-4 py-3 w-28">Tgl SK</th>
                         <th class="text-left font-medium px-4 py-3 w-24">Semester</th>
                         <th class="text-left font-medium px-4 py-3 w-20">SKS</th>
-                        <th class="text-left font-medium px-4 py-3 w-36">Aksi</th>
+                        <th class="text-left font-medium px-4 py-3 w-32">File</th>
+                        <th class="text-left font-medium px-4 py-3 w-40">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-white/10">
@@ -66,7 +67,23 @@
                             <td class="px-4 py-3">{{ $row->semester }} @if($row->tahun_ajaran)<span class="text-xs text-emerald-100/60"> • {{ $row->tahun_ajaran }}</span>@endif</td>
                             <td class="px-4 py-3">{{ $row->beban_sks ?: '-' }}</td>
                             <td class="px-4 py-3">
-                                <div class="flex items-center gap-2">
+                                @if (!empty($row->file_pdf) && Storage::disk('public')->exists($row->file_pdf))
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-400/30 text-xs text-emerald-300 font-medium">
+                                        <i class="fa-solid fa-file-pdf text-red-400"></i> PDF
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-500/10 border border-amber-400/30 text-xs text-amber-300 font-medium">
+                                        <i class="fa-solid fa-triangle-exclamation"></i> Belum Upload
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    @if (!empty($row->file_pdf) && Storage::disk('public')->exists($row->file_pdf))
+                                        <a href="{{ Storage::disk('public')->url($row->file_pdf) }}" target="_blank" class="h-8 px-3 inline-flex items-center gap-1 rounded-lg bg-blue-500/15 hover:bg-blue-500/25 border border-blue-400/30 text-blue-100 transition text-xs" title="Lihat PDF">
+                                            <i class="fa-solid fa-eye"></i> Lihat
+                                        </a>
+                                    @endif
                                     <a href="{{ route('admin.sk-mengajar.edit', $row) }}" class="h-8 px-3 inline-flex items-center gap-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition text-xs" title="Edit">
                                         <i class="fa-solid fa-pen"></i> Edit
                                     </a>
@@ -81,7 +98,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-4 py-10 text-center text-emerald-100/70">Belum ada data SK Mengajar. Klik "Tambah SK Mengajar" untuk menambahkan.</td>
+                            <td colspan="9" class="px-4 py-10 text-center text-emerald-100/70">Belum ada data SK Mengajar. Klik "Tambah SK Mengajar" untuk upload PDF.</td>
                         </tr>
                     @endforelse
                 </tbody>

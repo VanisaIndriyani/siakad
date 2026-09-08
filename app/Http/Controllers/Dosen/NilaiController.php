@@ -7,10 +7,12 @@ use App\Models\Khs;
 use App\Models\Krs;
 use App\Models\MataKuliah;
 use App\Models\Roster;
+use App\Models\RosterUpload;
 use App\Models\SkMengajar;
 use Dompdf\Dompdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -558,6 +560,11 @@ class NilaiController extends Controller
             ->orderByDesc('tanggal_sk')
             ->first();
 
+        if ($skMengajar && !empty($skMengajar->file_pdf) && Storage::disk('public')->exists($skMengajar->file_pdf)) {
+            $filename = 'sk-mengajar-'.$mataKuliah->kode.'-semester-'.$semester.'.pdf';
+            return Storage::disk('public')->download($skMengajar->file_pdf, $filename, ['Content-Type' => 'application/pdf']);
+        }
+
         $html = view('dosen.nilai.pdf-sk-mengajar', [
             'mataKuliah' => $mataKuliah,
             'semester' => $semester,
@@ -582,6 +589,17 @@ class NilaiController extends Controller
     {
         $dosen = $request->user()?->dosen;
         abort_unless($dosen && in_array((int) $dosen->id, [(int) $mataKuliah->dosen_id, (int) $mataKuliah->dosen_id_2], true), 403);
+
+        $rosterUpload = RosterUpload::query()
+            ->where('mata_kuliah_id', $mataKuliah->id)
+            ->where('semester', $semester)
+            ->orderByDesc('id')
+            ->first();
+
+        if ($rosterUpload && !empty($rosterUpload->file_pdf) && Storage::disk('public')->exists($rosterUpload->file_pdf)) {
+            $filename = 'roster-'.$mataKuliah->kode.'-semester-'.$semester.'.pdf';
+            return Storage::disk('public')->download($rosterUpload->file_pdf, $filename, ['Content-Type' => 'application/pdf']);
+        }
 
         $rosters = Roster::query()
             ->with(['mataKuliah', 'dosen'])
