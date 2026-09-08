@@ -1,7 +1,12 @@
 <!doctype html>
-<html>
+<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns:m="http://schemas.microsoft.com/office/2004/12/omml" xmlns="http://www.w3.org/TR/REC-html40">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+<meta name="ProgId" content="Word.Document">
+<meta name="Generator" content="Microsoft Word 15">
+<meta name="Originator" content="Microsoft Word 15">
 <title>Transkrip Akademik - {{ $mahasiswa->nama_lengkap }}</title>
 <style>
 @page {
@@ -276,13 +281,34 @@ table.nilai tr.ujian-row td.mk.left-col {
 <body>
 @php
 /* =========================================================
-   MS WORD TIDAK BISA MEMBACA data:image base64 (hanya DomPDF yang bisa).
-   PAKAI absolute local file path (sudah disiapkan controller di sys_get_temp_dir()):
-   $logoLocalAbsPath = logo institusi (sudah di-copy ke temp, abs path)
-   $fotoLocalAbsPath = foto mahasiswa (sudah di-copy ke temp, abs path)
+   MICROSOFT WORD HTML EXPORT — IMAGES WAJIB di-EMBED sebagai DATA URI BASE64!
+   ALASAN: File .doc di-DOWNLOAD ke laptop user → path lokal SERVER (C:\xampp\tmp\...) TIDAK ADA di laptop user → "The picture can't be displayed".
+   SOLUSI: Baca bytes file gambar dari $logoLocalAbsPath / $fotoLocalAbsPath (SUDAH di-copy ke temp SERVER, pasti terbaca) → encode base64 → EMBED LANGSUNG ke HTML.
+   HASIL: Gambar ikut tersimpan DI DALAM file .doc — BISA dibuka di laptop siapapun tanpa error X merah.
 ========================================================= */
-$logoImgSrc = $logoLocalAbsPath ?? null;
-$fotoImgSrc = $fotoLocalAbsPath ?? null;
+$logoFinalSrc = null;
+if (!empty($logoLocalAbsPath) && @is_file($logoLocalAbsPath) && @is_readable($logoLocalAbsPath)) {
+    try {
+        $data = @file_get_contents($logoLocalAbsPath);
+        if ($data && strlen($data) > 100 && strlen($data) < 4000000) {
+            $ext = strtolower(pathinfo($logoLocalAbsPath, PATHINFO_EXTENSION));
+            $mime = ($ext === 'png') ? 'image/png' : (($ext === 'gif') ? 'image/gif' : 'image/jpeg');
+            $logoFinalSrc = 'data:' . $mime . ';base64,' . base64_encode($data);
+        }
+    } catch (\Throwable $e) { $logoFinalSrc = null; }
+}
+
+$fotoFinalSrc = null;
+if (!empty($fotoLocalAbsPath) && @is_file($fotoLocalAbsPath) && @is_readable($fotoLocalAbsPath)) {
+    try {
+        $data = @file_get_contents($fotoLocalAbsPath);
+        if ($data && strlen($data) > 200 && strlen($data) < 10000000) {
+            $ext = strtolower(pathinfo($fotoLocalAbsPath, PATHINFO_EXTENSION));
+            $mime = ($ext === 'png') ? 'image/png' : (($ext === 'gif') ? 'image/gif' : 'image/jpeg');
+            $fotoFinalSrc = 'data:' . $mime . ';base64,' . base64_encode($data);
+        }
+    } catch (\Throwable $e) { $fotoFinalSrc = null; }
+}
 
 /* =========================================================
    DATA UJIAN — SAMA PERSIS show.blade.php L203-L206
@@ -294,11 +320,11 @@ $ujianCount = count($ujianAda);
 
 <div class="transcript-paper">
     <div class="wrap">
-        {{-- ===== KOP SURAT — SAMA PERSIS PDF, LOGO PAKAI ABSOLUTE LOCAL PATH (Word butuh format file:// nanti otomatis resolve) ===== --}}
+        {{-- ===== KOP SURAT — SAMA PERSIS PDF, LOGO di-EMBED BASE64 langsung ke HTML (tidak butuh file external) ===== --}}
         <div class="kop-wrap">
             <div class="kop-logo-center">
-                @if($logoImgSrc)
-                    <img src="{{ $logoImgSrc }}" alt="Logo IAI DDI Sidrap" width="98" height="98">
+                @if($logoFinalSrc)
+                    <img src="{{ $logoFinalSrc }}" alt="Logo IAI DDI Sidrap" width="98" height="98" style="display:inline-block; border:0; margin:0; padding:0;">
                 @endif
             </div>
             <div class="kop-title-a">INSTITUT AGAMA ISLAM</div>
@@ -518,8 +544,8 @@ $ujianCount = count($ujianAda);
                 <tr>
                     <td class="ttd-foto-col" style="vertical-align: top; padding-top: 0;">
                         <div class="ttd-foto-box" style="margin-top: 0;">
-                            @if($fotoImgSrc)
-                                <img src="{{ $fotoImgSrc }}" alt="Foto {{ $mahasiswa->nama_lengkap }}">
+                            @if($fotoFinalSrc)
+                                <img src="{{ $fotoFinalSrc }}" alt="Foto {{ $mahasiswa->nama_lengkap }}" style="width:100%; height:100%; object-fit:cover; display:block; border:0;">
                             @else
                                 <div class="ttd-foto-empty">Foto<br>3 × 4</div>
                             @endif
