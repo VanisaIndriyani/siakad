@@ -32,7 +32,7 @@
                     <select name="dosen_id" class="mt-1 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400">
                         <option value="">Pilih dosen...</option>
                         @foreach ($dosens as $d)
-                            <option value="{{ $d->id }}" {{ old('dosen_id', $row->dosen_id) == $d->id ? 'selected' : '' }}>{{ $d->nama_lengkap }}</option>
+                            <option value="{{ $d->id }}" {{ old('dosen_id', $row->dosen_id) == $d->id ? 'selected' : '' }}>{{ $d->nama }}</option>
                         @endforeach
                     </select>
                 </div>

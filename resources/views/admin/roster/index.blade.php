@@ -59,7 +59,7 @@
                             <td class="px-4 py-3">{{ $no }}</td>
                             <td class="px-4 py-3">
                                 <div class="font-medium text-xs">{{ $row->mataKuliah?->kode }} - {{ $row->mataKuliah?->nama }}</div>
-                                @if($row->dosen) <div class="text-xs text-emerald-100/60">Dosen: {{ $row->dosen->nama_lengkap }}</div> @endif
+                                @if($row->dosen) <div class="text-xs text-emerald-100/60">Dosen: {{ $row->dosen->nama }}</div> @endif
                             </td>
                             <td class="px-4 py-3"><span class="px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 font-semibold text-xs">{{ $row->pertemuan_ke }}</span></td>
                             <td class="px-4 py-3 text-xs">

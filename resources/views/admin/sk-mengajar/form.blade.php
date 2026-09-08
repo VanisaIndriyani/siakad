@@ -33,7 +33,7 @@
                         <option value="">Pilih dosen...</option>
                         @foreach ($dosens as $d)
                             <option value="{{ $d->id }}" {{ old('dosen_id', $row->dosen_id) == $d->id ? 'selected' : '' }}>
-                                {{ $d->nama_lengkap }} @if($d->nidn) (NIDN. {{ $d->nidn }}) @endif
+                                {{ $d->nama }} @if($d->nidn) (NIDN. {{ $d->nidn }}) @endif
                             </option>
                         @endforeach
                     </select>

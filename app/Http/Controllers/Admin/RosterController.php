@@ -38,7 +38,7 @@ class RosterController extends Controller
 
         view()->share([
             'mataKuliahs' => MataKuliah::query()->orderBy('kode')->get(['id', 'kode', 'nama', 'jurusan']),
-            'dosens' => Dosen::query()->orderBy('nama_lengkap')->get(['id', 'nama_lengkap']),
+            'dosens' => Dosen::query()->orderBy('nama')->get(['id', 'nama']),
         ]);
 
         return view('admin.roster.index', compact('rows', 'q', 'semester', 'mataKuliahId', 'dosenId'));
@@ -123,7 +123,7 @@ class RosterController extends Controller
     {
         view()->share([
             'mataKuliahs' => MataKuliah::query()->orderBy('kode')->get(['id', 'kode', 'nama', 'jurusan', 'semester', 'sks']),
-            'dosens' => Dosen::query()->orderBy('nama_lengkap')->get(['id', 'nama_lengkap', 'nidn', 'nuptk']),
+            'dosens' => Dosen::query()->orderBy('nama')->get(['id', 'nama', 'nidn', 'nuptk']),
             'listHari' => ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'],
             'listMetode' => ['Tatap Muka', 'Daring (Online)', 'Hybrid', 'Praktek Lapangan', 'Mandiri'],
         ]);

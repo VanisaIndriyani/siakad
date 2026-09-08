@@ -27,7 +27,7 @@
         <select name="dosen_id" class="h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400">
             <option value="">Semua Dosen</option>
             @foreach ($dosens as $d)
-                <option value="{{ $d->id }}" {{ (int) $dosenId === (int) $d->id ? 'selected' : '' }}>{{ $d->nama_lengkap }}</option>
+                <option value="{{ $d->id }}" {{ (int) $dosenId === (int) $d->id ? 'selected' : '' }}>{{ $d->nama }}</option>
             @endforeach
         </select>
         <div class="flex items-center gap-2">
@@ -60,7 +60,7 @@
                                 <div class="font-medium">{{ $row->mataKuliah?->kode }} - {{ $row->mataKuliah?->nama }}</div>
                                 @if ($row->kelas) <div class="text-xs text-emerald-100/60">Kelas {{ $row->kelas }}{{ $row->program_studi ? ' • '.$row->program_studi : '' }}</div> @endif
                             </td>
-                            <td class="px-4 py-3">{{ $row->dosen?->nama_lengkap ?? '-' }}</td>
+                            <td class="px-4 py-3">{{ $row->dosen?->nama ?? '-' }}</td>
                             <td class="px-4 py-3 font-mono text-xs">{{ $row->nomor_sk ?: '-' }}</td>
                             <td class="px-4 py-3 text-xs">{{ $row->tanggal_sk?->format('d/m/Y') ?? '-' }}</td>
                             <td class="px-4 py-3">{{ $row->semester }} @if($row->tahun_ajaran)<span class="text-xs text-emerald-100/60"> • {{ $row->tahun_ajaran }}</span>@endif</td>

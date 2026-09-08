@@ -64,7 +64,7 @@
         $semester = (int) ($semester ?? $mataKuliah->semester ?? 1);
         $semesterLabel = ($semester % 2 === 0) ? 'GENAP' : 'GANJIL';
         $dosen = $relatedDosen ?? ($mataKuliah->dosen ?? $mataKuliah->dosen2);
-        $dosenNama = $dosen?->nama_lengkap ?? '-';
+        $dosenNama = $dosen?->nama ?? '-';
         $dosenNuptk = $dosen?->nuptk ?? ($dosen?->nidn ?? null);
         $programStudi = $mataKuliah->jurusan ?? '-';
         $sks = $mataKuliah->sks ?? 0;

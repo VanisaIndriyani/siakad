@@ -28,12 +28,12 @@ class SkMengajarController extends Controller
                 $s->where(function ($sub) use ($q) {
                     $sub->where('nomor_sk', 'like', "%{$q}%")
                         ->orWhereHas('mataKuliah', fn ($m) => $m->where('nama', 'like', "%{$q}%")->orWhere('kode', 'like', "%{$q}%"))
-                        ->orWhereHas('dosen', fn ($d) => $d->where('nama_lengkap', 'like', "%{$q}%"));
+                        ->orWhereHas('dosen', fn ($d) => $d->where('nama', 'like', "%{$q}%"));
                 });
             });
 
         $rows = $query->orderByDesc('tanggal_sk')->orderByDesc('id')->paginate(12)->withQueryString();
-        $dosens = Dosen::query()->orderBy('nama_lengkap')->get(['id', 'nama_lengkap', 'nidn', 'nuptk']);
+        $dosens = Dosen::query()->orderBy('nama')->get(['id', 'nama', 'nidn', 'nuptk']);
 
         return view('admin.sk-mengajar.index', compact('rows', 'dosens', 'q', 'semester', 'dosenId'));
     }
@@ -128,7 +128,7 @@ class SkMengajarController extends Controller
     {
         view()->share([
             'mataKuliahs' => MataKuliah::query()->orderBy('kode')->get(['id', 'kode', 'nama', 'jurusan', 'semester', 'sks']),
-            'dosens' => Dosen::query()->orderBy('nama_lengkap')->get(['id', 'nama_lengkap', 'nidn', 'nuptk', 'jabatan_struktural']),
+            'dosens' => Dosen::query()->orderBy('nama')->get(['id', 'nama', 'nidn', 'nuptk', 'jabatan_struktural']),
         ]);
     }
 }

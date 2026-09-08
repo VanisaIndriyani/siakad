@@ -65,7 +65,7 @@
         $semesterLabel = ($semester % 2 === 0) ? 'GENAP' : 'GANJIL';
 
         $dosen = $skMengajar?->dosen ?? $relatedDosen;
-        $dosenNama = $dosen?->nama_lengkap ?? ($mataKuliah->dosen?->nama_lengkap ?? '-');
+        $dosenNama = $dosen?->nama ?? ($mataKuliah->dosen?->nama ?? '-');
         $dosenNuptk = $dosen?->nuptk ?? ($dosen?->nidn ?? null);
         $dosenJabatan = trim((string) ($skMengajar?->jabatan_dosen ?: ($dosen?->jabatan_struktural ?? 'Dosen')));
         $programStudi = trim((string) ($skMengajar?->program_studi ?: ($mataKuliah->jurusan ?? '-')));
