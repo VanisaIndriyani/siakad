@@ -14,6 +14,7 @@ class SkMengajar extends Model
         'mata_kuliah_id', 'dosen_id', 'semester', 'tahun_ajaran', 'nomor_sk',
         'tanggal_sk', 'tanggal_mulai', 'tanggal_selesai', 'beban_sks', 'kelas',
         'program_studi', 'jabatan_dosen', 'tugas_tambahan', 'catatan', 'created_by',
+        'file_pdf',
     ];
 
     protected function casts(): array

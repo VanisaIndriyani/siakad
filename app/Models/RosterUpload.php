@@ -21,6 +21,7 @@ class RosterUpload extends Model
         'keterangan',
         'file_pdf',
         'created_by',
+        'program_studi',
     ];
 
     protected $casts = [
