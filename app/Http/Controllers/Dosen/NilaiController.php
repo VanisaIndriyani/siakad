@@ -553,11 +553,12 @@ class NilaiController extends Controller
         $dosen = $request->user()?->dosen;
         abort_unless($dosen && in_array((int) $dosen->id, [(int) $mataKuliah->dosen_id, (int) $mataKuliah->dosen_id_2], true), 403);
 
+        $prodi = (string) ($mataKuliah->jurusan ?? '');
         $skMengajar = SkMengajar::query()
-            ->with(['mataKuliah', 'dosen'])
-            ->where('mata_kuliah_id', $mataKuliah->id)
-            ->where('semester', $semester)
-            ->orderByDesc('tanggal_sk')
+            ->whereNotNull('file_pdf')
+            ->where('file_pdf', '!=', '')
+            ->when($prodi !== '', fn ($q) => $q->where('program_studi', $prodi))
+            ->orderByDesc('id')
             ->first();
 
         if ($skMengajar && !empty($skMengajar->file_pdf) && Storage::disk('public')->exists($skMengajar->file_pdf)) {
@@ -565,24 +566,8 @@ class NilaiController extends Controller
             return Storage::disk('public')->download($skMengajar->file_pdf, $filename, ['Content-Type' => 'application/pdf']);
         }
 
-        $html = view('dosen.nilai.pdf-sk-mengajar', [
-            'mataKuliah' => $mataKuliah,
-            'semester' => $semester,
-            'skMengajar' => $skMengajar,
-            'relatedDosen' => $dosen,
-        ])->render();
-
-        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
-        $dompdf->loadHtml($html);
-        $dompdf->setPaper('legal', 'portrait');
-        $dompdf->render();
-
-        $filename = 'sk-mengajar-'.$mataKuliah->kode.'-semester-'.$semester.'.pdf';
-
-        return response($dompdf->output(), 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
-        ]);
+        $msg = 'File PDF <strong>SK Mengajar</strong> untuk Prodi <strong>'.($prodi !== '' ? $mataKuliah->jurusan : '-').'</strong> BELUM diupload oleh Admin. Silakan hubungi Admin / Akademik untuk mengupload file SK Mengajar terlebih dahulu.';
+        return redirect()->back()->withErrors(['sk_mengajar_pdf' => $msg]);
     }
 
     public function exportRosterPdf(Request $request, MataKuliah $mataKuliah, int $semester)
@@ -590,9 +575,11 @@ class NilaiController extends Controller
         $dosen = $request->user()?->dosen;
         abort_unless($dosen && in_array((int) $dosen->id, [(int) $mataKuliah->dosen_id, (int) $mataKuliah->dosen_id_2], true), 403);
 
+        $prodi = (string) ($mataKuliah->jurusan ?? '');
         $rosterUpload = RosterUpload::query()
-            ->where('mata_kuliah_id', $mataKuliah->id)
-            ->where('semester', $semester)
+            ->whereNotNull('file_pdf')
+            ->where('file_pdf', '!=', '')
+            ->when($prodi !== '', fn ($q) => $q->where('program_studi', $prodi))
             ->orderByDesc('id')
             ->first();
 
@@ -601,42 +588,7 @@ class NilaiController extends Controller
             return Storage::disk('public')->download($rosterUpload->file_pdf, $filename, ['Content-Type' => 'application/pdf']);
         }
 
-        $rosters = Roster::query()
-            ->with(['mataKuliah', 'dosen'])
-            ->where('mata_kuliah_id', $mataKuliah->id)
-            ->where('semester', $semester)
-            ->orderBy('pertemuan_ke')
-            ->orderBy('tanggal')
-            ->get();
-
-        $krsMahasiswa = Krs::query()
-            ->with(['mahasiswa'])
-            ->where('status_approval', 'approved')
-            ->where('semester', $semester)
-            ->whereHas('items', function ($sub) use ($mataKuliah) {
-                $sub->where('mata_kuliah_id', $mataKuliah->id);
-            })
-            ->orderBy('mahasiswa_id')
-            ->get();
-
-        $html = view('dosen.nilai.pdf-roster', [
-            'mataKuliah' => $mataKuliah,
-            'semester' => $semester,
-            'rosters' => $rosters,
-            'krsMahasiswa' => $krsMahasiswa,
-            'relatedDosen' => $dosen,
-        ])->render();
-
-        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
-        $dompdf->loadHtml($html);
-        $dompdf->setPaper('legal', 'landscape');
-        $dompdf->render();
-
-        $filename = 'roster-'.$mataKuliah->kode.'-semester-'.$semester.'.pdf';
-
-        return response($dompdf->output(), 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
-        ]);
+        $msg = 'File PDF <strong>Roster Kuliah</strong> untuk Prodi <strong>'.($prodi !== '' ? $mataKuliah->jurusan : '-').'</strong> BELUM diupload oleh Admin. Silakan hubungi Admin / Akademik untuk mengupload file Roster Kuliah terlebih dahulu.';
+        return redirect()->back()->withErrors(['roster_pdf' => $msg]);
     }
 }
