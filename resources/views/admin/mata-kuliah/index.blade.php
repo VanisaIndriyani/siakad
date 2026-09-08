@@ -18,12 +18,9 @@
         <div class="mb-5 relative inline-block">
             <div class="absolute left-0 top-0 bottom-0 w-1.5 rounded-full bg-gradient-to-b from-emerald-400 via-teal-400 to-emerald-600 shadow-[0_0_15px_rgba(45,212,191,0.55)]"></div>
             <div class="pl-4 sm:pl-5">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-400/20 text-emerald-200 text-[11px] font-medium mb-2 shadow-[0_0_25px_-6px_rgba(16,185,129,0.45)]">
-                    <i class="fa-solid fa-cloud-arrow-up text-[10px]"></i>
-                    <span>UPLOAD PUSAT — SEKALI UPLOAD SEMUA DOSEN DAPAT</span>
-                </div>
+             
                 <h2 class="text-2xl sm:text-[26px] font-bold tracking-tight leading-tight">Upload SK Mengajar &amp; Roster Kuliah Per Prodi</h2>
-                <div class="text-sm text-emerald-100/75 mt-2">Upload 1x per prodi → otomatis muncul untuk <strong>SEMUA dosen</strong> di prodi tersebut di halaman Input Nilai Dosen. Cukup upload disini, nanti otomatis menyesuaikan prodi masing-masing dosen tanpa perlu setting per-dosen.</div>
+            
             </div>
         </div>
 
@@ -58,13 +55,7 @@
                             <div class="shrink-0 w-11 h-11 rounded-xl bg-gradient-to-br {{ $prodiAccent }} border border-white/10 inline-flex items-center justify-center shadow-[0_0_25px_-4px_rgba(16,185,129,0.55)]">
                                 <i class="fa-solid {{ $prodiIcon }} text-white text-[15px]"></i>
                             </div>
-                            <div class="min-w-0">
-                                <div class="text-[17px] font-bold tracking-tight leading-tight text-white truncate" title="{{ $j }}">{{ $j }}</div>
-                                <div class="text-[11px] text-emerald-100/65 mt-1 inline-flex items-center gap-1">
-                                    <i class="fa-solid fa-users-line text-[10px]"></i>
-                                    Upload 1x untuk seluruh dosen prodi ini
-                                </div>
-                            </div>
+                           
                         </div>
                         <div class="flex flex-wrap gap-1.5 shrink-0 sm:justify-end">
                             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border {{ $skAda ? 'bg-emerald-500/15 border-emerald-400/30 text-emerald-100 shadow-[0_0_18px_-6px_rgba(16,185,129,0.7)]' : 'bg-red-500/12 border-red-500/25 text-red-200' }}">
@@ -87,7 +78,7 @@
                                     </div>
                                     <div>
                                         <div class="text-sm font-semibold leading-tight">SK Mengajar</div>
-                                        <div class="text-[10px] text-emerald-100/60 leading-tight mt-0.5">Format resmi IAI DDI Sidrap — untuk dibagikan ke semua dosen</div>
+                                     
                                     </div>
                                 </div>
                                 @if($skAda)
@@ -153,13 +144,13 @@
                                     </div>
                                     <div>
                                         <div class="text-sm font-semibold leading-tight">Roster Kuliah</div>
-                                        <div class="text-[10px] text-blue-100/60 leading-tight mt-0.5">Jadwal + Absensi 16 pertemuan — semua dosen prodi</div>
+                                      
                                     </div>
                                 </div>
                                 @if($rsAda)
                                     <a href="{{ \Illuminate\Support\Facades\Storage::url($rs->file_pdf) }}" target="_blank" rel="noopener" class="h-8 px-3 inline-flex items-center gap-1.5 rounded-lg bg-blue-500/15 hover:bg-blue-500/25 border border-blue-400/30 text-[11px] font-semibold text-blue-100 transition">
                                         <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-                                        Lihat PDF
+                                        Lihat PDFUpload 1x per prodi → otomatis muncul untuk SEMUA dosen di prodi tersebut di halaman Input Nilai Dosen. Cukup upload disini, nanti otomatis menyesuaikan prodi masing-masing dosen tanpa perlu setting per-dosen.
                                     </a>
                                 @endif
                             </div>
