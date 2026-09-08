@@ -24,10 +24,20 @@
             <a href="{{ route('dosen.nilai.edit', [$mataKuliah, $semester]) }}" class="h-11 px-4 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">Reset</a>
         </form>
 
-        <a href="{{ route('dosen.nilai.pdf', [$mataKuliah, $semester] + array_filter(['q' => $q])) }}" class="h-11 px-4 inline-flex items-center justify-center gap-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/20 transition text-red-100">
-            <i class="fa-solid fa-file-pdf"></i>
-            PDF
-        </a>
+        <div class="flex flex-wrap items-center gap-2">
+            <a href="{{ route('dosen.nilai.pdf', [$mataKuliah, $semester] + array_filter(['q' => $q])) }}" class="h-11 px-4 inline-flex items-center justify-center gap-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/20 transition text-red-100">
+                <i class="fa-solid fa-file-pdf"></i>
+                PDF Nilai
+            </a>
+            <a href="{{ route('dosen.nilai.roster.pdf', [$mataKuliah, $semester]) }}" class="h-11 px-4 inline-flex items-center justify-center gap-2 rounded-xl bg-blue-500/15 hover:bg-blue-500/25 border border-blue-500/20 transition text-blue-100">
+                <i class="fa-solid fa-calendar-days"></i>
+                PDF Roster
+            </a>
+            <a href="{{ route('dosen.nilai.sk-mengajar.pdf', [$mataKuliah, $semester]) }}" class="h-11 px-4 inline-flex items-center justify-center gap-2 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/20 transition text-purple-100">
+                <i class="fa-solid fa-file-signature"></i>
+                PDF SK Mengajar
+            </a>
+        </div>
     </div>
 
     <form method="POST" action="{{ route('dosen.nilai.update', [$mataKuliah, $semester]) }}" class="rounded-2xl bg-white/5 border border-white/10 p-5">

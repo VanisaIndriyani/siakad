@@ -29,6 +29,7 @@
             @php
                 $namaFilePdf = 'Transkrip-' . ($mahasiswa->npm ?: $mahasiswa->id) . '-' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', (string)$mahasiswa->nama_lengkap) . '.pdf';
                 $namaFileExcel = 'Transkrip-' . ($mahasiswa->npm ?: $mahasiswa->id) . '-' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', (string)$mahasiswa->nama_lengkap) . '.xlsx';
+                $namaFileWord = 'Transkrip-' . ($mahasiswa->npm ?: $mahasiswa->id) . '-' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', (string)$mahasiswa->nama_lengkap) . '.doc';
             @endphp
 
             <a href="{{ route('admin.transkrip-nilai.pdf', $mahasiswa) }}?dl=1"
@@ -43,6 +44,13 @@
                class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-green-700 hover:bg-green-600 border border-green-500/40 transition text-sm font-semibold shadow-lg shadow-green-900/30 text-white">
                 <i class="fa-solid fa-file-excel"></i>
                 Download Excel
+            </a>
+
+            <a href="{{ route('admin.transkrip-nilai.word', $mahasiswa) }}?dl=1"
+               download="{{ $namaFileWord }}"
+               class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-blue-700 hover:bg-blue-600 border border-blue-500/40 transition text-sm font-semibold shadow-lg shadow-blue-900/30 text-white">
+                <i class="fa-solid fa-file-word"></i>
+                Download Word
             </a>
         </div>
     </div>
@@ -740,7 +748,7 @@
         .ttd-nidk    { margin-top: 1px; font-size: 8.5px; letter-spacing: 0.1px; }
 
         @page {
-            size: 210mm 330mm;
+            size: folio portrait;
             margin: 0 !important;
         }
         @media print {

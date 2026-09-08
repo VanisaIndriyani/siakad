@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\RosterController as AdminRosterController;
+use App\Http\Controllers\Admin\SkMengajarController as AdminSkMengajarController;
 use App\Http\Controllers\Admin\CutiApprovalController as AdminCutiApprovalController;
 use App\Http\Controllers\Dosen\CutiApprovalController as DosenCutiApprovalController;
 use App\Http\Controllers\Mahasiswa\CutiController as MahasiswaCutiController;
@@ -237,6 +239,22 @@ Route::prefix('admin')
         Route::get('/absensi/rekap', [AdminAbsensiController::class, 'exportRekapPdf'])->name('absensi.rekap');
         Route::delete('/absensi-items/{absensiItem}', [AdminAbsensiController::class, 'destroyItem'])->name('absensi.items.destroy');
 
+        // Admin SK Mengajar
+        Route::get('/sk-mengajar', [AdminSkMengajarController::class, 'index'])->name('sk-mengajar.index');
+        Route::get('/sk-mengajar/create', [AdminSkMengajarController::class, 'create'])->name('sk-mengajar.create');
+        Route::post('/sk-mengajar', [AdminSkMengajarController::class, 'store'])->name('sk-mengajar.store');
+        Route::get('/sk-mengajar/{skMengajar}/edit', [AdminSkMengajarController::class, 'edit'])->name('sk-mengajar.edit');
+        Route::put('/sk-mengajar/{skMengajar}', [AdminSkMengajarController::class, 'update'])->name('sk-mengajar.update');
+        Route::delete('/sk-mengajar/{skMengajar}', [AdminSkMengajarController::class, 'destroy'])->name('sk-mengajar.destroy');
+
+        // Admin Roster Kuliah
+        Route::get('/roster', [AdminRosterController::class, 'index'])->name('roster.index');
+        Route::get('/roster/create', [AdminRosterController::class, 'create'])->name('roster.create');
+        Route::post('/roster', [AdminRosterController::class, 'store'])->name('roster.store');
+        Route::get('/roster/{roster}/edit', [AdminRosterController::class, 'edit'])->name('roster.edit');
+        Route::put('/roster/{roster}', [AdminRosterController::class, 'update'])->name('roster.update');
+        Route::delete('/roster/{roster}', [AdminRosterController::class, 'destroy'])->name('roster.destroy');
+
         Route::resource('kalender-akademik', AdminAcademicCalendarController::class)
             ->parameters(['kalender-akademik' => 'kalender_akademik'])
             ->except(['show']);
@@ -364,6 +382,7 @@ Route::prefix('admin')
             Route::get('/transkrip-nilai/{mahasiswa}', [AdminTranskripNilaiController::class, 'show'])->name('transkrip-nilai.show');
             Route::get('/transkrip-nilai/{mahasiswa}/pdf', [AdminTranskripNilaiController::class, 'pdf'])->name('transkrip-nilai.pdf');
             Route::get('/transkrip-nilai/{mahasiswa}/excel', [AdminTranskripNilaiController::class, 'excel'])->name('transkrip-nilai.excel');
+            Route::get('/transkrip-nilai/{mahasiswa}/word', [AdminTranskripNilaiController::class, 'word'])->name('transkrip-nilai.word');
             Route::get('/transkrip-nilai/{mahasiswa}/edit', [AdminTranskripNilaiController::class, 'edit'])->name('transkrip-nilai.edit');
             Route::put('/transkrip-nilai/{mahasiswa}', [AdminTranskripNilaiController::class, 'update'])->name('transkrip-nilai.update');
         });
@@ -551,6 +570,8 @@ Route::prefix('dosen')
         Route::get('/nilai', [DosenNilaiController::class, 'index'])->name('nilai.index');
         Route::get('/nilai/{mataKuliah}/{semester}', [DosenNilaiController::class, 'edit'])->name('nilai.edit');
         Route::get('/nilai/{mataKuliah}/{semester}/pdf', [DosenNilaiController::class, 'exportPdf'])->name('nilai.pdf');
+        Route::get('/nilai/{mataKuliah}/{semester}/pdf-sk-mengajar', [DosenNilaiController::class, 'exportSkMengajarPdf'])->name('nilai.sk-mengajar.pdf');
+        Route::get('/nilai/{mataKuliah}/{semester}/pdf-roster', [DosenNilaiController::class, 'exportRosterPdf'])->name('nilai.roster.pdf');
         Route::put('/nilai/{mataKuliah}/{semester}', [DosenNilaiController::class, 'update'])->name('nilai.update');
         Route::delete('/nilai/{mataKuliah}/{semester}/bulk-reset', [DosenNilaiController::class, 'bulkResetNilai'])->name('nilai.bulk-reset');
 

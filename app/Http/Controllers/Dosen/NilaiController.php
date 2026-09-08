@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Khs;
 use App\Models\Krs;
 use App\Models\MataKuliah;
+use App\Models\Roster;
+use App\Models\SkMengajar;
 use Dompdf\Dompdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -542,5 +544,81 @@ class NilaiController extends Controller
             'existing' => $existing,
             'q' => $q,
         ];
+    }
+
+    public function exportSkMengajarPdf(Request $request, MataKuliah $mataKuliah, int $semester)
+    {
+        $dosen = $request->user()?->dosen;
+        abort_unless($dosen && in_array((int) $dosen->id, [(int) $mataKuliah->dosen_id, (int) $mataKuliah->dosen_id_2], true), 403);
+
+        $skMengajar = SkMengajar::query()
+            ->with(['mataKuliah', 'dosen'])
+            ->where('mata_kuliah_id', $mataKuliah->id)
+            ->where('semester', $semester)
+            ->orderByDesc('tanggal_sk')
+            ->first();
+
+        $html = view('dosen.nilai.pdf-sk-mengajar', [
+            'mataKuliah' => $mataKuliah,
+            'semester' => $semester,
+            'skMengajar' => $skMengajar,
+            'relatedDosen' => $dosen,
+        ])->render();
+
+        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('legal', 'portrait');
+        $dompdf->render();
+
+        $filename = 'sk-mengajar-'.$mataKuliah->kode.'-semester-'.$semester.'.pdf';
+
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ]);
+    }
+
+    public function exportRosterPdf(Request $request, MataKuliah $mataKuliah, int $semester)
+    {
+        $dosen = $request->user()?->dosen;
+        abort_unless($dosen && in_array((int) $dosen->id, [(int) $mataKuliah->dosen_id, (int) $mataKuliah->dosen_id_2], true), 403);
+
+        $rosters = Roster::query()
+            ->with(['mataKuliah', 'dosen'])
+            ->where('mata_kuliah_id', $mataKuliah->id)
+            ->where('semester', $semester)
+            ->orderBy('pertemuan_ke')
+            ->orderBy('tanggal')
+            ->get();
+
+        $krsMahasiswa = Krs::query()
+            ->with(['mahasiswa'])
+            ->where('status_approval', 'approved')
+            ->where('semester', $semester)
+            ->whereHas('items', function ($sub) use ($mataKuliah) {
+                $sub->where('mata_kuliah_id', $mataKuliah->id);
+            })
+            ->orderBy('mahasiswa_id')
+            ->get();
+
+        $html = view('dosen.nilai.pdf-roster', [
+            'mataKuliah' => $mataKuliah,
+            'semester' => $semester,
+            'rosters' => $rosters,
+            'krsMahasiswa' => $krsMahasiswa,
+            'relatedDosen' => $dosen,
+        ])->render();
+
+        $dompdf = new Dompdf(['isRemoteEnabled' => true]);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('legal', 'landscape');
+        $dompdf->render();
+
+        $filename = 'roster-'.$mataKuliah->kode.'-semester-'.$semester.'.pdf';
+
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ]);
     }
 }

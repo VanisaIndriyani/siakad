@@ -70,6 +70,16 @@
         <i class="fa-solid fa-calendar-check text-emerald-300"></i>
         <span class="text-sm font-medium">Absensi</span>
     </a>
+    <a href="{{ route('admin.sk-mengajar.index') }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('admin.sk-mengajar.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+        <i class="fa-solid fa-file-signature text-emerald-300"></i>
+        <span class="text-sm font-medium">SK Mengajar</span>
+    </a>
+    <a href="{{ route('admin.roster.index') }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('admin.roster.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+        <i class="fa-solid fa-calendar-days text-emerald-300"></i>
+        <span class="text-sm font-medium">Roster Kuliah</span>
+    </a>
     <a href="{{ route('admin.kalender-akademik.index') }}"
        class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('admin.kalender-akademik.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
         <i class="fa-solid fa-calendar-days text-emerald-300"></i>

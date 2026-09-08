@@ -165,7 +165,7 @@ class TranskripNilaiController extends Controller
             $dompdf->getOptions()->setDpi(96);
 
             $dompdf->loadHtml($html, 'UTF-8');
-            $dompdf->setPaper(array(0.0, 0.0, 595.275591, 935.433071), 'portrait');
+            $dompdf->setPaper('folio', 'portrait');
             $dompdf->render();
 
             $namafile = 'Transkrip-' . ($mahasiswa->npm ?: $mahasiswa->id) . '-' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', (string) $mahasiswa->nama_lengkap) . '.pdf';
@@ -226,8 +226,22 @@ class TranskripNilaiController extends Controller
             ->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_FOLIO)
             ->setFitToPage(true)
             ->setFitToWidth(1)
-            ->setFitToHeight(0);
-        $sheet->getPageMargins()->setTop(0.4)->setBottom(0.4)->setLeft(0.4)->setRight(0.4);
+            ->setFitToHeight(0)
+            ->setHorizontalCentered(true)
+            ->setVerticalCentered(false)
+            ->setPrintCellComments(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PRINT_COMMENTS_NONE)
+            ->setPrintErrors(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PRINT_ERRORS_BLANK);
+        $sheet->getPageMargins()
+            ->setTop(0.3)
+            ->setBottom(0.3)
+            ->setLeft(0.3)
+            ->setRight(0.3)
+            ->setHeader(0.0)
+            ->setFooter(0.0);
+        $sheet->getHeaderFooter()->setOddHeader('')->setEvenHeader('')->setOddFooter('')->setEvenFooter('');
+        $sheet->setShowGridLines(false);
+        $sheet->setPrintGridLines(false);
+        $sheet->setShowRowColHeaders(false);
 
         $boldFont = ['font' => ['bold' => true]];
         $centerAlign = ['alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER]];
@@ -725,6 +739,122 @@ class TranskripNilaiController extends Controller
             'Pengembangan Moral dan Agama',
             'Psikologi Perkembangan Anak',
         ];
+    }
+
+    public function word(Request $request, Mahasiswa $mahasiswa)
+    {
+        $data = $this->buildTranskripData($mahasiswa);
+
+        $logoCandidates = [];
+        try { $logoCandidates[] = rtrim(public_path(), '\\/') . DIRECTORY_SEPARATOR . 'img' . DIRECTORY_SEPARATOR . 'lo.jpeg'; } catch (\Throwable $e) {}
+        try {
+            $bp = rtrim(str_replace('\\', '/', base_path()), '/');
+            if ($bp !== '') {
+                $logoCandidates[] = $bp . '/public/img/lo.jpeg';
+                $logoCandidates[] = $bp . '/public/img/lo.jpg';
+                $logoCandidates[] = $bp . '/public/img/lo.png';
+                $logoCandidates[] = $bp . '/public_html/img/lo.jpeg';
+                $logoCandidates[] = $bp . '/public/img/logo.jpeg';
+                $logoCandidates[] = $bp . '/public/img/logo.jpg';
+                $logoCandidates[] = $bp . '/public/img/logo.png';
+            }
+        } catch (\Throwable $e) {}
+        try {
+            $docRoot = rtrim(str_replace('\\', '/', (string) ($_SERVER['DOCUMENT_ROOT'] ?? '')), '/');
+            if ($docRoot !== '') {
+                $logoCandidates[] = $docRoot . '/img/lo.jpeg';
+                $logoCandidates[] = $docRoot . '/img/lo.jpg';
+                $logoCandidates[] = $docRoot . '/img/lo.png';
+                $logoCandidates[] = $docRoot . '/public/img/lo.jpeg';
+                $logoCandidates[] = $docRoot . '/storage/img/lo.jpeg';
+            }
+        } catch (\Throwable $e) {}
+        $logoPath = null;
+        foreach ($logoCandidates as $lc) {
+            $lc = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string)$lc);
+            if (@is_file($lc) && @is_readable($lc)) { $logoPath = $lc; break; }
+        }
+
+        $logoLocalAbsPath = null;
+        if ($logoPath) {
+            try {
+                $tempDir = sys_get_temp_dir();
+                if (!@is_dir($tempDir)) { $tempDir = @ini_get('upload_tmp_dir') ?: storage_path('framework/cache'); }
+                $ext = strtolower(pathinfo($logoPath, PATHINFO_EXTENSION));
+                if (!in_array($ext, ['jpg','jpeg','png','gif'])) { $ext = 'jpg'; }
+                if ($ext === 'jpeg') { $ext = 'jpg'; }
+                $fn = 'transkrip-logo-' . md5($logoPath . '|' . filesize($logoPath)) . '.' . $ext;
+                $tempLogoAbs = rtrim($tempDir, '\\/') . DIRECTORY_SEPARATOR . $fn;
+                if (!@is_file($tempLogoAbs) || (@filemtime($tempLogoAbs) + 86400) < time()) {
+                    @copy($logoPath, $tempLogoAbs);
+                }
+                if (@is_file($tempLogoAbs)) {
+                    $logoLocalAbsPath = str_replace('\\', '/', $tempLogoAbs);
+                }
+            } catch (\Throwable $e) { $logoLocalAbsPath = null; }
+        }
+
+        $data['logoLocalAbsPath'] = $logoLocalAbsPath;
+
+        $fotoLocalAbsPath = null;
+        $fotoOrEmptyPlaceholder = false;
+        $relPath = trim(str_replace(['/', '\\'], '/', (string)$mahasiswa->foto_path), '/');
+        if ($relPath !== '') {
+            $candidates = [
+                public_path('storage/' . $relPath),
+                rtrim((string) ($_SERVER['DOCUMENT_ROOT'] ?? ''), '\\/') . '/storage/' . $relPath,
+                rtrim((string) ($_SERVER['DOCUMENT_ROOT'] ?? ''), '\\/') . '/' . $relPath,
+            ];
+            foreach ($candidates as $c) {
+                $c = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string)$c);
+                if (@is_file($c) && @is_readable($c) && (@filesize($c) > 200)) {
+                    try {
+                        $tempDir = sys_get_temp_dir();
+                        if (!@is_dir($tempDir)) { $tempDir = @ini_get('upload_tmp_dir') ?: storage_path('framework/cache'); }
+                        $ext = strtolower(pathinfo($c, PATHINFO_EXTENSION));
+                        if (!in_array($ext, ['jpg','jpeg','png','gif'])) { $ext = 'jpg'; }
+                        if ($ext === 'jpeg') { $ext = 'jpg'; }
+                        $fn = 'transkrip-foto-' . md5($c . '|' . filesize($c)) . '.' . $ext;
+                        $tempF = rtrim($tempDir, '\\/') . DIRECTORY_SEPARATOR . $fn;
+                        if (!@is_file($tempF) || (@filemtime($tempF) + 86400) < time()) {
+                            @copy($c, $tempF);
+                        }
+                        if (@is_file($tempF)) { $fotoLocalAbsPath = str_replace('\\', '/', $tempF); break; }
+                    } catch (\Throwable $e) { $fotoLocalAbsPath = null; }
+                }
+            }
+        }
+        $data['fotoLocalAbsPath'] = $fotoLocalAbsPath;
+
+        while (ob_get_level() > 0) {
+            if (!@ob_end_clean()) {
+                break;
+            }
+        }
+        ob_start();
+
+        $html = view('admin.transkrip-nilai.word', $data)->render();
+
+        $namafile = 'Transkrip-' . ($mahasiswa->npm ?: $mahasiswa->id) . '-' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', (string) $mahasiswa->nama_lengkap) . '.doc';
+
+        $forceDownload = (string) $request->query('download', '') !== ''
+            || (string) $request->query('dl', '') !== ''
+            || (string) $request->query('fd', '') !== ''
+            || strtolower((string) $request->query('disposition', '')) === 'attachment';
+
+        $callback = function () use ($html) {
+            echo $html;
+        };
+
+        return response()->streamDownload($callback, $namafile, [
+            'Content-Type' => 'application/msword',
+            'Content-Transfer-Encoding' => 'binary',
+            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0, private',
+            'Pragma' => 'public',
+            'Expires' => 'Sat, 26 Jul 1997 05:00:00 GMT',
+            'X-Content-Type-Options' => 'nosniff',
+            'Content-Description' => 'File Transfer',
+        ], $forceDownload ? 'attachment' : 'inline');
     }
 
     private function buildTranskripData(Mahasiswa $mahasiswa): array
