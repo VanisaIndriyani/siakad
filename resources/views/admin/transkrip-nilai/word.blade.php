@@ -276,52 +276,13 @@ table.nilai tr.ujian-row td.mk.left-col {
 <body>
 @php
 /* =========================================================
-   LOGO BASE64 (ganti $logoWeb di show — karena DomPDF tidak bisa pakai asset() URL http)
+   MS WORD TIDAK BISA MEMBACA data:image base64 (hanya DomPDF yang bisa).
+   PAKAI absolute local file path (sudah disiapkan controller di sys_get_temp_dir()):
+   $logoLocalAbsPath = logo institusi (sudah di-copy ke temp, abs path)
+   $fotoLocalAbsPath = foto mahasiswa (sudah di-copy ke temp, abs path)
 ========================================================= */
-$logoFinalSrc = null;
-$logoCandidates = [
-    public_path('img/lo.jpeg'),
-    public_path('img/lo.jpg'),
-    public_path('img/lo.png'),
-    public_path('img/logo.jpeg'),
-    public_path('img/logo.jpg'),
-    public_path('img/logo.png'),
-];
-foreach ($logoCandidates as $logoPath) {
-    try {
-        if (file_exists($logoPath) && is_file($logoPath) && is_readable($logoPath)) {
-            $data = @file_get_contents($logoPath);
-            if ($data && strlen($data) > 100 && strlen($data) < 400000) {
-                $ext = strtolower(pathinfo($logoPath, PATHINFO_EXTENSION));
-                $mime = ($ext === 'png') ? 'image/png' : (($ext === 'gif') ? 'image/gif' : 'image/jpeg');
-                $logoFinalSrc = 'data:' . $mime . ';base64,' . base64_encode($data);
-                break;
-            }
-        }
-    } catch (\Throwable $e) { $logoFinalSrc = null; }
-}
-
-/* =========================================================
-   FOTO MAHASISWA BASE64 (pertahankan variabel $fotoMahasiswa dari controller — SUDAH base64)
-========================================================= */
-$fotoSrcFinal = $fotoMahasiswa ?? null;
-if (empty($fotoSrcFinal) && !empty($mahasiswa->foto_path)) {
-    try {
-        $relPath = trim(str_replace(['/', '\\'], '/', (string)$mahasiswa->foto_path), '/');
-        $absPath = public_path('storage/' . $relPath);
-        if (@file_exists($absPath) && @is_file($absPath) && @is_readable($absPath)) {
-            $sz = @filesize($absPath);
-            if ($sz > 200 && $sz < 10000000) {
-                $data = @file_get_contents($absPath);
-                if ($data && strlen($data) > 200) {
-                    $ext = strtolower(pathinfo($absPath, PATHINFO_EXTENSION));
-                    $mime = ($ext === 'png') ? 'image/png' : (($ext === 'gif') ? 'image/gif' : 'image/jpeg');
-                    $fotoSrcFinal = 'data:' . $mime . ';base64,' . base64_encode($data);
-                }
-            }
-        }
-    } catch (\Throwable $e) { $fotoSrcFinal = null; }
-}
+$logoImgSrc = $logoLocalAbsPath ?? null;
+$fotoImgSrc = $fotoLocalAbsPath ?? null;
 
 /* =========================================================
    DATA UJIAN — SAMA PERSIS show.blade.php L203-L206
@@ -333,11 +294,11 @@ $ujianCount = count($ujianAda);
 
 <div class="transcript-paper">
     <div class="wrap">
-        {{-- ===== KOP SURAT — SAMA PERSIS show L211-L246, hanya logo diganti base64 ===== --}}
+        {{-- ===== KOP SURAT — SAMA PERSIS PDF, LOGO PAKAI ABSOLUTE LOCAL PATH (Word butuh format file:// nanti otomatis resolve) ===== --}}
         <div class="kop-wrap">
             <div class="kop-logo-center">
-                @if($logoFinalSrc)
-                    <img src="{{ $logoFinalSrc }}" alt="Logo IAI DDI Sidrap" width="98" height="98">
+                @if($logoImgSrc)
+                    <img src="{{ $logoImgSrc }}" alt="Logo IAI DDI Sidrap" width="98" height="98">
                 @endif
             </div>
             <div class="kop-title-a">INSTITUT AGAMA ISLAM</div>
@@ -557,8 +518,8 @@ $ujianCount = count($ujianAda);
                 <tr>
                     <td class="ttd-foto-col" style="vertical-align: top; padding-top: 0;">
                         <div class="ttd-foto-box" style="margin-top: 0;">
-                            @if($fotoSrcFinal)
-                                <img src="{{ $fotoSrcFinal }}" alt="Foto {{ $mahasiswa->nama_lengkap }}">
+                            @if($fotoImgSrc)
+                                <img src="{{ $fotoImgSrc }}" alt="Foto {{ $mahasiswa->nama_lengkap }}">
                             @else
                                 <div class="ttd-foto-empty">Foto<br>3 × 4</div>
                             @endif
