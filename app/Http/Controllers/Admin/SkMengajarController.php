@@ -64,6 +64,7 @@ class SkMengajarController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $this->validateForm($request);
+        $validated = $this->prepareDefaults($validated, $request);
         $validated['created_by'] = Auth::id();
         SkMengajar::create($validated);
 
@@ -81,10 +82,38 @@ class SkMengajarController extends Controller
     public function update(Request $request, SkMengajar $skMengajar): RedirectResponse
     {
         $validated = $this->validateForm($request, $skMengajar->id);
+        $validated = $this->prepareDefaults($validated, $request);
         $skMengajar->update($validated);
 
         return to_route('admin.sk-mengajar.index')
             ->with('success', 'SK Mengajar berhasil diperbarui.');
+    }
+
+    private function prepareDefaults(array $payload, Request $request): array
+    {
+        $mkId = (int) ($payload['mata_kuliah_id'] ?? 0);
+        $fallbackSks = 0;
+        $fallbackProdi = '';
+        if ($mkId > 0) {
+            $mk = MataKuliah::query()->find($mkId, ['id', 'sks', 'jurusan']);
+            if ($mk) {
+                $fallbackSks = (float) ($mk->sks ?? 0);
+                $fallbackProdi = (string) ($mk->jurusan ?? '');
+            }
+        }
+
+        if (!isset($payload['beban_sks']) || $payload['beban_sks'] === null || $payload['beban_sks'] === '') {
+            $payload['beban_sks'] = $fallbackSks;
+        }
+        if (!isset($payload['program_studi']) || trim((string) $payload['program_studi']) === '') {
+            $payload['program_studi'] = $fallbackProdi;
+        }
+        foreach (['kelas', 'jabatan_dosen', 'tugas_tambahan', 'catatan', 'tahun_ajaran', 'nomor_sk'] as $f) {
+            if (!isset($payload[$f]) || $payload[$f] === null) {
+                $payload[$f] = '';
+            }
+        }
+        return $payload;
     }
 
     public function destroy(SkMengajar $skMengajar): RedirectResponse
