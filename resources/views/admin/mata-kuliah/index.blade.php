@@ -51,7 +51,7 @@
                         default => 'from-lime-500/40 to-green-500/40',
                     };
                 @endphp
-                <div x-data="{ showFormSk: @js(!$skAda), showFormRoster: @js(!$rsAda) }" class="group relative flex flex-col rounded-2xl bg-white/[0.04] backdrop-blur-sm border border-white/10 p-5 sm:p-6 shadow-[0_0_50px_-18px_rgba(16,185,129,0.22)] hover:shadow-[0_0_70px_-12px_rgba(16,185,129,0.35)] hover:border-emerald-400/25 hover:-translate-y-0.5 transition-all duration-300">
+                <div x-data="{ showFormSk: @js(!$skAda), showFormRoster: @js(!$rsAda) }" class="group relative flex flex-col rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 p-5 sm:p-6 shadow-[0_0_50px_-18px_rgba(16,185,129,0.22)] hover:shadow-[0_0_70px_-12px_rgba(16,185,129,0.35)] hover:border-emerald-400/25 hover:-translate-y-0.5 transition-all duration-300">
                     <div class="absolute -top-px left-6 right-6 h-px rounded-full bg-gradient-to-r {{ $prodiAccent }} opacity-70 group-hover:opacity-100 transition-opacity"></div>
                     <div class="flex flex-col gap-3 mb-5 sm:flex-row sm:items-start sm:justify-between">
                         <div class="flex items-start gap-3 min-w-0">
@@ -79,7 +79,7 @@
                     </div>
 
                     <div class="space-y-3 mt-auto">
-                        <div class="rounded-xl border border-emerald-400/20 bg-emerald-500/[0.04] p-4 shadow-[inset_0_0_30px_-18px_rgba(16,185,129,0.45)]">
+                        <div class="rounded-xl border border-emerald-400/20 bg-emerald-500/5 p-4 shadow-[inset_0_0_30px_-18px_rgba(16,185,129,0.45)]">
                             <div class="flex items-center justify-between gap-2 mb-3">
                                 <div class="inline-flex items-center gap-2 text-emerald-100">
                                     <div class="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-400/25 inline-flex items-center justify-center">
@@ -145,7 +145,7 @@
                             </form>
                         </div>
 
-                        <div class="rounded-xl border border-blue-400/20 bg-blue-500/[0.04] p-4 shadow-[inset_0_0_30px_-18px_rgba(59,130,246,0.45)]">
+                        <div class="rounded-xl border border-blue-400/20 bg-blue-500/5 p-4 shadow-[inset_0_0_30px_-18px_rgba(59,130,246,0.45)]">
                             <div class="flex items-center justify-between gap-2 mb-3">
                                 <div class="inline-flex items-center gap-2 text-blue-100">
                                     <div class="w-7 h-7 rounded-lg bg-blue-500/15 border border-blue-400/25 inline-flex items-center justify-center">
