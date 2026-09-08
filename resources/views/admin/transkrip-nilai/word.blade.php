@@ -281,37 +281,56 @@ table.nilai tr.ujian-row td.mk.left-col {
 <body>
 @php
 /* =========================================================
-   MICROSOFT WORD HTML EXPORT — IMAGES WAJIB di-EMBED sebagai DATA URI BASE64!
-   ALASAN: File .doc di-DOWNLOAD ke laptop user → path lokal SERVER (C:\xampp\tmp\...) TIDAK ADA di laptop user → "The picture can't be displayed".
-   SOLUSI: Baca bytes file gambar dari $logoLocalAbsPath / $fotoLocalAbsPath (SUDAH di-copy ke temp SERVER, pasti terbaca) → encode base64 → EMBED LANGSUNG ke HTML.
-   HASIL: Gambar ikut tersimpan DI DALAM file .doc — BISA dibuka di laptop siapapun tanpa error X merah.
+   LOGO BASE64 (SAMA PERSIS DENGAN pdf.blade.php — LANGSUNG BACA dari public/img/lo.jpeg TANPA TERGANTUNG controller $logoLocalAbsPath.
+   Ini WORK 100% karena PDF selalu berhasil muncul logo dengan logic ini.)
 ========================================================= */
 $logoFinalSrc = null;
-if (!empty($logoLocalAbsPath) && @is_file($logoLocalAbsPath) && @is_readable($logoLocalAbsPath)) {
+$logoCandidates = [
+    public_path('img/lo.jpeg'),
+    public_path('img/lo.jpg'),
+    public_path('img/lo.png'),
+    public_path('img/logo.jpeg'),
+    public_path('img/logo.jpg'),
+    public_path('img/logo.png'),
+];
+foreach ($logoCandidates as $logoPath) {
     try {
-        $data = @file_get_contents($logoLocalAbsPath);
-        if ($data && strlen($data) > 100 && strlen($data) < 4000000) {
-            $ext = strtolower(pathinfo($logoLocalAbsPath, PATHINFO_EXTENSION));
-            $mime = ($ext === 'png') ? 'image/png' : (($ext === 'gif') ? 'image/gif' : 'image/jpeg');
-            $logoFinalSrc = 'data:' . $mime . ';base64,' . base64_encode($data);
+        if (file_exists($logoPath) && is_file($logoPath) && is_readable($logoPath)) {
+            $data = @file_get_contents($logoPath);
+            if ($data && strlen($data) > 100 && strlen($data) < 400000) {
+                $ext = strtolower(pathinfo($logoPath, PATHINFO_EXTENSION));
+                $mime = ($ext === 'png') ? 'image/png' : (($ext === 'gif') ? 'image/gif' : 'image/jpeg');
+                $logoFinalSrc = 'data:' . $mime . ';base64,' . base64_encode($data);
+                break;
+            }
         }
     } catch (\Throwable $e) { $logoFinalSrc = null; }
 }
 
-$fotoFinalSrc = null;
-if (!empty($fotoLocalAbsPath) && @is_file($fotoLocalAbsPath) && @is_readable($fotoLocalAbsPath)) {
+/* =========================================================
+   FOTO MAHASISWA BASE64 (SAMA PERSIS pdf.blade.php — coba $fotoMahasiswa terlebih dahulu, lalu fallback baca langsung dari storage foto_path)
+========================================================= */
+$fotoFinalSrc = $fotoMahasiswa ?? null;
+if (empty($fotoFinalSrc) && !empty($mahasiswa->foto_path)) {
     try {
-        $data = @file_get_contents($fotoLocalAbsPath);
-        if ($data && strlen($data) > 200 && strlen($data) < 10000000) {
-            $ext = strtolower(pathinfo($fotoLocalAbsPath, PATHINFO_EXTENSION));
-            $mime = ($ext === 'png') ? 'image/png' : (($ext === 'gif') ? 'image/gif' : 'image/jpeg');
-            $fotoFinalSrc = 'data:' . $mime . ';base64,' . base64_encode($data);
+        $relPath = trim(str_replace(['/', '\\'], '/', (string)$mahasiswa->foto_path), '/');
+        $absPath = public_path('storage/' . $relPath);
+        if (@file_exists($absPath) && @is_file($absPath) && @is_readable($absPath)) {
+            $sz = @filesize($absPath);
+            if ($sz > 200 && $sz < 10000000) {
+                $data = @file_get_contents($absPath);
+                if ($data && strlen($data) > 200) {
+                    $ext = strtolower(pathinfo($absPath, PATHINFO_EXTENSION));
+                    $mime = ($ext === 'png') ? 'image/png' : (($ext === 'gif') ? 'image/gif' : 'image/jpeg');
+                    $fotoFinalSrc = 'data:' . $mime . ';base64,' . base64_encode($data);
+                }
+            }
         }
     } catch (\Throwable $e) { $fotoFinalSrc = null; }
 }
 
 /* =========================================================
-   DATA UJIAN — SAMA PERSIS show.blade.php L203-L206
+   DATA UJIAN
 ========================================================= */
 $ujianKompre = $ujianKompre ?? [];
 $ujianAda = array_values(array_filter(array_map(fn($v) => trim((string)$v), $ujianKompre), fn($v) => $v !== ''));
@@ -320,7 +339,7 @@ $ujianCount = count($ujianAda);
 
 <div class="transcript-paper">
     <div class="wrap">
-        {{-- ===== KOP SURAT — SAMA PERSIS PDF, LOGO di-EMBED BASE64 langsung ke HTML (tidak butuh file external) ===== --}}
+        {{-- ===== KOP SURAT — LOGO di-EMBED BASE64 (WORK di Word / PDF) ===== --}}
         <div class="kop-wrap">
             <div class="kop-logo-center">
                 @if($logoFinalSrc)
