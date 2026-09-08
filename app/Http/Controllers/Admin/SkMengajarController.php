@@ -66,6 +66,7 @@ class SkMengajarController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $this->validateForm($request);
+        $validated = $this->applyAutoFillFromDosen($validated, $request);
         $validated = $this->prepareDefaults($validated, $request);
         $validated['created_by'] = Auth::id();
 
@@ -89,6 +90,7 @@ class SkMengajarController extends Controller
     public function update(Request $request, SkMengajar $skMengajar): RedirectResponse
     {
         $validated = $this->validateForm($request, $skMengajar->id);
+        $validated = $this->applyAutoFillFromDosen($validated, $request, $skMengajar);
         $validated = $this->prepareDefaults($validated, $request);
 
         if ($request->hasFile('file_pdf_upload') && $request->file('file_pdf_upload')->isValid()) {
@@ -123,6 +125,89 @@ class SkMengajarController extends Controller
             ->with('success', 'SK Mengajar berhasil dihapus.');
     }
 
+    private function applyAutoFillFromDosen(array $payload, Request $request, ?SkMengajar $existing = null): array
+    {
+        $dosenId = (int) ($payload['dosen_id'] ?? ($existing?->dosen_id ?? 0));
+        if ($dosenId <= 0) {
+            return $payload;
+        }
+
+        $auto = $this->resolveAutoFillFromDosen($dosenId);
+        if ($auto === null) {
+            return $payload;
+        }
+
+        $fieldShouldAuto = [
+            'mata_kuliah_id',
+            'semester',
+            'tahun_ajaran',
+            'nomor_sk',
+            'tanggal_sk',
+            'tanggal_mulai',
+            'tanggal_selesai',
+            'beban_sks',
+            'kelas',
+            'program_studi',
+            'jabatan_dosen',
+            'tugas_tambahan',
+            'catatan',
+        ];
+
+        foreach ($fieldShouldAuto as $key) {
+            $userProvided = array_key_exists($key, $payload)
+                && $payload[$key] !== null
+                && (is_array($payload[$key]) || trim((string) $payload[$key]) !== '');
+            if (!$userProvided) {
+                $payload[$key] = $auto[$key];
+            }
+        }
+
+        return $payload;
+    }
+
+    private function resolveAutoFillFromDosen(int $dosenId): ?array
+    {
+        $dosen = Dosen::query()->find($dosenId, ['id', 'nama', 'nidn', 'nuptk', 'jabatan_struktural']);
+        if (!$dosen) {
+            return null;
+        }
+
+        $mk = MataKuliah::query()
+            ->where(function ($q) use ($dosenId) {
+                $q->where('dosen_id', $dosenId)
+                    ->orWhere('dosen_id_2', $dosenId);
+            })
+            ->orderBy('semester')
+            ->orderBy('kode')
+            ->first(['id', 'kode', 'nama', 'semester', 'sks', 'jurusan']);
+
+        if (!$mk) {
+            return null;
+        }
+
+        $y = (int) date('Y');
+        $ta = $y.'/'.($y + 1);
+        $tgl = date('Y-m-d');
+        $tglSelesai = date('Y-m-d', strtotime('+4 months'));
+        $nomor = 'IADD-SK/'.date('Y').'/MK-'.sprintf('%03d', $mk->id).'-D'.sprintf('%03d', $dosenId);
+
+        return [
+            'mata_kuliah_id' => (int) $mk->id,
+            'semester' => (int) ($mk->semester ?? 1),
+            'tahun_ajaran' => $ta,
+            'nomor_sk' => $nomor,
+            'tanggal_sk' => $tgl,
+            'tanggal_mulai' => $tgl,
+            'tanggal_selesai' => $tglSelesai,
+            'beban_sks' => (float) ($mk->sks ?? 0),
+            'kelas' => 'A',
+            'program_studi' => (string) ($mk->jurusan ?? ''),
+            'jabatan_dosen' => (string) ($dosen->jabatan_struktural ?? 'Dosen'),
+            'tugas_tambahan' => '',
+            'catatan' => '',
+        ];
+    }
+
     private function prepareDefaults(array $payload, Request $request): array
     {
         $mkId = (int) ($payload['mata_kuliah_id'] ?? 0);
@@ -146,6 +231,16 @@ class SkMengajarController extends Controller
             if (!isset($payload[$f]) || $payload[$f] === null) {
                 $payload[$f] = '';
             }
+        }
+        if (empty($payload['semester']) || (int) $payload['semester'] < 1 || (int) $payload['semester'] > 8) {
+            $payload['semester'] = 1;
+        } else {
+            $payload['semester'] = (int) $payload['semester'];
+        }
+        if (empty($payload['mata_kuliah_id']) || (int) $payload['mata_kuliah_id'] < 1) {
+            $payload['mata_kuliah_id'] = $mkId > 0 ? $mkId : 0;
+        } else {
+            $payload['mata_kuliah_id'] = (int) $payload['mata_kuliah_id'];
         }
         return $payload;
     }
@@ -178,19 +273,16 @@ class SkMengajarController extends Controller
     private function validateForm(Request $request, ?int $id = null): array
     {
         return $request->validate([
-            'mata_kuliah_id' => 'required|exists:mata_kuliah,id',
-            'dosen_id' => 'nullable|exists:dosen,id',
-            'semester' => 'required|integer|min:1|max:8',
+            'dosen_id' => 'required|exists:dosen,id',
+            'mata_kuliah_id' => 'nullable|exists:mata_kuliah,id',
+            'semester' => 'nullable|integer|min:1|max:8',
             'tahun_ajaran' => 'nullable|string|max:20',
             'nomor_sk' => [
                 'nullable',
                 'string',
                 'max:120',
                 Rule::unique('sk_mengajars', 'nomor_sk')
-                    ->where(fn ($q) => $q->where('mata_kuliah_id', (int) $request->get('mata_kuliah_id'))
-                        ->where('semester', (int) $request->get('semester'))
-                        ->when($id, fn ($sq) => $sq->where('id', '!=', $id))
-                    ),
+                    ->where(fn ($q) => $q->when($id, fn ($sq) => $sq->where('id', '!=', $id))),
             ],
             'tanggal_sk' => 'nullable|date',
             'tanggal_mulai' => 'nullable|date',

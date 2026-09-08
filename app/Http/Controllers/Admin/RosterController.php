@@ -64,6 +64,7 @@ class RosterController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $this->validateForm($request);
+        $validated = $this->applyAutoFillFromDosen($validated);
         $validated = $this->prepareDefaults($validated);
         $validated['created_by'] = Auth::id();
 
@@ -86,6 +87,7 @@ class RosterController extends Controller
     public function update(Request $request, RosterUpload $rosterUpload): RedirectResponse
     {
         $validated = $this->validateForm($request, $rosterUpload->id);
+        $validated = $this->applyAutoFillFromDosen($validated, $rosterUpload);
         $validated = $this->prepareDefaults($validated);
 
         if ($request->hasFile('file_pdf_upload') && $request->file('file_pdf_upload')->isValid()) {
@@ -120,12 +122,88 @@ class RosterController extends Controller
             ->with('success', 'Roster Kuliah berhasil dihapus.');
     }
 
+    private function applyAutoFillFromDosen(array $payload, ?RosterUpload $existing = null): array
+    {
+        $dosenId = (int) ($payload['dosen_id'] ?? ($existing?->dosen_id ?? 0));
+        if ($dosenId <= 0) {
+            return $payload;
+        }
+
+        $auto = $this->resolveAutoFillFromDosen($dosenId);
+        if ($auto === null) {
+            return $payload;
+        }
+
+        $fieldShouldAuto = [
+            'mata_kuliah_id',
+            'semester',
+            'tahun_ajaran',
+            'kelas',
+            'keterangan',
+        ];
+
+        foreach ($fieldShouldAuto as $key) {
+            $userProvided = array_key_exists($key, $payload)
+                && $payload[$key] !== null
+                && (is_array($payload[$key]) || trim((string) $payload[$key]) !== '');
+            if (!$userProvided) {
+                $payload[$key] = $auto[$key];
+            }
+        }
+
+        return $payload;
+    }
+
+    private function resolveAutoFillFromDosen(int $dosenId): ?array
+    {
+        $dosen = Dosen::query()->find($dosenId, ['id', 'nama']);
+        if (!$dosen) {
+            return null;
+        }
+
+        $mk = MataKuliah::query()
+            ->where(function ($q) use ($dosenId) {
+                $q->where('dosen_id', $dosenId)
+                    ->orWhere('dosen_id_2', $dosenId);
+            })
+            ->orderBy('semester')
+            ->orderBy('kode')
+            ->first(['id', 'kode', 'nama', 'semester', 'sks', 'jurusan']);
+
+        if (!$mk) {
+            return null;
+        }
+
+        $y = (int) date('Y');
+        $ta = $y.'/'.($y + 1);
+        $smt = (int) ($mk->semester ?? 1);
+        $ket = 'Roster Kuliah Semester '.$smt.' Tahun Ajaran '.$ta;
+
+        return [
+            'mata_kuliah_id' => (int) $mk->id,
+            'semester' => $smt,
+            'tahun_ajaran' => $ta,
+            'kelas' => 'A',
+            'keterangan' => $ket,
+        ];
+    }
+
     private function prepareDefaults(array $payload): array
     {
         foreach (['tahun_ajaran', 'kelas', 'keterangan'] as $f) {
             if (!isset($payload[$f]) || $payload[$f] === null) {
                 $payload[$f] = '';
             }
+        }
+        if (empty($payload['semester']) || (int) $payload['semester'] < 1 || (int) $payload['semester'] > 8) {
+            $payload['semester'] = 1;
+        } else {
+            $payload['semester'] = (int) $payload['semester'];
+        }
+        if (empty($payload['mata_kuliah_id']) || (int) $payload['mata_kuliah_id'] < 1) {
+            $payload['mata_kuliah_id'] = 0;
+        } else {
+            $payload['mata_kuliah_id'] = (int) $payload['mata_kuliah_id'];
         }
         return $payload;
     }
@@ -153,9 +231,9 @@ class RosterController extends Controller
     private function validateForm(Request $request, ?int $id = null): array
     {
         return $request->validate([
-            'mata_kuliah_id' => 'required|exists:mata_kuliah,id',
-            'dosen_id' => 'nullable|exists:dosen,id',
-            'semester' => 'required|integer|min:1|max:8',
+            'dosen_id' => 'required|exists:dosen,id',
+            'mata_kuliah_id' => 'nullable|exists:mata_kuliah,id',
+            'semester' => 'nullable|integer|min:1|max:8',
             'tahun_ajaran' => 'nullable|string|max:20',
             'kelas' => 'nullable|string|max:20',
             'keterangan' => 'nullable|string|max:255',

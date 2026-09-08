@@ -1,4 +1,4 @@
-<x-portal-layout :title="($isEdit ? 'Edit' : 'Upload').' Roster Kuliah - '.config('app.name')" subtitle="Upload file PDF Roster Kuliah">
+<x-portal-layout :title="($isEdit ? 'Edit' : 'Upload').' Roster Kuliah - '.config('app.name')" subtitle="Pilih dosen lalu upload file PDF Roster Kuliah">
     <x-slot:sidebar>
         @include('admin.partials.sidebar')
     </x-slot:sidebar>
@@ -8,9 +8,42 @@
         <div class="flex items-center justify-between gap-3 mb-5">
             <div>
                 <div class="text-xl font-semibold">{{ $isEdit ? 'Edit Roster Kuliah' : 'Upload Roster Kuliah' }}</div>
-                <div class="text-sm text-emerald-100/70">Cukup upload file PDF Roster/Jadwal perkuliahan (sudah termasuk lembar absensi jika ada).</div>
+                <div class="text-sm text-emerald-100/70">Cukup pilih dosen lalu upload PDF — otomatis muncul di halaman Input Nilai Dosen.</div>
             </div>
             <a href="{{ route('admin.roster.index') }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition">Kembali</a>
+        </div>
+
+        <div class="rounded-2xl bg-gradient-to-br from-blue-500/15 via-white/5 to-white/5 border border-blue-400/30 p-5 mb-4">
+            <div class="flex items-start gap-3">
+                <div class="shrink-0 w-11 h-11 rounded-xl bg-blue-500/20 border border-blue-400/40 flex items-center justify-center text-blue-300"><i class="fa-solid fa-user-tie text-lg"></i></div>
+                <div class="flex-1">
+                    <div class="font-semibold mb-1">Pilih Dosen Pengampu <span class="text-red-400">*</span></div>
+                    <div class="text-sm text-emerald-100/70 mb-3">Data mata kuliah, semester, dan kelas otomatis diambil dari mata kuliah pertama yang diampu dosen ini.</div>
+                    <select name="dosen_id" required class="w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-blue-400 focus:ring-blue-400">
+                        <option value="">Pilih dosen...</option>
+                        @foreach ($dosens as $d)
+                            <option value="{{ $d->id }}" {{ old('dosen_id', $row->dosen_id) == $d->id ? 'selected' : '' }}>
+                                {{ $d->nama }} @if($d->nidn) (NIDN. {{ $d->nidn }}) @elseif($d->nuptk) (NUPTK. {{ $d->nuptk }}) @endif
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('dosen_id') <div class="mt-1 text-xs text-red-400">{{ $message }}</div> @enderror
+
+                    @if (!empty($row->dosen_id) && !empty($row->mata_kuliah_id) && !empty($mataKuliahs))
+                        @php
+                            $mk = $mataKuliahs->firstWhere('id', $row->mata_kuliah_id);
+                        @endphp
+                        @if ($mk)
+                            <div class="mt-4 p-3 rounded-xl bg-white/5 border border-white/10 text-sm space-y-1">
+                                <div class="flex items-center gap-2"><i class="fa-solid fa-book text-blue-400 w-5"></i><span class="text-emerald-100/80">Mata Kuliah:</span><span class="font-medium">{{ $mk->kode }} — {{ $mk->nama }}</span></div>
+                                <div class="flex items-center gap-2"><i class="fa-solid fa-calendar-days text-blue-400 w-5"></i><span class="text-emerald-100/80">Semester:</span><span class="font-medium">{{ $mk->semester }} • {{ $mk->sks }} SKS</span></div>
+                                @if (!empty($row->kelas))<div class="flex items-center gap-2"><i class="fa-solid fa-door-open text-blue-400 w-5"></i><span class="text-emerald-100/80">Kelas:</span><span class="font-medium">{{ $row->kelas }}</span></div>@endif
+                                @if (!empty($mk->jurusan))<div class="flex items-center gap-2"><i class="fa-solid fa-building-columns text-blue-400 w-5"></i><span class="text-emerald-100/80">Prodi:</span><span class="font-medium">{{ $mk->jurusan }}</span></div>@endif
+                            </div>
+                        @endif
+                    @endif
+                </div>
+            </div>
         </div>
 
         <div class="rounded-2xl bg-gradient-to-br from-blue-500/15 via-white/5 to-white/5 border border-blue-400/30 p-5 mb-4">
@@ -44,59 +77,6 @@
                 </div>
             </div>
         </div>
-
-        <details class="rounded-2xl bg-white/5 border border-white/10 mb-3" @if(!empty(old('_token')) || (isset($row) && (!empty($row->kelas) || !empty($row->tahun_ajaran) || !empty($row->dosen_id) || !empty($row->keterangan)))) open @endif>
-            <summary class="cursor-pointer select-none px-5 py-3.5 text-sm font-semibold flex items-center gap-2 hover:bg-white/5 rounded-t-2xl">
-                <i class="fa-solid fa-caret-down"></i> Data pendukung (opsional)
-            </summary>
-            <div class="p-5 pt-0 space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-sm text-emerald-100/80">Mata Kuliah <span class="text-red-400">*</span></label>
-                        <select name="mata_kuliah_id" required class="mt-1 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400">
-                            <option value="">Pilih mata kuliah...</option>
-                            @foreach ($mataKuliahs as $mk)
-                                <option value="{{ $mk->id }}" {{ old('mata_kuliah_id', $row->mata_kuliah_id) == $mk->id ? 'selected' : '' }}>
-                                    {{ $mk->kode }} - {{ $mk->nama }} ({{ $mk->jurusan }} • Smt {{ $mk->semester }})
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('mata_kuliah_id') <div class="mt-1 text-xs text-red-400">{{ $message }}</div> @enderror
-                    </div>
-                    <div>
-                        <label class="text-sm text-emerald-100/80">Dosen Pengampu</label>
-                        <select name="dosen_id" class="mt-1 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400">
-                            <option value="">Pilih dosen...</option>
-                            @foreach ($dosens as $d)
-                                <option value="{{ $d->id }}" {{ old('dosen_id', $row->dosen_id) == $d->id ? 'selected' : '' }}>
-                                    {{ $d->nama }} @if($d->nidn) (NIDN. {{ $d->nidn }}) @endif
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-sm text-emerald-100/80">Semester <span class="text-red-400">*</span></label>
-                        <select name="semester" required class="mt-1 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400">
-                            @foreach (range(1, 8) as $s)
-                                <option value="{{ $s }}" {{ old('semester', $row->semester) == $s ? 'selected' : '' }}>Semester {{ $s }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-sm text-emerald-100/80">Tahun Ajaran</label>
-                        <input name="tahun_ajaran" value="{{ old('tahun_ajaran', $row->tahun_ajaran) }}" placeholder="Contoh: 2026/2027" class="mt-1 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
-                    </div>
-                    <div>
-                        <label class="text-sm text-emerald-100/80">Kelas</label>
-                        <input name="kelas" value="{{ old('kelas', $row->kelas) }}" placeholder="Contoh: A, B, Pagi-A" class="mt-1 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
-                    </div>
-                    <div>
-                        <label class="text-sm text-emerald-100/80">Keterangan</label>
-                        <input name="keterangan" value="{{ old('keterangan', $row->keterangan) }}" placeholder="Contoh: Roster Semester Ganjil" class="mt-1 w-full h-11 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400" />
-                    </div>
-                </div>
-            </div>
-        </details>
 
         <div class="flex items-center justify-end gap-3">
             <button type="submit" class="h-11 px-6 inline-flex items-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 active:bg-blue-700 transition font-medium shadow-lg shadow-blue-900/30">
