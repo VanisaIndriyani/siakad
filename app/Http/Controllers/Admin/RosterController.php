@@ -103,8 +103,8 @@ class RosterController extends Controller
     private function validateForm(Request $request): array
     {
         return $request->validate([
-            'mata_kuliah_id' => 'required|exists:mata_kuliahs,id',
-            'dosen_id' => 'nullable|exists:dosens,id',
+            'mata_kuliah_id' => 'required|exists:mata_kuliah,id',
+            'dosen_id' => 'nullable|exists:dosen,id',
             'semester' => 'required|integer|min:1|max:8',
             'tahun_ajaran' => 'nullable|string|max:20',
             'pertemuan_ke' => 'required|integer|min:1|max:30',
