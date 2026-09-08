@@ -97,7 +97,7 @@ class MataKuliahController extends Controller
     {
         $prodi = trim(urldecode($prodi));
         if (!in_array($prodi, self::JURUSAN, true)) {
-            return redirect()->back()->withErrors(['sk_pdf' => 'Prodi <strong>'.e($prodi).'</strong> tidak valid.']);
+            return redirect()->back()->withErrors(['sk_pdf' => "Prodi {$prodi} tidak valid."]);
         }
 
         $validated = $request->validate([
@@ -118,7 +118,7 @@ class MataKuliahController extends Controller
             if ($oldPath !== '') {
                 $this->deletePdf($oldPath);
             }
-            return redirect()->back()->with('success', 'File PDF <strong>SK Mengajar</strong> Prodi <strong>'.e($prodi).'</strong> BERHASIL diupdate. Semua dosen di prodi ini sekarang mendapatkan file terbaru.');
+            return redirect()->back()->with('success', "✅ File PDF SK Mengajar Prodi {$prodi} BERHASIL diupdate. Semua dosen di prodi ini sekarang mendapatkan file terbaru.");
         }
 
         $auto = $this->autoFillSkForProdi($prodi);
@@ -132,19 +132,19 @@ class MataKuliahController extends Controller
             $this->deletePdf($newPath);
             $duplicate = ((string) $e->getCode() === '23000') || (isset($e->errorInfo[1]) && (int) $e->errorInfo[1] === 1062);
             if ($duplicate) {
-                return redirect()->back()->withErrors(['sk_pdf' => 'SK Mengajar untuk <strong>'.e($prodi).'</strong> SUDAH ADA (unique index). Silakan refresh halaman lalu upload ulang untuk overwrite.']);
+                return redirect()->back()->withErrors(['sk_pdf' => "SK Mengajar untuk Prodi {$prodi} SUDAH ADA. Silakan refresh halaman lalu upload ulang untuk menimpa file lama."]);
             }
             throw $e;
         }
 
-        return redirect()->back()->with('success', 'File PDF <strong>SK Mengajar</strong> Prodi <strong>'.e($prodi).'</strong> BERHASIL diupload. Sekali upload → otomatis terbaca untuk SEMUA dosen di prodi ini ketika klik tombol PDF SK Mengajar.');
+        return redirect()->back()->with('success', "✅ File PDF SK Mengajar Prodi {$prodi} BERHASIL diupload. Sekali upload — otomatis terbaca untuk SEMUA dosen di prodi ini ketika klik tombol PDF SK Mengajar.");
     }
 
     public function uploadRosterPdfProdi(Request $request, string $prodi): RedirectResponse
     {
         $prodi = trim(urldecode($prodi));
         if (!in_array($prodi, self::JURUSAN, true)) {
-            return redirect()->back()->withErrors(['roster_pdf' => 'Prodi <strong>'.e($prodi).'</strong> tidak valid.']);
+            return redirect()->back()->withErrors(['roster_pdf' => "Prodi {$prodi} tidak valid."]);
         }
 
         $validated = $request->validate([
@@ -165,7 +165,7 @@ class MataKuliahController extends Controller
             if ($oldPath !== '') {
                 $this->deletePdf($oldPath);
             }
-            return redirect()->back()->with('success', 'File PDF <strong>Roster Kuliah</strong> Prodi <strong>'.e($prodi).'</strong> BERHASIL diupdate. Semua dosen di prodi ini sekarang mendapatkan file terbaru.');
+            return redirect()->back()->with('success', "✅ File PDF Roster Kuliah Prodi {$prodi} BERHASIL diupdate. Semua dosen di prodi ini sekarang mendapatkan file terbaru.");
         }
 
         $auto = $this->autoFillRosterForProdi($prodi);
@@ -179,12 +179,12 @@ class MataKuliahController extends Controller
             $this->deletePdf($newPath);
             $duplicate = ((string) $e->getCode() === '23000') || (isset($e->errorInfo[1]) && (int) $e->errorInfo[1] === 1062);
             if ($duplicate) {
-                return redirect()->back()->withErrors(['roster_pdf' => 'Roster Kuliah untuk <strong>'.e($prodi).'</strong> SUDAH ADA (unique index). Silakan refresh halaman lalu upload ulang untuk overwrite.']);
+                return redirect()->back()->withErrors(['roster_pdf' => "Roster Kuliah untuk Prodi {$prodi} SUDAH ADA. Silakan refresh halaman lalu upload ulang untuk menimpa file lama."]);
             }
             throw $e;
         }
 
-        return redirect()->back()->with('success', 'File PDF <strong>Roster Kuliah</strong> Prodi <strong>'.e($prodi).'</strong> BERHASIL diupload. Sekali upload → otomatis terbaca untuk SEMUA dosen di prodi ini ketika klik tombol PDF Roster.');
+        return redirect()->back()->with('success', "✅ File PDF Roster Kuliah Prodi {$prodi} BERHASIL diupload. Sekali upload — otomatis terbaca untuk SEMUA dosen di prodi ini ketika klik tombol PDF Roster.");
     }
 
     private function autoFillSkForProdi(string $prodi): array

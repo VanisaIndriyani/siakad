@@ -64,7 +64,7 @@
                             </div>
                         @endif
                         @error('sk_pdf')
-                            <div class="text-[11px] text-red-300 mb-2">{!! $message !!}</div>
+                            <div class="text-[11px] text-red-300 mb-2">{{ $message }}</div>
                         @enderror
                         <div class="flex flex-col sm:flex-row gap-2">
                             <input type="file" name="file_pdf" accept="application/pdf,.pdf" required class="w-full h-9 px-2.5 text-xs rounded-lg bg-emerald-500/10 border border-emerald-400/20 focus:border-emerald-400 focus:ring-emerald-400 file:mr-2 file:mt-1.5 file:h-6 file:px-2.5 file:text-[11px] file:rounded-md file:bg-emerald-500 file:text-white file:border-0 file:cursor-pointer" />
@@ -95,7 +95,7 @@
                             </div>
                         @endif
                         @error('roster_pdf')
-                            <div class="text-[11px] text-red-300 mb-2">{!! $message !!}</div>
+                            <div class="text-[11px] text-red-300 mb-2">{{ $message }}</div>
                         @enderror
                         <div class="flex flex-col sm:flex-row gap-2">
                             <input type="file" name="file_pdf" accept="application/pdf,.pdf" required class="w-full h-9 px-2.5 text-xs rounded-lg bg-blue-500/10 border border-blue-400/20 focus:border-blue-400 focus:ring-blue-400 file:mr-2 file:mt-1.5 file:h-6 file:px-2.5 file:text-[11px] file:rounded-md file:bg-blue-500 file:text-white file:border-0 file:cursor-pointer" />

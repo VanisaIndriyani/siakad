@@ -566,7 +566,8 @@ class NilaiController extends Controller
             return Storage::disk('public')->download($skMengajar->file_pdf, $filename, ['Content-Type' => 'application/pdf']);
         }
 
-        $msg = 'File PDF <strong>SK Mengajar</strong> untuk Prodi <strong>'.($prodi !== '' ? $mataKuliah->jurusan : '-').'</strong> BELUM diupload oleh Admin. Silakan hubungi Admin / Akademik untuk mengupload file SK Mengajar terlebih dahulu.';
+        $namaProdi = $prodi !== '' ? $mataKuliah->jurusan : '-';
+        $msg = "⚠️ File PDF SK Mengajar untuk Prodi {$namaProdi} BELUM diupload oleh Admin. Silakan hubungi Admin / Akademik untuk mengupload file SK Mengajar terlebih dahulu.";
         return redirect()->back()->withErrors(['sk_mengajar_pdf' => $msg]);
     }
 
@@ -588,7 +589,8 @@ class NilaiController extends Controller
             return Storage::disk('public')->download($rosterUpload->file_pdf, $filename, ['Content-Type' => 'application/pdf']);
         }
 
-        $msg = 'File PDF <strong>Roster Kuliah</strong> untuk Prodi <strong>'.($prodi !== '' ? $mataKuliah->jurusan : '-').'</strong> BELUM diupload oleh Admin. Silakan hubungi Admin / Akademik untuk mengupload file Roster Kuliah terlebih dahulu.';
+        $namaProdi = $prodi !== '' ? $mataKuliah->jurusan : '-';
+        $msg = "⚠️ File PDF Roster Kuliah untuk Prodi {$namaProdi} BELUM diupload oleh Admin. Silakan hubungi Admin / Akademik untuk mengupload file Roster Kuliah terlebih dahulu.";
         return redirect()->back()->withErrors(['roster_pdf' => $msg]);
     }
 }
