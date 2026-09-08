@@ -103,7 +103,7 @@ class SkMengajarController extends Controller
                     .($mkCode !== '' ? $mkCode.' ' : '')
                     .'• Dosen ID '.$validated['dosen_id']
                     .' • Semester '.$validated['semester']
-                    .' • TA '.($validated['tahun_ajaran'] ?? '').').' Silakan <strong>EDIT</strong> data SK Mengajar yang sudah ada di halaman Index, jangan buat baru (CREATE) ulang!';
+                    .' • TA '.($validated['tahun_ajaran'] ?? '').') Silakan <strong>EDIT</strong> data SK Mengajar yang sudah ada di halaman Index, jangan buat baru (CREATE) ulang!';
                 return redirect()->back()->withInput()->withErrors([
                     'dosen_id' => $msg,
                 ]);
