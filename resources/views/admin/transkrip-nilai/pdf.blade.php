@@ -56,11 +56,12 @@ body::after, .wrap::after, .transcript-paper::after {
     max-height: none;
     background: #ffffff;
     color: #000000;
-    /* MARGIN LUAR DIPERKECIL (sebelumnya 8/12/8/12 teralu lebar):
-       ATAS 7mm · KANAN 9mm · BAWAH 7mm · KIRI 9mm
-       Inner width = 210 - 9 - 9 = 192mm → isi lebih penuh tapi masih 9mm jarak aman = TIDAK KEPOTONG
+    /* MARGIN AMAN DARI CLIP DOMPDF DEFAULT 5mm AREA PRINTABLE:
+       ATAS 8mm (sebelumnya 7mm, KOP sempat kepotong di atas) · KIRI 10mm (sblm 9, nama institut smpat terpotong kiri)
+       KANAN 10mm · BAWAH 7mm
+       Inner = 210 -10 -10 = 190mm, jarak aman tdk pernah nyentuh pinggir = TIDAK KEPOTONG
     */
-    padding: 7mm 9mm 7mm 9mm;
+    padding: 8mm 10mm 7mm 10mm;
     margin: 0 !important;
     box-sizing: border-box;
     font-family: 'Times New Roman', Times, serif;
@@ -222,31 +223,32 @@ table.nilai tr.ujian-row td.mk.left-col {
     padding: 3px 6px !important;
 }
 
-/* RINGKASAN font 9.5px val 9.8px — width 100% FULL (inner width 192mm masih jauh dari pinggir = aman). VALUE NORMAL wrap, LABEL nowrap. */
+/* RINGKASAN font 9.5px val 9.8px — ⭐ TABLE-LAYOUT FIXED (bukan auto). TABLE AUTO SEBELUMNYA = td.val membesar BEBAS keluar KANAN KEPOTONG (bukan wrap). DIPAKSA TABLE-LAYOUT:FIXED + LABEL 30% width, SEP 2% width, VALUE 68% width — CELL TIDAK BISA MEMBESAR, KALAU PANJANG PASTI WRAP KE BARIS 2. */
 .ringkasan {
     width: 100%; margin-top: 9px; border-collapse: collapse;
-    font-size: 9.5px; color: #000000; table-layout: auto;
+    font-size: 9.5px; color: #000000;
+    table-layout: fixed !important; /* ⭐ FORCE column widths: cell td TIDAK BOLEH oversize keluar kanan */
 }
 .ringkasan td { vertical-align: top; padding: 1.5px 0; line-height: 1.28; }
 .ringkasan td.label {
-    width: auto; white-space: nowrap; font-weight: 700; color: #000000; padding-right: 12px;
+    width: 30%; white-space: nowrap; font-weight: 700; color: #000000; padding-right: 10px;
 }
 .ringkasan td.label-top {
-    width: auto; white-space: nowrap; font-weight: 700; color: #000000; padding: 1.5px 12px 0 0;
+    width: 30%; white-space: nowrap; font-weight: 700; color: #000000; padding: 1.5px 10px 0 0;
 }
-.ringkasan td.sep   { width: auto; text-align: left; padding-right: 10px; }
-.ringkasan td.sep-top { width: auto; text-align: left; padding: 1.5px 10px 0 0; }
-/* td.val = nilai pendek (IPK 3,11 / Predikat Memuaskan) — BOLEH wrap kalau panjang (white-space NORMAL, tidak di-nowrap kayak sebelumnya yang bikin kepotong!) */
+.ringkasan td.sep   { width: 2%; text-align: left; padding-right: 6px; }
+.ringkasan td.sep-top { width: 2%; text-align: left; padding: 1.5px 6px 0 0; }
+/* td.val = nilai pendek (IPK 3,11 / Predikat Memuaskan) — width 68% (sisa dari 30+2). VAL WRAP KALAU PANJANG! */
 .ringkasan td.val   {
-    font-weight: 800; color: #000000; font-size: 9.8px; width: auto;
+    font-weight: 800; color: #000000; font-size: 9.8px; width: 68%;
     white-space: normal !important;
     overflow-wrap: anywhere !important;
     word-wrap: break-word !important;
 }
-/* td.val-judul = JUDUL SKRIPSI BISA 2-3 BARIS! FORCE wrap normal, TIDAK di-clipped / dipenggal ellipsis */
+/* td.val-judul = JUDUL SKRIPSI BISA 2-3 BARIS! FORCE wrap normal, TIDAK di-clipped / dipenggal ellipsis — width MAX 68% cell */
 .ringkasan td.val-judul {
     text-align: left; color: #000000; line-height: 1.28; padding: 1.5px 0 1.5px 0;
-    vertical-align: top; width: auto;
+    vertical-align: top; width: 68%;
     white-space: normal !important;
     overflow-wrap: anywhere !important;
     word-wrap: break-word !important;
