@@ -10,6 +10,12 @@
     margin: 0 !important;
 }
 
+@page :blank {
+    display: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
 *, *:before, *:after { box-sizing: border-box; }
 table, table th, table td { box-sizing: border-box; }
 
@@ -17,7 +23,8 @@ html, body {
     margin: 0 !important;
     padding: 0 !important;
     width: 210mm !important;
-    min-height: 330mm !important;
+    height: auto !important;
+    min-height: 0 !important;
     background: #fff !important;
     color: #000 !important;
     font-family: 'Times New Roman', Times, serif;
@@ -25,17 +32,24 @@ html, body {
     print-color-adjust: exact;
 }
 
+body::after, .wrap::after, .transcript-paper::after {
+    content: '' !important;
+    display: none !important;
+    clear: both;
+}
+
 .transcript-paper {
     width: 210mm;
     height: auto;
-    min-height: 330mm;
+    min-height: 0 !important;
     max-height: none;
     background: #ffffff;
     color: #000000;
-    padding: 3mm 3mm 3mm 3mm;
+    padding: 2mm 2mm 2mm 2mm;
+    margin: 0 !important;
     box-sizing: border-box;
     font-family: 'Times New Roman', Times, serif;
-    overflow: visible;
+    overflow: hidden;
     page-break-after: auto;
     page-break-inside: auto;
 }
