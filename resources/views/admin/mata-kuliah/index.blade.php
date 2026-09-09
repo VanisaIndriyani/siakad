@@ -214,67 +214,6 @@
                         </div>
                     </div>
                 </div>
-
-                {{-- ===== LIST NAMA MATA KULIAH PER PRODI (di bawah upload SK & Roster, dalam card yang sama) ===== --}}
-                <div class="mt-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition">
-                    <button type="button" x-data="{ open: false }" @click="open = !open"
-                            class="w-full px-4 py-3 flex items-center gap-3 text-left">
-                        <div class="w-9 h-9 rounded-lg bg-emerald-500/15 border border-emerald-400/20 inline-flex items-center justify-center text-emerald-300 shrink-0">
-                            <i class="fa-solid fa-list text-[13px]"></i>
-                        </div>
-                        <div class="flex-1">
-                            <div class="text-sm font-semibold text-emerald-100">
-                                Daftar Mata Kuliah
-                                <span class="ml-1.5 px-2 py-0.5 rounded-full bg-emerald-500/15 text-[10px] font-bold text-emerald-300 border border-emerald-400/20">
-                                    {{ $countMk }} MK
-                                </span>
-                            </div>
-                            <div class="text-[11px] text-emerald-100/60 mt-0.5">
-                                Kelompok: {{ $groupedBySem->count() }} semester — klik untuk expand
-                            </div>
-                        </div>
-                        <div class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 inline-flex items-center justify-center text-emerald-100/70 shrink-0 transition"
-                             :class="open ? 'rotate-180 bg-emerald-500/15 border-emerald-400/20 text-emerald-300' : ''">
-                            <i class="fa-solid fa-chevron-down text-[11px]"></i>
-                        </div>
-                    </button>
-
-                    <div x-show="open" x-transition x-collapse class="px-4 pb-4 pt-0 space-y-3">
-                        @if($countMk === 0)
-                            <div class="rounded-lg border border-dashed border-yellow-500/30 bg-yellow-500/5 px-3 py-2 text-[11px] text-yellow-100/80">
-                                ⚠️ Belum ada Mata Kuliah untuk prodi ini di database.
-                            </div>
-                        @else
-                            @foreach($groupedBySem as $sem => $items)
-                                <div class="rounded-lg border border-white/10 bg-black/10">
-                                    <div class="px-3 py-1.5 flex items-center gap-2 border-b border-white/10">
-                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/20 text-emerald-300">
-                                            Semester {{ $sem }}
-                                        </span>
-                                        <span class="text-[10px] text-emerald-100/60">
-                                            {{ $items->count() }} matkul · {{ $items->sum('sks') }} SKS total
-                                        </span>
-                                    </div>
-                                    <ul class="px-2 py-1.5 divide-y divide-white/5 space-y-0.5">
-                                        @foreach($items as $mk)
-                                            <li class="px-2 py-1.5 rounded hover:bg-white/5 flex items-center gap-2.5 text-[11.5px]">
-                                                <span class="shrink-0 text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-emerald-100/70">
-                                                    {{ $mk->kode ?: '—' }}
-                                                </span>
-                                                <span class="font-semibold text-emerald-100/95 flex-1 leading-snug">
-                                                    {{ $mk->nama }}
-                                                </span>
-                                                <span class="shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-500/15 border border-blue-400/20 text-blue-200">
-                                                    {{ $mk->sks }} SKS
-                                                </span>
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            @endforeach
-                        @endif
-                    </div>
-                </div>
             @endforeach
         </div>
     </div>
