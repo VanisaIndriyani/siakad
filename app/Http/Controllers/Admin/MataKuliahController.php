@@ -82,6 +82,15 @@ class MataKuliahController extends Controller
             ->get()
             ->keyBy('program_studi');
 
+        $listMkPerProdi = [];
+        foreach (self::JURUSAN as $j) {
+            $listMkPerProdi[$j] = MataKuliah::query()
+                ->where('jurusan', $j)
+                ->orderBy('semester')
+                ->orderBy('kode')
+                ->get(['id', 'kode', 'nama', 'semester', 'sks']);
+        }
+
         return view('admin.mata-kuliah.index', [
             'jurusanList' => self::JURUSAN,
             'mataKuliah' => $mataKuliah,
@@ -90,6 +99,7 @@ class MataKuliahController extends Controller
             'semester' => $ctx->semester ?: null,
             'skPerProdi' => $skPerProdi,
             'rosterPerProdi' => $rosterPerProdi,
+            'listMkPerProdi' => $listMkPerProdi,
         ]);
     }
 
