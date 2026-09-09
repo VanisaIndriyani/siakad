@@ -5,7 +5,7 @@
 <title>Transkrip Akademik - {{ $mahasiswa->nama_lengkap }}</title>
 <style>
 @page {
-    size: folio portrait;
+    size: 210mm 330mm portrait;
     margin: 0 !important;
 }
 
@@ -26,11 +26,11 @@ html, body {
 .transcript-paper {
     width: 210mm;
     height: auto;
-    min-height: 0;
+    min-height: 330mm;
     max-height: none;
     background: #ffffff;
     color: #000000;
-    padding: 6mm 12mm 5mm 6mm;
+    padding: 7mm 10mm 7mm;
     box-sizing: border-box;
     font-family: 'Times New Roman', Times, serif;
     overflow: visible;
