@@ -7,13 +7,13 @@
 @page {
     /* F4 / Folio Indonesia Standard: 210mm × 330mm portrait */
     size: 210mm 330mm portrait;
-    margin: 0 !important;
+    /* MARGIN STANDARD NORMAL MICROSOFT WORD = 2.54cm / 25.4mm SEMUA SISI (sesuai gambar Normal Top/Bottom/Left/Right 2,54cm) */
+    margin: 25.4mm 25.4mm 25.4mm 25.4mm !important;
 }
 
 @page :blank {
     display: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
+    margin: 25.4mm !important;
 }
 
 *, *:before, *:after { box-sizing: border-box; }
@@ -22,7 +22,8 @@ table, table th, table td { box-sizing: border-box; }
 html, body {
     margin: 0 !important;
     padding: 0 !important;
-    width: 210mm !important;
+    /* LEBAR = F4 (210mm) - (margin kiri 25.4 + kanan 25.4) = 159.2mm area print */
+    width: 159.2mm !important;
     height: auto !important;
     min-height: 0 !important;
     background: #fff !important;
@@ -39,13 +40,14 @@ body::after, .wrap::after, .transcript-paper::after {
 }
 
 .transcript-paper {
-    width: 210mm;
+    /* Area print area sudah terpotong otomatis margin @page 25.4mm, jadi transcript-paper 100% sisa area */
+    width: 100%;
     height: auto;
     min-height: 0 !important;
     max-height: none;
     background: #ffffff;
     color: #000000;
-    padding: 2mm 2mm 2mm 2mm;
+    padding: 0 !important;
     margin: 0 !important;
     box-sizing: border-box;
     font-family: 'Times New Roman', Times, serif;
