@@ -19,6 +19,16 @@
 *, *:before, *:after { box-sizing: border-box; }
 table, table th, table td { box-sizing: border-box; }
 
+/* ⭐ GLOBAL ANTI KEPOTONG: FORCE SEMUA TEXT PANJANG WRAP BARIS OTOMATIS — TIDAK ADA ELLIPSIS 3 TITIK DAN TIDAK ADA CLIP KELUAR KERTAS */
+* {
+    word-break: normal !important;
+    overflow-wrap: anywhere !important;
+    word-wrap: break-word !important;
+    white-space: normal !important;
+    text-overflow: clip !important;
+    overflow: visible !important;
+}
+
 html, body {
     margin: 0 !important;
     padding: 0 !important;
@@ -30,6 +40,7 @@ html, body {
     font-family: 'Times New Roman', Times, serif;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+    overflow: visible !important;
 }
 
 body::after, .wrap::after, .transcript-paper::after {
@@ -39,19 +50,21 @@ body::after, .wrap::after, .transcript-paper::after {
 }
 
 .transcript-paper {
-    /* SAMA PERSIS 100% DENGAN show.blade.php L523-L535 (kecuali box-shadow dihapus karena PDF tidak butuh, dan min-height di-set 0 agar tidak paksa 2 halaman kosong) */
     width: 210mm;
     height: auto;
-    min-height: 0 !important; /* show L526 = 330mm, tapi PDF DomPDF dipaksa min-height 330 + padding = overflow 2 lembar kosong */
+    min-height: 0 !important;
     max-height: none;
     background: #ffffff;
     color: #000000;
-    /* PADDING PERSIS SHOW L530: 7mm atas · 10mm kanan · 7mm bawah · 10mm kiri (CSS shorthand 3 value = top right-left bottom) */
-    padding: 7mm 10mm 7mm 10mm;
+    /* ⭐ PADDING LUAR DITAMBAH SUPAYA TIDAK KENA CLIP DOMPDF DEFAULT 5mm AREA PRINTABLE:
+       ATAS 8mm · KANAN 12mm · BAWAH 8mm · KIRI 12mm
+       Inner width = 210 - 12 - 12 = 186mm → longgar banget, TIDAK PERNAH menyentuh ujung kertas = TIDAK KEPOTONG
+    */
+    padding: 8mm 12mm 8mm 12mm;
     margin: 0 !important;
     box-sizing: border-box;
     font-family: 'Times New Roman', Times, serif;
-    overflow: hidden;
+    overflow: visible !important;
     page-break-after: auto;
     page-break-inside: auto;
 }
@@ -101,9 +114,13 @@ body::after, .wrap::after, .transcript-paper::after {
 }
 .judul-nomor { font-size: 9.2px; margin-top: 1px; color: #000000; }
 
-/* PERSIS SHOW L583-L615: biodata font 9.5px padding 1.5 10 1.5 0 (SEBELUMNYA 7.9px 1.2 9 1.2) */
+/* PERSIS SHOW L583-L615: biodata font 9.5px padding 1.5 10 1.5 0 — WIDTH Dikurangi 96% auto margin = 2% jarak kiri kanan anti kepotong */
 .biodata {
-    width: 100%; margin-top: 10px; border-collapse: collapse;
+    width: 96%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10px;
+    border-collapse: collapse;
     font-size: 9.5px; color: #000000; table-layout: fixed;
 }
 .biodata td { vertical-align: top; padding: 0; line-height: 1.3; }
@@ -130,15 +147,22 @@ body::after, .wrap::after, .transcript-paper::after {
     width: 25%;
     padding: 1.5px 0 1.5px 6px;
     color: #000000;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-wrap: break-word !important;
 }
 .biodata td.bio-value.right-val {
     width: 30%;
 }
-.bio-val { font-weight: 700; color: #000000; display: inline-block; }
+/* bio-val = display inline BUKAN inline-block, DomPDF sering masalah inline-block membesar keluar box */
+.bio-val { font-weight: 700; color: #000000; display: inline !important; }
 
-/* PERSIS SHOW L617-L683: NILAI WIDTH 100% font 8.2px th padding 4 2 td padding 2 3 (SEBELUMNYA 96% 7px th 2 1.5 td 1.2 2) */
+/* PERSIS SHOW L617-L683: NILAI WIDTH 96.5% font 8.2px th padding 4 2 td padding 2 3 — margin auto center 1.75% jarak kiri kanan supaya TIDAK KEPOTONG pinggir */
 table.nilai {
-    width: 100%; border-collapse: collapse; margin-top: 10px;
+    width: 96.5%;
+    margin-left: auto;
+    margin-right: auto;
+    border-collapse: collapse; margin-top: 10px;
     font-size: 8.2px; color: #000000; table-layout: fixed;
 }
 table.nilai th {
@@ -205,9 +229,13 @@ table.nilai tr.ujian-row td.mk.left-col {
     padding: 3px 6px !important;
 }
 
-/* PERSIS SHOW L685-L702: RINGKASAN font 9.5px val 9.8px (SEBELUMNYA 7.9px 8.2px) */
+/* RINGKASAN font 9.5px val 9.8px — WIDTH 96% auto margin (jarak pinggir aman) + SEMUA VALUE WHITE-SPACE NORMAL. LABEL SAJA YANG NOWRAP. */
 .ringkasan {
-    width: 100%; margin-top: 9px; border-collapse: collapse;
+    width: 96%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 9px;
+    border-collapse: collapse;
     font-size: 9.5px; color: #000000; table-layout: auto;
 }
 .ringkasan td { vertical-align: top; padding: 1.5px 0; line-height: 1.28; }
@@ -219,10 +247,21 @@ table.nilai tr.ujian-row td.mk.left-col {
 }
 .ringkasan td.sep   { width: auto; text-align: left; padding-right: 10px; }
 .ringkasan td.sep-top { width: auto; text-align: left; padding: 1.5px 10px 0 0; }
-.ringkasan td.val   { font-weight: 800; color: #000000; font-size: 9.8px; width: auto; white-space: nowrap; }
+/* td.val = nilai pendek (IPK 3,11 / Predikat Memuaskan) — BOLEH wrap kalau panjang (white-space NORMAL, tidak di-nowrap kayak sebelumnya yang bikin kepotong!) */
+.ringkasan td.val   {
+    font-weight: 800; color: #000000; font-size: 9.8px; width: auto;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-wrap: break-word !important;
+}
+/* td.val-judul = JUDUL SKRIPSI BISA 2-3 BARIS! FORCE wrap normal, TIDAK di-clipped / dipenggal ellipsis */
 .ringkasan td.val-judul {
     text-align: left; color: #000000; line-height: 1.28; padding: 1.5px 0 1.5px 0;
     vertical-align: top; width: auto;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-wrap: break-word !important;
+    word-break: normal !important;
 }
 
 /* PERSIS SHOW L704-L741: TTD + FOTO (28mm kolom, foto 24×32mm, ttd font 9.5, nama marginTop 48px) (SEBELUMNYA 25mm kolom, foto 22×30, font 8.2, nama 40px) */
