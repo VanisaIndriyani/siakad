@@ -30,7 +30,7 @@ html, body {
     max-height: none;
     background: #ffffff;
     color: #000000;
-    padding: 7mm 10mm 7mm;
+    padding: 5mm 6mm 5mm 6mm;
     box-sizing: border-box;
     font-family: 'Times New Roman', Times, serif;
     overflow: visible;
