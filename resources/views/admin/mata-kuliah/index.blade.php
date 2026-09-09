@@ -58,7 +58,15 @@
                             <div class="shrink-0 w-11 h-11 rounded-xl bg-gradient-to-br {{ $prodiAccent }} border border-white/10 inline-flex items-center justify-center shadow-[0_0_25px_-4px_rgba(16,185,129,0.55)]">
                                 <i class="fa-solid {{ $prodiIcon }} text-white text-[15px]"></i>
                             </div>
-                           
+                            <div class="min-w-0">
+                                <div class="text-base font-bold text-emerald-100 tracking-tight leading-snug break-words">
+                                    {{ $j }}
+                                </div>
+                                <div class="mt-1 text-[11px] text-emerald-100/60 leading-snug">
+                                    <i class="fa-solid fa-cloud-arrow-up mr-1"></i>
+                                    Upload 1x untuk seluruh dosen prodi ini
+                                </div>
+                            </div>
                         </div>
                         <div class="flex flex-wrap gap-1.5 shrink-0 sm:justify-end">
                             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border {{ $skAda ? 'bg-emerald-500/15 border-emerald-400/30 text-emerald-100 shadow-[0_0_18px_-6px_rgba(16,185,129,0.7)]' : 'bg-red-500/12 border-red-500/25 text-red-200' }}">
