@@ -56,11 +56,11 @@ body::after, .wrap::after, .transcript-paper::after {
     max-height: none;
     background: #ffffff;
     color: #000000;
-    /* ⭐ PADDING LUAR DITAMBAH SUPAYA TIDAK KENA CLIP DOMPDF DEFAULT 5mm AREA PRINTABLE:
-       ATAS 8mm · KANAN 12mm · BAWAH 8mm · KIRI 12mm
-       Inner width = 210 - 12 - 12 = 186mm → longgar banget, TIDAK PERNAH menyentuh ujung kertas = TIDAK KEPOTONG
+    /* MARGIN LUAR DIPERKECIL (sebelumnya 8/12/8/12 teralu lebar):
+       ATAS 7mm · KANAN 9mm · BAWAH 7mm · KIRI 9mm
+       Inner width = 210 - 9 - 9 = 192mm → isi lebih penuh tapi masih 9mm jarak aman = TIDAK KEPOTONG
     */
-    padding: 8mm 12mm 8mm 12mm;
+    padding: 7mm 9mm 7mm 9mm;
     margin: 0 !important;
     box-sizing: border-box;
     font-family: 'Times New Roman', Times, serif;
@@ -114,13 +114,9 @@ body::after, .wrap::after, .transcript-paper::after {
 }
 .judul-nomor { font-size: 9.2px; margin-top: 1px; color: #000000; }
 
-/* PERSIS SHOW L583-L615: biodata font 9.5px padding 1.5 10 1.5 0 — WIDTH Dikurangi 96% auto margin = 2% jarak kiri kanan anti kepotong */
+/* PERSIS SHOW L583-L615: biodata font 9.5px padding 1.5 10 1.5 0 — width 100% FULL (isi padat, global wrap masih ada jadi TIDAK KEPOTONG) */
 .biodata {
-    width: 96%;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 10px;
-    border-collapse: collapse;
+    width: 100%; margin-top: 10px; border-collapse: collapse;
     font-size: 9.5px; color: #000000; table-layout: fixed;
 }
 .biodata td { vertical-align: top; padding: 0; line-height: 1.3; }
@@ -157,12 +153,9 @@ body::after, .wrap::after, .transcript-paper::after {
 /* bio-val = display inline BUKAN inline-block, DomPDF sering masalah inline-block membesar keluar box */
 .bio-val { font-weight: 700; color: #000000; display: inline !important; }
 
-/* PERSIS SHOW L617-L683: NILAI WIDTH 96.5% font 8.2px th padding 4 2 td padding 2 3 — margin auto center 1.75% jarak kiri kanan supaya TIDAK KEPOTONG pinggir */
+/* NILAI WIDTH 100% font 8.2px th padding 4 2 td padding 2 3 — FULL lebar, global wrap TETAP AMAN anti kepotong */
 table.nilai {
-    width: 96.5%;
-    margin-left: auto;
-    margin-right: auto;
-    border-collapse: collapse; margin-top: 10px;
+    width: 100%; border-collapse: collapse; margin-top: 10px;
     font-size: 8.2px; color: #000000; table-layout: fixed;
 }
 table.nilai th {
@@ -229,13 +222,9 @@ table.nilai tr.ujian-row td.mk.left-col {
     padding: 3px 6px !important;
 }
 
-/* RINGKASAN font 9.5px val 9.8px — WIDTH 96% auto margin (jarak pinggir aman) + SEMUA VALUE WHITE-SPACE NORMAL. LABEL SAJA YANG NOWRAP. */
+/* RINGKASAN font 9.5px val 9.8px — width 100% FULL (inner width 192mm masih jauh dari pinggir = aman). VALUE NORMAL wrap, LABEL nowrap. */
 .ringkasan {
-    width: 96%;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 9px;
-    border-collapse: collapse;
+    width: 100%; margin-top: 9px; border-collapse: collapse;
     font-size: 9.5px; color: #000000; table-layout: auto;
 }
 .ringkasan td { vertical-align: top; padding: 1.5px 0; line-height: 1.28; }
