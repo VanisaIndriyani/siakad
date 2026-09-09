@@ -5,6 +5,7 @@
 <title>Transkrip Akademik - {{ $mahasiswa->nama_lengkap }}</title>
 <style>
 @page {
+    /* F4 / Folio Indonesia Standard: 210mm × 330mm portrait */
     size: 210mm 330mm portrait;
     margin: 0 !important;
 }
@@ -16,6 +17,7 @@ html, body {
     margin: 0 !important;
     padding: 0 !important;
     width: 210mm !important;
+    min-height: 330mm !important;
     background: #fff !important;
     color: #000 !important;
     font-family: 'Times New Roman', Times, serif;
