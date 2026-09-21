@@ -56,12 +56,7 @@ body::after, .wrap::after, .transcript-paper::after {
     max-height: none;
     background: #ffffff;
     color: #000000;
-    /* MARGIN AMAN DARI CLIP DOMPDF DEFAULT 5mm AREA PRINTABLE:
-       ATAS 8mm (sebelumnya 7mm, KOP sempat kepotong di atas) · KIRI 10mm (sblm 9, nama institut smpat terpotong kiri)
-       KANAN 10mm · BAWAH 7mm
-       Inner = 210 -10 -10 = 190mm, jarak aman tdk pernah nyentuh pinggir = TIDAK KEPOTONG
-    */
-    padding: 8mm 10mm 7mm 10mm;
+    padding: 6mm 5mm 5mm 5mm;
     margin: 0 !important;
     box-sizing: border-box;
     font-family: 'Times New Roman', Times, serif;
