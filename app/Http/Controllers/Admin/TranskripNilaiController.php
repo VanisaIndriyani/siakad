@@ -534,37 +534,86 @@ class TranskripNilaiController extends Controller
         $sheet->getColumnDimension('I')->setWidth(6);
         $sheet->getColumnDimension('J')->setWidth(8);
 
-            $namafile = 'Transkrip-' . ($mahasiswa->npm ?: $mahasiswa->id) . '-' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', (string) $mahasiswa->nama_lengkap) . '.xlsx';
-            $writer = new Xlsx($spreadsheet);
-
-            while (ob_get_level() > 0) {
-                if (!@ob_end_clean()) break;
+        // ============== ⭐ FIX DOWNLOAD CORRUPT: HAPUS DRAWINGS (LOGO LAMA) & UNMERGE SEMUA CELLS SEBELUM SAVE ==============
+        // PhpSpreadsheet sering corrupt / file 0 bytes kalau ada Drawing reference setengah terhapus / merge cell kosong dari block LOGO yang dihapus kemarin.
+        try {
+            $drawings = $sheet->getDrawingCollection();
+            if (is_object($drawings) && $drawings->count() > 0) {
+                for ($di = $drawings->count() - 1; $di >= 0; $di--) {
+                    try { $drawings->offsetUnset($di); } catch (\Throwable $_) {}
+                }
             }
+        } catch (\Throwable $_) {}
+        try {
+            $mergeCells = $sheet->getMergeCells();
+            if (!empty($mergeCells)) {
+                foreach (array_values($mergeCells) as $mcStr) {
+                    try { $sheet->unmergeCells($mcStr); } catch (\Throwable $_) {}
+                }
+            }
+        } catch (\Throwable $_) {}
 
-            $callback = function () use ($writer) {
-                $writer->save('php://output');
-            };
+        $namafile = 'Transkrip-' . ($mahasiswa->npm ?: $mahasiswa->id) . '-' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', (string) $mahasiswa->nama_lengkap) . '.xlsx';
+        $writer = new Xlsx($spreadsheet);
 
-            $response = response()->streamDownload(
-                $callback,
-                $namafile,
-                [
-                    'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                    'Content-Transfer-Encoding' => 'binary',
-                    'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0, private',
-                    'Pragma' => 'public',
-                    'Expires' => 'Sat, 26 Jul 1997 05:00:00 GMT',
-                    'X-Content-Type-Options' => 'nosniff',
-                    'Accept-Ranges' => 'bytes',
-                    'Content-Description' => 'File Transfer',
-                ],
-                'attachment'
-            );
+        // ============== DOUBLE OB CLEAN (NUCLEAR) — HAPUS SEMUA OUTPUT BUFFER SISA WARNING/NOTICE LARAVEL SEBELUM WRITE FILE ==============
+        for ($obLoop = 0; $obLoop < 3; $obLoop++) {
+            while (ob_get_level() > 0) { if (!@ob_end_clean()) break; }
+            @ob_end_flush();
+        }
+        while (ob_get_level() > 0) { if (!@ob_end_clean()) break; }
+        @ini_set('zlib.output_compression', '0');
+        @apache_setenv('no-gzip', '1');
 
+        // ============== SAVE KE TEMP FILE (storage/framework/cache) — 100% LEBIH AMAN DARI save('php://output') + streamDownload ==============
+        $tempDir = rtrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string) storage_path('framework/cache')), DIRECTORY_SEPARATOR);
+        if (!@is_dir($tempDir) || !@is_writable($tempDir)) {
+            $tempDir = rtrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string) sys_get_temp_dir()), DIRECTORY_SEPARATOR);
+            if (!@is_dir($tempDir) || !@is_writable($tempDir)) {
+                $tempDir = rtrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string) ini_get('upload_tmp_dir')), DIRECTORY_SEPARATOR);
+                if (!@is_dir($tempDir) || !@is_writable($tempDir)) {
+                    $tempDir = rtrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string) storage_path('framework/views')), DIRECTORY_SEPARATOR);
+                }
+            }
+        }
+        $tempAbs = $tempDir . DIRECTORY_SEPARATOR . 'xlsx-transkrip-' . $mahasiswa->id . '-' . substr(md5(uniqid((string) mt_rand(), true)), 0, 16) . '.xlsx';
+        try {
+            $writer->save($tempAbs);
+            @chmod($tempAbs, 0666);
+            clearstatcache(true, $tempAbs);
+            if (!@is_file($tempAbs) || @filesize($tempAbs) < 1024) {
+                @unlink($tempAbs);
+                throw new \RuntimeException('Gagal membuat file xlsx (size terlalu kecil / tidak ter-create).');
+            }
+            for ($obLoop2 = 0; $obLoop2 < 2; $obLoop2++) {
+                while (ob_get_level() > 0) { if (!@ob_end_clean()) break; }
+            }
+            while (ob_get_level() > 0) { if (!@ob_end_clean()) break; }
+        } catch (\Throwable $writeErr) {
+            @unlink($tempAbs);
             ini_set('display_errors', $prevDisplayErrors);
             error_reporting($prevErrorReporting);
+            throw $writeErr;
+        }
 
-            return $response;
+        $headers = [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Transfer-Encoding' => 'binary',
+            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0, private',
+            'Pragma' => 'public',
+            'Expires' => 'Sat, 26 Jul 1997 05:00:00 GMT',
+            'X-Content-Type-Options' => 'nosniff',
+            'Accept-Ranges' => 'bytes',
+            'Content-Length' => @filesize($tempAbs),
+            'Content-Description' => 'File Transfer',
+            'Content-Disposition' => 'attachment; filename="' . $namafile . '"',
+        ];
+
+        ini_set('display_errors', $prevDisplayErrors);
+        error_reporting($prevErrorReporting);
+
+        // Laravel baca file temp, set ALL headers termasuk Content-Length otomatis, lalu DELETE FILE SETELAH SELESAI DIKIRIM ✨
+        return response()->download($tempAbs, $namafile, $headers)->deleteFileAfterSend(true);
         } catch (\Throwable $e) {
             ini_set('display_errors', $prevDisplayErrors);
             error_reporting($prevErrorReporting);
