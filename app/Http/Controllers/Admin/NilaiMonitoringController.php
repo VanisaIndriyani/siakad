@@ -170,7 +170,7 @@ class NilaiMonitoringController extends Controller
         $query = NilaiArchive::query()
             ->with([
                 'mahasiswa:id,nama_lengkap,npm,program_studi',
-                'mataKuliah:id,kode,nama_mata_kuliah,sks',
+                'mataKuliah:id,kode,nama,sks',
                 'resetBy:id,name',
             ]);
 
@@ -234,7 +234,7 @@ class NilaiMonitoringController extends Controller
             ->where('batch_code', $batch)
             ->with([
                 'mahasiswa:id,nama_lengkap,npm,program_studi',
-                'mataKuliah:id,kode,nama_mata_kuliah,sks',
+                'mataKuliah:id,kode,nama,sks',
             ])
             ->orderBy('mahasiswa_id')
             ->orderBy('mata_kuliah_id')

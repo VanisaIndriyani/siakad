@@ -183,7 +183,7 @@
                             </td>
                             <td class="px-4 py-3 min-w-[220px]">
                                 @if ($r->mataKuliah)
-                                    <div class="font-semibold text-emerald-100 whitespace-nowrap">{{ $r->mataKuliah->nama_mata_kuliah }}</div>
+                                    <div class="font-semibold text-emerald-100 whitespace-nowrap">{{ $r->mataKuliah->nama }}</div>
                                     <div class="text-[11px] text-emerald-100/60 font-mono">{{ $r->mataKuliah->kode }} · {{ $r->mataKuliah->sks }} SKS</div>
                                 @else
                                     <span class="text-rose-300">MK tidak ditemukan</span>

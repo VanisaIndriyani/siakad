@@ -191,7 +191,7 @@
                                 <tr class="hover:bg-white/5">
                                     <td class="px-4 py-3">
                                         @if ($row->mataKuliah)
-                                            <div class="font-semibold text-emerald-100 whitespace-nowrap">{{ $row->mataKuliah->nama_mata_kuliah }}</div>
+                                            <div class="font-semibold text-emerald-100 whitespace-nowrap">{{ $row->mataKuliah->nama }}</div>
                                             <div class="text-[11px] text-emerald-100/60 font-mono">{{ $row->mataKuliah->kode }}</div>
                                         @else
                                             <span class="text-rose-300">MK #{{ (int) $row->mata_kuliah_id }}</span>
