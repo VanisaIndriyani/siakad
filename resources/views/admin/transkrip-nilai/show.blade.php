@@ -218,6 +218,47 @@
     <div class="transcript-preview">
         <div class="transcript-paper">
 
+            {{-- ===== KOP SURAT (LOGO DI TENGAH, SESUAI CONTOH WILDAH ASLI) ===== --}}
+            <div class="kop-wrap">
+                <div class="kop-logo-center">
+                    <img id="transkripLogoHeader"
+                         src="{{ $logoWeb }}"
+                         alt="Logo IAI DDI Sidrap"
+                         width="110" height="110">
+                    <script>
+                        (function () {
+                            var img = document.getElementById('transkripLogoHeader');
+                            if (!img) return;
+                            var fallbacks = {!! $logoWebFallbackJs !!};
+                            var idx = 0;
+                            var tried = {};
+                            var current = img.getAttribute('src') || '';
+                            tried[current] = true;
+                            img.addEventListener('error', function () {
+                                while (idx < fallbacks.length && tried[fallbacks[idx]]) idx++;
+                                if (idx < fallbacks.length) {
+                                    var next = fallbacks[idx++];
+                                    tried[next] = true;
+                                    img.setAttribute('src', next);
+                                } else {
+                                    img.style.display = 'none';
+                                }
+                            });
+                        })();
+                    </script>
+                </div>
+                <div class="kop-title-a">INSTITUT AGAMA ISLAM</div>
+                <div class="kop-title-a kop-title-a2">DARUD DA'WAH WAL IRSYAD</div>
+                <div class="kop-title-b">SIDENRENG RAPPANG</div>
+                <div class="kop-terakreditasi">TERAKREDITASI INSTITUSI • SK : 337/SK/BAN-PT/Ak-S/2.0/PT/VI/2026</div>
+                <div class="kop-alamat-line">Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang</div>
+                <div class="kop-alamat-line kop-email-web">E-mail : iaiddisidrap@gmail.com &nbsp;&nbsp; Website : www.yppddisrapp.ac.id</div>
+                <div class="kop-line-double">
+                    <div class="kop-line-top"></div>
+                    <div class="kop-line-bottom"></div>
+                </div>
+            </div>
+
             {{-- ===== JUDUL TRANSKRIP ===== --}}
             <div class="judul-box">
                 <div class="judul-text">Transkrip Akademik</div>
@@ -518,7 +559,7 @@
             width: 100%; height: 1.5px; background: #000000; margin-top: 2px;
         }
 
-        .judul-box { text-align: center; margin-top: 22px; }
+        .judul-box { text-align: center; margin-top: 10px; }
         .judul-text {
             font-size: 16px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
             text-decoration: none; color: #000000;
@@ -526,7 +567,7 @@
         .judul-nomor { font-size: 9.2px; margin-top: 1px; color: #000000; }
 
         .biodata {
-            width: 100%; margin-top: 16px; border-collapse: collapse;
+            width: 100%; margin-top: 10px; border-collapse: collapse;
             font-size: 9.5px; color: #000000; table-layout: fixed;
         }
         .biodata td { vertical-align: top; padding: 0; line-height: 1.3; }

@@ -108,7 +108,7 @@ body::after, .wrap::after, .transcript-paper::after {
 }
 
 /* PERSIS SHOW L576-L581: judul-text 16px judul-nomor 9.2px (SEBELUMNYA 14+8) */
-.judul-box { text-align: center; margin-top: 24px; }
+.judul-box { text-align: center; margin-top: 10px; }
 .judul-text {
     font-size: 16px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
     text-decoration: none; color: #000000;
@@ -117,7 +117,7 @@ body::after, .wrap::after, .transcript-paper::after {
 
 /* PERSIS SHOW L583-L615: biodata font 9.5px padding 1.5 10 1.5 0 — width 100% FULL (isi padat, global wrap masih ada jadi TIDAK KEPOTONG) */
 .biodata {
-    width: 100%; margin-top: 16px; border-collapse: collapse;
+    width: 100%; margin-top: 10px; border-collapse: collapse;
     font-size: 9.5px; color: #000000; table-layout: fixed;
 }
 .biodata td { vertical-align: top; padding: 0; line-height: 1.3; }

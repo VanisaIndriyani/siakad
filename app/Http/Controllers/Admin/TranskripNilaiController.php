@@ -265,7 +265,117 @@ class TranskripNilaiController extends Controller
             'color' => ['argb' => 'FFD9EAD3'],
         ]];
 
-        $row = 2;
+        // ============== ⭐ KEMBALIKAN KOP SURAT EXCEL (LOGO DRAWING 2 LAYER + INSTITUSI + TERAKREDITASI + ALAMAT) ==============
+        $logoCandidates = [];
+        $logoInserted = false;
+        try {
+            try { $logoCandidates[] = rtrim(public_path(), '\\/') . DIRECTORY_SEPARATOR . 'img' . DIRECTORY_SEPARATOR . 'lo.jpeg'; } catch (\Throwable $e) {}
+            try {
+                $bp = rtrim(str_replace('\\', '/', base_path()), '/');
+                if ($bp !== '') {
+                    $logoCandidates[] = $bp . '/public/img/lo.jpeg';
+                    $logoCandidates[] = $bp . '/public_html/img/lo.jpeg';
+                }
+            } catch (\Throwable $e) {}
+            try {
+                $docRoot = rtrim(str_replace('\\', '/', (string) ($_SERVER['DOCUMENT_ROOT'] ?? '')), '/');
+                if ($docRoot !== '') {
+                    $logoCandidates[] = $docRoot . '/img/lo.jpeg';
+                    $logoCandidates[] = $docRoot . '/public/img/lo.jpeg';
+                }
+            } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {}
+        $logoPath = null;
+        foreach ($logoCandidates as $lc) {
+            $lc = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string)$lc);
+            if (@is_file($lc) && @is_readable($lc)) { $logoPath = $lc; break; }
+        }
+        if ($logoPath) {
+            try {
+                $logoDrawing = new Drawing();
+                $logoDrawing->setName('Logo IAI DDI Sidrap');
+                $logoDrawing->setDescription('Logo IAI DDI Sidrap');
+                $logoDrawing->setPath($logoPath, false);
+                $logoDrawing->setHeight(95);
+                $logoDrawing->setWidth(95);
+                $logoDrawing->setOffsetX(445);
+                $logoDrawing->setOffsetY(2);
+                $logoDrawing->setCoordinates('A1');
+                $logoDrawing->setWorksheet($sheet);
+                $logoInserted = true;
+            } catch (\Throwable $e) {
+                try {
+                    $imgInfo = @getimagesize($logoPath);
+                    $mime = $imgInfo ? ($imgInfo['mime'] ?? '') : '';
+                    $ext = strtolower(pathinfo($logoPath, PATHINFO_EXTENSION));
+                    $gd = null;
+                    if ($ext === 'png' || $mime === 'image/png') {
+                        $gd = function_exists('imagecreatefrompng') ? @imagecreatefrompng($logoPath) : false;
+                    } elseif ($ext === 'gif' || $mime === 'image/gif') {
+                        $gd = function_exists('imagecreatefromgif') ? @imagecreatefromgif($logoPath) : false;
+                    } else {
+                        $gd = function_exists('imagecreatefromjpeg') ? @imagecreatefromjpeg($logoPath) : false;
+                    }
+                    if ($gd !== false && $gd !== null) {
+                        $logoDrawing2 = new MemoryDrawing();
+                        $logoDrawing2->setName('Logo IAI DDI Sidrap');
+                        $logoDrawing2->setDescription('Logo IAI DDI Sidrap');
+                        $logoDrawing2->setImageResource($gd);
+                        if ($ext === 'png' || $mime === 'image/png') {
+                            $logoDrawing2->setRenderingFunction(MemoryDrawing::RENDERING_PNG);
+                            $logoDrawing2->setMimeType(MemoryDrawing::MIMETYPE_PNG);
+                        } elseif ($ext === 'gif' || $mime === 'image/gif') {
+                            $logoDrawing2->setRenderingFunction(MemoryDrawing::RENDERING_GIF);
+                            $logoDrawing2->setMimeType(MemoryDrawing::MIMETYPE_GIF);
+                        } else {
+                            $logoDrawing2->setRenderingFunction(MemoryDrawing::RENDERING_JPEG);
+                            $logoDrawing2->setMimeType(MemoryDrawing::MIMETYPE_DEFAULT);
+                        }
+                        $logoDrawing2->setHeight(95);
+                        $logoDrawing2->setWidth(95);
+                        $logoDrawing2->setOffsetX(445);
+                        $logoDrawing2->setOffsetY(2);
+                        $logoDrawing2->setCoordinates('A1');
+                        $logoDrawing2->setWorksheet($sheet);
+                        $logoInserted = true;
+                    }
+                } catch (\Throwable $e2) { $logoInserted = false; }
+            }
+        }
+        $sheet->mergeCells('A1:J4');
+        $sheet->getRowDimension(1)->setRowHeight(24);
+        $sheet->getRowDimension(2)->setRowHeight(24);
+        $sheet->getRowDimension(3)->setRowHeight(24);
+        $sheet->getRowDimension(4)->setRowHeight(24);
+        if (!$logoInserted) {
+            $sheet->setCellValue('A1', 'LOGO IAI DDI SIDRAP');
+            $sheet->getStyle('A1')->applyFromArray(array_merge(
+                $boldFont, $centerAlign,
+                ['font' => ['size' => 14, 'bold' => true, 'color' => ['argb' => 'FF1B6B3B']]]
+            ));
+        }
+
+        $sheet->setCellValue('A6', 'INSTITUT AGAMA ISLAM DARUD DA\'WAH WAL IRSYAD');
+        $sheet->mergeCells('A6:J6');
+        $sheet->getStyle('A6')->applyFromArray(array_merge($boldFont, $centerAlign, ['font' => ['bold' => true, 'size' => 18]]));
+
+        $sheet->setCellValue('A7', 'SIDENRENG RAPPANG');
+        $sheet->mergeCells('A7:J7');
+        $sheet->getStyle('A7')->applyFromArray(array_merge($boldFont, $centerAlign, ['font' => ['bold' => true, 'size' => 17]]));
+
+        $sheet->setCellValue('A8', 'TERAKREDITASI INSTITUSI • SK : 337/SK/BAN-PT/Ak-S/2.0/PT/VI/2026');
+        $sheet->mergeCells('A8:J8');
+        $sheet->getStyle('A8')->applyFromArray(array_merge($centerAlign, ['font' => ['size' => 10]]));
+
+        $sheet->setCellValue('A9', 'Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang');
+        $sheet->mergeCells('A9:J9');
+        $sheet->getStyle('A9')->applyFromArray(array_merge($centerAlign, ['font' => ['size' => 10]]));
+
+        $sheet->setCellValue('A10', 'E-mail : iaiddisidrap@gmail.com   Website : www.yppddisrapp.ac.id');
+        $sheet->mergeCells('A10:J10');
+        $sheet->getStyle('A10')->applyFromArray(array_merge($centerAlign, ['font' => ['size' => 10]]));
+
+        $row = 12;
         $sheet->setCellValue("A{$row}", 'TRANSKRIP AKADEMIK');
         $sheet->mergeCells("A{$row}:J{$row}");
         $sheet->getStyle("A{$row}")->applyFromArray(array_merge($boldFont, $centerAlign, ['font' => ['bold' => true, 'size' => 15]]));
@@ -533,25 +643,6 @@ class TranskripNilaiController extends Controller
         $sheet->getColumnDimension('H')->setWidth(6);
         $sheet->getColumnDimension('I')->setWidth(6);
         $sheet->getColumnDimension('J')->setWidth(8);
-
-        // ============== ⭐ FIX DOWNLOAD CORRUPT: HAPUS DRAWINGS (LOGO LAMA) & UNMERGE SEMUA CELLS SEBELUM SAVE ==============
-        // PhpSpreadsheet sering corrupt / file 0 bytes kalau ada Drawing reference setengah terhapus / merge cell kosong dari block LOGO yang dihapus kemarin.
-        try {
-            $drawings = $sheet->getDrawingCollection();
-            if (is_object($drawings) && $drawings->count() > 0) {
-                for ($di = $drawings->count() - 1; $di >= 0; $di--) {
-                    try { $drawings->offsetUnset($di); } catch (\Throwable $_) {}
-                }
-            }
-        } catch (\Throwable $_) {}
-        try {
-            $mergeCells = $sheet->getMergeCells();
-            if (!empty($mergeCells)) {
-                foreach (array_values($mergeCells) as $mcStr) {
-                    try { $sheet->unmergeCells($mcStr); } catch (\Throwable $_) {}
-                }
-            }
-        } catch (\Throwable $_) {}
 
         $namafile = 'Transkrip-' . ($mahasiswa->npm ?: $mahasiswa->id) . '-' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', (string) $mahasiswa->nama_lengkap) . '.xlsx';
         $writer = new Xlsx($spreadsheet);
