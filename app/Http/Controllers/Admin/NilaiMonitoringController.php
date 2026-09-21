@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Khs;
 use App\Models\KhsItem;
 use App\Models\Krs;
+use App\Models\Mahasiswa;
 use App\Models\MataKuliah;
 use App\Models\NilaiArchive;
 use Dompdf\Dompdf;
@@ -156,6 +157,200 @@ class NilaiMonitoringController extends Controller
 
             return redirect()->back()->withErrors([
                 'reset' => 'Gagal reset nilai: '.mb_substr($e->getMessage(), 0, 200),
+            ]);
+        }
+    }
+
+    public function arsipIndex(Request $request): View
+    {
+        $q = trim((string) $request->get('q', ''));
+        $semester = (int) $request->get('semester', 0);
+        $batchCode = trim((string) $request->get('batch', ''));
+
+        $query = NilaiArchive::query()
+            ->with([
+                'mahasiswa:id,nama_lengkap,npm,program_studi',
+                'mataKuliah:id,kode,nama_mata_kuliah,sks',
+                'resetBy:id,name',
+            ]);
+
+        if ($semester >= 1 && $semester <= 8) {
+            $query->where('semester', $semester);
+        }
+        if ($batchCode !== '') {
+            $query->where('batch_code', 'like', '%'.$batchCode.'%');
+        }
+        if ($q !== '') {
+            $query->where(function ($sub) use ($q) {
+                $sub->whereHas('mahasiswa', function ($s) use ($q) {
+                    $s->where('nama_lengkap', 'like', '%'.$q.'%')
+                        ->orWhere('npm', 'like', '%'.$q.'%');
+                })
+                ->orWhereHas('mataKuliah', function ($s) use ($q) {
+                    $s->where('kode', 'like', '%'.$q.'%')
+                        ->orWhere('nama_mata_kuliah', 'like', '%'.$q.'%');
+                })
+                ->orWhere('batch_code', 'like', '%'.$q.'%');
+            });
+        }
+
+        $query->orderByDesc('reset_at')->orderByDesc('id');
+        $records = $query->paginate(25)->withQueryString();
+
+        $batchGroups = NilaiArchive::query()
+            ->select('batch_code', 'semester', DB::raw('COUNT(*) as total_records'), DB::raw('MAX(reset_at) as reset_at'), DB::raw('COUNT(DISTINCT mahasiswa_id) as total_mahasiswa'), 'reset_by')
+            ->with(['resetBy:id,name'])
+            ->groupBy('batch_code', 'semester', 'reset_by')
+            ->orderByDesc('reset_at')
+            ->limit(10)
+            ->get();
+
+        $totalArsip = NilaiArchive::query()->count();
+        $totalBatch = NilaiArchive::query()->distinct()->count('batch_code');
+
+        return view('admin.nilai-monitoring.arsip', [
+            'records' => $records,
+            'batchGroups' => $batchGroups,
+            'q' => $q,
+            'semester' => $semester,
+            'batchCode' => $batchCode,
+            'totalArsip' => $totalArsip,
+            'totalBatch' => $totalBatch,
+            'semesterOptions' => range(1, 8),
+        ]);
+    }
+
+    public function arsipDetail(Request $request, string $batch): View
+    {
+        $batch = strtoupper(trim($batch));
+
+        $batchInfo = NilaiArchive::query()
+            ->where('batch_code', $batch)
+            ->select('batch_code', 'semester', 'tahun_ajaran', 'reset_by', DB::raw('COUNT(*) as total_records'), DB::raw('MAX(reset_at) as reset_at'), DB::raw('COUNT(DISTINCT mahasiswa_id) as total_mahasiswa'), DB::raw('COUNT(DISTINCT mata_kuliah_id) as total_mk'))
+            ->with(['resetBy:id,name'])
+            ->firstOrFail();
+
+        $records = NilaiArchive::query()
+            ->where('batch_code', $batch)
+            ->with([
+                'mahasiswa:id,nama_lengkap,npm,program_studi',
+                'mataKuliah:id,kode,nama_mata_kuliah,sks',
+            ])
+            ->orderBy('mahasiswa_id')
+            ->orderBy('mata_kuliah_id')
+            ->get()
+            ->groupBy(fn ($r) => (int) $r->mahasiswa_id);
+
+        return view('admin.nilai-monitoring.arsip-detail', [
+            'batchInfo' => $batchInfo,
+            'recordsGrouped' => $records,
+            'batchCode' => $batch,
+        ]);
+    }
+
+    public function arsipRestoreBatch(Request $request, string $batch): RedirectResponse
+    {
+        $batch = strtoupper(trim($batch));
+        $confirm = strtoupper(trim((string) $request->input('confirm_restore', '')));
+        $expected = 'RESTORE-BATCH-'.$batch;
+        if ($confirm !== $expected) {
+            return redirect()->back()->withErrors([
+                'restore' => "Konfirmasi restore salah. Harus ketik: {$expected}",
+            ]);
+        }
+
+        $arsipRecords = NilaiArchive::query()
+            ->where('batch_code', $batch)
+            ->get();
+        if ($arsipRecords->count() === 0) {
+            return redirect()->back()->with('error', "Batch {$batch} tidak ditemukan.");
+        }
+
+        $updatedMhs = [];
+        DB::beginTransaction();
+        try {
+            $restored = 0;
+            $skipped = 0;
+            $restoredViaFallback = 0;
+            $skippedDetail = [];
+            foreach ($arsipRecords as $ar) {
+                $mkId = (int) $ar->mata_kuliah_id;
+                $mhsId = (int) $ar->mahasiswa_id;
+                $semester = (int) $ar->semester;
+                $khsItemTarget = null;
+
+                if (! empty($ar->khs_item_id)) {
+                    $khsItem = KhsItem::query()->find((int) $ar->khs_item_id);
+                    if ($khsItem) {
+                        $khsItemTarget = $khsItem;
+                    }
+                }
+                if (! $khsItemTarget && ! empty($ar->khs_id)) {
+                    $khsItemTarget = KhsItem::query()
+                        ->where('khs_id', (int) $ar->khs_id)
+                        ->where('mata_kuliah_id', $mkId)
+                        ->first();
+                }
+                if (! $khsItemTarget) {
+                    $khsHead = Khs::query()
+                        ->where('mahasiswa_id', $mhsId)
+                        ->where('semester', $semester)
+                        ->first();
+                    if ($khsHead) {
+                        $khsItemTarget = KhsItem::query()
+                            ->where('khs_id', (int) $khsHead->id)
+                            ->where('mata_kuliah_id', $mkId)
+                            ->first();
+                        if ($khsItemTarget) {
+                            $restoredViaFallback++;
+                        }
+                    }
+                }
+                if (! $khsItemTarget) {
+                    $skipped++;
+                    $skippedDetail[] = [
+                        'mahasiswa_id' => $mhsId,
+                        'mata_kuliah_id' => $mkId,
+                        'semester' => $semester,
+                    ];
+                    continue;
+                }
+                $khsItemTarget->nilai_tm = $ar->nilai_tm;
+                $khsItemTarget->nilai_quis = $ar->nilai_quis;
+                $khsItemTarget->nilai_mid = $ar->nilai_mid;
+                $khsItemTarget->nilai_final = $ar->nilai_final;
+                $khsItemTarget->nilai_angka = $ar->nilai_angka;
+                $khsItemTarget->nilai_huruf = $ar->nilai_huruf;
+                $khsItemTarget->save();
+                $restored++;
+                $updatedMhs[$mhsId] = true;
+            }
+
+            $nilaiController = new \App\Http\Controllers\Dosen\NilaiController();
+            $maxSemester = 8;
+            foreach (array_keys($updatedMhs) as $mhsId) {
+                $nilaiController->callableRecalculate((int) $mhsId, $maxSemester);
+            }
+            DB::commit();
+
+            $msg = "✅ Restore Batch {$batch} BERHASIL. ";
+            $msg .= "Data nilai yang dikembalikan: {$restored} record. ";
+            if ($restoredViaFallback > 0) {
+                $msg .= "({$restoredViaFallback} record dipulihkan via pencarian Mahasiswa+Semester karena ID KHS lama tidak ditemukan — cocok untuk kasus KHS dibuat ulang setelah reset). ";
+            }
+            if ($skipped > 0) {
+                $sample = array_slice($skippedDetail, 0, 5);
+                $sampleStr = collect($sample)->map(fn ($s) => "Mhs#{$s['mahasiswa_id']}/MK#{$s['mata_kuliah_id']}/S{$s['semester']}")->implode(', ');
+                $msg .= "Dilewati (KHS / KHS Item tidak ditemukan): {$skipped} record. Sampel: {$sampleStr}. Ini biasanya terjadi jika MK di KHS sekarang tidak sama dengan saat reset.";
+            }
+            $msg .= count($updatedMhs)." mahasiswa IPS/IPK dihitung ulang.";
+            return redirect()->route('admin.nilai-monitoring.arsip-detail', ['batch' => $batch])
+                ->with('success', $msg);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            report($e);
+            return redirect()->back()->withErrors([
+                'restore' => 'Gagal restore batch: '.mb_substr($e->getMessage(), 0, 200),
             ]);
         }
     }

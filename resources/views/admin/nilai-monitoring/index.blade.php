@@ -24,6 +24,10 @@
             <div class="text-sm text-emerald-100/70">Monitoring status penginputan nilai per mata kuliah dan semester.</div>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
+            <a href="{{ route('admin.nilai-monitoring.arsip') }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-blue-500/15 hover:bg-blue-500/25 border border-blue-400/30 transition text-blue-100 shadow-[0_0_20px_-12px_rgba(59,130,246,0.5)]">
+                <i class="fa-solid fa-box-archive"></i>
+                <span class="text-sm font-medium">Arsip Nilai (Backup)</span>
+            </a>
             <a href="{{ route('admin.nilai-monitoring.pdf', array_filter(['q' => $q ?: null, 'semester' => $semester ?: null, 'status' => $status ?: null, 'all' => $showAll ? 1 : null, 'page' => ! $showAll ? request()->get('page') : null])) }}"
                class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/20 transition text-emerald-100">
                 <i class="fa-solid fa-file-pdf"></i>
@@ -112,6 +116,10 @@
                         <div class="mt-0.5 text-xs text-emerald-100/70">Setiap reset otomatis membuat backup nilai agar bisa diakses kapan saja.</div>
                     </div>
                 </div>
+                <a href="{{ route('admin.nilai-monitoring.arsip') }}" class="inline-flex items-center gap-2 h-9 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-[11px] font-semibold text-emerald-100 self-start">
+                    <i class="fa-solid fa-table-list text-[10px]"></i>
+                    <span>Lihat Semua Arsip</span>
+                </a>
             </div>
             <div class="overflow-hidden rounded-xl border border-white/10">
                 <div class="overflow-x-auto">
@@ -123,6 +131,7 @@
                                 <th class="text-left font-medium px-3 py-2">Semester</th>
                                 <th class="text-left font-medium px-3 py-2">Reset Oleh</th>
                                 <th class="text-right font-medium px-3 py-2">Jumlah Data</th>
+                                <th class="text-center font-medium px-3 py-2">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-white/10">
@@ -135,6 +144,12 @@
                                     <td class="px-3 py-2 font-semibold whitespace-nowrap">Semester {{ $b->semester }}</td>
                                     <td class="px-3 py-2 text-emerald-100/80 whitespace-nowrap">{{ $b->resetBy?->name ?? '-' }}</td>
                                     <td class="px-3 py-2 text-right font-semibold whitespace-nowrap">{{ (int) $b->total_records }} nilai</td>
+                                    <td class="px-3 py-2 text-center whitespace-nowrap">
+                                        <a href="{{ route('admin.nilai-monitoring.arsip-detail', ['batch' => $b->batch_code]) }}" class="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/30 transition text-emerald-100 text-[11px] font-semibold">
+                                            <i class="fa-solid fa-eye text-[10px]"></i>
+                                            <span>Detail & Restore</span>
+                                        </a>
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>

@@ -219,6 +219,9 @@ Route::prefix('admin')
         Route::get('/nilai-monitoring/pdf', [AdminNilaiMonitoringController::class, 'exportPdf'])->name('nilai-monitoring.pdf');
         Route::get('/nilai-monitoring/{mataKuliah}/pdf/{semester}', [AdminNilaiMonitoringController::class, 'exportDetailPdf'])->name('nilai-monitoring.detail.pdf');
         Route::post('/nilai-monitoring/reset-semester', [AdminNilaiMonitoringController::class, 'resetNilaiSemester'])->name('nilai-monitoring.reset-semester');
+        Route::get('/arsip-nilai', [AdminNilaiMonitoringController::class, 'arsipIndex'])->name('nilai-monitoring.arsip');
+        Route::get('/arsip-nilai/{batch}', [AdminNilaiMonitoringController::class, 'arsipDetail'])->name('nilai-monitoring.arsip-detail');
+        Route::post('/arsip-nilai/{batch}/restore', [AdminNilaiMonitoringController::class, 'arsipRestoreBatch'])->name('nilai-monitoring.arsip-restore-batch');
 
         Route::get('/kuesioner', [AdminQuestionnaireController::class, 'index'])->name('kuesioner.index');
         Route::get('/kuesioner/create', [AdminQuestionnaireController::class, 'create'])->name('kuesioner.create');
