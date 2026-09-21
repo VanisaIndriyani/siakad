@@ -184,6 +184,28 @@
             color: #fffbeb !important;
             -webkit-text-fill-color: #fffbeb !important;
         }
+        /* ======================== HOSTING FIX: KILL CHROME BLUE FOCUS + GLOBAL MODAL ======================== */
+        [id^="cfm-inp-"],[id^="cfm-inp-"]:hover,[id^="cfm-inp-"]:active,[id^="cfm-inp-"]:focus,
+        [id^="btn-submit-restore-"],[id^="btn-submit-restore-"]:hover,[id^="btn-submit-restore-"]:active,[id^="btn-submit-restore-"]:focus,
+        button,input,select,textarea,a {
+            outline: none !important;
+            outline-style: none !important;
+            outline-width: 0 !important;
+            -webkit-tap-highlight-color: transparent !important;
+            -webkit-focus-ring-color: transparent !important;
+        }
+        [id^="cfm-inp-"]::-webkit-input-placeholder,[id^="cfm-inp-"]::-moz-placeholder,[id^="cfm-inp-"]:-ms-input-placeholder {
+            color: rgba(110,231,183,0.55) !important;
+            -webkit-text-fill-color: rgba(110,231,183,0.55) !important;
+            font-weight: 500 !important;
+        }
+        [id^="cfm-inp-"]:-webkit-autofill,[id^="cfm-inp-"]:-webkit-autofill:hover,[id^="cfm-inp-"]:-webkit-autofill:focus,[id^="cfm-inp-"]:-webkit-autofill:active {
+            -webkit-box-shadow: inset 0 0 0 1000px #061713 !important;
+            box-shadow: inset 0 0 0 1000px #061713 !important;
+            -webkit-text-fill-color: #fde68a !important;
+            caret-color: #fbbf24 !important;
+            transition: background-color 9999s ease-in-out 0s !important;
+        }
     </style>
     <div x-data="{
             forceInputStyle() {
@@ -351,62 +373,76 @@
                     </table>
                 </div>
                 </div>
-                <div x-cloak x-show="showM{{ $mhsId }}" x-transition.opacity
-                     class="fixed inset-0 z-[100] flex items-center justify-center p-4"
-                     style="display: none;"
-                     @click.self="showM{{ $mhsId }} = false">
-                    <div class="absolute inset-0 bg-black/65 backdrop-blur-[2px]" @click="showM{{ $mhsId }} = false"></div>
-                    <div x-show="showM{{ $mhsId }}" x-transition:enter="scale-95 opacity-0" x-transition:enter-end="scale-100 opacity-100"
-                         class="relative w-full max-w-xl rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-[#0a1f1a] via-[#0d2820] to-[#0a1f1a] shadow-[0_25px_80px_-15px_rgba(0,0,0,0.7),0_0_50px_-20px_rgba(16,185,129,0.5)] overflow-hidden">
-                        <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 via-amber-400 to-emerald-500"></div>
-                        <div class="px-6 py-5 border-b border-white/10">
-                            <div class="flex items-start gap-4">
-                                <div class="shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500/25 to-amber-400/20 border border-emerald-500/40 inline-flex items-center justify-center shadow-[0_0_25px_-8px_rgba(16,185,129,0.7)]">
-                                    <i class="fa-solid fa-user-rotate text-emerald-300 text-lg"></i>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <div class="text-lg font-bold text-emerald-100">Restore Hanya Mahasiswa Ini</div>
-                                    <div class="mt-1 text-xs text-emerald-100/70 leading-relaxed">
-                                        Hanya merestor nilai milik <span class="font-bold text-emerald-200">{{ $mhs?->nama_lengkap ?? 'Mahasiswa #'.$mhsId }}</span>
-                                        @if($mhs) <span class="font-mono text-amber-300">(NPM {{ $mhs->npm }})</span> @endif
-                                        pada batch <span class="font-mono text-amber-300">{{ $batchCode }}</span>.<br>
-                                        Mahasiswa LAINNYA TIDAK TERDAMPAK. IPS/IPK mahasiswa ini otomatis dihitung ulang.
+                <template x-teleport="body">
+                    <div x-cloak x-show="showM{{ $mhsId }}" x-transition.opacity.duration.200ms
+                         class="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+                         style="display:none!important;isolation:isolate;"
+                         @click.self="showM{{ $mhsId }} = false; cfm{{ $mhsId }} = '';">
+                        <div class="absolute inset-0"
+                             style="background-color:rgba(4,12,10,0.88)!important;backdrop-filter:blur(6px)!important;-webkit-backdrop-filter:blur(6px)!important;"
+                             @click="showM{{ $mhsId }} = false; cfm{{ $mhsId }} = '';"></div>
+                        <div x-show="showM{{ $mhsId }}" x-transition:enter="scale-90 opacity-0 translate-y-4" x-transition:enter-end="scale-100 opacity-100 translate-y-0" x-transition:enter.duration.220ms
+                             class="relative w-full max-w-xl rounded-3xl shadow-[0_30px_120px_-10px_rgba(0,0,0,0.85),0_0_60px_-22px_rgba(16,185,129,0.6)] overflow-hidden"
+                             style="background-image:linear-gradient(160deg,#0a1f1a 0%,#0e2b22 42%,#0a1f1a 100%)!important;border:1.5px solid rgba(16,185,129,0.35)!important;">
+                            <div class="absolute top-0 left-0 right-0 h-[6px]"
+                                 style="background-image:linear-gradient(90deg,#059669 0%,#10b981 33%,#fbbf24 50%,#10b981 67%,#059669 100%)!important;"></div>
+                            <div class="px-6 py-5" style="border-bottom:1px solid rgba(255,255,255,0.08)!important;">
+                                <div class="flex items-start gap-4">
+                                    <div class="shrink-0 w-12 h-12 rounded-2xl inline-flex items-center justify-center"
+                                         style="background-image:linear-gradient(160deg,rgba(16,185,129,0.28) 0%,rgba(251,191,36,0.22) 100%)!important;border:1.5px solid rgba(16,185,129,0.45)!important;box-shadow:0 0 28px -10px rgba(16,185,129,0.85)!important;">
+                                        <i class="fa-solid fa-user-rotate text-lg" style="color:#a7f3d0!important;"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="text-lg font-bold leading-7" style="color:#ecfdf5!important;text-shadow:0 1px 0 rgba(0,0,0,0.35)!important;">Restore Hanya Mahasiswa Ini</div>
+                                        <div class="mt-1 text-xs leading-relaxed" style="color:#a7f3d0!important;opacity:0.85!important;">
+                                            Hanya merestor nilai milik <span class="font-bold" style="color:#d1fae5!important;">{{ $mhs?->nama_lengkap ?? 'Mahasiswa #'.$mhsId }}</span>
+                                            @if($mhs) <span class="font-mono font-semibold" style="color:#fcd34d!important;">(NPM {{ $mhs->npm }})</span> @endif
+                                            pada batch <span class="font-mono font-semibold" style="color:#fcd34d!important;">{{ $batchCode }}</span>.
+                                            <span style="display:block;margin-top:3px;">Mahasiswa LAINNYA TIDAK TERDAMPAK. IPS/IPK otomatis dihitung ulang.</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <form method="POST" action="{{ route('admin.nilai-monitoring.arsip-restore-mahasiswa', ['batch' => $batchCode, 'mahasiswa' => $mhsId]) }}" class="px-6 py-5 space-y-4">
-                            @csrf
-                            <div class="space-y-2.5">
-                                <label class="block text-xs font-bold uppercase tracking-wider text-emerald-100/80 pl-0.5">Konfirmasi Keamanan</label>
-                                <div class="text-xs text-emerald-100/70">Ketik teks di bawah ini (case-insensitive):</div>
-                                <div class="px-3.5 py-2.5 rounded-xl bg-black/25 border border-amber-400/25 text-[12px] font-mono font-bold text-amber-200 break-all select-all shadow-[inset_0_1px_0_0_rgba(255,255,255,0.03)]">
-                                    {{ $mhsRestConfirm }}
+                            <form method="POST" action="{{ route('admin.nilai-monitoring.arsip-restore-mahasiswa', ['batch' => $batchCode, 'mahasiswa' => $mhsId]) }}" class="px-6 py-5 space-y-4" novalidate autocomplete="off">
+                                @csrf
+                                <div class="space-y-2.5">
+                                    <label class="block text-xs font-bold uppercase tracking-[0.15em] pl-0.5" style="color:#6ee7b7!important;">Konfirmasi Keamanan</label>
+                                    <div class="text-xs" style="color:#a7f3d0!important;opacity:0.8!important;">Ketik teks di bawah ini (case-insensitive):</div>
+                                    <div class="px-4 py-3 rounded-xl break-all select-all font-mono text-[12.5px] font-bold leading-6"
+                                         style="background-color:rgba(0,0,0,0.28)!important;border:1.5px solid rgba(251,191,36,0.32)!important;color:#fde68a!important;box-shadow:inset 0 1px 0 0 rgba(255,255,255,0.04)!important;">
+                                        {{ $mhsRestConfirm }}
+                                    </div>
+                                    <input id="cfm-inp-{{ $mhsId }}" type="text" x-model="cfm{{ $mhsId }}" name="confirm"
+                                           placeholder="Ketik konfirmasi restore mahasiswa..."
+                                           spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"
+                                           style="appearance:none!important;-webkit-appearance:none!important;-moz-appearance:none!important;width:100%!important;height:52px!important;padding:0 15px 0 15px!important;border-radius:14px!important;background-color:#061713!important;background-image:none!important;border:1.5px solid rgba(16,185,129,0.35)!important;color:#fde68a!important;-webkit-text-fill-color:#fde68a!important;font-size:14px!important;font-weight:700!important;letter-spacing:0.01em!important;caret-color:#fbbf24!important;box-shadow:inset 0 1px 0 0 rgba(255,255,255,0.04),0 0 0 1px rgba(16,185,129,0.1)!important;outline:none!important;"
+                                           onfocus="this.style.setProperty('background-color','#061713','important');this.style.setProperty('color','#fef3c7','important');this.style.setProperty('-webkit-text-fill-color','#fef3c7','important');this.style.setProperty('border-color','rgba(251,191,36,0.78)','important');this.style.setProperty('box-shadow','0 0 0 2.5px rgba(251,191,36,0.38), 0 0 32px -10px rgba(251,191,36,0.9)','important');"
+                                           onblur="this.style.setProperty('background-color','#061713','important');this.style.setProperty('color','#fde68a','important');this.style.setProperty('-webkit-text-fill-color','#fde68a','important');this.style.setProperty('border-color','rgba(16,185,129,0.35)','important');this.style.setProperty('box-shadow','inset 0 1px 0 0 rgba(255,255,255,0.04),0 0 0 1px rgba(16,185,129,0.1)','important');" />
                                 </div>
-                                <input id="cfm-inp-{{ $mhsId }}" type="text" x-model="cfm{{ $mhsId }}" name="confirm"
-                                       placeholder="Ketik konfirmasi restore mahasiswa..."
-                                       spellcheck="false" autocomplete="off"
-                                       class="w-full h-12 px-3.5 rounded-xl bg-black/25 border border-emerald-400/25 focus:border-amber-300/60 focus:ring-2 focus:ring-amber-300/30 focus:shadow-[0_0_25px_-10px_rgba(251,191,36,0.65)] text-sm text-amber-50 placeholder:text-emerald-100/40 outline-none transition-all duration-200" />
-                            </div>
-                            <div class="flex items-center justify-between gap-3 pt-2">
-                                <button type="button" @click="showM{{ $mhsId }} = false; cfm{{ $mhsId }} = '';"
-                                        style="cursor:pointer!important;"
-                                        class="h-11 px-5 rounded-xl bg-white/5 hover:bg-rose-500/15 border border-white/10 hover:border-rose-300/30 text-sm font-semibold text-emerald-100/80 hover:text-rose-100 transition-all duration-200">
-                                    Batal
-                                </button>
-                                <button type="submit" :disabled="!ok{{ $mhsId }}"
-                                        :class="ok{{ $mhsId }}
-                                            ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 shadow-[0_0_30px_-8px_rgba(16,185,129,0.8)] border-emerald-400/40 text-white cursor-pointer'
-                                            : 'bg-black/30 border-white/10 cursor-not-allowed text-white/35 pointer-events-none'"
-                                        style="pointer-events:auto!important;"
-                                        class="h-11 px-6 inline-flex items-center gap-2 rounded-xl border transition-all duration-200 text-sm font-bold">
-                                    <i class="fa-solid fa-rotate-left text-xs"></i>
-                                    <span>Restore Mahasiswa Ini</span>
-                                </button>
-                            </div>
-                        </form>
+                                <div class="flex items-center justify-between gap-3 pt-2">
+                                    <button type="button"
+                                            @click="showM{{ $mhsId }} = false; cfm{{ $mhsId }} = '';"
+                                            style="cursor:pointer!important;appearance:none!important;outline:none!important;isolation:isolate;height:46px!important;padding:0 22px!important;border-radius:14px!important;background-color:rgba(255,255,255,0.045)!important;border:1.5px solid rgba(255,255,255,0.11)!important;font-size:13.5px!important;font-weight:600!important;color:#a7f3d0!important;opacity:0.92!important;transition:all .2s ease!important;"
+                                            onmouseover="this.style.setProperty('background-color','rgba(244,63,94,0.15)','important');this.style.setProperty('border-color','rgba(251,113,133,0.38)','important');this.style.setProperty('color','#fecdd3','important');"
+                                            onmouseout="this.style.setProperty('background-color','rgba(255,255,255,0.045)','important');this.style.setProperty('border-color','rgba(255,255,255,0.11)','important');this.style.setProperty('color','#a7f3d0','important');">
+                                        Batal
+                                    </button>
+                                    <button type="submit"
+                                            :disabled="!ok{{ $mhsId }}"
+                                            id="btn-submit-restore-{{ $mhsId }}"
+                                            :style="ok{{ $mhsId }} ? 'cursor:pointer!important;appearance:none!important;outline:none!important;isolation:isolate;height:46px!important;padding:0 26px!important;border-radius:14px!important;background-image:linear-gradient(90deg,#059669 0%,#10b981 50%,#059669 100%)!important;border:1.5px solid rgba(52,211,153,0.45)!important;font-size:13.5px!important;font-weight:800!important;color:#ffffff!important;letter-spacing:0.01em!important;box-shadow:0 0 34px -10px rgba(16,185,129,0.92)!important;transition:all .22s ease!important;' : 'cursor:not-allowed!important;pointer-events:none!important;appearance:none!important;outline:none!important;isolation:isolate;height:46px!important;padding:0 26px!important;border-radius:14px!important;background-image:none!important;background-color:rgba(0,0,0,0.32)!important;border:1.5px solid rgba(255,255,255,0.12)!important;font-size:13.5px!important;font-weight:800!important;color:rgba(255,255,255,0.32)!important;letter-spacing:0.01em!important;box-shadow:none!important;transition:all .22s ease!important;filter:grayscale(1) brightness(0.95)!important;opacity:0.9!important;user-select:none!important;'"
+                                            @mouseenter="ok{{ $mhsId }} && ($el.style.setProperty('box-shadow','0 0 42px -8px rgba(16,185,129,0.98)','important'),$el.style.setProperty('transform','translateY(-1px)','important'))"
+                                            @mouseleave="$el.style.setProperty('transform','translateY(0)','important')"
+                                            @mousedown="ok{{ $mhsId }} && $el.style.setProperty('transform','translateY(0)','important')"
+                                            class="inline-flex items-center gap-2">
+                                        <i class="fa-solid fa-rotate-left" style="font-size:11.5px!important;"></i>
+                                        <span>Restore Mahasiswa Ini</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                </div>
+                </template>
             </div>
         @empty
             <div class="rounded-2xl border border-white/10 bg-[#0b231c] px-6 py-12 text-center">
