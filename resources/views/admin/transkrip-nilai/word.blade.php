@@ -10,81 +10,111 @@
 <title>Transkrip Akademik - {{ $mahasiswa->nama_lengkap }}</title>
 <style>
 @page {
-    size: folio portrait;
+    /* F4 / Folio Indonesia Standard: 210mm × 330mm portrait */
+    size: 210mm 330mm portrait;
     margin: 0 !important;
 }
 
 *, *:before, *:after { box-sizing: border-box; }
 table, table th, table td { box-sizing: border-box; }
 
+/* ⭐ GLOBAL ANTI KEPOTONG: FORCE SEMUA TEXT PANJANG WRAP BARIS OTOMATIS — TIDAK ADA ELLIPSIS 3 TITIK DAN TIDAK ADA CLIP KELUAR KERTAS */
+* {
+    word-break: normal !important;
+    overflow-wrap: anywhere !important;
+    word-wrap: break-word !important;
+    white-space: normal !important;
+    text-overflow: clip !important;
+    overflow: visible !important;
+}
+
 html, body {
     margin: 0 !important;
     padding: 0 !important;
     width: 210mm !important;
+    height: auto !important;
+    min-height: 0 !important;
     background: #fff !important;
     color: #000 !important;
     font-family: 'Times New Roman', Times, serif;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+    overflow: visible !important;
+}
+
+body::after, .wrap::after, .transcript-paper::after {
+    content: '' !important;
+    display: none !important;
+    clear: both;
 }
 
 .transcript-paper {
     width: 210mm;
     height: auto;
-    min-height: 0;
+    min-height: 0 !important;
     max-height: none;
     background: #ffffff;
     color: #000000;
-    padding: 6mm 12mm 5mm 6mm;
+    padding: 8mm 10mm 7mm 10mm;
+    margin: 0 !important;
     box-sizing: border-box;
     font-family: 'Times New Roman', Times, serif;
-    overflow: visible;
+    overflow: visible !important;
     page-break-after: auto;
     page-break-inside: auto;
 }
 
-/* ====== SEMUA CLASS DI BAWAH INI = PERSIS SAMA DENGAN show.blade.php L516-712, HANYA FONT/PADDING DIKALIKAN 0.9 UNTUK 1 HALAMAN ====== */
 .wrap { width: 100%; }
 
 .kop-wrap { width: 100%; text-align: center; color: #000000; }
-.kop-logo-center { width: 100%; text-align: center; margin-bottom: 6px; height: auto; display: block; }
-.kop-logo-center img { width: 98px; height: 98px; object-fit: contain; display: inline-block; border: 0; margin: 0; padding: 0; }
+.kop-logo-center { width: 100%; text-align: center; margin-bottom: 8px; }
+.kop-logo-center img { width: 110px; height: 110px; object-fit: contain; display: inline-block; border: 0; margin: 0; padding: 0; }
 
 .kop-title-a {
-    font-size: 18px; font-weight: 800; letter-spacing: 0.65px; line-height: 1.17; margin: 1.5px 0 0; padding: 0; color: #000000;
+    font-size: 20px; font-weight: 800; letter-spacing: 0.7px; line-height: 1.18; margin: 2px 0 0; padding: 0; color: #000000;
 }
 .kop-title-a2 { margin-top: 1px; }
 .kop-title-b {
-    font-size: 17px; font-weight: 800; letter-spacing: 0.65px; line-height: 1.17; margin: 1.5px 0 0; padding: 0; color: #000000;
+    font-size: 19px; font-weight: 800; letter-spacing: 0.7px; line-height: 1.18; margin: 2px 0 0; padding: 0; color: #000000;
 }
 .kop-terakreditasi {
-    font-size: 9px; margin-top: 4px; color: #000000; text-align: center; letter-spacing: 0.1px;
+    font-size: 11px; margin-top: 6px; color: #000000; text-align: center; letter-spacing: 0.1px;
 }
 .kop-alamat-line {
-    font-size: 8.5px; margin-top: 2px; line-height: 1.25; color: #000000; text-align: center;
+    font-size: 10.5px; margin-top: 4px; line-height: 1.25; color: #000000; text-align: center;
 }
 .kop-email-web { margin-top: 2px; }
+.kop-line-double {
+    margin-top: 3px;
+    width: 100%;
+    display: block;
+}
+.kop-line-double .kop-line-top {
+    width: 100%; height: 2px; background: #000000;
+}
+.kop-line-double .kop-line-bottom {
+    width: 100%; height: 1.5px; background: #000000; margin-top: 2px;
+}
 
 .judul-box { text-align: center; margin-top: 24px; }
 .judul-text {
-    font-size: 14px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase;
+    font-size: 16px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
     text-decoration: none; color: #000000;
 }
-.judul-nomor { font-size: 8px; margin-top: 1px; color: #000000; }
+.judul-nomor { font-size: 9.2px; margin-top: 1px; color: #000000; }
 
 .biodata {
     width: 100%; margin-top: 16px; border-collapse: collapse;
-    font-size: 7.9px; color: #000000; table-layout: fixed;
+    font-size: 9.5px; color: #000000; table-layout: fixed;
 }
-.biodata td { vertical-align: top; padding: 0; line-height: 1.25; }
+.biodata td { vertical-align: top; padding: 0; line-height: 1.3; }
 .biodata td.bio-label {
     width: 25%;
-    padding: 1.2px 9px 1.2px 0;
+    padding: 1.5px 10px 1.5px 0;
     text-align: left;
     font-weight: 400;
     color: #000000;
     position: relative;
-    white-space: nowrap;
 }
 .biodata td.bio-label.right-label {
     width: 20%;
@@ -93,99 +123,80 @@ html, body {
     content: ":";
     position: absolute;
     right: 0px;
-    top: 1.2px;
+    top: 1.5px;
     display: inline-block;
     color: #000000;
 }
 .biodata td.bio-value {
     width: 25%;
-    padding: 1.2px 0 1.2px 5px;
+    padding: 1.5px 0 1.5px 6px;
     color: #000000;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-wrap: break-word !important;
 }
 .biodata td.bio-value.right-val {
     width: 30%;
 }
-.bio-val { font-weight: 700; color: #000000; display: inline-block; }
+.bio-val { font-weight: 700; color: #000000; display: inline !important; }
 
 table.nilai {
-    border-collapse: collapse;
-    width: 96%;
-    margin-top: 7px;
-    font-size: 7.0px;
-    color: #000000;
-    table-layout: fixed;
+    width: 100%; border-collapse: collapse; margin-top: 10px;
+    font-size: 8.2px; color: #000000; table-layout: fixed;
 }
 table.nilai th {
-    border: 1px solid #000;
-    background: #e0f2ea;
-    font-weight: 700;
-    letter-spacing: 0.12px;
-    padding: 2px 1.5px;
-    vertical-align: middle;
-    line-height: 1.1;
-    text-align: center;
+    border: 1px solid #000; background: #e0f2ea; font-weight: 700; letter-spacing: 0.15px;
+    padding: 4px 2px; vertical-align: middle; line-height: 1.15; text-align: center;
 }
-table.nilai th.mk { text-align: left; padding: 2px 3px; width: 27.6%; }
-table.nilai th.num { width: 4.0%; padding: 2px 1.5px; }
-table.nilai th.sks { width: 5.4%; padding: 2px 1.5px; }
-table.nilai th.nilaih { width: 5.4%; padding: 2px 1.5px; }
-table.nilai th.m { width: 5.4%; padding: 2px 1.5px; }
+table.nilai th.mk { text-align: left; padding: 4px 5px; width: 29%; }
+table.nilai th.num { width: 4.5%; padding: 4px 2px; }
+table.nilai th.sks { width: 5.5%; padding: 4px 2px; }
+table.nilai th.nilaih { width: 5.5%; padding: 4px 2px; }
+table.nilai th.m { width: 5.5%; padding: 4px 2px; }
 table.nilai td {
-    border: 1px solid #000;
-    padding: 1.2px 2px;
-    vertical-align: middle;
-    line-height: 1.08;
-    text-align: center;
-    color: #000000;
-    word-wrap: break-word;
-    overflow-wrap: anywhere;
-    white-space: normal;
+    border: 1px solid #000; padding: 2px 3px; vertical-align: middle;
+    line-height: 1.15; text-align: center; color: #000000;
 }
-table.nilai td.mk { text-align: left; padding: 1.2px 3px; width: 27.6%; }
-table.nilai td.num { width: 4.0%; padding: 1.2px 1.5px; }
-table.nilai td.sks { width: 5.4%; padding: 1.2px 1.5px; }
-table.nilai td.nilaih { width: 5.4%; font-weight: 700; padding: 1.2px 1.5px; }
-table.nilai td.m { width: 5.4%; padding: 1.2px 1.5px; }
+table.nilai td.mk { text-align: left; padding: 2px 5px; width: 29%; }
+table.nilai td.num { width: 4.5%; padding: 2px 2px; }
+table.nilai td.sks { width: 5.5%; padding: 2px 2px; }
+table.nilai td.nilaih { width: 5.5%; font-weight: 700; padding: 2px 2px; }
+table.nilai td.m { width: 5.5%; padding: 2px 2px; }
 table.nilai tr.jumlah td {
-    background: #ffffff !important;
-    font-weight: 700;
-    padding: 1.6px 3px;
-    letter-spacing: 0.2px;
-    line-height: 1.08;
+    background: #ffffff !important; font-weight: 700; padding: 2.5px 5px;
+    letter-spacing: 0.2px; line-height: 1.15;
 }
 table.nilai tr.jumlah td.mk { text-align: center; }
 table.nilai tr.jumlah td.jumlah-dashed {
     background: #ffffff !important;
     border-top: 1px dashed #000000 !important;
-    border-bottom: 1px solid #000000 !important;
+    border-bottom: none !important;
 }
 table.nilai tr.ujian-head td {
-    background: #ffffff !important;
-    font-weight: 700;
-    letter-spacing: 0.12px;
-    padding: 1.6px 3px;
-    line-height: 1.08;
-    font-size: 7.0px;
+    background: #ffffff !important; font-weight: 700; letter-spacing: 0.15px;
+    padding: 2.5px 5px; line-height: 1.15; font-size: 8.2px;
 }
-table.nilai td.ujian-left-title { text-align: left; padding-left: 5px !important; }
+table.nilai td.ujian-left-title { text-align: left; padding-left: 7px !important; }
+table.nilai td.ujian-left-spacer,
+table.nilai td.ujian-left-spacer-cell,
+table.nilai td.ujian-right-spacer,
+table.nilai td.ujian-right-title,
+table.nilai td.ujian-right-title-sks,
+table.nilai td.ujian-right-title-nilai,
+table.nilai td.ujian-right-title-m { background: #ffffff !important; }
 table.nilai tr.spacer-row td {
-    background: #ffffff !important;
-    border: 1px solid #000000;
-    height: 6px;
-    padding: 0;
+    background: #ffffff !important; border: 1px solid #000000;
+    height: 15px; padding: 0;
 }
-table.nilai tr.ujian-row td {
-    font-size: 7.0px;
-    padding: 1.2px 2px;
-    line-height: 1.08;
-}
+table.nilai tr.ujian-row td { font-size: 8.2px; padding: 2px 3px; line-height: 1.15; }
+
 table.nilai tr.jumlah td.left-col,
 table.nilai tr.spacer-row td.left-col,
 table.nilai tr.ujian-head td.left-col,
 table.nilai tr.ujian-row td.left-col {
     background: #ffffff !important;
     font-weight: 400 !important;
-    padding: 2px 3px !important;
+    padding: 3px 4px !important;
     text-align: center !important;
     letter-spacing: 0 !important;
 }
@@ -194,30 +205,36 @@ table.nilai tr.spacer-row td.mk.left-col,
 table.nilai tr.ujian-head td.mk.left-col,
 table.nilai tr.ujian-row td.mk.left-col {
     text-align: left !important;
-    padding: 2px 5px !important;
+    padding: 3px 6px !important;
 }
 
 .ringkasan {
-    width: 100%;
-    margin-top: 6px;
-    border-collapse: collapse;
-    font-size: 7.9px;
-    color: #000000;
-    table-layout: auto;
+    width: 100%; margin-top: 9px; border-collapse: collapse;
+    font-size: 9.5px; color: #000000;
+    table-layout: fixed !important;
 }
-.ringkasan td { vertical-align: top; padding: 1.0px 0; line-height: 1.22; }
+.ringkasan td { vertical-align: top; padding: 1.5px 0; line-height: 1.28; }
 .ringkasan td.label {
-    width: auto; white-space: nowrap; font-weight: 700; color: #000000; padding-right: 9px;
+    width: 30%; white-space: nowrap; font-weight: 700; color: #000000; padding-right: 10px;
 }
 .ringkasan td.label-top {
-    width: auto; white-space: nowrap; font-weight: 700; color: #000000; padding: 1.0px 9px 0 0;
+    width: 30%; white-space: nowrap; font-weight: 700; color: #000000; padding: 1.5px 10px 0 0;
 }
-.ringkasan td.sep   { width: auto; text-align: left; padding-right: 7px; }
-.ringkasan td.sep-top { width: auto; text-align: left; padding: 1.0px 7px 0 0; }
-.ringkasan td.val   { font-weight: 800; color: #000000; font-size: 8.2px; width: auto; white-space: nowrap; }
+.ringkasan td.sep   { width: 2%; text-align: left; padding-right: 6px; }
+.ringkasan td.sep-top { width: 2%; text-align: left; padding: 1.5px 6px 0 0; }
+.ringkasan td.val   {
+    font-weight: 800; color: #000000; font-size: 9.8px; width: 68%;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-wrap: break-word !important;
+}
 .ringkasan td.val-judul {
-    text-align: left; color: #000000; line-height: 1.22; padding: 1.0px 0 1.0px 0;
-    vertical-align: top; width: auto;
+    text-align: left; color: #000000; line-height: 1.28; padding: 1.5px 0 1.5px 0;
+    vertical-align: top; width: 68%;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-wrap: break-word !important;
+    word-break: normal !important;
 }
 
 .ttd-foto-wrapper {
@@ -226,21 +243,14 @@ table.nilai tr.ujian-row td.mk.left-col {
 }
 .ttd-foto-wrapper td { vertical-align: top; padding: 0; }
 .ttd-foto-col {
-    width: 25mm;
-    padding-right: 2mm;
-    padding-top: 0;
-    vertical-align: top;
+    width: 28mm; padding-right: 2mm;
 }
 .ttd-foto-box {
-    width: 22mm;
-    height: 30mm;
-    border: 1px solid #333;
-    background: #fdfdfd;
-    overflow: hidden;
-    box-sizing: border-box;
+    width: 24mm; height: 32mm;
+    border: 1px solid #333; background: #fdfdfd;
+    overflow: hidden; box-sizing: border-box;
     position: relative;
     margin: 0;
-    margin-top: 0;
 }
 .ttd-foto-box img {
     width: 100%; height: 100%; object-fit: cover; display: block;
@@ -248,41 +258,28 @@ table.nilai tr.ujian-row td.mk.left-col {
 .ttd-foto-empty {
     position: absolute; inset: 0;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    color: #888; font-size: 9.5px; font-weight: 400;
+    color: #888; font-size: 10.5px; font-weight: 400;
     line-height: 1.25; text-align: center;
     background: #ffffff;
 }
 .ttd-col-wrapper { width: auto; }
 .ttd-box {
-    width: 100%;
-    margin-top: 0;
-    border-collapse: collapse;
-    font-size: 8.2px;
-    color: #000000;
+    width: 100%; margin-top: 0; border-collapse: collapse;
+    font-size: 9.3px; color: #000000;
 }
-.ttd-box td { vertical-align: top; padding-top: 0; margin-top: 0; }
+.ttd-box td { vertical-align: top; }
 .ttd-spacer-l { width: 0%; }
 .ttd-spacer-r { width: 0%; }
-.ttd-col {
-    width: 100%;
-    text-align: left;
-    line-height: 1.28;
-    color: #000000;
-    padding-left: 0;
-    font-size: 8.2px;
-    padding-top: 0 !important;
-    margin-top: 0 !important;
-}
-.ttd-jabatan { margin-top: 2.5px; font-weight: 800; letter-spacing: 0.2px; }
-.ttd-nama    { margin-top: 40px; font-weight: 800; text-decoration: underline; font-size: 8.5px; }
-.ttd-nidk    { margin-top: 3px; font-size: 7.5px; letter-spacing: 0.1px; }
+.ttd-col { width: 100%; text-align: left; line-height: 1.32; color: #000000; padding-left: 0; font-size: 9.5px; }
+.ttd-jabatan { margin-top: 3px; font-weight: 800; letter-spacing: 0.2px; }
+.ttd-nama    { margin-top: 48px; font-weight: 800; text-decoration: underline; font-size: 9.5px; }
+.ttd-nidk    { margin-top: 1px; font-size: 8.5px; letter-spacing: 0.1px; }
 </style>
 </head>
 <body>
 @php
 /* =========================================================
-   LOGO BASE64 (SAMA PERSIS DENGAN pdf.blade.php — LANGSUNG BACA dari public/img/lo.jpeg TANPA TERGANTUNG controller $logoLocalAbsPath.
-   Ini WORK 100% karena PDF selalu berhasil muncul logo dengan logic ini.)
+   LOGO BASE64
 ========================================================= */
 $logoFinalSrc = null;
 $logoCandidates = [
@@ -308,10 +305,10 @@ foreach ($logoCandidates as $logoPath) {
 }
 
 /* =========================================================
-   FOTO MAHASISWA BASE64 (SAMA PERSIS pdf.blade.php — coba $fotoMahasiswa terlebih dahulu, lalu fallback baca langsung dari storage foto_path)
+   FOTO MAHASISWA BASE64
 ========================================================= */
-$fotoFinalSrc = $fotoMahasiswa ?? null;
-if (empty($fotoFinalSrc) && !empty($mahasiswa->foto_path)) {
+$fotoSrcFinal = $fotoMahasiswa ?? null;
+if (empty($fotoSrcFinal) && !empty($mahasiswa->foto_path)) {
     try {
         $relPath = trim(str_replace(['/', '\\'], '/', (string)$mahasiswa->foto_path), '/');
         $absPath = public_path('storage/' . $relPath);
@@ -322,11 +319,11 @@ if (empty($fotoFinalSrc) && !empty($mahasiswa->foto_path)) {
                 if ($data && strlen($data) > 200) {
                     $ext = strtolower(pathinfo($absPath, PATHINFO_EXTENSION));
                     $mime = ($ext === 'png') ? 'image/png' : (($ext === 'gif') ? 'image/gif' : 'image/jpeg');
-                    $fotoFinalSrc = 'data:' . $mime . ';base64,' . base64_encode($data);
+                    $fotoSrcFinal = 'data:' . $mime . ';base64,' . base64_encode($data);
                 }
             }
         }
-    } catch (\Throwable $e) { $fotoFinalSrc = null; }
+    } catch (\Throwable $e) { $fotoSrcFinal = null; }
 }
 
 /* =========================================================
@@ -340,13 +337,13 @@ $ujianCount = count($ujianAda);
 <div class="transcript-paper">
     <div class="wrap">
 
-        {{-- ===== JUDUL TRANSKRIP — SAMA show L249-L252 ===== --}}
+        {{-- ===== JUDUL TRANSKRIP ===== --}}
         <div class="judul-box">
             <div class="judul-text">Transkrip Akademik</div>
             <div class="judul-nomor">Nomor : {{ $nomorTranskrip }}</div>
         </div>
 
-        {{-- ===== BIODATA — SAMA PERSIS show.blade.php L255-L286 (4 KOLOM, TANPA colgroup, class right-label & right-val) ===== --}}
+        {{-- ===== BIODATA (4 KOLOM, class right-label & right-val) ===== --}}
         <table class="biodata" cellpadding="0" cellspacing="0">
             <tr>
                 <td class="bio-label">Nama</td>
@@ -397,7 +394,6 @@ $ujianCount = count($ujianAda);
         <table class="nilai" cellpadding="0" cellspacing="0"><colgroup><col style="width:4.0%;"><col style="width:27.6%;"><col style="width:5.4%;"><col style="width:5.4%;"><col style="width:5.4%;"><col style="width:4.0%;"><col style="width:27.6%;"><col style="width:5.4%;"><col style="width:5.4%;"><col style="width:5.4%;"></colgroup><thead><tr><th class="num">NO</th><th class="mk">MATA KULIAH</th><th class="sks">SKS</th><th class="nilaih">NILAI</th><th class="m">M</th><th class="num">NO</th><th class="mk">MATA KULIAH</th><th class="sks">SKS</th><th class="nilaih">NILAI</th><th class="m">M</th></tr></thead><tbody>
 @for($i = 0; $i < $maxAtas; $i++)
     @php
-        /* SAMA PERSIS show L321-L332 (tidak diubah) */
         $L = $kiriAtas[$i] ?? null;
         $R = $kananAtas[$i] ?? null;
         $noL = $L ? ($i + 1) : '';
@@ -427,7 +423,6 @@ $ujianCount = count($ujianAda);
 
 @for($bi = 0; $bi < $barisBawah; $bi++)
     @php
-        /* SAMA PERSIS show L350-L367 */
         $LL = $mkBawahKiri[$bi] ?? null;
         $namaLL = $LL ? $LL->nama_mata_kuliah : '';
         $sksLL = $LL ? ($LL->sks == 0 ? '0' : $LL->sks) : '';
@@ -493,7 +488,7 @@ $ujianCount = count($ujianAda);
             </tbody>
         </table>
 
-        {{-- ===== RINGKASAN — SAMA PERSIS show L424-L445 ===== --}}
+        {{-- ===== RINGKASAN ===== --}}
         <table class="ringkasan" cellpadding="0" cellspacing="0">
             <colgroup>
                 <col style="width:290px;"><col style="width:22px;"><col style="width:auto;">
@@ -515,14 +510,14 @@ $ujianCount = count($ujianAda);
             </tr>
         </table>
 
-        {{-- ===== FOTO + TANDA TANGAN — SAMA show L448-L476, HANYA padding-left dinaikkan 90→94mm biar foto lebih ke kanan (sesuai spec no.5) ===== --}}
+        {{-- ===== FOTO + TANDA TANGAN ===== --}}
         <div style="page-break-inside: avoid; padding-left:94mm !important; margin-top:6px !important;">
             <table class="ttd-foto-wrapper" cellpadding="0" cellspacing="0" style="padding-left:0 !important; margin:0 !important; border-collapse: collapse;">
                 <tr>
                     <td class="ttd-foto-col" style="vertical-align: top; padding-top: 0;">
                         <div class="ttd-foto-box" style="margin-top: 0;">
-                            @if($fotoFinalSrc)
-                                <img src="{{ $fotoFinalSrc }}" alt="Foto {{ $mahasiswa->nama_lengkap }}" style="width:100%; height:100%; object-fit:cover; display:block; border:0;">
+                            @if($fotoSrcFinal)
+                                <img src="{{ $fotoSrcFinal }}" alt="Foto {{ $mahasiswa->nama_lengkap }}">
                             @else
                                 <div class="ttd-foto-empty">Foto<br>3 × 4</div>
                             @endif
