@@ -56,7 +56,7 @@ body::after, .wrap::after, .transcript-paper::after {
     max-height: none;
     background: #ffffff;
     color: #000000;
-    padding: 6mm 5mm 5mm 5mm;
+    padding: 8mm 12mm 7mm 12mm;
     margin: 0 !important;
     box-sizing: border-box;
     font-family: 'Times New Roman', Times, serif;
@@ -350,6 +350,20 @@ $ujianCount = count($ujianAda);
 
 <div class="transcript-paper">
     <div class="wrap">
+        {{-- ===== KOP SURAT — SAMA PERSIS show L211-L246, hanya logo diganti base64 ===== --}}
+        <div class="kop-wrap">
+            <div class="kop-logo-center">
+                @if($logoFinalSrc)
+                    <img src="{{ $logoFinalSrc }}" alt="Logo IAI DDI Sidrap" width="98" height="98">
+                @endif
+            </div>
+            <div class="kop-title-a">INSTITUT AGAMA ISLAM</div>
+            <div class="kop-title-a kop-title-a2">DARUD DA'WAH WAL IRSYAD</div>
+            <div class="kop-title-b">SIDENRENG RAPPANG</div>
+            <div class="kop-terakreditasi">TERAKREDITASI INSTITUSI • SK : 337/SK/BAN-PT/Ak-S/2.0/PT/VI/2026</div>
+            <div class="kop-alamat-line">Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang</div>
+            <div class="kop-alamat-line kop-email-web">E-mail : iaiddisidrap@gmail.com &nbsp;&nbsp; Website : www.yppddisrapp.ac.id</div>
+        </div>
 
         {{-- ===== JUDUL TRANSKRIP — SAMA show L249-L252 ===== --}}
         <div class="judul-box">

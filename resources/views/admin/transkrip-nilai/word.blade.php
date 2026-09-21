@@ -55,7 +55,7 @@ body::after, .wrap::after, .transcript-paper::after {
     max-height: none;
     background: #ffffff;
     color: #000000;
-    padding: 6mm 5mm 5mm 5mm;
+    padding: 8mm 12mm 7mm 12mm;
     margin: 0 !important;
     box-sizing: border-box;
     font-family: 'Times New Roman', Times, serif;
