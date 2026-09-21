@@ -140,9 +140,9 @@
             <div class="space-y-1.5">
                 <label class="block text-[10px] font-semibold uppercase tracking-wider text-emerald-100/50 pl-0.5">Kata Kunci Pencarian</label>
                 <div class="relative group">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-[13px] text-emerald-300/50 group-focus-within:text-amber-300/80 transition-colors duration-200"></i>
-                    <input type="text" name="mhs_q" value="{{ request('mhs_q') }}" placeholder="Ketik NPM / Nama Mahasiswa..."
-                           class="w-full h-12 pl-10 pr-3.5 rounded-xl bg-gradient-to-r from-emerald-950/70 to-[#0a1f1a]/60 border border-emerald-300/20 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04),0_0_0_1px_rgba(16,185,129,0.05)] placeholder:text-emerald-100/30 placeholder:text-[12.5px] text-sm text-emerald-50 focus:border-amber-300/50 focus:ring-2 focus:ring-amber-300/25 focus:shadow-[0_0_28px_-12px_rgba(251,191,36,0.65)] transition-all duration-200 outline-none" />
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-[13px] text-amber-200/70 group-focus-within:text-amber-300 transition-colors duration-200 z-10"></i>
+                    <input type="text" name="mhs_q" value="{{ request('mhs_q') }}" placeholder="Ketik NPM / Nama Mahasiswa..." spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"
+                           class="w-full h-12 pl-10 pr-3.5 rounded-xl [background-image:none] [background-color:rgb(10,31,26)!important] border border-emerald-300/25 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04),0_0_0_1px_rgba(16,185,129,0.08)] placeholder:text-emerald-100/40 placeholder:text-[12.5px] placeholder:font-normal text-[13.5px] text-white font-medium tracking-wide focus:[background-color:rgb(10,31,26)!important] focus:border-amber-300/60 focus:ring-2 focus:ring-amber-300/30 focus:shadow-[0_0_28px_-12px_rgba(251,191,36,0.7)] focus:text-amber-50 focus:outline-none transition-all duration-200 autofill:[background-color:rgb(10,31,26)!important] autofill:text-fill-color-white autofill:shadow-[inset_0_0_0px_1000px_rgb(10,31,26)] selection:bg-amber-300/30 selection:text-amber-50" />
                 </div>
             </div>
             <div class="flex items-center gap-2.5">
