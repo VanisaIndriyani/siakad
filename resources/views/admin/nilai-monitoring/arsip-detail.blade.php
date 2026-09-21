@@ -126,7 +126,89 @@
         </div>
     </div>
 
-    <div class="mt-5 rounded-2xl border border-emerald-400/25 shadow-[0_0_40px_-18px_rgba(16,185,129,0.55),inset_0_0_30px_-18px_rgba(251,191,36,0.35)] bg-gradient-to-br from-emerald-950/55 via-[#0d2a22]/45 to-[#0a1f1a]/55 backdrop-blur-md p-4">
+    <style>
+        #arsipMhsQInput,
+        #arsipMhsQInput:hover,
+        #arsipMhsQInput:active {
+            appearance: none !important;
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+            background-color: #0a1f1a !important;
+            background-image: none !important;
+            color: #fcd34d !important;
+            -webkit-text-fill-color: #fcd34d !important;
+            font-size: 14px !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.01em !important;
+            border: 1.8px solid rgba(16, 185, 129, 0.42) !important;
+            border-radius: 14px !important;
+            padding: 0 15px 0 42px !important;
+            height: 50px !important;
+            width: 100% !important;
+            box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.05), 0 0 0 1px rgba(16,185,129,0.14) !important;
+            outline: none !important;
+            caret-color: #fbbf24 !important;
+        }
+        #arsipMhsQInput:focus,
+        #arsipMhsQInput:focus-within {
+            background-color: #0a1f1a !important;
+            color: #fde68a !important;
+            -webkit-text-fill-color: #fde68a !important;
+            border-color: rgba(251, 191, 36, 0.82) !important;
+            box-shadow: 0 0 0 2.5px rgba(251, 191, 36, 0.38), 0 0 32px -10px rgba(251,191,36,0.9) !important;
+            outline: none !important;
+        }
+        #arsipMhsQInput::placeholder,
+        #arsipMhsQInput::-webkit-input-placeholder,
+        #arsipMhsQInput::-moz-placeholder,
+        #arsipMhsQInput:-ms-input-placeholder {
+            color: #fef3c7 !important;
+            -webkit-text-fill-color: #fef3c7 !important;
+            opacity: 0.72 !important;
+            font-size: 12.8px !important;
+            font-weight: 500 !important;
+        }
+        #arsipMhsQInput:-webkit-autofill,
+        #arsipMhsQInput:-webkit-autofill:hover,
+        #arsipMhsQInput:-webkit-autofill:focus,
+        #arsipMhsQInput:-webkit-autofill:active {
+            -webkit-box-shadow: inset 0 0 0 1000px #0a1f1a !important;
+            box-shadow: inset 0 0 0 1000px #0a1f1a !important;
+            -webkit-text-fill-color: #fcd34d !important;
+            caret-color: #fbbf24 !important;
+            transition: background-color 9999s ease-in-out 0s !important;
+        }
+        #arsipMhsQInput::selection,
+        #arsipMhsQInput::-moz-selection {
+            background: rgba(251, 191, 36, 0.38) !important;
+            color: #fffbeb !important;
+            -webkit-text-fill-color: #fffbeb !important;
+        }
+    </style>
+    <div x-data="{
+            forceInputStyle() {
+                const el = document.getElementById('arsipMhsQInput');
+                if (!el) return;
+                const apply = () => {
+                    el.style.setProperty('background-color', '#0a1f1a', 'important');
+                    el.style.setProperty('color', '#fcd34d', 'important');
+                    el.style.setProperty('-webkit-text-fill-color', '#fcd34d', 'important');
+                    el.style.setProperty('caret-color', '#fbbf24', 'important');
+                    el.style.setProperty('background-image', 'none', 'important');
+                    el.style.setProperty('appearance', 'none', 'important');
+                };
+                apply();
+                ['input','keydown','keyup','paste','cut','change','blur'].forEach(ev => el.addEventListener(ev, apply, { passive: true }));
+                el.addEventListener('focus', () => {
+                    apply();
+                    el.style.setProperty('-webkit-text-fill-color', '#fde68a', 'important');
+                    el.style.setProperty('color', '#fde68a', 'important');
+                }, { passive: true });
+                new MutationObserver(apply).observe(el, { attributes: true, attributeFilter: ['style', 'class'] });
+                setInterval(apply, 220);
+            }
+        }" x-init="forceInputStyle()" id="arsipMhsQWrap"
+         class="mt-5 rounded-2xl border border-emerald-400/25 shadow-[0_0_40px_-18px_rgba(16,185,129,0.55),inset_0_0_30px_-18px_rgba(251,191,36,0.35)] bg-gradient-to-br from-emerald-950/55 via-[#0d2a22]/45 to-[#0a1f1a]/55 backdrop-blur-md p-4">
         <div class="flex items-center gap-3 mb-4">
             <div class="shrink-0 w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500/20 to-amber-400/15 border border-emerald-400/30 inline-flex items-center justify-center shadow-[0_0_20px_-8px_rgba(16,185,129,0.7)]">
                 <i class="fa-solid fa-user-magnifying-glass text-emerald-200"></i>
@@ -140,12 +222,9 @@
             <div class="space-y-1.5">
                 <label class="block text-[10px] font-bold uppercase tracking-[0.15em] text-emerald-300 pl-0.5 drop-shadow-[0_0_6px_rgba(16,185,129,0.25)]">Kata Kunci Pencarian</label>
                 <div class="relative group">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-[13px] text-amber-300 group-focus-within:text-amber-100 transition-colors duration-200 z-10" style="color: rgb(251 191 36 / 85%)!important;"></i>
-                    <input type="text" name="mhs_q" value="{{ request('mhs_q') }}" placeholder="Ketik NPM / Nama Mahasiswa..." spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"
-                           style="appearance:none;-webkit-appearance:none;-moz-appearance:none;background-color:#0a1f1a!important;background-image:none!important;color:#fffbeb!important;-webkit-text-fill-color:#fffbeb!important;font-size:13.5px;font-weight:600;letter-spacing:0.01em;border:1.5px solid rgb(16 185 129 / 38%);border-radius:12px;padding:0 14px 0 40px;height:48px;width:100%;box-shadow:inset 0 1px 0 0 rgba(255,255,255,0.04),0 0 0 1px rgba(16,185,129,0.12);outline:none!important;"
-                           onfocus="this.style.backgroundColor='#0a1f1a';this.style.color='#fffbeb';this.style.webkitTextFillColor='#fffbeb';this.style.borderColor='rgba(251,191,36,0.75)';this.style.boxShadow='0 0 0 2px rgba(251,191,36,0.35), 0 0 28px -10px rgba(251,191,36,0.8)';"
-                           onblur="this.style.backgroundColor='#0a1f1a';this.style.borderColor='rgba(16,185,129,0.38)';this.style.boxShadow='inset 0 1px 0 0 rgba(255,255,255,0.04),0 0 0 1px rgba(16,185,129,0.12)';"
-                           class="w-full rounded-xl transition-all duration-200 placeholder:[color:rgb(254_243_199/0.65)!important] placeholder:text-[12.5px] autofill:shadow-[inset_0_0_0px_1000px_#0a1f1a] autofill:[text-fill-color:#fffbeb!important]" />
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-[14px] text-amber-400 group-focus-within:text-amber-300 transition-colors duration-200 z-10" style="color:#fbbf24!important;"></i>
+                    <input id="arsipMhsQInput" type="text" name="mhs_q" value="{{ request('mhs_q') }}" placeholder="Ketik NPM / Nama Mahasiswa..." spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"
+                           class="w-full rounded-xl transition-all duration-200" />
                 </div>
             </div>
             <div class="flex items-center gap-2.5">
