@@ -16,6 +16,16 @@
             </div>
         </div>
         <div class="flex flex-wrap gap-2 justify-end">
+            <form method="POST" action="{{ route($prefix.'.khs.sync-from-krs') }}" class="inline" onsubmit="return confirm('Sinkronkan KHS dari KRS yang sudah disetujui (approved)?\n\nYang dilakukan:\n✅ Buat KHS baru untuk KRS approved yang KHS-nya belum ada\n✅ Tambahkan item mata kuliah dari KRS Items ke KHS Items (nilai tetap kosong, menunggu input dosen)\n✅ Hitung ulang IPS/IPK mahasiswa yang terpengaruh\n\nYang TIDAK diubah:\n❌ Nilai yang sudah diinput tidak dihapus / diubah\n❌ KHS dan item yang sudah ada tidak dihapus');">
+                @csrf
+                @foreach(array_filter(request()->only(['q', 'semester', 'page'])) as $k => $v)
+                    <input type="hidden" name="{{ $k }}" value="{{ $v }}" />
+                @endforeach
+                <button class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/30 transition text-amber-100" title="Generate otomatis KHS + item mata kuliah dari KRS approved yang belum tercatat di KHS">
+                    <i class="fa-solid fa-rotate"></i>
+                    <span class="text-sm font-medium">Sinkron KHS dari KRS</span>
+                </button>
+            </form>
             <form method="POST" action="{{ route($prefix.'.khs.recalc') }}" class="inline" onsubmit="return confirm('Hitung ulang IPS &amp; IPK untuk SEMUA mahasiswa yang punya KHS?');">
                 @csrf
                 @foreach(array_filter(request()->only(['q', 'semester', 'page'])) as $k => $v)

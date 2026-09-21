@@ -4,12 +4,17 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Khs;
+use App\Models\KhsItem;
 use App\Models\Krs;
 use App\Models\MataKuliah;
+use App\Models\NilaiArchive;
 use Dompdf\Dompdf;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class NilaiMonitoringController extends Controller
@@ -23,7 +28,136 @@ class NilaiMonitoringController extends Controller
 
     public function index(Request $request): View
     {
-        return view('admin.nilai-monitoring.index', $this->buildIndexData($request, true));
+        $data = $this->buildIndexData($request, true);
+
+        $archiveBatches = NilaiArchive::query()
+            ->select('batch_code', 'semester', DB::raw('COUNT(*) as total_records'), DB::raw('MAX(reset_at) as reset_at'), 'reset_by')
+            ->with(['resetBy:id,name'])
+            ->groupBy('batch_code', 'semester', 'reset_by')
+            ->orderByDesc('reset_at')
+            ->limit(5)
+            ->get();
+
+        return view('admin.nilai-monitoring.index', array_merge($data, [
+            'archiveBatches' => $archiveBatches,
+        ]));
+    }
+
+    public function resetNilaiSemester(Request $request): RedirectResponse
+    {
+        $semester = (int) $request->input('semester', 0);
+        if ($semester < 1 || $semester > 8) {
+            return redirect()->back()->withErrors(['reset' => 'Semester tidak valid (pilih 1-8).']);
+        }
+
+        $confirm = strtoupper(trim((string) $request->input('confirm_reset', '')));
+        if ($confirm !== 'RESET-SEMESTER-'.$semester) {
+            return redirect()->back()->withErrors(['reset' => 'Konfirmasi reset tidak sesuai. Silakan ketik teks yang diminta dengan benar.']);
+        }
+
+        $khsQuery = Khs::query()->where('semester', $semester)->with('items');
+        $totalKhs = (clone $khsQuery)->count();
+        if ($totalKhs === 0) {
+            return redirect()->back()->with('error', "Tidak ada data nilai untuk Semester {$semester}. Tidak perlu direset.");
+        }
+
+        $batchCode = 'RESET-SMT'.$semester.'-'.date('Ymd-His').'-'.Str::upper(Str::random(4));
+        $resetBy = Auth::id();
+        $resetAt = now();
+        $tahunAjaranDefault = (int) date('Y').'/'.((int) date('Y') + 1);
+
+        DB::beginTransaction();
+        try {
+            $khsList = (clone $khsQuery)->get();
+            $archiveInsert = [];
+
+            foreach ($khsList as $khs) {
+                $tahunAjaran = $khs->tahun_ajaran ?: $tahunAjaranDefault;
+
+                if ($khs->items && $khs->items->count() > 0) {
+                    foreach ($khs->items as $item) {
+                        $hasValue = $item->nilai_tm !== null
+                            || $item->nilai_quis !== null
+                            || $item->nilai_mid !== null
+                            || $item->nilai_final !== null
+                            || $item->nilai_angka !== null
+                            || $item->nilai_huruf !== null;
+                        if (! $hasValue) {
+                            continue;
+                        }
+                        $archiveInsert[] = [
+                            'batch_code' => $batchCode,
+                            'semester' => $semester,
+                            'tahun_ajaran' => $tahunAjaran,
+                            'mahasiswa_id' => (int) $khs->mahasiswa_id,
+                            'mata_kuliah_id' => (int) $item->mata_kuliah_id,
+                            'khs_id' => (int) $khs->id,
+                            'khs_item_id' => (int) $item->id,
+                            'nilai_tm' => $item->nilai_tm,
+                            'nilai_quis' => $item->nilai_quis,
+                            'nilai_mid' => $item->nilai_mid,
+                            'nilai_final' => $item->nilai_final,
+                            'nilai_angka' => $item->nilai_angka,
+                            'nilai_huruf' => $item->nilai_huruf,
+                            'ips_saat_reset' => $khs->ips,
+                            'ipk_saat_reset' => $khs->ipk,
+                            'catatan' => 'Reset nilai otomatis semester '.$semester,
+                            'reset_by' => $resetBy,
+                            'reset_at' => $resetAt,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ];
+                    }
+                }
+            }
+
+            if (count($archiveInsert) > 0) {
+                $chunks = array_chunk($archiveInsert, 500);
+                foreach ($chunks as $chunk) {
+                    NilaiArchive::insert($chunk);
+                }
+            }
+
+            $totalArchived = count($archiveInsert);
+
+            KhsItem::query()
+                ->whereIn('khs_id', function ($sub) use ($semester) {
+                    $sub->select('id')->from('khs')->where('semester', $semester);
+                })
+                ->update([
+                    'nilai_tm' => null,
+                    'nilai_quis' => null,
+                    'nilai_mid' => null,
+                    'nilai_final' => null,
+                    'nilai_angka' => null,
+                    'nilai_huruf' => null,
+                ]);
+
+            Khs::query()
+                ->where('semester', $semester)
+                ->update([
+                    'ips' => null,
+                ]);
+
+            DB::commit();
+
+            $msg = "✅ Reset nilai Semester {$semester} BERHASIL. ";
+            $msg .= "Total KHS: {$totalKhs}, Total nilai yang di-archive: {$totalArchived}. ";
+            if ($totalArchived > 0) {
+                $msg .= "Batch: {$batchCode} — semua nilai lama AMAN tersimpan di tabel archive dan bisa dilihat/direstore kapan saja.";
+            }
+
+            return redirect()
+                ->route('admin.nilai-monitoring.index', ['semester' => $semester])
+                ->with('success', $msg);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            report($e);
+
+            return redirect()->back()->withErrors([
+                'reset' => 'Gagal reset nilai: '.mb_substr($e->getMessage(), 0, 200),
+            ]);
+        }
     }
 
     public function exportPdf(Request $request)

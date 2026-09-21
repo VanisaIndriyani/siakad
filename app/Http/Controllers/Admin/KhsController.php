@@ -6,11 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Dosen;
 use App\Models\Khs;
 use App\Models\KhsItem;
+use App\Models\Krs;
+use App\Models\KrsItem;
 use App\Models\Mahasiswa;
 use App\Models\MataKuliah;
 use Dompdf\Dompdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class KhsController extends Controller
@@ -359,6 +362,147 @@ class KhsController extends Controller
         $query->delete();
 
         return back()->with('success', 'Data KHS terpilih berhasil dihapus.');
+    }
+
+    public function syncFromApprovedKrs(Request $request): RedirectResponse
+    {
+        $context = $this->resolveContext($request);
+        $programStudi = $context['programStudi'] ?? null;
+
+        $krsApprovedQuery = Krs::query()
+            ->with(['items:id,krs_id,mata_kuliah_id', 'items.mataKuliah:id,sks', 'mahasiswa:id,program_studi,nama_lengkap,npm'])
+            ->where('status_approval', 'approved');
+
+        if (!empty($programStudi)) {
+            $krsApprovedQuery->whereHas('mahasiswa', function ($sub) use ($programStudi) {
+                $sub->where('program_studi', $programStudi);
+            });
+        }
+
+        $semesterFilter = trim((string) $request->get('semester', ''));
+        if ($semesterFilter !== '') {
+            $semInt = (int) $semesterFilter;
+            if ($semInt > 0 && $semInt <= 8) {
+                $krsApprovedQuery->where('semester', $semInt);
+            }
+        }
+
+        $approvedKrs = $krsApprovedQuery->get();
+
+        $tahunAjaranDefault = (int) date('Y').'/'.((int) date('Y') + 1);
+        $createdKhsCount = 0;
+        $createdItemsCount = 0;
+        $updatedExisting = 0;
+        $processedMhs = [];
+
+        DB::beginTransaction();
+        try {
+            foreach ($approvedKrs as $krs) {
+                $mhs = $krs->mahasiswa;
+                if (! $mhs) {
+                    continue;
+                }
+                $mhsId = (int) $mhs->id;
+                $smt = (int) $krs->semester;
+                if ($smt < 1 || $smt > 8) {
+                    continue;
+                }
+                $tahunAjaran = trim((string) ($krs->tahun_ajaran ?? '')) ?: $tahunAjaranDefault;
+
+                $khs = Khs::query()->firstOrNew(
+                    ['mahasiswa_id' => $mhsId, 'semester' => $smt]
+                );
+
+                $isNew = ! $khs->exists;
+                if (! $khs->exists) {
+                    $khs->tahun_ajaran = $tahunAjaran;
+                    $khs->ips = null;
+                    $khs->ipk = null;
+                    $khs->save();
+                    $createdKhsCount++;
+                } else {
+                    if (empty($khs->tahun_ajaran)) {
+                        $khs->tahun_ajaran = $tahunAjaran;
+                        $khs->save();
+                        $updatedExisting++;
+                    }
+                }
+
+                $mkExisting = KhsItem::query()
+                    ->where('khs_id', $khs->id)
+                    ->pluck('mata_kuliah_id')
+                    ->map(fn ($v) => (int) $v)
+                    ->all();
+
+                if ($krs->items && $krs->items->count() > 0) {
+                    foreach ($krs->items as $krsItem) {
+                        $mkId = (int) ($krsItem->mata_kuliah_id ?? 0);
+                        if ($mkId < 1) {
+                            continue;
+                        }
+                        if (in_array($mkId, $mkExisting, true)) {
+                            continue;
+                        }
+                        KhsItem::create([
+                            'khs_id' => (int) $khs->id,
+                            'mata_kuliah_id' => $mkId,
+                            'nilai_tm' => null,
+                            'nilai_quis' => null,
+                            'nilai_mid' => null,
+                            'nilai_final' => null,
+                            'nilai_angka' => null,
+                            'nilai_huruf' => null,
+                        ]);
+                        $createdItemsCount++;
+                    }
+                }
+
+                if (! isset($processedMhs[$mhsId])) {
+                    $processedMhs[$mhsId] = true;
+                }
+            }
+
+            $maxSemester = (int) Khs::query()->max('semester');
+            if ($maxSemester < 1) {
+                $maxSemester = 8;
+            }
+            $nilaiController = new \App\Http\Controllers\Dosen\NilaiController();
+            $recalcCount = 0;
+            foreach (array_keys($processedMhs) as $mhsId) {
+                $nilaiController->callableRecalculate((int) $mhsId, $maxSemester);
+                $recalcCount++;
+            }
+
+            DB::commit();
+
+            $parts = [];
+            $parts[] = "✅ Sinkron selesai.";
+            if ($createdKhsCount > 0) {
+                $parts[] = "KHS baru dibuat: {$createdKhsCount}.";
+            }
+            if ($createdItemsCount > 0) {
+                $parts[] = "Item MK ditambahkan: {$createdItemsCount}.";
+            }
+            if ($updatedExisting > 0) {
+                $parts[] = "KHS lama diperbarui: {$updatedExisting}.";
+            }
+            if ($recalcCount > 0) {
+                $parts[] = "IPS/IPK dihitung ulang: {$recalcCount} mahasiswa.";
+            }
+            if ($createdKhsCount === 0 && $createdItemsCount === 0 && $updatedExisting === 0) {
+                $parts[] = "Tidak ada perubahan — Semua KRS approved sudah sinkron dengan KHS.";
+            }
+
+            $prefix = $context['routePrefix'] ?? 'admin';
+            return redirect()->route($prefix.'.khs.index', $request->only(['q', 'semester', 'page']))
+                ->with('success', implode(' ', $parts));
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            report($e);
+            return back()->withErrors([
+                'sync' => 'Gagal sinkron KHS dari KRS approved: '.mb_substr($e->getMessage(), 0, 200),
+            ]);
+        }
     }
 
     public function recalcAll(Request $request): RedirectResponse

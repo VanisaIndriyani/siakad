@@ -201,6 +201,7 @@ Route::prefix('admin')
 
         Route::delete('/khs/bulk-delete', [AdminKhsController::class, 'bulkDestroy'])->name('khs.bulk-delete');
         Route::post('/khs/recalc', [AdminKhsController::class, 'recalcAll'])->name('khs.recalc');
+        Route::post('/khs/sync-from-krs', [AdminKhsController::class, 'syncFromApprovedKrs'])->name('khs.sync-from-krs');
         Route::get('/khs', [AdminKhsController::class, 'index'])->name('khs.index');
         Route::get('/khs/create', [AdminKhsController::class, 'create'])->name('khs.create');
         Route::get('/khs/{khs}', [AdminKhsController::class, 'show'])->name('khs.show');
@@ -217,6 +218,7 @@ Route::prefix('admin')
         Route::get('/nilai-monitoring', [AdminNilaiMonitoringController::class, 'index'])->name('nilai-monitoring.index');
         Route::get('/nilai-monitoring/pdf', [AdminNilaiMonitoringController::class, 'exportPdf'])->name('nilai-monitoring.pdf');
         Route::get('/nilai-monitoring/{mataKuliah}/pdf/{semester}', [AdminNilaiMonitoringController::class, 'exportDetailPdf'])->name('nilai-monitoring.detail.pdf');
+        Route::post('/nilai-monitoring/reset-semester', [AdminNilaiMonitoringController::class, 'resetNilaiSemester'])->name('nilai-monitoring.reset-semester');
 
         Route::get('/kuesioner', [AdminQuestionnaireController::class, 'index'])->name('kuesioner.index');
         Route::get('/kuesioner/create', [AdminQuestionnaireController::class, 'create'])->name('kuesioner.create');
@@ -679,6 +681,7 @@ Route::prefix('dosen')
 
         Route::delete('/khs/bulk-delete', [AdminKhsController::class, 'bulkDestroy'])->name('khs.bulk-delete');
         Route::post('/khs/recalc', [AdminKhsController::class, 'recalcAll'])->name('khs.recalc');
+        Route::post('/khs/sync-from-krs', [AdminKhsController::class, 'syncFromApprovedKrs'])->name('khs.sync-from-krs');
         Route::get('/khs', [AdminKhsController::class, 'index'])->name('khs.index');
         Route::get('/khs/create', [AdminKhsController::class, 'create'])->name('khs.create');
         Route::get('/khs/{khs}', [AdminKhsController::class, 'show'])->name('khs.show');
