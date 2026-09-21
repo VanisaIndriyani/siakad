@@ -222,6 +222,7 @@ Route::prefix('admin')
         Route::get('/arsip-nilai', [AdminNilaiMonitoringController::class, 'arsipIndex'])->name('nilai-monitoring.arsip');
         Route::get('/arsip-nilai/{batch}', [AdminNilaiMonitoringController::class, 'arsipDetail'])->name('nilai-monitoring.arsip-detail');
         Route::post('/arsip-nilai/{batch}/restore', [AdminNilaiMonitoringController::class, 'arsipRestoreBatch'])->name('nilai-monitoring.arsip-restore-batch');
+        Route::post('/arsip-nilai/{batch}/restore-mahasiswa/{mahasiswa}', [AdminNilaiMonitoringController::class, 'arsipRestoreMahasiswa'])->name('nilai-monitoring.arsip-restore-mahasiswa');
 
         Route::get('/kuesioner', [AdminQuestionnaireController::class, 'index'])->name('kuesioner.index');
         Route::get('/kuesioner/create', [AdminQuestionnaireController::class, 'create'])->name('kuesioner.create');

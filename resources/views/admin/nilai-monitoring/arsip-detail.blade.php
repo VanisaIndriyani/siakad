@@ -126,6 +126,30 @@
         </div>
     </div>
 
+    <div class="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4">
+        <form method="GET" action="{{ url()->current() }}" class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+            <div class="space-y-1">
+                <label class="block text-[11px] font-semibold uppercase tracking-wider text-emerald-100/60">Cari Cepat Mahasiswa</label>
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs text-emerald-100/40"></i>
+                    <input type="text" name="mhs_q" value="{{ request('mhs_q') }}" placeholder="Cari nama / NPM (contoh: 0229250002 / Herliana)"
+                           class="w-full h-11 pl-9 pr-3 rounded-xl bg-[#0a1f1a] border border-white/10 focus:border-emerald-400 focus:ring-emerald-400 text-sm" />
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button type="submit" class="h-11 px-5 inline-flex items-center gap-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/30 transition text-sm font-semibold text-emerald-100">
+                    <i class="fa-solid fa-filter"></i> Cari
+                </button>
+                @if(request('mhs_q'))
+                    <a href="{{ url()->current() }}" class="h-11 px-4 inline-flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition text-sm">Reset</a>
+                @endif
+            </div>
+            <div class="text-xs text-emerald-100/60 md:text-right">
+                Total mahasiswa ditampilkan: <span class="font-bold text-emerald-200">{{ $recordsGrouped->count() }}</span>
+            </div>
+        </form>
+    </div>
+
     <div class="mt-5 space-y-5">
         @forelse ($recordsGrouped as $mhsId => $items)
             @php
@@ -133,7 +157,68 @@
                 $mhs = $firstItem?->mahasiswa;
                 $ipsSnapshot = $firstItem?->ips_saat_reset;
                 $ipkSnapshot = $firstItem?->ipk_saat_reset;
+                $mhsRestConfirm = $mhs ? 'RESTORE-MHS-'.$mhs->npm.'-BATCH-'.$batchCode : 'RESTORE-MHS-'.$mhsId.'-BATCH-'.$batchCode;
+                $mhsModalId = 'restore-mhs-modal-'.$mhsId;
             @endphp
+            <div x-data="{
+                    showModal{{ $mhsId }}: false,
+                    confirmInput{{ $mhsId }}: '',
+                    expected{{ $mhsId }}: @js($mhsRestConfirm),
+                    get isValid() { return this['confirmInput{{ $mhsId }}'].trim().toUpperCase() === this['expected{{ $mhsId }}']; }
+                }"
+                 x-on:open-modal.window="if ($event.detail.id === 'restore-mhs-modal-{{ $mhsId }}') this['showModal{{ $mhsId }}'] = true"
+                 x-show="showModal{{ $mhsId }}" x-transition.opacity
+                 class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display: none;">
+                <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showModal{{ $mhsId }} = false"></div>
+                <div class="relative w-full max-w-lg rounded-2xl border border-emerald-500/25 bg-[#0a1f1a] shadow-2xl overflow-hidden"
+                     x-show="showModal{{ $mhsId }}" x-transition:enter="scale-95 opacity-0" x-transition:enter-end="scale-100 opacity-100">
+                    <div class="px-6 py-5 border-b border-white/10">
+                        <div class="flex items-start gap-4">
+                            <div class="shrink-0 w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 inline-flex items-center justify-center">
+                                <i class="fa-solid fa-user-rotate text-emerald-300 text-lg"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-lg font-bold text-emerald-100">Restore Hanya Mahasiswa Ini</div>
+                                <div class="mt-1 text-xs text-emerald-100/70 leading-relaxed">
+                                    Hanya merestor nilai milik <span class="font-bold text-emerald-200">{{ $mhs?->nama_lengkap ?? 'Mahasiswa #'.$mhsId }}</span>
+                                    @if($mhs) <span class="font-mono text-amber-300">(NPM {{ $mhs->npm }})</span> @endif
+                                    pada batch <span class="font-mono text-amber-300">{{ $batchCode }}</span>.
+                                    Mahasiswa LAINNYA TIDAK TERDAMPAK sama sekali. IPS/IPK mahasiswa ini otomatis dihitung ulang.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <form method="POST" action="{{ route('admin.nilai-monitoring.arsip-restore-mahasiswa', ['batch' => $batchCode, 'mahasiswa' => $mhsId]) }}" class="px-6 py-5 space-y-4">
+                        @csrf
+                        <div class="space-y-2">
+                            <label class="block text-xs font-semibold text-emerald-100/80">Konfirmasi Keamanan</label>
+                            <div class="text-xs text-emerald-100/70">Ketik teks berikut (case-insensitive):</div>
+                            <div class="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-xs font-mono font-bold text-emerald-300 break-all select-all">
+                                {{ $mhsRestConfirm }}
+                            </div>
+                            <input type="text" x-model="confirmInput{{ $mhsId }}" name="confirm"
+                                   placeholder="Ketik konfirmasi restore mahasiswa..."
+                                   class="w-full h-11 px-3 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400 text-sm"
+                                   autocomplete="off" />
+                        </div>
+                        <div class="flex items-center justify-between gap-3 pt-2">
+                            <button type="button" @click="showModal{{ $mhsId }} = false"
+                                    class="h-11 px-5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-sm font-medium">
+                                Batal
+                            </button>
+                            <button type="submit" :disabled="!isValid"
+                                    :class="isValid
+                                        ? 'bg-emerald-500 hover:bg-emerald-400 shadow-[0_0_25px_-5px_rgba(16,185,129,0.7)] border-emerald-400/30'
+                                        : 'bg-white/5 border-white/10 cursor-not-allowed text-white/40'"
+                                    class="h-11 px-6 inline-flex items-center gap-2 rounded-xl border transition text-sm font-bold text-white">
+                                <i class="fa-solid fa-rotate-left text-xs"></i>
+                                <span>Restore Mahasiswa Ini</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <div class="rounded-2xl border border-white/10 bg-[#0b231c] shadow-2xl overflow-hidden">
                 <div class="bg-gradient-to-r from-emerald-500/10 via-transparent to-transparent px-5 py-4 border-b border-white/10">
                     <div class="flex flex-wrap items-center gap-4 justify-between">
@@ -156,7 +241,12 @@
                                 @endif
                             </div>
                         </div>
-                        <div class="flex items-center gap-2">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button type="button" @click="$dispatch('open-modal', { id: 'restore-mhs-modal-{{ $mhsId }}' })"
+                                    class="h-9 px-4 inline-flex items-center gap-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/30 transition text-emerald-100 text-xs font-semibold shadow-[0_0_18px_-10px_rgba(16,185,129,0.55)]">
+                                <i class="fa-solid fa-user-rotate"></i>
+                                Restore Hanya Mahasiswa Ini
+                            </button>
                             <div class="px-3 py-1.5 rounded-xl bg-blue-500/10 border border-blue-400/25">
                                 <div class="text-[10px] uppercase tracking-wider font-semibold text-blue-200/80">Total MK</div>
                                 <div class="text-sm font-bold text-blue-100">{{ $items->count() }} matkul</div>

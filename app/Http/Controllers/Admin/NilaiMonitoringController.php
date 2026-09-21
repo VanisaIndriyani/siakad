@@ -223,6 +223,7 @@ class NilaiMonitoringController extends Controller
     public function arsipDetail(Request $request, string $batch): View
     {
         $batch = strtoupper(trim($batch));
+        $mhs_q = trim((string) $request->input('mhs_q', ''));
 
         $batchInfo = NilaiArchive::query()
             ->where('batch_code', $batch)
@@ -231,12 +232,21 @@ class NilaiMonitoringController extends Controller
             ->groupBy('batch_code', 'semester', 'tahun_ajaran', 'reset_by')
             ->firstOrFail();
 
-        $records = NilaiArchive::query()
+        $query = NilaiArchive::query()
             ->where('batch_code', $batch)
             ->with([
                 'mahasiswa:id,nama_lengkap,npm,program_studi',
                 'mataKuliah:id,kode,nama,sks',
-            ])
+            ]);
+
+        if ($mhs_q !== '') {
+            $query->whereHas('mahasiswa', function ($s) use ($mhs_q) {
+                $s->where('nama_lengkap', 'like', '%'.$mhs_q.'%')
+                    ->orWhere('npm', 'like', '%'.$mhs_q.'%');
+            });
+        }
+
+        $records = $query
             ->orderBy('mahasiswa_id')
             ->orderBy('mata_kuliah_id')
             ->get()
@@ -352,6 +362,143 @@ class NilaiMonitoringController extends Controller
             report($e);
             return redirect()->back()->withErrors([
                 'restore' => 'Gagal restore batch: '.mb_substr($e->getMessage(), 0, 200),
+            ]);
+        }
+    }
+
+    public function arsipRestoreMahasiswa(Request $request, string $batch, Mahasiswa $mahasiswa)
+    {
+        $request->validate([
+            'confirm' => ['required', 'string', function ($attr, $val, $fail) use ($batch, $mahasiswa) {
+                $expected = "RESTORE-MHS-{$mahasiswa->npm}-BATCH-{$batch}";
+                if (strtoupper(trim($val)) !== $expected) {
+                    $fail("Teks konfirmasi SALAH. Harus ketik: {$expected}");
+                }
+            }],
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $archives = NilaiArchive::query()
+                ->where('batch_code', $batch)
+                ->where('mahasiswa_id', $mahasiswa->id)
+                ->get();
+
+            if ($archives->isEmpty()) {
+                DB::rollBack();
+                return redirect()->back()->withErrors([
+                    'restore' => "Tidak ada nilai backup untuk NPM {$mahasiswa->npm} di batch {$batch}",
+                ]);
+            }
+
+            $semester = $archives->first()->semester;
+            $khsLookupCache = [];
+            $khsItemIdsByMkCache = [];
+            $restored = 0;
+            $restoredViaKhsItem = 0;
+            $restoredViaKhsAndMk = 0;
+            $restoredViaFallback = 0;
+            $skipped = 0;
+            $skippedDetail = [];
+
+            foreach ($archives as $ar) {
+                $updateData = [
+                    'nilai_tm' => $ar->nilai_tm,
+                    'nilai_quis' => $ar->nilai_quis,
+                    'nilai_mid' => $ar->nilai_mid,
+                    'nilai_final' => $ar->nilai_final,
+                    'nilai_angka' => $ar->nilai_angka,
+                    'nilai_huruf' => $ar->nilai_huruf,
+                ];
+                $updated = false;
+
+                if ($ar->khs_item_id) {
+                    $affected = KhsItem::query()->where('id', $ar->khs_item_id)->update($updateData);
+                    if ($affected > 0) {
+                        $restored++;
+                        $restoredViaKhsItem++;
+                        $updated = true;
+                    }
+                }
+
+                if (! $updated && $ar->khs_id && $ar->mata_kuliah_id) {
+                    $affected = KhsItem::query()
+                        ->where('khs_id', $ar->khs_id)
+                        ->where('mata_kuliah_id', $ar->mata_kuliah_id)
+                        ->update($updateData);
+                    if ($affected > 0) {
+                        $restored++;
+                        $restoredViaKhsAndMk++;
+                        $updated = true;
+                    }
+                }
+
+                if (! $updated) {
+                    $cacheKey = "{$mahasiswa->id}:{$ar->semester}";
+                    if (! isset($khsLookupCache[$cacheKey])) {
+                        $khsLookupCache[$cacheKey] = Khs::query()
+                            ->where('mahasiswa_id', $mahasiswa->id)
+                            ->where('semester', $ar->semester)
+                            ->first();
+                    }
+                    $currentKhs = $khsLookupCache[$cacheKey];
+                    if ($currentKhs) {
+                        $itemCacheKey = "{$currentKhs->id}:{$ar->mata_kuliah_id}";
+                        if (! isset($khsItemIdsByMkCache[$itemCacheKey])) {
+                            $khsItemIdsByMkCache[$itemCacheKey] = KhsItem::query()
+                                ->where('khs_id', $currentKhs->id)
+                                ->where('mata_kuliah_id', $ar->mata_kuliah_id)
+                                ->first();
+                        }
+                        $item = $khsItemIdsByMkCache[$itemCacheKey];
+                        if ($item) {
+                            $item->update($updateData);
+                            $restored++;
+                            $restoredViaFallback++;
+                            $updated = true;
+                        }
+                    }
+                }
+
+                if (! $updated) {
+                    $skipped++;
+                    $skippedDetail[] = [
+                        'mahasiswa_id' => $ar->mahasiswa_id,
+                        'mata_kuliah_id' => $ar->mata_kuliah_id,
+                        'semester' => $ar->semester,
+                    ];
+                }
+            }
+
+            $updatedMhs = [];
+            $updatedMhs[$mahasiswa->id] = true;
+            try {
+                $nilaiCtrl = new \App\Http\Controllers\Dosen\NilaiController();
+                $nilaiCtrl->callableRecalculate([$mahasiswa->id]);
+            } catch (\Throwable $e) {
+                report($e);
+            }
+
+            DB::commit();
+            $msg = "✅ Restore NPM {$mahasiswa->npm} BERHASIL! Batch: {$batch}. Semester {$semester}. Total data restore: {$restored} record. ";
+            $layers = [];
+            if ($restoredViaKhsItem > 0) $layers[] = "via Layer 1 (khs_item_id): {$restoredViaKhsItem}";
+            if ($restoredViaKhsAndMk > 0) $layers[] = "via Layer 2 (khs_id+mk): {$restoredViaKhsAndMk}";
+            if ($restoredViaFallback > 0) $layers[] = "via Layer 3 Fallback (Mahasiswa+Semester): {$restoredViaFallback}";
+            if ($layers) $msg .= "Layer restore: ".implode(', ', $layers).". ";
+            if ($skipped > 0) {
+                $sample = array_slice($skippedDetail, 0, 5);
+                $sampleStr = collect($sample)->map(fn ($s) => "MK#{$s['mata_kuliah_id']}/S{$s['semester']}")->implode(', ');
+                $msg .= "Dilewati: {$skipped} record (MK tidak ada di KHS sekarang). Sampel: {$sampleStr}. ";
+            }
+            $msg .= "IPS/IPK NPM {$mahasiswa->npm} otomatis dihitung ulang. ✅";
+            return redirect()->route('admin.nilai-monitoring.arsip-detail', ['batch' => $batch])
+                ->with('success', $msg);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            report($e);
+            return redirect()->back()->withErrors([
+                'restore' => "Gagal restore mahasiswa {$mahasiswa->npm}: ".mb_substr($e->getMessage(), 0, 200),
             ]);
         }
     }
