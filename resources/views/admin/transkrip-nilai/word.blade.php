@@ -65,7 +65,7 @@ html, body {
 }
 .kop-email-web { margin-top: 2px; }
 
-.judul-box { text-align: center; margin-top: 8px; }
+.judul-box { text-align: center; margin-top: 24px; }
 .judul-text {
     font-size: 14px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase;
     text-decoration: none; color: #000000;
@@ -73,7 +73,7 @@ html, body {
 .judul-nomor { font-size: 8px; margin-top: 1px; color: #000000; }
 
 .biodata {
-    width: 100%; margin-top: 7px; border-collapse: collapse;
+    width: 100%; margin-top: 16px; border-collapse: collapse;
     font-size: 7.9px; color: #000000; table-layout: fixed;
 }
 .biodata td { vertical-align: top; padding: 0; line-height: 1.25; }
@@ -339,20 +339,6 @@ $ujianCount = count($ujianAda);
 
 <div class="transcript-paper">
     <div class="wrap">
-        {{-- ===== KOP SURAT — LOGO di-EMBED BASE64 (WORK di Word / PDF) ===== --}}
-        <div class="kop-wrap">
-            <div class="kop-logo-center">
-                @if($logoFinalSrc)
-                    <img src="{{ $logoFinalSrc }}" alt="Logo IAI DDI Sidrap" width="98" height="98" style="display:inline-block; border:0; margin:0; padding:0;">
-                @endif
-            </div>
-            <div class="kop-title-a">INSTITUT AGAMA ISLAM</div>
-            <div class="kop-title-a kop-title-a2">DARUD DA'WAH WAL IRSYAD</div>
-            <div class="kop-title-b">SIDENRENG RAPPANG</div>
-            <div class="kop-terakreditasi">TERAKREDITASI INSTITUSI • SK : 337/SK/BAN-PT/Ak-S/2.0/PT/VI/2026</div>
-            <div class="kop-alamat-line">Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang</div>
-            <div class="kop-alamat-line kop-email-web">E-mail : iaiddisidrap@gmail.com &nbsp;&nbsp; Website : www.yppddisrapp.ac.id</div>
-        </div>
 
         {{-- ===== JUDUL TRANSKRIP — SAMA show L249-L252 ===== --}}
         <div class="judul-box">

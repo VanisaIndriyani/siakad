@@ -108,7 +108,7 @@ body::after, .wrap::after, .transcript-paper::after {
 }
 
 /* PERSIS SHOW L576-L581: judul-text 16px judul-nomor 9.2px (SEBELUMNYA 14+8) */
-.judul-box { text-align: center; margin-top: 10px; }
+.judul-box { text-align: center; margin-top: 24px; }
 .judul-text {
     font-size: 16px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
     text-decoration: none; color: #000000;
@@ -117,7 +117,7 @@ body::after, .wrap::after, .transcript-paper::after {
 
 /* PERSIS SHOW L583-L615: biodata font 9.5px padding 1.5 10 1.5 0 — width 100% FULL (isi padat, global wrap masih ada jadi TIDAK KEPOTONG) */
 .biodata {
-    width: 100%; margin-top: 10px; border-collapse: collapse;
+    width: 100%; margin-top: 16px; border-collapse: collapse;
     font-size: 9.5px; color: #000000; table-layout: fixed;
 }
 .biodata td { vertical-align: top; padding: 0; line-height: 1.3; }
@@ -355,20 +355,6 @@ $ujianCount = count($ujianAda);
 
 <div class="transcript-paper">
     <div class="wrap">
-        {{-- ===== KOP SURAT — SAMA PERSIS show L211-L246, hanya logo diganti base64 ===== --}}
-        <div class="kop-wrap">
-            <div class="kop-logo-center">
-                @if($logoFinalSrc)
-                    <img src="{{ $logoFinalSrc }}" alt="Logo IAI DDI Sidrap" width="98" height="98">
-                @endif
-            </div>
-            <div class="kop-title-a">INSTITUT AGAMA ISLAM</div>
-            <div class="kop-title-a kop-title-a2">DARUD DA'WAH WAL IRSYAD</div>
-            <div class="kop-title-b">SIDENRENG RAPPANG</div>
-            <div class="kop-terakreditasi">TERAKREDITASI INSTITUSI • SK : 337/SK/BAN-PT/Ak-S/2.0/PT/VI/2026</div>
-            <div class="kop-alamat-line">Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang</div>
-            <div class="kop-alamat-line kop-email-web">E-mail : iaiddisidrap@gmail.com &nbsp;&nbsp; Website : www.yppddisrapp.ac.id</div>
-        </div>
 
         {{-- ===== JUDUL TRANSKRIP — SAMA show L249-L252 ===== --}}
         <div class="judul-box">
