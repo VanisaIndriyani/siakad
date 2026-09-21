@@ -21,9 +21,14 @@
         <span class="text-sm font-medium">Dosen</span>
     </a>
     <a href="{{ route('admin.mata-kuliah.index') }}"
-       class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('admin.mata-kuliah.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+       class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('admin.mata-kuliah.*') && !request()->routeIs('admin.dokumen-kuliah.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
         <i class="fa-solid fa-book-open text-emerald-300"></i>
         <span class="text-sm font-medium">Mata Kuliah</span>
+    </a>
+    <a href="{{ route('admin.dokumen-kuliah.index') }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl border transition {{ request()->routeIs('admin.dokumen-kuliah.*') ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5 hover:border-white/10' }}">
+        <i class="fa-solid fa-file-arrow-up text-emerald-300"></i>
+        <span class="text-sm font-medium">Upload SK & Roster</span>
     </a>
     @php
         $pendingKrsCount = cache()->remember('admin_pending_krs_count', 10, function () {

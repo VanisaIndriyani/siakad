@@ -8,6 +8,7 @@ use App\Http\Controllers\Mahasiswa\CutiController as MahasiswaCutiController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\AcademicCalendarController as AdminAcademicCalendarController;
 use App\Http\Controllers\Admin\AbsensiController as AdminAbsensiController;
+use App\Http\Controllers\Admin\DokumenKuliahController as AdminDokumenKuliahController;
 use App\Http\Controllers\Admin\DosenController as AdminDosenController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
@@ -172,9 +173,11 @@ Route::prefix('admin')
 
         Route::delete('/mata-kuliah/bulk-delete', [AdminMataKuliahController::class, 'bulkDestroy'])->name('mata-kuliah.bulk-delete');
         Route::get('/mata-kuliah/export-pdf', [AdminMataKuliahController::class, 'exportPdf'])->name('mata-kuliah.export-pdf');
-        Route::post('/mata-kuliah/upload-sk/{prodi}', [AdminMataKuliahController::class, 'uploadSkPdfProdi'])->name('mata-kuliah.upload-sk');
-        Route::post('/mata-kuliah/upload-roster/{prodi}', [AdminMataKuliahController::class, 'uploadRosterPdfProdi'])->name('mata-kuliah.upload-roster');
         Route::resource('mata-kuliah', AdminMataKuliahController::class)->except(['show']);
+
+        Route::get('/dokumen-kuliah', [AdminDokumenKuliahController::class, 'index'])->name('dokumen-kuliah.index');
+        Route::post('/dokumen-kuliah/upload-sk/{prodi}', [AdminDokumenKuliahController::class, 'uploadSkPdfProdi'])->name('dokumen-kuliah.upload-sk');
+        Route::post('/dokumen-kuliah/upload-roster/{prodi}', [AdminDokumenKuliahController::class, 'uploadRosterPdfProdi'])->name('dokumen-kuliah.upload-roster');
         Route::post('/mata-kuliah/{mataKuliah}/rps-admin', [AdminMataKuliahController::class, 'uploadRpsAdmin'])->name('mata-kuliah.rps-admin.upload');
         Route::get('/mata-kuliah/{mataKuliah}/rps-admin', [AdminMataKuliahController::class, 'downloadRpsAdmin'])->name('mata-kuliah.rps-admin.download');
         Route::get('/mata-kuliah/{mataKuliah}/rps-admin/preview', [AdminMataKuliahController::class, 'previewRpsAdmin'])->name('mata-kuliah.rps-admin.preview');
