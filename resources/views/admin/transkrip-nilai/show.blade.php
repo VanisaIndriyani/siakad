@@ -303,34 +303,6 @@
                 </thead>
                 <tbody>
                     @php
-                        /* ============== INJECT DUMMY 16 MK (TEST SAMPAI 91 MK TOTAL) — UNTUK TEST SHOW & PDF ============== */
-                        $dummyList = [];
-                        $gradeMap = ['A'=>4,'A-'=>3.7,'B+'=>3.3,'B'=>3,'B-'=>2.7,'C+'=>2.3,'C'=>2,'D'=>1,'E'=>0];
-                        $prodiDummy = ['Ekonomi Syariah','Perbankan Syariah','Perbankan Syariah','Ekonomi Syariah','Perbankan Syariah','Ekonomi Syariah','Perbankan Syariah','Perbankan Syariah','Ekonomi Syariah','Perbankan Syariah','Perbankan Syariah','Ekonomi Syariah','Perbankan Syariah','Ekonomi Syariah','Perbankan Syariah','Ekonomi Syariah'];
-                        $smtDummy   = [9,9,9,9,10,10,10,10,11,11,11,11,12,12,12,12];
-                        $mkNoDummy  = [1,2,3,4,1,2,3,4,1,2,3,4,1,2,3,4];
-                        $sksDummy   = [3,2,3,3,3,2,3,2,3,3,2,3,3,2,3,3];
-                        $gradeDummy = ['A-','C+','A','B+','A-','B','D','B+','A','A-','D','B-','A-','A','B','D'];
-                        for($z=0;$z<16;$z++){
-                            $g = $gradeDummy[$z];
-                            $gb = $gradeMap[$g] ?? 0;
-                            $sksZ = (int)$sksDummy[$z];
-                            $obj = new \stdClass();
-                            $obj->nama_mata_kuliah = $prodiDummy[$z].' - Semester '.$smtDummy[$z].' (MK '.$mkNoDummy[$z].')';
-                            $obj->sks = $sksZ;
-                            $obj->nilai_huruf = $g;
-                            $obj->nilai_m = round($sksZ * $gb, 2);
-                            $dummyList[] = $obj;
-                        }
-                        if (is_array($daftarMataKuliah)) {
-                            $daftarMataKuliah = array_merge($daftarMataKuliah, $dummyList);
-                        } elseif (is_object($daftarMataKuliah) && $daftarMataKuliah instanceof \Illuminate\Support\Collection) {
-                            $daftarMataKuliah = $daftarMataKuliah->merge(collect($dummyList));
-                        }
-                        unset($dummyList,$gradeMap,$prodiDummy,$smtDummy,$mkNoDummy,$sksDummy,$gradeDummy,$z,$g,$gb,$sksZ,$obj);
-                        /* ============== END INJECT DUMMY 16 MK ============== */
-                    @endphp
-                    @php
                         $semuaMK = $daftarMataKuliah;
                         $totalMK = count($semuaMK);
                         $barisBawah = 3 + $ujianCount;

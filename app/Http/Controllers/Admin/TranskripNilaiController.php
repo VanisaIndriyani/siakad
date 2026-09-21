@@ -215,7 +215,18 @@ class TranskripNilaiController extends Controller
 
     public function excel(Request $request, Mahasiswa $mahasiswa)
     {
-        $data = $this->buildTranskripData($mahasiswa);
+        // MATIKAN NOTICE/WARNING & BERSIHKAN OUTPUT BUFFER (sama seperti PDF)
+        $prevDisplayErrors = ini_get('display_errors');
+        $prevErrorReporting = error_reporting();
+        ini_set('display_errors', '0');
+        error_reporting($prevErrorReporting & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED & ~E_STRICT);
+        while (ob_get_level() > 0) {
+            if (!@ob_end_clean()) break;
+        }
+        ob_start();
+
+        try {
+            $data = $this->buildTranskripData($mahasiswa);
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -636,30 +647,45 @@ class TranskripNilaiController extends Controller
         $sheet->getColumnDimension('I')->setWidth(6);
         $sheet->getColumnDimension('J')->setWidth(8);
 
-        $namafile = 'Transkrip-' . ($mahasiswa->npm ?: $mahasiswa->id) . '-' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', (string) $mahasiswa->nama_lengkap) . '.xlsx';
+            $namafile = 'Transkrip-' . ($mahasiswa->npm ?: $mahasiswa->id) . '-' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', (string) $mahasiswa->nama_lengkap) . '.xlsx';
+            $writer = new Xlsx($spreadsheet);
 
-        $writer = new Xlsx($spreadsheet);
-        ob_start();
-        $writer->save('php://output');
-        $output = ob_get_clean();
+            while (ob_get_level() > 0) {
+                if (!@ob_end_clean()) break;
+            }
 
-        $namafileRaw = rawurlencode($namafile);
-        $contentLength = function_exists('mb_strlen') ? mb_strlen($output, '8bit') : strlen($output);
+            $callback = function () use ($writer) {
+                $writer->save('php://output');
+            };
 
-        $headers = [
-            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'Content-Disposition' => 'attachment; filename="' . $namafile . '"; filename*=UTF-8\'\'' . $namafileRaw,
-            'Content-Length' => $contentLength,
-            'Content-Transfer-Encoding' => 'binary',
-            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0, private',
-            'Pragma' => 'public',
-            'Expires' => 'Sat, 26 Jul 1997 05:00:00 GMT',
-            'X-Content-Type-Options' => 'nosniff',
-            'Accept-Ranges' => 'bytes',
-            'Content-Description' => 'File Transfer',
-        ];
+            $response = response()->streamDownload(
+                $callback,
+                $namafile,
+                [
+                    'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    'Content-Transfer-Encoding' => 'binary',
+                    'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0, private',
+                    'Pragma' => 'public',
+                    'Expires' => 'Sat, 26 Jul 1997 05:00:00 GMT',
+                    'X-Content-Type-Options' => 'nosniff',
+                    'Accept-Ranges' => 'bytes',
+                    'Content-Description' => 'File Transfer',
+                ],
+                'attachment'
+            );
 
-        return response($output, 200, $headers);
+            ini_set('display_errors', $prevDisplayErrors);
+            error_reporting($prevErrorReporting);
+
+            return $response;
+        } catch (\Throwable $e) {
+            ini_set('display_errors', $prevDisplayErrors);
+            error_reporting($prevErrorReporting);
+            while (ob_get_level() > 0) {
+                @ob_end_clean();
+            }
+            throw $e;
+        }
     }
 
     private function nilaiMutuHuruf(string $huruf): float
