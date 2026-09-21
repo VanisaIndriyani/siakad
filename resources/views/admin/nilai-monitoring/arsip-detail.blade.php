@@ -256,92 +256,40 @@
                 $mhsModalId = 'restore-mhs-modal-'.$mhsId;
             @endphp
             <div x-data="{
-                    showModal{{ $mhsId }}: false,
-                    confirmInput{{ $mhsId }}: '',
-                    expected{{ $mhsId }}: @js($mhsRestConfirm),
-                    get isValid() { return this['confirmInput{{ $mhsId }}'].trim().toUpperCase() === this['expected{{ $mhsId }}']; }
-                }"
-                 x-on:open-modal.window="if ($event.detail.id === 'restore-mhs-modal-{{ $mhsId }}') this['showModal{{ $mhsId }}'] = true"
-                 x-show="showModal{{ $mhsId }}" x-transition.opacity
-                 class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display: none;">
-                <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showModal{{ $mhsId }} = false"></div>
-                <div class="relative w-full max-w-lg rounded-2xl border border-emerald-500/25 bg-[#0a1f1a] shadow-2xl overflow-hidden"
-                     x-show="showModal{{ $mhsId }}" x-transition:enter="scale-95 opacity-0" x-transition:enter-end="scale-100 opacity-100">
-                    <div class="px-6 py-5 border-b border-white/10">
-                        <div class="flex items-start gap-4">
-                            <div class="shrink-0 w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 inline-flex items-center justify-center">
-                                <i class="fa-solid fa-user-rotate text-emerald-300 text-lg"></i>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="text-lg font-bold text-emerald-100">Restore Hanya Mahasiswa Ini</div>
-                                <div class="mt-1 text-xs text-emerald-100/70 leading-relaxed">
-                                    Hanya merestor nilai milik <span class="font-bold text-emerald-200">{{ $mhs?->nama_lengkap ?? 'Mahasiswa #'.$mhsId }}</span>
-                                    @if($mhs) <span class="font-mono text-amber-300">(NPM {{ $mhs->npm }})</span> @endif
-                                    pada batch <span class="font-mono text-amber-300">{{ $batchCode }}</span>.
-                                    Mahasiswa LAINNYA TIDAK TERDAMPAK sama sekali. IPS/IPK mahasiswa ini otomatis dihitung ulang.
+                    showM{{ $mhsId }}: false,
+                    cfm{{ $mhsId }}: '',
+                    exp{{ $mhsId }}: @js($mhsRestConfirm),
+                    get ok{{ $mhsId }}() { return this['cfm'.$mhsId].trim().toUpperCase() === this['exp'.$mhsId]; }
+                }" class="relative w-full">
+                <div class="rounded-2xl border border-white/10 bg-[#0b231c] shadow-2xl overflow-hidden relative">
+                    <div class="bg-gradient-to-r from-emerald-500/10 via-transparent to-transparent px-5 py-4 border-b border-white/10">
+                        <div class="flex flex-wrap items-center gap-4 justify-between">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="shrink-0 w-11 h-11 rounded-2xl bg-emerald-500/15 border border-emerald-400/30 inline-flex items-center justify-center text-emerald-300 font-bold">
+                                    @if($mhs)
+                                        {{ strtoupper(substr($mhs->nama_lengkap ?? 'M', 0, 1)) }}
+                                    @else
+                                        ?
+                                    @endif
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                    <form method="POST" action="{{ route('admin.nilai-monitoring.arsip-restore-mahasiswa', ['batch' => $batchCode, 'mahasiswa' => $mhsId]) }}" class="px-6 py-5 space-y-4">
-                        @csrf
-                        <div class="space-y-2">
-                            <label class="block text-xs font-semibold text-emerald-100/80">Konfirmasi Keamanan</label>
-                            <div class="text-xs text-emerald-100/70">Ketik teks berikut (case-insensitive):</div>
-                            <div class="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-xs font-mono font-bold text-emerald-300 break-all select-all">
-                                {{ $mhsRestConfirm }}
-                            </div>
-                            <input type="text" x-model="confirmInput{{ $mhsId }}" name="confirm"
-                                   placeholder="Ketik konfirmasi restore mahasiswa..."
-                                   class="w-full h-11 px-3 rounded-xl bg-white/5 border border-white/10 focus:border-emerald-400 focus:ring-emerald-400 text-sm"
-                                   autocomplete="off" />
-                        </div>
-                        <div class="flex items-center justify-between gap-3 pt-2">
-                            <button type="button" @click="showModal{{ $mhsId }} = false"
-                                    class="h-11 px-5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-sm font-medium">
-                                Batal
-                            </button>
-                            <button type="submit" :disabled="!isValid"
-                                    :class="isValid
-                                        ? 'bg-emerald-500 hover:bg-emerald-400 shadow-[0_0_25px_-5px_rgba(16,185,129,0.7)] border-emerald-400/30'
-                                        : 'bg-white/5 border-white/10 cursor-not-allowed text-white/40'"
-                                    class="h-11 px-6 inline-flex items-center gap-2 rounded-xl border transition text-sm font-bold text-white">
-                                <i class="fa-solid fa-rotate-left text-xs"></i>
-                                <span>Restore Mahasiswa Ini</span>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <div class="rounded-2xl border border-white/10 bg-[#0b231c] shadow-2xl overflow-hidden">
-                <div class="bg-gradient-to-r from-emerald-500/10 via-transparent to-transparent px-5 py-4 border-b border-white/10">
-                    <div class="flex flex-wrap items-center gap-4 justify-between">
-                        <div class="flex items-center gap-3 min-w-0">
-                            <div class="shrink-0 w-11 h-11 rounded-2xl bg-emerald-500/15 border border-emerald-400/30 inline-flex items-center justify-center text-emerald-300 font-bold">
-                                @if($mhs)
-                                    {{ strtoupper(substr($mhs->nama_lengkap ?? 'M', 0, 1)) }}
-                                @else
-                                    ?
-                                @endif
-                            </div>
-                            <div class="min-w-0">
-                                <div class="font-semibold text-emerald-100 text-base whitespace-nowrap">
-                                    {{ $mhs?->nama_lengkap ?? 'Mahasiswa #'.$mhsId }}
-                                </div>
-                                @if($mhs)
-                                    <div class="text-xs text-emerald-100/70 font-mono mt-0.5">
-                                        NPM {{ $mhs->npm }} · {{ $mhs->program_studi }}
+                                <div class="min-w-0">
+                                    <div class="font-semibold text-emerald-100 text-base whitespace-nowrap">
+                                        {{ $mhs?->nama_lengkap ?? 'Mahasiswa #'.$mhsId }}
                                     </div>
-                                @endif
+                                    @if($mhs)
+                                        <div class="text-xs text-emerald-100/70 font-mono mt-0.5">
+                                            NPM {{ $mhs->npm }} · {{ $mhs->program_studi }}
+                                        </div>
+                                    @endif
+                                </div>
                             </div>
-                        </div>
-                        <div class="flex flex-wrap items-center gap-2">
-                            <button type="button" @click="$dispatch('open-modal', { id: 'restore-mhs-modal-{{ $mhsId }}' })"
-                                    class="h-9 px-4 inline-flex items-center gap-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/30 transition text-emerald-100 text-xs font-semibold shadow-[0_0_18px_-10px_rgba(16,185,129,0.55)]">
-                                <i class="fa-solid fa-user-rotate"></i>
-                                Restore Hanya Mahasiswa Ini
-                            </button>
+                            <div class="flex flex-wrap items-center gap-2 relative z-20">
+                                <button type="button" @click="showM{{ $mhsId }} = !showM{{ $mhsId }}; $nextTick(() => document.getElementById('cfm-inp-{{ $mhsId }}')?.focus());"
+                                        style="cursor:pointer!important;pointer-events:auto!important;position:relative;z-index:30;"
+                                        class="h-9 px-4 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500/20 to-amber-400/15 hover:from-emerald-500/30 hover:to-amber-400/25 border border-emerald-400/40 hover:border-amber-300/50 transition-all duration-200 text-emerald-100 hover:text-amber-50 text-xs font-bold tracking-wide shadow-[0_0_22px_-10px_rgba(16,185,129,0.65)] hover:shadow-[0_0_26px_-9px_rgba(251,191,36,0.55)]">
+                                    <i class="fa-solid fa-user-rotate"></i>
+                                    Restore Hanya Mahasiswa Ini
+                                </button>
                             <div class="px-3 py-1.5 rounded-xl bg-blue-500/10 border border-blue-400/25">
                                 <div class="text-[10px] uppercase tracking-wider font-semibold text-blue-200/80">Total MK</div>
                                 <div class="text-sm font-bold text-blue-100">{{ $items->count() }} matkul</div>
@@ -401,6 +349,63 @@
                             @endforeach
                         </tbody>
                     </table>
+                </div>
+                </div>
+                <div x-cloak x-show="showM{{ $mhsId }}" x-transition.opacity
+                     class="fixed inset-0 z-[100] flex items-center justify-center p-4"
+                     style="display: none;"
+                     @click.self="showM{{ $mhsId }} = false">
+                    <div class="absolute inset-0 bg-black/65 backdrop-blur-[2px]" @click="showM{{ $mhsId }} = false"></div>
+                    <div x-show="showM{{ $mhsId }}" x-transition:enter="scale-95 opacity-0" x-transition:enter-end="scale-100 opacity-100"
+                         class="relative w-full max-w-xl rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-[#0a1f1a] via-[#0d2820] to-[#0a1f1a] shadow-[0_25px_80px_-15px_rgba(0,0,0,0.7),0_0_50px_-20px_rgba(16,185,129,0.5)] overflow-hidden">
+                        <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 via-amber-400 to-emerald-500"></div>
+                        <div class="px-6 py-5 border-b border-white/10">
+                            <div class="flex items-start gap-4">
+                                <div class="shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500/25 to-amber-400/20 border border-emerald-500/40 inline-flex items-center justify-center shadow-[0_0_25px_-8px_rgba(16,185,129,0.7)]">
+                                    <i class="fa-solid fa-user-rotate text-emerald-300 text-lg"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="text-lg font-bold text-emerald-100">Restore Hanya Mahasiswa Ini</div>
+                                    <div class="mt-1 text-xs text-emerald-100/70 leading-relaxed">
+                                        Hanya merestor nilai milik <span class="font-bold text-emerald-200">{{ $mhs?->nama_lengkap ?? 'Mahasiswa #'.$mhsId }}</span>
+                                        @if($mhs) <span class="font-mono text-amber-300">(NPM {{ $mhs->npm }})</span> @endif
+                                        pada batch <span class="font-mono text-amber-300">{{ $batchCode }}</span>.<br>
+                                        Mahasiswa LAINNYA TIDAK TERDAMPAK. IPS/IPK mahasiswa ini otomatis dihitung ulang.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <form method="POST" action="{{ route('admin.nilai-monitoring.arsip-restore-mahasiswa', ['batch' => $batchCode, 'mahasiswa' => $mhsId]) }}" class="px-6 py-5 space-y-4">
+                            @csrf
+                            <div class="space-y-2.5">
+                                <label class="block text-xs font-bold uppercase tracking-wider text-emerald-100/80 pl-0.5">Konfirmasi Keamanan</label>
+                                <div class="text-xs text-emerald-100/70">Ketik teks di bawah ini (case-insensitive):</div>
+                                <div class="px-3.5 py-2.5 rounded-xl bg-black/25 border border-amber-400/25 text-[12px] font-mono font-bold text-amber-200 break-all select-all shadow-[inset_0_1px_0_0_rgba(255,255,255,0.03)]">
+                                    {{ $mhsRestConfirm }}
+                                </div>
+                                <input id="cfm-inp-{{ $mhsId }}" type="text" x-model="cfm{{ $mhsId }}" name="confirm"
+                                       placeholder="Ketik konfirmasi restore mahasiswa..."
+                                       spellcheck="false" autocomplete="off"
+                                       class="w-full h-12 px-3.5 rounded-xl bg-black/25 border border-emerald-400/25 focus:border-amber-300/60 focus:ring-2 focus:ring-amber-300/30 focus:shadow-[0_0_25px_-10px_rgba(251,191,36,0.65)] text-sm text-amber-50 placeholder:text-emerald-100/40 outline-none transition-all duration-200" />
+                            </div>
+                            <div class="flex items-center justify-between gap-3 pt-2">
+                                <button type="button" @click="showM{{ $mhsId }} = false; cfm{{ $mhsId }} = '';"
+                                        style="cursor:pointer!important;"
+                                        class="h-11 px-5 rounded-xl bg-white/5 hover:bg-rose-500/15 border border-white/10 hover:border-rose-300/30 text-sm font-semibold text-emerald-100/80 hover:text-rose-100 transition-all duration-200">
+                                    Batal
+                                </button>
+                                <button type="submit" :disabled="!ok{{ $mhsId }}"
+                                        :class="ok{{ $mhsId }}
+                                            ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 shadow-[0_0_30px_-8px_rgba(16,185,129,0.8)] border-emerald-400/40 text-white cursor-pointer'
+                                            : 'bg-black/30 border-white/10 cursor-not-allowed text-white/35 pointer-events-none'"
+                                        style="pointer-events:auto!important;"
+                                        class="h-11 px-6 inline-flex items-center gap-2 rounded-xl border transition-all duration-200 text-sm font-bold">
+                                    <i class="fa-solid fa-rotate-left text-xs"></i>
+                                    <span>Restore Mahasiswa Ini</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         @empty
