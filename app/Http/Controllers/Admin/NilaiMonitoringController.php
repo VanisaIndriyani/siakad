@@ -188,7 +188,7 @@ class NilaiMonitoringController extends Controller
                 })
                 ->orWhereHas('mataKuliah', function ($s) use ($q) {
                     $s->where('kode', 'like', '%'.$q.'%')
-                        ->orWhere('nama_mata_kuliah', 'like', '%'.$q.'%');
+                        ->orWhere('nama', 'like', '%'.$q.'%');
                 })
                 ->orWhere('batch_code', 'like', '%'.$q.'%');
             });
