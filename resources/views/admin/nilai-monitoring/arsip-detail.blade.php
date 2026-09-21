@@ -132,33 +132,33 @@
                 <i class="fa-solid fa-user-magnifying-glass text-emerald-200"></i>
             </div>
             <div class="flex-1 min-w-0">
-                <div class="text-[11px] font-semibold uppercase tracking-[0.15em] text-emerald-100/70">Pencarian Cepat Mahasiswa</div>
-                <div class="text-[11px] text-amber-100/55 mt-0.5">Filter arsip nilai per individu berdasarkan NPM atau Nama Lengkap</div>
+                <div class="text-[11px] font-bold uppercase tracking-[0.18em] bg-gradient-to-r from-emerald-400 via-emerald-300 to-amber-300 bg-clip-text text-transparent drop-shadow-[0_0_18px_rgba(16,185,129,0.35)]">Pencarian Cepat Mahasiswa</div>
+                <div class="text-[11.5px] text-amber-200/90 mt-1 font-medium">Filter arsip nilai per individu berdasarkan <span class="text-emerald-300 font-semibold">NPM</span> atau <span class="text-emerald-300 font-semibold">Nama Lengkap</span></div>
             </div>
         </div>
         <form method="GET" action="{{ url()->current() }}" class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
             <div class="space-y-1.5">
-                <label class="block text-[10px] font-semibold uppercase tracking-wider text-emerald-100/50 pl-0.5">Kata Kunci Pencarian</label>
+                <label class="block text-[10px] font-bold uppercase tracking-[0.15em] text-emerald-300 pl-0.5 drop-shadow-[0_0_6px_rgba(16,185,129,0.25)]">Kata Kunci Pencarian</label>
                 <div class="relative group">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-[13px] text-amber-200/70 group-focus-within:text-amber-300 transition-colors duration-200 z-10"></i>
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-[13px] text-amber-300 group-focus-within:text-amber-200 transition-colors duration-200 z-10"></i>
                     <input type="text" name="mhs_q" value="{{ request('mhs_q') }}" placeholder="Ketik NPM / Nama Mahasiswa..." spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"
-                           class="w-full h-12 pl-10 pr-3.5 rounded-xl [background-image:none] [background-color:rgb(10,31,26)!important] border border-emerald-300/25 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04),0_0_0_1px_rgba(16,185,129,0.08)] placeholder:text-emerald-100/40 placeholder:text-[12.5px] placeholder:font-normal text-[13.5px] text-white font-medium tracking-wide focus:[background-color:rgb(10,31,26)!important] focus:border-amber-300/60 focus:ring-2 focus:ring-amber-300/30 focus:shadow-[0_0_28px_-12px_rgba(251,191,36,0.7)] focus:text-amber-50 focus:outline-none transition-all duration-200 autofill:[background-color:rgb(10,31,26)!important] autofill:text-fill-color-white autofill:shadow-[inset_0_0_0px_1000px_rgb(10,31,26)] selection:bg-amber-300/30 selection:text-amber-50" />
+                           class="w-full h-12 pl-10 pr-3.5 rounded-xl [background-image:none] [background-color:rgb(10,31,26)!important] border border-emerald-300/35 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04),0_0_0_1px_rgba(16,185,129,0.1)] placeholder:text-amber-100/60 placeholder:text-[12.5px] placeholder:font-medium text-[13.5px] text-amber-50 font-semibold tracking-wide focus:[background-color:rgb(10,31,26)!important] focus:border-amber-300/70 focus:ring-2 focus:ring-amber-300/35 focus:shadow-[0_0_28px_-12px_rgba(251,191,36,0.75)] focus:text-amber-50 focus:outline-none transition-all duration-200 autofill:[background-color:rgb(10,31,26)!important] autofill:text-fill-color-amber-50 autofill:shadow-[inset_0_0_0px_1000px_rgb(10,31,26)] selection:bg-amber-300/35 selection:text-amber-50" />
                 </div>
             </div>
             <div class="flex items-center gap-2.5">
-                <button type="submit" class="h-12 px-5.5 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500/25 via-emerald-500/20 to-amber-400/15 hover:from-emerald-500/35 hover:to-amber-400/25 border border-emerald-400/35 hover:border-amber-300/45 shadow-[0_0_22px_-10px_rgba(16,185,129,0.6)] hover:shadow-[0_0_28px_-8px_rgba(251,191,36,0.5)] transition-all duration-200 text-[13px] font-semibold tracking-wide text-emerald-50 hover:text-amber-50">
+                <button type="submit" class="h-12 px-5.5 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500/30 via-emerald-500/22 to-amber-400/20 hover:from-emerald-500/40 hover:to-amber-400/28 border border-emerald-400/40 hover:border-amber-300/50 shadow-[0_0_22px_-10px_rgba(16,185,129,0.65)] hover:shadow-[0_0_28px_-8px_rgba(251,191,36,0.55)] transition-all duration-200 text-[13px] font-bold tracking-wide text-emerald-100 hover:text-amber-50 drop-shadow-[0_0_5px_rgba(16,185,129,0.3)]">
                     <i class="fa-solid fa-filter text-[12px]"></i> Terapkan Filter
                 </button>
                 @if(request('mhs_q'))
-                    <a href="{{ url()->current() }}" class="h-12 px-4.5 inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-950/40 hover:bg-rose-500/15 border border-emerald-300/15 hover:border-rose-300/35 hover:text-rose-100 transition-all duration-200 text-[12.5px] text-emerald-100/70">
+                    <a href="{{ url()->current() }}" class="h-12 px-4.5 inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-br from-emerald-950/60 to-rose-950/40 hover:from-rose-500/25 hover:to-rose-700/20 border border-emerald-400/25 hover:border-rose-300/50 hover:text-rose-50 transition-all duration-200 text-[12.5px] font-semibold text-amber-200/90 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.03)]">
                         <i class="fa-solid fa-rotate-left text-[11.5px]"></i> Reset
                     </a>
                 @endif
             </div>
-            <div class="rounded-xl bg-gradient-to-br from-emerald-500/10 to-amber-400/8 border border-emerald-300/15 px-3.5 py-2.5 text-xs text-emerald-100/65 md:text-right leading-relaxed shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]">
-                <span class="text-emerald-100/45 text-[10.5px] font-semibold uppercase tracking-wider block mb-0.5">Menampilkan</span>
-                <span class="font-bold text-emerald-100 text-base">{{ $recordsGrouped->count() }}</span>
-                <span class="text-emerald-100/50"> kelompok mahasiswa</span>
+            <div class="rounded-xl bg-gradient-to-br from-emerald-500/18 to-amber-400/14 border border-emerald-400/25 px-3.5 py-2.5 text-xs md:text-right leading-relaxed shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04),0_0_22px_-12px_rgba(16,185,129,0.35)]">
+                <span class="bg-gradient-to-r from-emerald-300 to-amber-300 bg-clip-text text-transparent text-[10.5px] font-bold uppercase tracking-[0.18em] block mb-0.5 drop-shadow-[0_0_4px_rgba(16,185,129,0.3)]">Menampilkan</span>
+                <span class="font-bold bg-gradient-to-r from-emerald-200 via-amber-100 to-amber-300 bg-clip-text text-transparent text-lg drop-shadow-[0_0_8px_rgba(251,191,36,0.35)]">{{ $recordsGrouped->count() }}</span>
+                <span class="text-emerald-300 font-semibold"> kelompok mahasiswa</span>
             </div>
         </form>
     </div>
