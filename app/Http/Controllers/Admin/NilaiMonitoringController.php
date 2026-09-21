@@ -228,6 +228,7 @@ class NilaiMonitoringController extends Controller
             ->where('batch_code', $batch)
             ->select('batch_code', 'semester', 'tahun_ajaran', 'reset_by', DB::raw('COUNT(*) as total_records'), DB::raw('MAX(reset_at) as reset_at'), DB::raw('COUNT(DISTINCT mahasiswa_id) as total_mahasiswa'), DB::raw('COUNT(DISTINCT mata_kuliah_id) as total_mk'))
             ->with(['resetBy:id,name'])
+            ->groupBy('batch_code', 'semester', 'tahun_ajaran', 'reset_by')
             ->firstOrFail();
 
         $records = NilaiArchive::query()
