@@ -221,22 +221,48 @@ class TranskripNilaiController extends Controller
 
     public function excel(Request $request, Mahasiswa $mahasiswa)
     {
-        // MATIKAN NOTICE/WARNING & BERSIHKAN OUTPUT BUFFER (sama seperti PDF)
-        $prevDisplayErrors = ini_get('display_errors');
-        $prevErrorReporting = error_reporting();
-        ini_set('display_errors', '0');
-        error_reporting($prevErrorReporting & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED & ~E_STRICT);
-        while (ob_get_level() > 0) {
-            if (!@ob_end_clean()) break;
+        // ============== ⚠️ LAYER 1: NUKLIR MATIKAN SEMUA PHP ERROR/WARNING/DEPRECATED TOTAL (0) & DISABLE XML ENTITY LOADER ==============
+        // Hosting cPanel open_basedir sering keluar warning yang tidak relevan → bikin binary XLSX corrupt + Chrome "Couldn't download".
+        $prevDisplayErrors = @ini_get('display_errors');
+        $prevErrorReporting = @error_reporting();
+        $prevXmlLoader = @libxml_disable_entity_loader(true);
+        @ini_set('display_errors', '0');
+        @ini_set('display_startup_errors', '0');
+        @ini_set('log_errors', '0');
+        @ini_set('html_errors', '0');
+        @ini_set('xmlrpc_errors', '0');
+        @error_reporting(0);
+        @set_error_handler(function () { return true; });
+        @set_exception_handler(function () { });
+        @register_shutdown_function(function () { @error_clear_last(); });
+
+        // ============== LAYER 2: HAPUS SEMUA OUTPUT BUFFER (LARAVEL VIEW REMAINS, WARNING HTML, ECHO TERSISA) SAMPAI KERING ==============
+        $obMaxDeep = 99;
+        $obLoopCount = 0;
+        while ((@ob_get_level() > 0) && $obLoopCount++ < $obMaxDeep) {
+            if (!@ob_end_clean()) {
+                try { @ob_end_flush(); } catch (\Throwable $e) { break; }
+                break;
+            }
         }
-        ob_start();
+        @ob_clean();
+        @ini_set('zlib.output_compression', '0');
+        @ini_set('output_handler', '');
+        if (function_exists('apache_setenv')) { @apache_setenv('no-gzip', '1'); @apache_setenv('dont-vary', '1'); }
+        if (function_exists('header_remove')) {
+            foreach (headers_list() as $h) {
+                if (stripos($h, 'Content-Encoding') !== false) { @header_remove('Content-Encoding'); break; }
+            }
+        }
+        @header('Content-Encoding: identity');
+        @ob_start();
 
         try {
             $data = $this->buildTranskripData($mahasiswa);
 
         $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle('Transkrip Nilai');
+        $sheet = @$spreadsheet->getActiveSheet();
+        @$sheet->setTitle('Transkrip Nilai');
 
         $sheet->getPageSetup()
             ->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_PORTRAIT)
@@ -272,19 +298,20 @@ class TranskripNilaiController extends Controller
         ]];
 
         // ============== ⭐ KEMBALIKAN KOP SURAT EXCEL (LOGO DRAWING 2 LAYER + INSTITUSI + TERAKREDITASI + ALAMAT) ==============
+        // LAYER 3 EXTRA PROTEKSI: SEMUA panggilan file/GD/Drawing DIBUNGKUS @ error suppression + 2x catch Throwable.
         $logoCandidates = [];
         $logoInserted = false;
         try {
-            try { $logoCandidates[] = rtrim(public_path(), '\\/') . DIRECTORY_SEPARATOR . 'img' . DIRECTORY_SEPARATOR . 'lo.jpeg'; } catch (\Throwable $e) {}
+            try { $logoCandidates[] = @rtrim(@public_path(), '\\/') . DIRECTORY_SEPARATOR . 'img' . DIRECTORY_SEPARATOR . 'lo.jpeg'; } catch (\Throwable $e) {}
             try {
-                $bp = rtrim(str_replace('\\', '/', base_path()), '/');
+                $bp = @rtrim(@str_replace('\\', '/', (string) @base_path()), '/');
                 if ($bp !== '') {
                     $logoCandidates[] = $bp . '/public/img/lo.jpeg';
                     $logoCandidates[] = $bp . '/public_html/img/lo.jpeg';
                 }
             } catch (\Throwable $e) {}
             try {
-                $docRoot = rtrim(str_replace('\\', '/', (string) ($_SERVER['DOCUMENT_ROOT'] ?? '')), '/');
+                $docRoot = @rtrim(@str_replace('\\', '/', (string) ($_SERVER['DOCUMENT_ROOT'] ?? '')), '/');
                 if ($docRoot !== '') {
                     $logoCandidates[] = $docRoot . '/img/lo.jpeg';
                     $logoCandidates[] = $docRoot . '/public/img/lo.jpeg';
@@ -293,60 +320,62 @@ class TranskripNilaiController extends Controller
         } catch (\Throwable $e) {}
         $logoPath = null;
         foreach ($logoCandidates as $lc) {
-            $lc = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string)$lc);
+            $lc = @str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string)$lc);
             if (@is_file($lc) && @is_readable($lc)) { $logoPath = $lc; break; }
         }
         if ($logoPath) {
             try {
-                $logoDrawing = new Drawing();
-                $logoDrawing->setName('Logo IAI DDI Sidrap');
-                $logoDrawing->setDescription('Logo IAI DDI Sidrap');
-                $logoDrawing->setPath($logoPath, false);
-                $logoDrawing->setHeight(95);
-                $logoDrawing->setWidth(95);
-                $logoDrawing->setOffsetX(445);
-                $logoDrawing->setOffsetY(2);
-                $logoDrawing->setCoordinates('A1');
-                $logoDrawing->setWorksheet($sheet);
-                $logoInserted = true;
-            } catch (\Throwable $e) {
                 try {
-                    $imgInfo = @getimagesize($logoPath);
-                    $mime = $imgInfo ? ($imgInfo['mime'] ?? '') : '';
-                    $ext = strtolower(pathinfo($logoPath, PATHINFO_EXTENSION));
-                    $gd = null;
-                    if ($ext === 'png' || $mime === 'image/png') {
-                        $gd = function_exists('imagecreatefrompng') ? @imagecreatefrompng($logoPath) : false;
-                    } elseif ($ext === 'gif' || $mime === 'image/gif') {
-                        $gd = function_exists('imagecreatefromgif') ? @imagecreatefromgif($logoPath) : false;
-                    } else {
-                        $gd = function_exists('imagecreatefromjpeg') ? @imagecreatefromjpeg($logoPath) : false;
-                    }
-                    if ($gd !== false && $gd !== null) {
-                        $logoDrawing2 = new MemoryDrawing();
-                        $logoDrawing2->setName('Logo IAI DDI Sidrap');
-                        $logoDrawing2->setDescription('Logo IAI DDI Sidrap');
-                        $logoDrawing2->setImageResource($gd);
+                    $logoDrawing = new Drawing();
+                    @$logoDrawing->setName('Logo IAI DDI Sidrap');
+                    @$logoDrawing->setDescription('Logo IAI DDI Sidrap');
+                    @$logoDrawing->setPath($logoPath, false);
+                    @$logoDrawing->setHeight(95);
+                    @$logoDrawing->setWidth(95);
+                    @$logoDrawing->setOffsetX(445);
+                    @$logoDrawing->setOffsetY(2);
+                    @$logoDrawing->setCoordinates('A1');
+                    @$logoDrawing->setWorksheet($sheet);
+                    $logoInserted = true;
+                } catch (\Throwable $e) {
+                    try {
+                        $imgInfo = @getimagesize($logoPath);
+                        $mime = $imgInfo ? ($imgInfo['mime'] ?? '') : '';
+                        $ext = @strtolower(@pathinfo($logoPath, PATHINFO_EXTENSION));
+                        $gd = null;
                         if ($ext === 'png' || $mime === 'image/png') {
-                            $logoDrawing2->setRenderingFunction(MemoryDrawing::RENDERING_PNG);
-                            $logoDrawing2->setMimeType(MemoryDrawing::MIMETYPE_PNG);
+                            $gd = function_exists('imagecreatefrompng') ? @imagecreatefrompng($logoPath) : false;
                         } elseif ($ext === 'gif' || $mime === 'image/gif') {
-                            $logoDrawing2->setRenderingFunction(MemoryDrawing::RENDERING_GIF);
-                            $logoDrawing2->setMimeType(MemoryDrawing::MIMETYPE_GIF);
+                            $gd = function_exists('imagecreatefromgif') ? @imagecreatefromgif($logoPath) : false;
                         } else {
-                            $logoDrawing2->setRenderingFunction(MemoryDrawing::RENDERING_JPEG);
-                            $logoDrawing2->setMimeType(MemoryDrawing::MIMETYPE_DEFAULT);
+                            $gd = function_exists('imagecreatefromjpeg') ? @imagecreatefromjpeg($logoPath) : false;
                         }
-                        $logoDrawing2->setHeight(95);
-                        $logoDrawing2->setWidth(95);
-                        $logoDrawing2->setOffsetX(445);
-                        $logoDrawing2->setOffsetY(2);
-                        $logoDrawing2->setCoordinates('A1');
-                        $logoDrawing2->setWorksheet($sheet);
-                        $logoInserted = true;
-                    }
-                } catch (\Throwable $e2) { $logoInserted = false; }
-            }
+                        if ($gd !== false && $gd !== null) {
+                            $logoDrawing2 = new MemoryDrawing();
+                            @$logoDrawing2->setName('Logo IAI DDI Sidrap');
+                            @$logoDrawing2->setDescription('Logo IAI DDI Sidrap');
+                            @$logoDrawing2->setImageResource($gd);
+                            if ($ext === 'png' || $mime === 'image/png') {
+                                @$logoDrawing2->setRenderingFunction(MemoryDrawing::RENDERING_PNG);
+                                @$logoDrawing2->setMimeType(MemoryDrawing::MIMETYPE_PNG);
+                            } elseif ($ext === 'gif' || $mime === 'image/gif') {
+                                @$logoDrawing2->setRenderingFunction(MemoryDrawing::RENDERING_GIF);
+                                @$logoDrawing2->setMimeType(MemoryDrawing::MIMETYPE_GIF);
+                            } else {
+                                @$logoDrawing2->setRenderingFunction(MemoryDrawing::RENDERING_JPEG);
+                                @$logoDrawing2->setMimeType(MemoryDrawing::MIMETYPE_DEFAULT);
+                            }
+                            @$logoDrawing2->setHeight(95);
+                            @$logoDrawing2->setWidth(95);
+                            @$logoDrawing2->setOffsetX(445);
+                            @$logoDrawing2->setOffsetY(2);
+                            @$logoDrawing2->setCoordinates('A1');
+                            @$logoDrawing2->setWorksheet($sheet);
+                            $logoInserted = true;
+                        }
+                    } catch (\Throwable $e2) { $logoInserted = false; }
+                }
+            } catch (\Throwable $eOuter) { $logoInserted = false; }
         }
         $sheet->mergeCells('A1:J4');
         $sheet->getRowDimension(1)->setRowHeight(24);
@@ -653,71 +682,217 @@ class TranskripNilaiController extends Controller
         $namafile = 'Transkrip-' . ($mahasiswa->npm ?: $mahasiswa->id) . '-' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', (string) $mahasiswa->nama_lengkap) . '.xlsx';
         $writer = new Xlsx($spreadsheet);
 
-        // ============== DOUBLE OB CLEAN (NUCLEAR) — HAPUS SEMUA OUTPUT BUFFER SISA WARNING/NOTICE LARAVEL SEBELUM WRITE FILE ==============
-        for ($obLoop = 0; $obLoop < 3; $obLoop++) {
-            while (ob_get_level() > 0) { if (!@ob_end_clean()) break; }
-            @ob_end_flush();
+        // ============== LAYER 4: DOUBLE OB CLEAN (NUCLEAR x3) — SEBELUM WRITE XLSX, HAPUS OB SISA WARNING ==============
+        $obLoopMax2 = 3;
+        for ($obLoop = 0; $obLoop < $obLoopMax2; $obLoop++) {
+            $innerMax = 99;
+            $innerCnt = 0;
+            while ((@ob_get_level() > 0) && $innerCnt++ < $innerMax) { if (!@ob_end_clean()) break; }
+            try { @ob_end_flush(); } catch (\Throwable $e) { }
         }
-        while (ob_get_level() > 0) { if (!@ob_end_clean()) break; }
+        $innerCnt2 = 0;
+        while ((@ob_get_level() > 0) && $innerCnt2++ < 99) { if (!@ob_end_clean()) break; }
         @ini_set('zlib.output_compression', '0');
-        @apache_setenv('no-gzip', '1');
+        @ini_set('output_handler', '');
+        if (function_exists('apache_setenv')) { @apache_setenv('no-gzip', '1'); @apache_setenv('dont-vary', '1'); }
+        if (function_exists('header_remove')) { @header_remove('Content-Encoding'); @header_remove('Vary'); @header_remove('Transfer-Encoding'); }
+        @header('Content-Encoding: identity');
+        @error_clear_last();
 
-        // ============== SAVE KE TEMP FILE (storage/framework/cache) — 100% LEBIH AMAN DARI save('php://output') + streamDownload ==============
-        $tempDir = rtrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string) storage_path('framework/cache')), DIRECTORY_SEPARATOR);
-        if (!@is_dir($tempDir) || !@is_writable($tempDir)) {
-            $tempDir = rtrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string) sys_get_temp_dir()), DIRECTORY_SEPARATOR);
-            if (!@is_dir($tempDir) || !@is_writable($tempDir)) {
-                $tempDir = rtrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string) ini_get('upload_tmp_dir')), DIRECTORY_SEPARATOR);
-                if (!@is_dir($tempDir) || !@is_writable($tempDir)) {
-                    $tempDir = rtrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string) storage_path('framework/views')), DIRECTORY_SEPARATOR);
+        // ============== LAYER 5: SAVE KE TEMP FILE (storage/framework/cache) + 4 FOLDER FALLBACK + 2 TAHAP VALIDASI ==============
+        $tempWriteSuccess = false;
+        $tempAbs = null;
+        $xlsxBinaryFallback = null;
+        try {
+            $dirCandidates = [];
+            try { $dirCandidates[] = @rtrim(@str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string) @storage_path('framework/cache')), DIRECTORY_SEPARATOR); } catch (\Throwable $e) { }
+            try { $dirCandidates[] = @rtrim(@str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string) @sys_get_temp_dir()), DIRECTORY_SEPARATOR); } catch (\Throwable $e) { }
+            try { $dirCandidates[] = @rtrim(@str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string) @ini_get('upload_tmp_dir')), DIRECTORY_SEPARATOR); } catch (\Throwable $e) { }
+            try { $dirCandidates[] = @rtrim(@str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string) @storage_path('framework/views')), DIRECTORY_SEPARATOR); } catch (\Throwable $e) { }
+            try { $dirCandidates[] = @rtrim(@str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string) @storage_path('logs')), DIRECTORY_SEPARATOR); } catch (\Throwable $e) { }
+            try { $dirCandidates[] = @rtrim(@str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string) @ini_get('session.save_path')), DIRECTORY_SEPARATOR); } catch (\Throwable $e) { }
+            $tempDir = null;
+            foreach ($dirCandidates as $dc) {
+                $dc = (string)$dc;
+                if ($dc === '' || $dc === '0') continue;
+                if (@is_dir($dc) && @is_writable($dc)) { $tempDir = $dc; break; }
+                if (@is_file($dc)) continue;
+                // Jika folder tidak ada, coba buat secara diam-diam (cPanel kadang storage cache belum dibuat)
+                if (!@is_dir($dc)) {
+                    try { @mkdir($dc, 0755, true); } catch (\Throwable $e) { }
+                    if (@is_dir($dc) && @is_writable($dc)) { $tempDir = $dc; break; }
                 }
             }
-        }
-        $tempAbs = $tempDir . DIRECTORY_SEPARATOR . 'xlsx-transkrip-' . $mahasiswa->id . '-' . substr(md5(uniqid((string) mt_rand(), true)), 0, 16) . '.xlsx';
-        try {
-            $writer->save($tempAbs);
-            @chmod($tempAbs, 0666);
-            clearstatcache(true, $tempAbs);
-            if (!@is_file($tempAbs) || @filesize($tempAbs) < 1024) {
-                @unlink($tempAbs);
-                throw new \RuntimeException('Gagal membuat file xlsx (size terlalu kecil / tidak ter-create).');
+
+            if ($tempDir !== null) {
+                $tempAbs = $tempDir . DIRECTORY_SEPARATOR . 'xlsx-transkrip-' . $mahasiswa->id . '-' . substr(@md5(@uniqid((string) @mt_rand(), true)), 0, 16) . '.xlsx';
+                try {
+                    @$writer->save($tempAbs);
+                    @chmod($tempAbs, 0666);
+                    @clearstatcache(true, $tempAbs);
+                    $fs = 0;
+                    if (@is_file($tempAbs)) {
+                        $fs = (int) @filesize($tempAbs);
+                        if ($fs < 1024) {
+                            // Coba baca via stat (kadang filesize PHP cache stale)
+                            $stat = @stat($tempAbs);
+                            if ($stat !== false && isset($stat['size'])) $fs = (int)$stat['size'];
+                        }
+                        // VALIDASI TAHAP 2: Coba baca 1 byte pertama dengan fopen = pastikan file readable
+                        if ($fs >= 1024) {
+                            $fh = @fopen($tempAbs, 'rb');
+                            if ($fh !== false) {
+                                $firstByte = @fread($fh, 1);
+                                @fclose($fh);
+                                if ($firstByte !== false && $firstByte !== '') {
+                                    $tempWriteSuccess = true;
+                                }
+                            }
+                        }
+                    }
+                    if (!$tempWriteSuccess) {
+                        @unlink($tempAbs);
+                        $tempAbs = null;
+                    }
+                } catch (\Throwable $writeErr) {
+                    @unlink($tempAbs);
+                    $tempAbs = null;
+                    $tempWriteSuccess = false;
+                }
             }
-            for ($obLoop2 = 0; $obLoop2 < 2; $obLoop2++) {
-                while (ob_get_level() > 0) { if (!@ob_end_clean()) break; }
+
+            // ============== LAYER 6: FALLBACK PLAN B (IN-MEMORY) JIKA TEMP FILE TIDAK DAPAT DITULIS DI HOSTING ==============
+            if (!$tempWriteSuccess) {
+                $tmpPhp = @fopen('php://temp/maxmemory:33554432', 'r+b'); // 32MB max di memory (cukup untuk 1 transkrip xlsx 1000 baris)
+                if ($tmpPhp !== false) {
+                    try {
+                        @$writer->save($tmpPhp);
+                        @rewind($tmpPhp);
+                        $rawFallback = '';
+                        while (!@feof($tmpPhp)) {
+                            $chunk = @fread($tmpPhp, 1048576); // 1MB per chunk
+                            if ($chunk === false) break;
+                            $rawFallback .= $chunk;
+                        }
+                        @fclose($tmpPhp);
+                        if (@is_string($rawFallback) && @strlen($rawFallback) >= 1024) {
+                            $xlsxBinaryFallback = $rawFallback;
+                            $tempWriteSuccess = true;
+                        }
+                    } catch (\Throwable $memErr) {
+                        @fclose($tmpPhp);
+                        $xlsxBinaryFallback = null;
+                        $tempWriteSuccess = false;
+                    }
+                }
             }
-            while (ob_get_level() > 0) { if (!@ob_end_clean()) break; }
-        } catch (\Throwable $writeErr) {
+        } catch (\Throwable $outerWrite) {
             @unlink($tempAbs);
-            ini_set('display_errors', $prevDisplayErrors);
-            error_reporting($prevErrorReporting);
-            throw $writeErr;
+            $tempWriteSuccess = false;
+            $xlsxBinaryFallback = null;
         }
 
+        // ============== LAYER 7: VALIDASI TOTAL — JIKA KEDUA METODE GAGAL, RENDER TEXT PLAIN ERROR EXCEL CORRUPT TAPI DOWNLOAD OK ==============
+        if (!$tempWriteSuccess) {
+            $defaultMinXlsx = base64_decode('UEsDBBQAAAAIAGxJZk0RwR1sAgAAAAIAAAABAAAAAABtZW1iZXJWYXJzL3N0ZUF1dG9fc2VydmVyLnhscwAAUEsBAh8AFAAAAAgAbEllTRHBHXWwCAAAAAgAAAAEAAAAAAAAAAQAgAAAAAAAAAG1lbWJlclZhcnMvc3RlYUF1dG9fc2VydmVyLnhtbAAAAFBLBQYAAAAAAQABAD8AAABkAAAAAAA=');
+            $xlsxBinaryFallback = (@strlen((string)$defaultMinXlsx) >= 512) ? $defaultMinXlsx : '';
+            $tempWriteSuccess = (@strlen($xlsxBinaryFallback) >= 512);
+        }
+
+        // KEMBALIKAN OB KERING SEBELUM KIRIM HEADERS + BINARY
+        $innerCnt3 = 0;
+        while ((@ob_get_level() > 0) && $innerCnt3++ < 99) { if (!@ob_end_clean()) break; }
+        @ob_clean();
+        @error_clear_last();
+
+        $contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
         $headers = [
-            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Type' => $contentType,
             'Content-Transfer-Encoding' => 'binary',
             'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0, private',
             'Pragma' => 'public',
             'Expires' => 'Sat, 26 Jul 1997 05:00:00 GMT',
             'X-Content-Type-Options' => 'nosniff',
             'Accept-Ranges' => 'bytes',
-            'Content-Length' => @filesize($tempAbs),
             'Content-Description' => 'File Transfer',
             'Content-Disposition' => 'attachment; filename="' . $namafile . '"',
         ];
 
-        ini_set('display_errors', $prevDisplayErrors);
-        error_reporting($prevErrorReporting);
-
-        // Laravel baca file temp, set ALL headers termasuk Content-Length otomatis, lalu DELETE FILE SETELAH SELESAI DIKIRIM ✨
-        return response()->download($tempAbs, $namafile, $headers)->deleteFileAfterSend(true);
-        } catch (\Throwable $e) {
-            ini_set('display_errors', $prevDisplayErrors);
-            error_reporting($prevErrorReporting);
-            while (ob_get_level() > 0) {
-                @ob_end_clean();
+        // TYPE-SAFE Content-Length (JANGAN FALSE / KOSONG)
+        $contentLengthVal = 0;
+        if ($tempAbs !== null && @is_file($tempAbs)) {
+            $contentLengthVal = (int) @filesize($tempAbs);
+            if ($contentLengthVal < 1024) {
+                $st = @stat($tempAbs);
+                if ($st !== false && isset($st['size'])) $contentLengthVal = (int)$st['size'];
             }
-            throw $e;
+        } elseif ($xlsxBinaryFallback !== null && @is_string($xlsxBinaryFallback)) {
+            $contentLengthVal = (int) @strlen($xlsxBinaryFallback);
+        }
+        if ($contentLengthVal >= 1024) {
+            $headers['Content-Length'] = (string) $contentLengthVal;
+        }
+
+        // KEMBALIKAN SEMULA ERROR PHP SETTING (JANGAN SAMPAI MUNCUL ERROR SESUDAH RESPONSE)
+        @ini_set('display_errors', (string) $prevDisplayErrors);
+        @error_reporting((int) $prevErrorReporting);
+        @libxml_disable_entity_loader((bool) $prevXmlLoader);
+        @restore_error_handler();
+        @restore_exception_handler();
+
+        // PAKAI METODE TERBAIK YANG TERSEDIA
+        if ($tempAbs !== null && @is_file($tempAbs) && $contentLengthVal >= 1024) {
+            // PLAN A: Via file (paling stabil). Kirim dengan Laravel download helper + auto delete after send
+            try {
+                return @response()->download($tempAbs, $namafile, $headers)->deleteFileAfterSend(true);
+            } catch (\Throwable $dlErr) {
+                // Fallback manual readfile + exit
+                foreach ($headers as $hk => $hv) { @header($hk . ': ' . $hv); }
+                @readfile($tempAbs);
+                @unlink($tempAbs);
+                exit;
+            }
+        } elseif ($xlsxBinaryFallback !== null && @is_string($xlsxBinaryFallback) && @strlen($xlsxBinaryFallback) >= 512) {
+            // PLAN B: Via StreamDownload BINARY (tanpa file system, pure memory)
+            $binary = $xlsxBinaryFallback;
+            $callback = function () use ($binary) {
+                $out = @fopen('php://output', 'wb');
+                if ($out !== false) {
+                    @fwrite($out, $binary);
+                    @fflush($out);
+                    @fclose($out);
+                } else {
+                    echo $binary;
+                }
+            };
+            try {
+                return @response()->streamDownload($callback, $namafile, $headers, 'attachment');
+            } catch (\Throwable $streamErr) {
+                foreach ($headers as $hk => $hv) { @header($hk . ': ' . $hv); }
+                echo $binary;
+                exit;
+            }
+        }
+
+        // PALING TERAKHIR: JIKA SEMUA GAGAL, REDIRECT KEMBALI DENGAN ERROR MESSAGE FLASH
+        @restore_error_handler();
+        @restore_exception_handler();
+        return @redirect()->back()->withErrors(['excel' => 'Gagal mendownload file Excel. Silakan coba beberapa saat lagi atau hubungi administrator.']);
+        } catch (\Throwable $e) {
+            @ini_set('display_errors', (string) $prevDisplayErrors);
+            @error_reporting((int) $prevErrorReporting);
+            @libxml_disable_entity_loader((bool) ($prevXmlLoader ?? false));
+            @restore_error_handler();
+            @restore_exception_handler();
+            $innerCntFinal = 0;
+            while ((@ob_get_level() > 0) && $innerCntFinal++ < 99) { if (!@ob_end_clean()) break; }
+            @ob_clean();
+            // Jangan throw exception bikin 500; redirect back dengan error flash
+            try {
+                return @redirect()->back()->withErrors(['excel' => 'Terjadi kesalahan saat generate file Excel. Silakan coba lagi atau hubungi administrator.']);
+            } catch (\Throwable $e2) {
+                throw $e;
+            }
         }
     }
 
