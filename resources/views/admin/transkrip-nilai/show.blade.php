@@ -349,13 +349,13 @@
                             <td class="num">{{ $noL }}</td>
                             <td class="mk">{{ $namaL }}</td>
                             <td class="sks">{{ $sksL }}</td>
-                            <td class="nilaih">{{ $mutuL }}</td>
-                            <td class="m">{{ $nhL }}</td>
+                            <td class="nilaih">{{ $nhL }}</td>
+                            <td class="m">{{ $mutuL }}</td>
                             <td class="num">{{ $noR }}</td>
                             <td class="mk">{{ $namaR }}</td>
                             <td class="sks">{{ $sksR }}</td>
-                            <td class="nilaih">{{ $mutuR }}</td>
-                            <td class="m">{{ $nhR }}</td>
+                            <td class="nilaih">{{ $nhR }}</td>
+                            <td class="m">{{ $mutuR }}</td>
                         </tr>
                     @endfor
 
@@ -385,8 +385,8 @@
                         <td class="num left-col">{{ $noLanjutTampil }}</td>
                         <td class="mk left-col">{{ $namaLL }}</td>
                         <td class="sks left-col">{{ $sksLL }}</td>
-                        <td class="nilaih left-col">{{ $mutuLL }}</td>
-                        <td class="m left-col">{{ $nhLL }}</td>
+                        <td class="nilaih left-col">{{ $nhLL }}</td>
+                        <td class="m left-col">{{ $mutuLL }}</td>
                         <td class="num jumlah-dashed"></td>
                         <td class="mk">Jumlah</td>
                         <td class="sks">{{ $totalSks }}</td>
@@ -398,8 +398,8 @@
                         <td class="num left-col">{{ $noLanjutTampil }}</td>
                         <td class="mk left-col">{{ $namaLL }}</td>
                         <td class="sks left-col">{{ $sksLL }}</td>
-                        <td class="nilaih left-col">{{ $mutuLL }}</td>
-                        <td class="m left-col">{{ $nhLL }}</td>
+                        <td class="nilaih left-col">{{ $nhLL }}</td>
+                        <td class="m left-col">{{ $mutuLL }}</td>
                         <td class="num"></td>
                         <td class="mk"></td>
                         <td class="sks"></td>
@@ -411,8 +411,8 @@
                         <td class="num left-col">{{ $noLanjutTampil }}</td>
                         <td class="mk left-col">{{ $namaLL }}</td>
                         <td class="sks left-col">{{ $sksLL }}</td>
-                        <td class="nilaih left-col">{{ $mutuLL }}</td>
-                        <td class="m left-col">{{ $nhLL }}</td>
+                        <td class="nilaih left-col">{{ $nhLL }}</td>
+                        <td class="m left-col">{{ $mutuLL }}</td>
                         <td class="num ujian-right-spacer"></td>
                         <td class="mk ujian-left-title" colspan="4">Ujian Kompetensi</td>
                     </tr>
@@ -421,13 +421,13 @@
                         <td class="num left-col">{{ $noLanjutTampil }}</td>
                         <td class="mk left-col">{{ $namaLL }}</td>
                         <td class="sks left-col">{{ $sksLL }}</td>
-                        <td class="nilaih left-col">{{ $mutuLL }}</td>
-                        <td class="m left-col">{{ $nhLL }}</td>
+                        <td class="nilaih left-col">{{ $nhLL }}</td>
+                        <td class="m left-col">{{ $mutuLL }}</td>
                         <td class="num">{{ $uNo }}</td>
                         <td class="mk">{{ $uNama }}</td>
                         <td class="sks">0</td>
-                        <td class="nilaih">0</td>
-                        <td class="m">A</td>
+                        <td class="nilaih">A</td>
+                        <td class="m">0</td>
                     </tr>
                         @endif
                     @endfor
