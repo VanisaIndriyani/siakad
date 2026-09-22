@@ -70,6 +70,7 @@ class Mahasiswa extends Model
         'nomor_transkrip',
         'tanggal_lulus',
         'nomor_sk_banpt',
+        'no_ijazah',
         'ujian_kompre',
         'nilai_transkrip',
         'judul_skripsi',

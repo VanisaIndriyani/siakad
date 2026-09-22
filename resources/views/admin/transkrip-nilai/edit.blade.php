@@ -62,25 +62,52 @@
                 <div>
                     <label class="text-sm text-emerald-100/80">Nomor Transkrip</label>
                     <input type="text" name="nomor_transkrip" value="{{ old('nomor_transkrip', $mahasiswa->nomor_transkrip) }}"
-                           placeholder="Contoh: TR/20260005/08/2025"
-                           class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 px-4 text-sm focus:border-emerald-400 focus:ring-emerald-400">
+                           placeholder="Contoh: TR/20260005/08/2025" spellcheck="false" autocomplete="off" autocorrect="off"
+                           class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 px-4 text-sm focus:border-emerald-400 focus:ring-emerald-400" style="background:#0a1f1a !important; color:#fcd34d !important; -webkit-text-fill-color:#fcd34d !important;">
                     @error('nomor_transkrip') <div class="mt-1.5 text-xs text-red-300">{{ $message }}</div> @enderror
                 </div>
 
                 <div>
                     <label class="text-sm text-emerald-100/80">Tanggal, Bulan dan Tahun Lulus</label>
                     <input type="date" name="tanggal_lulus"
-                           value="{{ old('tanggal_lulus', $mahasiswa->tanggal_lulus ? $mahasiswa->tanggal_lulus->format('Y-m-d') : '') }}"
-                           class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 px-4 text-sm focus:border-emerald-400 focus:ring-emerald-400">
+                           value="{{ old('tanggal_lulus', $mahasiswa->tanggal_lulus ? $mahasiswa->tanggal_lulus->format('Y-m-d') : '') }}" spellcheck="false" autocomplete="off" autocorrect="off"
+                           class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 px-4 text-sm focus:border-emerald-400 focus:ring-emerald-400" style="background:#0a1f1a !important; color:#fcd34d !important; -webkit-text-fill-color:#fcd34d !important;">
                     @error('tanggal_lulus') <div class="mt-1.5 text-xs text-red-300">{{ $message }}</div> @enderror
                 </div>
 
                 <div class="md:col-span-2">
                     <label class="text-sm text-emerald-100/80">No. SK BAN-PT</label>
                     <input type="text" name="nomor_sk_banpt" value="{{ old('nomor_sk_banpt', $mahasiswa->nomor_sk_banpt) }}"
-                           placeholder="Contoh: 1981/SK/BAN-PT/Ak/S/V/2023"
-                           class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 px-4 text-sm focus:border-emerald-400 focus:ring-emerald-400">
+                           placeholder="Contoh: 1981/SK/BAN-PT/Ak/S/V/2023" spellcheck="false" autocomplete="off" autocorrect="off"
+                           class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 px-4 text-sm focus:border-emerald-400 focus:ring-emerald-400" style="background:#0a1f1a !important; color:#fcd34d !important; -webkit-text-fill-color:#fcd34d !important;">
                     @error('nomor_sk_banpt') <div class="mt-1.5 text-xs text-red-300">{{ $message }}</div> @enderror
+                </div>
+
+                <div>
+                    <label class="text-sm text-emerald-100/80">No. Ijazah</label>
+                    <input type="text" name="no_ijazah" value="{{ old('no_ijazah', $mahasiswa->no_ijazah ?? ($mahasiswa->nik ?? '')) }}"
+                           placeholder="Contoh: 730000000001781" spellcheck="false" autocomplete="off" autocorrect="off"
+                           class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 px-4 text-sm focus:border-emerald-400 focus:ring-emerald-400" style="background:#0a1f1a !important; color:#fcd34d !important; -webkit-text-fill-color:#fcd34d !important;">
+                    <div class="mt-1 text-[11px] text-emerald-100/50">Akan tampil di bagian biodata transkrip. Diisi otomatis NIK jika dikosongkan.</div>
+                    @error('no_ijazah') <div class="mt-1.5 text-xs text-red-300">{{ $message }}</div> @enderror
+                </div>
+
+                <div>
+                    <label class="text-sm text-emerald-100/80">Tanggal Lahir Mahasiswa</label>
+                    <input type="date" name="tanggal_lahir"
+                           value="{{ old('tanggal_lahir', $mahasiswa->tanggal_lahir ? $mahasiswa->tanggal_lahir->format('Y-m-d') : '') }}" spellcheck="false" autocomplete="off" autocorrect="off"
+                           class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 px-4 text-sm focus:border-emerald-400 focus:ring-emerald-400" style="background:#0a1f1a !important; color:#fcd34d !important; -webkit-text-fill-color:#fcd34d !important;">
+                    <div class="mt-1 text-[11px] text-emerald-100/50">Untuk digabung dengan Tempat Lahir menjadi "Tempat, Tanggal Lahir" di transkrip.</div>
+                    @error('tanggal_lahir') <div class="mt-1.5 text-xs text-red-300">{{ $message }}</div> @enderror
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="text-sm text-emerald-100/80">Tempat Lahir Mahasiswa</label>
+                    <input type="text" name="tempat_lahir" value="{{ old('tempat_lahir', $mahasiswa->tempat_lahir ?? '') }}"
+                           placeholder="Contoh: Pangkajene" spellcheck="false" autocomplete="off" autocorrect="off"
+                           class="mt-2 w-full h-11 rounded-xl bg-white/5 border border-white/10 px-4 text-sm focus:border-emerald-400 focus:ring-emerald-400" style="background:#0a1f1a !important; color:#fcd34d !important; -webkit-text-fill-color:#fcd34d !important;">
+                    <div class="mt-1 text-[11px] text-emerald-100/50">Tempat kelahiran mahasiswa. Akan digabung dengan tanggal lahir di transkrip.</div>
+                    @error('tempat_lahir') <div class="mt-1.5 text-xs text-red-300">{{ $message }}</div> @enderror
                 </div>
             </div>
         </section>

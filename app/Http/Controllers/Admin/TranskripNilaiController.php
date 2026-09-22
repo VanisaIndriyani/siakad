@@ -100,6 +100,9 @@ class TranskripNilaiController extends Controller
             'nomor_transkrip' => ['nullable', 'string', 'max:100'],
             'tanggal_lulus' => ['nullable', 'date'],
             'nomor_sk_banpt' => ['nullable', 'string', 'max:100'],
+            'no_ijazah' => ['nullable', 'string', 'max:100'],
+            'tempat_lahir' => ['nullable', 'string', 'max:100'],
+            'tanggal_lahir' => ['nullable', 'date'],
             'judul_skripsi' => ['nullable', 'string', 'max:500'],
             'ujian' => ['nullable', 'array'],
             'ujian.*' => ['nullable', 'string', 'max:255'],
@@ -112,6 +115,9 @@ class TranskripNilaiController extends Controller
             'nomor_transkrip' => $validated['nomor_transkrip'] !== '' ? $validated['nomor_transkrip'] : null,
             'tanggal_lulus' => $validated['tanggal_lulus'] ?? null,
             'nomor_sk_banpt' => $validated['nomor_sk_banpt'] !== '' ? $validated['nomor_sk_banpt'] : null,
+            'no_ijazah' => $validated['no_ijazah'] !== '' ? $validated['no_ijazah'] : null,
+            'tempat_lahir' => $validated['tempat_lahir'] !== '' ? $validated['tempat_lahir'] : null,
+            'tanggal_lahir' => $validated['tanggal_lahir'] ?? null,
             'judul_skripsi' => $validated['judul_skripsi'] !== '' ? $validated['judul_skripsi'] : null,
             'ujian_kompre' => count($ujian) > 0 ? $ujian : null,
         ]);
@@ -388,7 +394,7 @@ class TranskripNilaiController extends Controller
         $biodata = [
             ['Nama', $mahasiswa->nama_lengkap, 'Program Pendidikan', 'Strata Satu (S1)'],
             ['No. Pokok Mahasiswa', $mahasiswa->npm ?? '-', 'Fakultas', $mahasiswa->fakultas ?? 'Fakultas Tarbiyah & Keguruan'],
-            ['No. Ijazah', $mahasiswa->nik ?? '-', 'Program Studi', $mahasiswa->program_studi ?? '-'],
+            ['No. Ijazah', $data['noIjazah'] ?? ($mahasiswa->nik ?? '-'), 'Program Studi', $mahasiswa->program_studi ?? '-'],
             ['Tempat / Tanggal Lahir', $data['tempatTgl'], 'No. SK BAN-PT', $data['skBanpt']],
             ['Tanggal, Bulan dan Tahun Lulus', $data['tanggalLulus'], '', ''],
         ];
@@ -1029,6 +1035,14 @@ class TranskripNilaiController extends Controller
             $skBanpt = '337/SK/BAN-PT/Ak-S/2.0/PT/VI/2026';
         }
 
+        $noIjazah = (string) ($mahasiswa->no_ijazah ?? '');
+        if ($noIjazah === '') {
+            $noIjazah = (string) ($mahasiswa->nik ?? '-');
+        }
+        if ($noIjazah === '') {
+            $noIjazah = '-';
+        }
+
         $ujianAda = $ujianKompre;
         $ujianCount = count($ujianAda);
 
@@ -1163,6 +1177,7 @@ class TranskripNilaiController extends Controller
             'tanggalLulus' => $tanggalLulus,
             'tanggalTtd' => $tanggalTtd,
             'skBanpt' => $skBanpt,
+            'noIjazah' => $noIjazah,
             'fotoMahasiswa' => $fotoMahasiswa,
             'ttdJabatan' => $ttdJabatan,
             'ttdNama' => $ttdNama,

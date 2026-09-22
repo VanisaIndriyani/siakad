@@ -281,7 +281,7 @@
                 </tr>
                 <tr>
                     <td class="bio-label">No. Ijazah</td>
-                    <td class="bio-value"><span class="bio-val">{{ $mahasiswa->nik ?? '-' }}</span></td>
+                    <td class="bio-value"><span class="bio-val">{{ $noIjazah }}</span></td>
                     <td class="bio-label right-label">Program Studi</td>
                     <td class="bio-value right-val"><span class="bio-val">{{ $mahasiswa->program_studi ?? '-' }}</span></td>
                 </tr>
