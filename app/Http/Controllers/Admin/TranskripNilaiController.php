@@ -254,7 +254,9 @@ class TranskripNilaiController extends Controller
                 if (stripos($h, 'Content-Encoding') !== false) { @header_remove('Content-Encoding'); break; }
             }
         }
-        @header('Content-Encoding: identity');
+        // PENTING: JANGAN set header apapun disini (termasuk Content-Encoding identity)!
+        // Headers DISET SATU KALI SAJA di bagian transmit, SEBELUM kirim binary,
+        // supaya headers_sent() = FALSE selama proses save excel.
         @ob_start();
 
         try {
@@ -799,84 +801,203 @@ class TranskripNilaiController extends Controller
             $tempWriteSuccess = (@strlen($xlsxBinaryFallback) >= 512);
         }
 
-        // KEMBALIKAN OB KERING SEBELUM KIRIM HEADERS + BINARY
+        // ============== 🔑 KRITIS: EKSTRAK BINARY FINAL + VALIDASI MAGIC NUMBER ZIP (WAJIB 50 4B 03 04) ==============
+        $finalBinary = null;
+        $finalTempFile = null;
+        $finalSize = 0;
+
+        if ($tempAbs !== null && @is_file($tempAbs)) {
+            // PLAN A: Baca binary dari temp file filesystem
+            $fsRead = (int) @filesize($tempAbs);
+            if ($fsRead < 1024) { $st2 = @stat($tempAbs); if ($st2 && isset($st2['size'])) $fsRead = (int)$st2['size']; }
+            if ($fsRead >= 1024) {
+                $fhRead = @fopen($tempAbs, 'rb');
+                if ($fhRead !== false) {
+                    $binRead = '';
+                    while (!@feof($fhRead)) {
+                        $chk = @fread($fhRead, 1048576);
+                        if ($chk === false) break;
+                        $binRead .= $chk;
+                    }
+                    @fclose($fhRead);
+                    if (@is_string($binRead) && @strlen($binRead) >= 1024) {
+                        $finalBinary = $binRead;
+                        $finalTempFile = $tempAbs;
+                        $finalSize = (int) @strlen($binRead);
+                    }
+                }
+            }
+        }
+        // PLAN B: Pakai in-memory binary jika PLAN A gagal / binary tidak valid
+        if (($finalBinary === null || @strlen((string)$finalBinary) < 1024)
+            && $xlsxBinaryFallback !== null && @is_string($xlsxBinaryFallback) && @strlen($xlsxBinaryFallback) >= 512) {
+            $finalBinary = $xlsxBinaryFallback;
+            $finalTempFile = null;
+            $finalSize = (int) @strlen($xlsxBinaryFallback);
+        }
+
+        // ============== 🔑 VALIDASI MAGIC NUMBER ZIP / XLSX 4 BYTE PERTAMA WAJIB = PK\x03\x04 (0x50 0x4B 0x03 0x04) ==============
+        $magicNumberOK = false;
+        if (@is_string($finalBinary) && @strlen($finalBinary) >= 4) {
+            $magic = @substr($finalBinary, 0, 4);
+            $magicNumberOK = ($magic === "\x50\x4B\x03\x04");
+        }
+        // Jika magic number TIDAK SESUAI tapi punya temp file, coba baca ulang dari file (kadang php://temp corrupt)
+        if (!$magicNumberOK && $finalTempFile !== null && @is_file($finalTempFile)) {
+            try {
+                $fhReopen = @fopen($finalTempFile, 'rb');
+                if ($fhReopen !== false) {
+                    $binReopen = '';
+                    while (!@feof($fhReopen)) {
+                        $chk2 = @fread($fhReopen, 1048576);
+                        if ($chk2 === false) break;
+                        $binReopen .= $chk2;
+                    }
+                    @fclose($fhReopen);
+                    if (@is_string($binReopen) && @strlen($binReopen) >= 4) {
+                        $magic2 = @substr($binReopen, 0, 4);
+                        if ($magic2 === "\x50\x4B\x03\x04") {
+                            $finalBinary = $binReopen;
+                            $finalSize = (int) @strlen($binReopen);
+                            $magicNumberOK = true;
+                        }
+                    }
+                }
+            } catch (\Throwable $reopenErr) { }
+        }
+
+        // ============== 🔑 MODE DEBUG DIAGNOSTIK: SIMPAN SALINAN BINARY KE storage/logs/xlsx-debug/ (jika writable) ==============
+        try {
+            $debugBase = @rtrim(@str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string) @storage_path('logs')), DIRECTORY_SEPARATOR);
+            if ($debugBase !== '' && @is_dir($debugBase) && @is_writable($debugBase)) {
+                $debugDir = $debugBase . DIRECTORY_SEPARATOR . 'xlsx-debug';
+                if (!@is_dir($debugDir)) { @mkdir($debugDir, 0755, true); }
+                if (@is_dir($debugDir) && @is_writable($debugDir)) {
+                    $ts = @date('Ymd-His');
+                    $safeName = @preg_replace('/[^a-zA-Z0-9._-]/', '_', (string)$namafile);
+                    $debugFile = $debugDir . DIRECTORY_SEPARATOR . $ts . '-' . ($safeName ?: 'transkrip.xlsx');
+                    $fhDebug = @fopen($debugFile, 'wb');
+                    if ($fhDebug !== false) {
+                        if (@is_string($finalBinary) && @strlen($finalBinary) > 0) {
+                            @fwrite($fhDebug, $finalBinary);
+                        }
+                        @fflush($fhDebug);
+                        @fclose($fhDebug);
+                        @chmod($debugFile, 0666);
+                    }
+                }
+            }
+        } catch (\Throwable $dbgErr) { }
+
+        // ============== 🔑 OB NUCLEAR CLEAN 99 LEVEL SEBELUM KIRIM BINARY (PASTIKAN TIDAK ADA BYTE SISA DI BUFFER) ==============
         $innerCnt3 = 0;
         while ((@ob_get_level() > 0) && $innerCnt3++ < 99) { if (!@ob_end_clean()) break; }
         @ob_clean();
+        if (function_exists('header_remove')) {
+            @header_remove();
+        }
         @error_clear_last();
+        @ini_set('zlib.output_compression', '0');
+        @ini_set('output_handler', '');
+        if (function_exists('apache_setenv')) { @apache_setenv('no-gzip', '1'); @apache_setenv('dont-vary', '1'); }
 
-        $contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-        $headers = [
-            'Content-Type' => $contentType,
-            'Content-Transfer-Encoding' => 'binary',
-            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0, private',
-            'Pragma' => 'public',
-            'Expires' => 'Sat, 26 Jul 1997 05:00:00 GMT',
-            'X-Content-Type-Options' => 'nosniff',
-            'Accept-Ranges' => 'bytes',
-            'Content-Description' => 'File Transfer',
-            'Content-Disposition' => 'attachment; filename="' . $namafile . '"',
-        ];
+        // ============== 🔑 CHECK: BINARY SUDAH READY + MAGIC NUMBER OK? ==============
+        if ($magicNumberOK && @is_string($finalBinary) && $finalSize >= 1024) {
 
-        // TYPE-SAFE Content-Length (JANGAN FALSE / KOSONG)
-        $contentLengthVal = 0;
-        if ($tempAbs !== null && @is_file($tempAbs)) {
-            $contentLengthVal = (int) @filesize($tempAbs);
-            if ($contentLengthVal < 1024) {
-                $st = @stat($tempAbs);
-                if ($st !== false && isset($st['size'])) $contentLengthVal = (int)$st['size'];
+            // 🔑🔑🔑 EXIT IMMEDIATELY PATTERN: KIRIM HEADERS + BINARY CHUNKED, EXIT(0) TANPA KEMBALI KE ROUTER LARAVEL 🔑🔑🔑
+            // JANGAN PERNAH return response()->download() atau return apapun ke Laravel Router!
+            // Di hosting cPanel CGI/FastCGI/FPM, shutdown function Laravel (session save, view composer, debugbar)
+            // akan INJECT BYTE TAMBAHAN di akhir binary → file corrupt "file format or extension is not valid".
+
+            $contentTypeXlsx = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            @header('HTTP/1.1 200 OK', true, 200);
+            @header('Content-Type: ' . $contentTypeXlsx, true);
+            @header('Content-Transfer-Encoding: binary', true);
+            @header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0, private', true);
+            @header('Pragma: public', true);
+            @header('Expires: Sat, 26 Jul 1997 05:00:00 GMT', true);
+            @header('X-Content-Type-Options: nosniff', true);
+            @header('Accept-Ranges: bytes', true);
+            @header('Content-Description: File Transfer', true);
+            @header('Content-Disposition: attachment; filename="' . $namafile . '"', true);
+            @header('Content-Encoding: identity', true);
+            @header('Content-Length: ' . (string)$finalSize, true);
+
+            // Flush headers SEGERA ke web server buffer
+            if (function_exists('fastcgi_finish_request')) {
+                // Jangan panggil fastcgi_finish_request SEBELUM kirim binary! Panggil SESUDAH flush binary semua.
             }
-        } elseif ($xlsxBinaryFallback !== null && @is_string($xlsxBinaryFallback)) {
-            $contentLengthVal = (int) @strlen($xlsxBinaryFallback);
-        }
-        if ($contentLengthVal >= 1024) {
-            $headers['Content-Length'] = (string) $contentLengthVal;
+            @flush();
+
+            // 🔑 KIRIM BINARY SECARA CHUNKED 1MB PER LOOP via php://output (aman memory limit)
+            $outStream = @fopen('php://output', 'wb');
+            if ($outStream !== false) {
+                $offset = 0;
+                $chunkSize = 1048576; // 1 MB per chunk
+                while ($offset < $finalSize) {
+                    $chunkPart = @substr($finalBinary, $offset, $chunkSize);
+                    if ($chunkPart === false || $chunkPart === '') break;
+                    @fwrite($outStream, $chunkPart);
+                    @fflush($outStream);
+                    if (function_exists('fastcgi_finish_request')) { /* flush chunk dulu */ }
+                    @flush();
+                    $offset += $chunkSize;
+                    unset($chunkPart);
+                }
+                @fflush($outStream);
+                @fclose($outStream);
+            } else {
+                // Fallback: echo langsung chunked (lebih riskan tapi lebih baik dari tidak ada)
+                $offset = 0;
+                $chunkSize = 1048576;
+                while ($offset < $finalSize) {
+                    $chunkPart = @substr($finalBinary, $offset, $chunkSize);
+                    if ($chunkPart === false || $chunkPart === '') break;
+                    echo $chunkPart;
+                    @flush();
+                    $offset += $chunkSize;
+                    unset($chunkPart);
+                }
+            }
+
+            @flush();
+
+            // 🔑 PANGGIL fastcgi_finish_request() DI HOSTING cPanel/FPM/FASTCGI:
+            // Ini MEMUTUS koneksi HTTP CLIENT SECARA LANGSUNG, sehingga byte apapun yang di-echo
+            // OLEH LARAVEL SHUTDOWN FUNCTION (setelah exit) TIDAK AKAN PERNAH SAMPAI KE BROWSER!
+            if (function_exists('fastcgi_finish_request')) {
+                try { @fastcgi_finish_request(); } catch (\Throwable $fpmErr) { }
+            }
+
+            // 🔑 HAPUS temp file (jika ada) DI BELAKANG LAYAR setelah koneksi diputus
+            try {
+                if ($finalTempFile !== null && @is_file($finalTempFile)) { @unlink($finalTempFile); }
+                if ($tempAbs !== null && $tempAbs !== $finalTempFile && @is_file($tempAbs)) { @unlink($tempAbs); }
+            } catch (\Throwable $unlinkErr) { }
+
+            // 🔑 KEMBALIKAN SETTING ERROR PHP SEBELUM EXIT (baik practice)
+            @ini_set('display_errors', (string) $prevDisplayErrors);
+            @error_reporting((int) $prevErrorReporting);
+            @libxml_disable_entity_loader((bool) $prevXmlLoader);
+            @restore_error_handler();
+            @restore_exception_handler();
+
+            // 🔑🔑🔑 EXIT(0) SEGERA! JANGAN SAMPAI KEMBALI KE KERNEL / ROUTER LARAVEL 🔑🔑🔑
+            exit(0);
         }
 
-        // KEMBALIKAN SEMULA ERROR PHP SETTING (JANGAN SAMPAI MUNCUL ERROR SESUDAH RESPONSE)
+        // ============== FALLBACK: JIKA BINARY GAGAL / MAGIC NUMBER SALAH ==============
+        // Disini BOLEH return redirect back karena TIDAK mengirim binary strict.
         @ini_set('display_errors', (string) $prevDisplayErrors);
         @error_reporting((int) $prevErrorReporting);
         @libxml_disable_entity_loader((bool) $prevXmlLoader);
         @restore_error_handler();
         @restore_exception_handler();
-
-        // PAKAI METODE TERBAIK YANG TERSEDIA
-        if ($tempAbs !== null && @is_file($tempAbs) && $contentLengthVal >= 1024) {
-            // PLAN A: Via file (paling stabil). Kirim dengan Laravel download helper + auto delete after send
-            try {
-                return @response()->download($tempAbs, $namafile, $headers)->deleteFileAfterSend(true);
-            } catch (\Throwable $dlErr) {
-                // Fallback manual readfile + exit
-                foreach ($headers as $hk => $hv) { @header($hk . ': ' . $hv); }
-                @readfile($tempAbs);
-                @unlink($tempAbs);
-                exit;
-            }
-        } elseif ($xlsxBinaryFallback !== null && @is_string($xlsxBinaryFallback) && @strlen($xlsxBinaryFallback) >= 512) {
-            // PLAN B: Via StreamDownload BINARY (tanpa file system, pure memory)
-            $binary = $xlsxBinaryFallback;
-            $callback = function () use ($binary) {
-                $out = @fopen('php://output', 'wb');
-                if ($out !== false) {
-                    @fwrite($out, $binary);
-                    @fflush($out);
-                    @fclose($out);
-                } else {
-                    echo $binary;
-                }
-            };
-            try {
-                return @response()->streamDownload($callback, $namafile, $headers, 'attachment');
-            } catch (\Throwable $streamErr) {
-                foreach ($headers as $hk => $hv) { @header($hk . ': ' . $hv); }
-                echo $binary;
-                exit;
-            }
-        }
-
-        // PALING TERAKHIR: JIKA SEMUA GAGAL, REDIRECT KEMBALI DENGAN ERROR MESSAGE FLASH
-        @restore_error_handler();
-        @restore_exception_handler();
+        // Hapus sisa file temp
+        try {
+            if ($finalTempFile !== null && @is_file($finalTempFile)) { @unlink($finalTempFile); }
+            if ($tempAbs !== null && $tempAbs !== $finalTempFile && @is_file($tempAbs)) { @unlink($tempAbs); }
+        } catch (\Throwable $unlinkErr2) { }
         return @redirect()->back()->withErrors(['excel' => 'Gagal mendownload file Excel. Silakan coba beberapa saat lagi atau hubungi administrator.']);
         } catch (\Throwable $e) {
             @ini_set('display_errors', (string) $prevDisplayErrors);
@@ -887,7 +1008,7 @@ class TranskripNilaiController extends Controller
             $innerCntFinal = 0;
             while ((@ob_get_level() > 0) && $innerCntFinal++ < 99) { if (!@ob_end_clean()) break; }
             @ob_clean();
-            // Jangan throw exception bikin 500; redirect back dengan error flash
+            if (function_exists('header_remove')) { @header_remove(); }
             try {
                 return @redirect()->back()->withErrors(['excel' => 'Terjadi kesalahan saat generate file Excel. Silakan coba lagi atau hubungi administrator.']);
             } catch (\Throwable $e2) {
