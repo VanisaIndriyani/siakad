@@ -7,18 +7,23 @@ use App\Models\Mahasiswa;
 use Dompdf\Dompdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
-use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
-use PhpOffice\PhpSpreadsheet\Worksheet\MemoryDrawing;
+use ZipArchive;
 
 class TranskripNilaiController extends Controller
 {
+    /*
+    |--------------------------------------------------------------------------
+    | INDEX
+    |--------------------------------------------------------------------------
+    */
+
     public function index(Request $request): View
     {
         $q = trim((string) $request->get('q', ''));
@@ -43,7 +48,10 @@ class TranskripNilaiController extends Controller
             $query->where('program_studi', $prodi);
         }
 
-        $mahasiswa = $query->orderByDesc('id')->paginate(15)->withQueryString();
+        $mahasiswa = $query
+            ->orderByDesc('id')
+            ->paginate(15)
+            ->withQueryString();
 
         $angkatanList = Mahasiswa::query()
             ->whereNotNull('angkatan')
@@ -72,14 +80,32 @@ class TranskripNilaiController extends Controller
         ]);
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | SHOW
+    |--------------------------------------------------------------------------
+    */
+
     public function show(Mahasiswa $mahasiswa): View
     {
-        return view('admin.transkrip-nilai.show', $this->buildTranskripData($mahasiswa));
+        return view(
+            'admin.transkrip-nilai.show',
+            $this->buildTranskripData($mahasiswa)
+        );
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | EDIT
+    |--------------------------------------------------------------------------
+    */
 
     public function edit(Mahasiswa $mahasiswa): View
     {
         $ujian = $mahasiswa->ujian_kompre;
+
         if (!is_array($ujian)) {
             $ujian = [];
         }
@@ -94,8 +120,17 @@ class TranskripNilaiController extends Controller
         ]);
     }
 
-    public function update(Request $request, Mahasiswa $mahasiswa): RedirectResponse
-    {
+
+    /*
+    |--------------------------------------------------------------------------
+    | UPDATE
+    |--------------------------------------------------------------------------
+    */
+
+    public function update(
+        Request $request,
+        Mahasiswa $mahasiswa
+    ): RedirectResponse {
         $validated = $request->validate([
             'nomor_transkrip' => ['nullable', 'string', 'max:100'],
             'tanggal_lulus' => ['nullable', 'date'],
@@ -104,48 +139,259 @@ class TranskripNilaiController extends Controller
             'tempat_lahir' => ['nullable', 'string', 'max:100'],
             'tanggal_lahir' => ['nullable', 'date'],
             'judul_skripsi' => ['nullable', 'string', 'max:500'],
+
             'ujian' => ['nullable', 'array'],
             'ujian.*' => ['nullable', 'string', 'max:255'],
         ]);
 
         $ujian = $validated['ujian'] ?? [];
-        $ujian = array_values(array_filter(array_map(fn($v) => trim((string) $v), $ujian), fn($v) => $v !== ''));
+
+        $ujian = array_values(
+            array_filter(
+                array_map(
+                    fn ($v) => trim((string) $v),
+                    $ujian
+                ),
+                fn ($v) => $v !== ''
+            )
+        );
 
         $mahasiswa->update([
-            'nomor_transkrip' => $validated['nomor_transkrip'] !== '' ? $validated['nomor_transkrip'] : null,
-            'tanggal_lulus' => $validated['tanggal_lulus'] ?? null,
-            'nomor_sk_banpt' => $validated['nomor_sk_banpt'] !== '' ? $validated['nomor_sk_banpt'] : null,
-            'no_ijazah' => $validated['no_ijazah'] !== '' ? $validated['no_ijazah'] : null,
-            'tempat_lahir' => $validated['tempat_lahir'] !== '' ? $validated['tempat_lahir'] : null,
-            'tanggal_lahir' => $validated['tanggal_lahir'] ?? null,
-            'judul_skripsi' => $validated['judul_skripsi'] !== '' ? $validated['judul_skripsi'] : null,
-            'ujian_kompre' => count($ujian) > 0 ? $ujian : null,
+            'nomor_transkrip' =>
+                !empty($validated['nomor_transkrip'])
+                    ? $validated['nomor_transkrip']
+                    : null,
+
+            'tanggal_lulus' =>
+                $validated['tanggal_lulus'] ?? null,
+
+            'nomor_sk_banpt' =>
+                !empty($validated['nomor_sk_banpt'])
+                    ? $validated['nomor_sk_banpt']
+                    : null,
+
+            'no_ijazah' =>
+                !empty($validated['no_ijazah'])
+                    ? $validated['no_ijazah']
+                    : null,
+
+            'tempat_lahir' =>
+                !empty($validated['tempat_lahir'])
+                    ? $validated['tempat_lahir']
+                    : null,
+
+            'tanggal_lahir' =>
+                $validated['tanggal_lahir'] ?? null,
+
+            'judul_skripsi' =>
+                !empty($validated['judul_skripsi'])
+                    ? $validated['judul_skripsi']
+                    : null,
+
+            'ujian_kompre' =>
+                count($ujian) > 0
+                    ? $ujian
+                    : null,
         ]);
 
-        return redirect()->route('admin.transkrip-nilai.show', $mahasiswa)
+        return redirect()
+            ->route('admin.transkrip-nilai.show', $mahasiswa)
             ->with('success', 'Data transkrip berhasil disimpan.');
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | PDF
+    |--------------------------------------------------------------------------
+    */
+
     public function pdf(Request $request, Mahasiswa $mahasiswa)
     {
-        // ===== MATIKAN SEMENTARA WARNING / ERROR OUTPUT (akar PDF corrupt "0 of 0") =====
         $prevDisplayErrors = ini_get('display_errors');
         $prevErrorReporting = error_reporting();
-        ini_set('display_errors', '0');
-        error_reporting($prevErrorReporting & ~E_NOTICE & ~E_WARNING & ~E_DEPRECATED & ~E_STRICT);
 
-        // ===== BERSIHKAN SEMUA OUTPUT BUFFER SEBELUM RENDER (jika ada echo / warning sisa) =====
+        ini_set('display_errors', '0');
+
+        error_reporting(
+            $prevErrorReporting
+            & ~E_NOTICE
+            & ~E_WARNING
+            & ~E_DEPRECATED
+            & ~E_STRICT
+        );
+
         while (ob_get_level() > 0) {
             if (!@ob_end_clean()) {
                 break;
             }
         }
+
         ob_start();
 
         try {
             $data = $this->buildTranskripData($mahasiswa);
-            $html = view('admin.transkrip-nilai.pdf', $data)->render();
 
+            /* =========================================================
+               LOGO: load & convert ke BASE64 (DomPDF tidak bisa baca asset URL)
+               ========================================================= */
+            $logoB64 = null;
+            $logoCandidates = [
+                public_path('img/lo.jpeg'),
+                public_path('img/lo.jpg'),
+                public_path('img/lo.png'),
+                public_path('img/logo.jpeg'),
+                public_path('img/logo.jpg'),
+                public_path('img/logo.png'),
+            ];
+            foreach ($logoCandidates as $lp) {
+                if ($logoB64 !== null) {
+                    break;
+                }
+                try {
+                    if (!$lp || !is_file($lp) || !is_readable($lp)) {
+                        continue;
+                    }
+                    $sizeRaw = @getimagesize($lp);
+                    $mimeRaw = is_array($sizeRaw) && !empty($sizeRaw['mime']) ? $sizeRaw['mime'] : '';
+                    $extRaw = strtolower(pathinfo($lp, PATHINFO_EXTENSION));
+                    $mime = '';
+                    if ($mimeRaw) {
+                        $mime = $mimeRaw;
+                    } else {
+                        if ($extRaw === 'png') {
+                            $mime = 'image/png';
+                        } elseif ($extRaw === 'gif') {
+                            $mime = 'image/gif';
+                        } else {
+                            $mime = 'image/jpeg';
+                        }
+                    }
+                    $contents = @file_get_contents($lp);
+                    if ($contents === false || $contents === '') {
+                        continue;
+                    }
+                    $logoB64 = 'data:' . $mime . ';base64,' . base64_encode($contents);
+                } catch (\Throwable $e) {
+                    $logoB64 = null;
+                }
+            }
+
+            /* =========================================================
+               FOTO: convert path/URL ke BASE64
+               ========================================================= */
+            $fotoB64 = null;
+            $fotoMahasiswaRaw = $data['fotoMahasiswa'] ?? null;
+            if (!empty($fotoMahasiswaRaw) && is_string($fotoMahasiswaRaw)) {
+                try {
+                    $fotoCandidates = [];
+                    $trim = ltrim($fotoMahasiswaRaw, '/');
+                    if (strpos($fotoMahasiswaRaw, '://') !== false) {
+                        $fotoCandidates[] = $fotoMahasiswaRaw;
+                    }
+                    $fotoCandidates[] = public_path($trim);
+                    $fotoCandidates[] = public_path($fotoMahasiswaRaw);
+                    foreach ($fotoCandidates as $fc) {
+                        if ($fotoB64 !== null) {
+                            break;
+                        }
+                        try {
+                            $contents = null;
+                            $mime = null;
+                            if (strpos($fc, '://') !== false) {
+                                $ch = @curl_init($fc);
+                                if ($ch) {
+                                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                                    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+                                    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                                    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+                                    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
+                                    curl_setopt($ch, CURLOPT_TIMEOUT, 6);
+                                    curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 SIAKAD-DOMPDF');
+                                    $buf = curl_exec($ch);
+                                    $httpCode = 0;
+                                    $ct = '';
+                                    try {
+                                        $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                                    } catch (\Throwable $e) {
+                                    }
+                                    try {
+                                        $ct = (string) curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+                                    } catch (\Throwable $e) {
+                                    }
+                                    try {
+                                        curl_close($ch);
+                                    } catch (\Throwable $e) {
+                                    }
+                                    if ($buf !== false && $buf !== '' && $httpCode >= 200 && $httpCode < 300) {
+                                        $contents = $buf;
+                                        if ($ct && strpos($ct, 'image/') === 0) {
+                                            $mime = trim(explode(';', $ct, 2)[0]);
+                                        }
+                                    }
+                                }
+                            } else {
+                                if (is_file($fc) && is_readable($fc)) {
+                                    $si = @getimagesize($fc);
+                                    if ($si && !empty($si['mime']) && strpos($si['mime'], 'image/') === 0) {
+                                        $buf = @file_get_contents($fc);
+                                        if ($buf !== false && $buf !== '') {
+                                            $contents = $buf;
+                                            $mime = $si['mime'];
+                                        }
+                                    }
+                                }
+                            }
+                            if ($contents === null || $contents === '') {
+                                continue;
+                            }
+                            if ($mime === null || $mime === '') {
+                                try {
+                                    $off = @getimagesizefromstring($contents);
+                                } catch (\Throwable $e) {
+                                    $off = null;
+                                }
+                                if (is_array($off) && !empty($off['mime']) && strpos($off['mime'], 'image/') === 0) {
+                                    $mime = $off['mime'];
+                                } else {
+                                    $mime = 'image/jpeg';
+                                }
+                            }
+                            $fotoB64 = 'data:' . $mime . ';base64,' . base64_encode($contents);
+                        } catch (\Throwable $e) {
+                            $fotoB64 = null;
+                        }
+                    }
+                } catch (\Throwable $e) {
+                    $fotoB64 = null;
+                }
+            }
+
+            /* =========================================================
+               RENDER BLADE KE HTML STRING
+               ========================================================= */
+            $html = view('admin.transkrip-nilai.pdf', [
+                'data' => $data,
+                'logoSrc' => $logoB64,
+                'fotoSrc' => $fotoB64,
+            ])->render();
+
+            /* =========================================================
+               HAPUS JUNK / BOM / NEWLINE SEBELUM <!DOCTYPE>
+               (blade @php baris 1 menambahkan newline prefix yang
+                membuat Dompdf hasilkan binary %PDF tidak di offset 0)
+               ========================================================= */
+            if ($html !== '' && is_string($html)) {
+                $firstTag = strpos($html, '<');
+                if ($firstTag !== false && $firstTag > 0) {
+                    $html = substr($html, $firstTag);
+                }
+                $html = preg_replace('/^[\x{FEFF}\x{200B}\s]+/u', '', $html);
+            }
+
+            /* =========================================================
+               BOOT DOMPDF DENGAN CONFIG STABIL
+               ========================================================= */
             $dompdf = new Dompdf([
                 'isRemoteEnabled' => true,
                 'isHtml5ParserEnabled' => true,
@@ -155,933 +401,3159 @@ class TranskripNilaiController extends Controller
                 'dpi' => 96,
                 'isJavascriptEnabled' => false,
                 'isFontSubsettingEnabled' => true,
-                'debugPng' => false,
-                'debugKeepTemp' => false,
-                'debugCss' => false,
-                'debugLayout' => false,
-                'debugLayoutLines' => false,
-                'debugLayoutBlocks' => false,
-                'debugLayoutInline' => false,
-                'debugLayoutPaddingBox' => false,
             ]);
+
             $dompdf->getOptions()->setIsRemoteEnabled(true);
             $dompdf->getOptions()->setDefaultFont('times');
             $dompdf->getOptions()->setIsFontSubsettingEnabled(true);
-            $dompdf->getOptions()->setFontHeightRatio(0.92);
-            $dompdf->getOptions()->setDpi(96);
+            $dompdf->getOptions()->setFontHeightRatio(0.95);
+            $dompdf->getOptions()->setDpi(120);
 
             $dompdf->loadHtml($html, 'UTF-8');
-            $dompdf->setPaper('folio', 'portrait');
+            $dompdf->setPaper('a4', 'portrait');
             $dompdf->render();
 
-            $namafile = 'Transkrip-' . ($mahasiswa->npm ?: $mahasiswa->id) . '-' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', (string) $mahasiswa->nama_lengkap) . '.pdf';
+            /* =========================================================
+               NAMA FILE AMAN
+               Transkrip-{NPM}-{Nama_Mahasiswa}.pdf
+               ========================================================= */
+            $namafile =
+                'Transkrip-' .
+                ($mahasiswa->npm ?: $mahasiswa->id) .
+                '-' .
+                preg_replace(
+                    '/[^a-zA-Z0-9_\-]/',
+                    '_',
+                    (string) $mahasiswa->nama_lengkap
+                ) .
+                '.pdf';
 
-            $forceDownload = (string) $request->query('download', '') !== ''
+            $forceDownload =
+                (string) $request->query('download', '') !== ''
                 || (string) $request->query('dl', '') !== ''
                 || (string) $request->query('fd', '') !== ''
-                || strtolower((string) $request->query('disposition', '')) === 'attachment';
+                || strtolower(
+                    (string) $request->query('disposition', '')
+                ) === 'attachment';
 
-            // Bersihkan buffer lagi sebelum ambil output PDF (menghindari warning tercampur binary PDF)
+            /* =========================================================
+               BERSIHKAN OUTPUT BUFFER SEBELUM DOMPDF OUTPUT
+               (Pastikan tidak ada echo / warning / BOM / whitespace
+                yang ikut tercampur ke binary PDF)
+               ========================================================= */
             while (ob_get_level() > 0) {
-                @ob_end_clean();
+                if (!@ob_end_clean()) {
+                    break;
+                }
             }
 
             $outputPdf = $dompdf->output();
+            if ($outputPdf === '' || $outputPdf === false) {
+                $outputPdf = '';
+            }
 
-            // PAKAI streamDownload Laravel yang ROBUST (otomatis header, tanpa hitung Content-Length manual sering bikin 0 byte)
-            $callback = function () use ($outputPdf) {
-                echo $outputPdf;
-            };
+            /* =========================================================
+               VALIDASI SIGNATURE PDF: 5 byte PERTAMA HARUS %PDF-
+               Jika tidak valid = Dompdf gagal render / ada error
+               inject. Dump ke storage dan throw Exception jelas.
+               ========================================================= */
+            $pdfSig = substr($outputPdf, 0, 5);
+            if ($pdfSig !== '%PDF-') {
+                $debugDir = rtrim(storage_path(), '\\/') . DIRECTORY_SEPARATOR . 'debug_transkrip';
+                if (!is_dir($debugDir)) {
+                    @mkdir($debugDir, 0755, true);
+                }
+                @file_put_contents($debugDir . '/pdf_bad_sig.bin', $outputPdf);
+                @file_put_contents($debugDir . '/pdf_bad_html.html', $html);
+                @file_put_contents($debugDir . '/pdf_bad_sig_info.txt',
+                    "Signature TIDAK VALID\n" .
+                    "Time: " . date('Y-m-d H:i:s') . "\n" .
+                    "5 byte pertama HEX: " . bin2hex($pdfSig) . "\n" .
+                    "Teks: " . $pdfSig . "\n" .
+                    "Panjang outputPdf: " . strlen($outputPdf) . "\n"
+                );
 
-            $response = response()->streamDownload($callback, $namafile, [
-                'Content-Type' => $forceDownload ? 'application/octet-stream' : 'application/pdf',
+                ini_set('display_errors', $prevDisplayErrors);
+                error_reporting($prevErrorReporting);
+
+                throw new \RuntimeException(
+                    'Generate PDF gagal: signature binary tidak valid (bukan diawali %PDF-). ' .
+                    'Lihat debug file di storage/debug_transkrip/pdf_bad_*. ' .
+                    'Info: sig=' . $pdfSig . ', len=' . strlen($outputPdf)
+                );
+            }
+
+            /* =========================================================
+               KIRIM PDF DENGAN LARAVEL RESPONSE PROPER.
+               JANGAN PAKAI: echo, flush(), fastcgi_finish_request,
+                             header() manual, exit.
+               Semua dikelola oleh Response Laravel.
+               ========================================================= */
+            $size = strlen($outputPdf);
+            $disposition = $forceDownload ? 'attachment' : 'inline';
+            $filenameForHeader = addcslashes($namafile, '"\\');
+
+            ini_set('display_errors', $prevDisplayErrors);
+            error_reporting($prevErrorReporting);
+
+            return response($outputPdf, 200, [
+                'Content-Type' => 'application/pdf',
                 'Content-Transfer-Encoding' => 'binary',
-                'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0, private',
+                'Content-Length' => $size,
+                'Content-Disposition' =>
+                    $disposition .
+                    '; filename="' . $filenameForHeader . '"; ' .
+                    'filename*=UTF-8\'\'' . rawurlencode($namafile),
+                'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0, private',
                 'Pragma' => 'public',
                 'Expires' => 'Sat, 26 Jul 1997 05:00:00 GMT',
                 'X-Content-Type-Options' => 'nosniff',
+                'Accept-Ranges' => 'bytes',
                 'Content-Description' => 'File Transfer',
-            ], $forceDownload ? 'attachment' : 'inline');
+            ]);
 
-            // KEMBALIKAN SEMULA setting error PHP
-            ini_set('display_errors', $prevDisplayErrors);
-            error_reporting($prevErrorReporting);
-
-            return $response;
         } catch (\Throwable $e) {
-            // Restore error settings meskipun terjadi exception
+
             while (ob_get_level() > 0) {
                 @ob_end_clean();
             }
+
+            $debugDir = rtrim(storage_path(), '\\/') . DIRECTORY_SEPARATOR . 'debug_transkrip';
+            if (!is_dir($debugDir)) {
+                @mkdir($debugDir, 0755, true);
+            }
+            @file_put_contents($debugDir . '/pdf_exception.txt',
+                "EXCEPTION di pdf()\n" .
+                "Time: " . date('Y-m-d H:i:s') . "\n" .
+                "Class: " . get_class($e) . "\n" .
+                "Message: " . $e->getMessage() . "\n" .
+                "File: " . $e->getFile() . "\n" .
+                "Line: " . $e->getLine() . "\n\n" .
+                "Trace:\n" . $e->getTraceAsString() . "\n"
+            );
+            if (isset($html)) {
+                @file_put_contents($debugDir . '/pdf_exception_html.html', $html);
+            }
+            if (isset($outputPdf)) {
+                @file_put_contents($debugDir . '/pdf_exception_pdf.bin', $outputPdf);
+            }
+
             ini_set('display_errors', $prevDisplayErrors);
             error_reporting($prevErrorReporting);
+
             throw $e;
         }
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | EXCEL
+    |--------------------------------------------------------------------------
+    */
+
     public function excel(Request $request, Mahasiswa $mahasiswa)
     {
-        // ============== ⚠️ LAYER 1: NUKLIR MATIKAN SEMUA PHP ERROR/WARNING/DEPRECATED TOTAL (0) & DISABLE XML ENTITY LOADER ==============
-        // Hosting cPanel open_basedir sering keluar warning yang tidak relevan → bikin binary XLSX corrupt + Chrome "Couldn't download".
-        $prevDisplayErrors = @ini_get('display_errors');
-        $prevErrorReporting = @error_reporting();
-        $prevXmlLoader = @libxml_disable_entity_loader(true);
-        @ini_set('display_errors', '0');
-        @ini_set('display_startup_errors', '0');
-        @ini_set('log_errors', '0');
-        @ini_set('html_errors', '0');
-        @ini_set('xmlrpc_errors', '0');
-        @error_reporting(0);
-        @set_error_handler(function () { return true; });
-        @set_exception_handler(function () { });
-        @register_shutdown_function(function () { @error_clear_last(); });
-
-        // ============== LAYER 2: HAPUS SEMUA OUTPUT BUFFER (LARAVEL VIEW REMAINS, WARNING HTML, ECHO TERSISA) SAMPAI KERING ==============
-        $obMaxDeep = 99;
-        $obLoopCount = 0;
-        while ((@ob_get_level() > 0) && $obLoopCount++ < $obMaxDeep) {
-            if (!@ob_end_clean()) {
-                try { @ob_end_flush(); } catch (\Throwable $e) { break; }
-                break;
-            }
-        }
-        @ob_clean();
-        @ini_set('zlib.output_compression', '0');
-        @ini_set('output_handler', '');
-        if (function_exists('apache_setenv')) { @apache_setenv('no-gzip', '1'); @apache_setenv('dont-vary', '1'); }
-        if (function_exists('header_remove')) {
-            foreach (headers_list() as $h) {
-                if (stripos($h, 'Content-Encoding') !== false) { @header_remove('Content-Encoding'); break; }
-            }
-        }
-        // PENTING: JANGAN set header apapun disini (termasuk Content-Encoding identity)!
-        // Headers DISET SATU KALI SAJA di bagian transmit, SEBELUM kirim binary,
-        // supaya headers_sent() = FALSE selama proses save excel.
-        @ob_start();
+        $tempFile = null;
 
         try {
             $data = $this->buildTranskripData($mahasiswa);
 
-        $spreadsheet = new Spreadsheet();
-        $sheet = @$spreadsheet->getActiveSheet();
-        @$sheet->setTitle('Transkrip Nilai');
+            $spreadsheet = new Spreadsheet();
 
-        $sheet->getPageSetup()
-            ->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_PORTRAIT)
-            ->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_FOLIO)
-            ->setFitToPage(true)
-            ->setFitToWidth(1)
-            ->setFitToHeight(0)
-            ->setHorizontalCentered(true)
-            ->setVerticalCentered(false)
-            ->setPrintCellComments(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PRINT_COMMENTS_NONE)
-            ->setPrintErrors(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PRINT_ERRORS_BLANK);
-        $sheet->getPageMargins()
-            ->setTop(0.3)
-            ->setBottom(0.3)
-            ->setLeft(0.3)
-            ->setRight(0.3)
-            ->setHeader(0.0)
-            ->setFooter(0.0);
-        $sheet->getHeaderFooter()->setOddHeader('')->setEvenHeader('')->setOddFooter('')->setEvenFooter('');
-        $sheet->setShowGridLines(false);
-        $sheet->setPrintGridLines(false);
-        $sheet->setShowRowColHeaders(false);
+            $sheet = $spreadsheet->getActiveSheet();
 
-        $boldFont = ['font' => ['bold' => true]];
-        $centerAlign = ['alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER]];
-        $wrapText = ['alignment' => ['wrapText' => true, 'vertical' => Alignment::VERTICAL_CENTER]];
-        $thinBorder = ['borders' => [
-            'allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['argb' => 'FF000000']],
-        ]];
-        $headerFill = ['fill' => [
-            'fillType' => Fill::FILL_SOLID,
-            'color' => ['argb' => 'FFD9EAD3'],
-        ]];
+            $sheet->setTitle('Transkrip Nilai');
 
-        // ============== ⭐ KEMBALIKAN KOP SURAT EXCEL (LOGO DRAWING 2 LAYER + INSTITUSI + TERAKREDITASI + ALAMAT) ==============
-        // LAYER 3 EXTRA PROTEKSI: SEMUA panggilan file/GD/Drawing DIBUNGKUS @ error suppression + 2x catch Throwable.
-        $logoCandidates = [];
-        $logoInserted = false;
-        try {
-            try { $logoCandidates[] = @rtrim(@public_path(), '\\/') . DIRECTORY_SEPARATOR . 'img' . DIRECTORY_SEPARATOR . 'lo.jpeg'; } catch (\Throwable $e) {}
-            try {
-                $bp = @rtrim(@str_replace('\\', '/', (string) @base_path()), '/');
-                if ($bp !== '') {
-                    $logoCandidates[] = $bp . '/public/img/lo.jpeg';
-                    $logoCandidates[] = $bp . '/public_html/img/lo.jpeg';
-                }
-            } catch (\Throwable $e) {}
-            try {
-                $docRoot = @rtrim(@str_replace('\\', '/', (string) ($_SERVER['DOCUMENT_ROOT'] ?? '')), '/');
-                if ($docRoot !== '') {
-                    $logoCandidates[] = $docRoot . '/img/lo.jpeg';
-                    $logoCandidates[] = $docRoot . '/public/img/lo.jpeg';
-                }
-            } catch (\Throwable $e) {}
-        } catch (\Throwable $e) {}
-        $logoPath = null;
-        foreach ($logoCandidates as $lc) {
-            $lc = @str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string)$lc);
-            if (@is_file($lc) && @is_readable($lc)) { $logoPath = $lc; break; }
-        }
-        if ($logoPath) {
-            try {
-                try {
-                    $logoDrawing = new Drawing();
-                    @$logoDrawing->setName('Logo IAI DDI Sidrap');
-                    @$logoDrawing->setDescription('Logo IAI DDI Sidrap');
-                    @$logoDrawing->setPath($logoPath, false);
-                    @$logoDrawing->setHeight(95);
-                    @$logoDrawing->setWidth(95);
-                    @$logoDrawing->setOffsetX(445);
-                    @$logoDrawing->setOffsetY(2);
-                    @$logoDrawing->setCoordinates('A1');
-                    @$logoDrawing->setWorksheet($sheet);
-                    $logoInserted = true;
-                } catch (\Throwable $e) {
-                    try {
-                        $imgInfo = @getimagesize($logoPath);
-                        $mime = $imgInfo ? ($imgInfo['mime'] ?? '') : '';
-                        $ext = @strtolower(@pathinfo($logoPath, PATHINFO_EXTENSION));
-                        $gd = null;
-                        if ($ext === 'png' || $mime === 'image/png') {
-                            $gd = function_exists('imagecreatefrompng') ? @imagecreatefrompng($logoPath) : false;
-                        } elseif ($ext === 'gif' || $mime === 'image/gif') {
-                            $gd = function_exists('imagecreatefromgif') ? @imagecreatefromgif($logoPath) : false;
-                        } else {
-                            $gd = function_exists('imagecreatefromjpeg') ? @imagecreatefromjpeg($logoPath) : false;
-                        }
-                        if ($gd !== false && $gd !== null) {
-                            $logoDrawing2 = new MemoryDrawing();
-                            @$logoDrawing2->setName('Logo IAI DDI Sidrap');
-                            @$logoDrawing2->setDescription('Logo IAI DDI Sidrap');
-                            @$logoDrawing2->setImageResource($gd);
-                            if ($ext === 'png' || $mime === 'image/png') {
-                                @$logoDrawing2->setRenderingFunction(MemoryDrawing::RENDERING_PNG);
-                                @$logoDrawing2->setMimeType(MemoryDrawing::MIMETYPE_PNG);
-                            } elseif ($ext === 'gif' || $mime === 'image/gif') {
-                                @$logoDrawing2->setRenderingFunction(MemoryDrawing::RENDERING_GIF);
-                                @$logoDrawing2->setMimeType(MemoryDrawing::MIMETYPE_GIF);
-                            } else {
-                                @$logoDrawing2->setRenderingFunction(MemoryDrawing::RENDERING_JPEG);
-                                @$logoDrawing2->setMimeType(MemoryDrawing::MIMETYPE_DEFAULT);
-                            }
-                            @$logoDrawing2->setHeight(95);
-                            @$logoDrawing2->setWidth(95);
-                            @$logoDrawing2->setOffsetX(445);
-                            @$logoDrawing2->setOffsetY(2);
-                            @$logoDrawing2->setCoordinates('A1');
-                            @$logoDrawing2->setWorksheet($sheet);
-                            $logoInserted = true;
-                        }
-                    } catch (\Throwable $e2) { $logoInserted = false; }
-                }
-            } catch (\Throwable $eOuter) { $logoInserted = false; }
-        }
-        $sheet->mergeCells('A1:J4');
-        $sheet->getRowDimension(1)->setRowHeight(24);
-        $sheet->getRowDimension(2)->setRowHeight(24);
-        $sheet->getRowDimension(3)->setRowHeight(24);
-        $sheet->getRowDimension(4)->setRowHeight(24);
-        if (!$logoInserted) {
-            $sheet->setCellValue('A1', 'LOGO IAI DDI SIDRAP');
-            $sheet->getStyle('A1')->applyFromArray(array_merge(
-                $boldFont, $centerAlign,
-                ['font' => ['size' => 14, 'bold' => true, 'color' => ['argb' => 'FF1B6B3B']]]
-            ));
-        }
+            $sheet->getPageSetup()
+                ->setOrientation(
+                    \PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE
+                )
+                ->setPaperSize(
+                    \PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_A4
+                )
+                ->setFitToPage(false);
 
-        $sheet->setCellValue('A6', 'INSTITUT AGAMA ISLAM DARUD DA\'WAH WAL IRSYAD');
-        $sheet->mergeCells('A6:J6');
-        $sheet->getStyle('A6')->applyFromArray(array_merge($boldFont, $centerAlign, ['font' => ['bold' => true, 'size' => 18]]));
+            $sheet->getPageMargins()
+                ->setTop(0.3)
+                ->setBottom(0.3)
+                ->setLeft(0.3)
+                ->setRight(0.3)
+                ->setHeader(0.0)
+                ->setFooter(0.0);
 
-        $sheet->setCellValue('A7', 'SIDENRENG RAPPANG');
-        $sheet->mergeCells('A7:J7');
-        $sheet->getStyle('A7')->applyFromArray(array_merge($boldFont, $centerAlign, ['font' => ['bold' => true, 'size' => 17]]));
+            $sheet->getHeaderFooter()
+                ->setOddHeader('')
+                ->setEvenHeader('')
+                ->setOddFooter('')
+                ->setEvenFooter('');
 
-        $sheet->setCellValue('A8', 'TERAKREDITASI INSTITUSI • SK : 337/SK/BAN-PT/Ak-S/2.0/PT/VI/2026');
-        $sheet->mergeCells('A8:J8');
-        $sheet->getStyle('A8')->applyFromArray(array_merge($centerAlign, ['font' => ['size' => 10]]));
+            $sheet->setShowGridLines(true);
+            $sheet->setPrintGridLines(true);
+            $sheet->setShowRowColHeaders(true);
 
-        $sheet->setCellValue('A9', 'Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang');
-        $sheet->mergeCells('A9:J9');
-        $sheet->getStyle('A9')->applyFromArray(array_merge($centerAlign, ['font' => ['size' => 10]]));
+            $boldFont = [
+                'font' => [
+                    'bold' => true,
+                ],
+            ];
 
-        $sheet->setCellValue('A10', 'E-mail : iaiddisidrap@gmail.com   Website : www.yppddisrapp.ac.id');
-        $sheet->mergeCells('A10:J10');
-        $sheet->getStyle('A10')->applyFromArray(array_merge($centerAlign, ['font' => ['size' => 10]]));
+            $centerAlign = [
+                'alignment' => [
+                    'horizontal' =>
+                        Alignment::HORIZONTAL_CENTER,
 
-        $row = 12;
-        $sheet->setCellValue("A{$row}", 'TRANSKRIP AKADEMIK');
-        $sheet->mergeCells("A{$row}:J{$row}");
-        $sheet->getStyle("A{$row}")->applyFromArray(array_merge($boldFont, $centerAlign, ['font' => ['bold' => true, 'size' => 15]]));
-        $row++;
-        $sheet->setCellValue("A{$row}", 'Nomor : ' . $data['nomorTranskrip']);
-        $sheet->mergeCells("A{$row}:J{$row}");
-        $sheet->getStyle("A{$row}")->applyFromArray(array_merge($centerAlign, ['font' => ['size' => 9]]));
-        $row++;
+                    'vertical' =>
+                        Alignment::VERTICAL_CENTER,
+                ],
+            ];
 
-        $biodata = [
-            ['Nama', $mahasiswa->nama_lengkap, 'Program Pendidikan', 'Strata Satu (S1)'],
-            ['No. Pokok Mahasiswa', $mahasiswa->npm ?? '-', 'Fakultas', $mahasiswa->fakultas ?? 'Fakultas Tarbiyah & Keguruan'],
-            ['No. Ijazah', $data['noIjazah'] ?? ($mahasiswa->nik ?? '-'), 'Program Studi', $mahasiswa->program_studi ?? '-'],
-            ['Tempat / Tanggal Lahir', $data['tempatTgl'], 'No. SK BAN-PT', $data['skBanpt']],
-            ['Tanggal, Bulan dan Tahun Lulus', $data['tanggalLulus'], '', ''],
-        ];
-        foreach ($biodata as $bio) {
-            $labelKiri = rtrim((string)$bio[0]);
-            if ($labelKiri !== '' && !str_ends_with($labelKiri, ':')) $labelKiri .= ': ';
-            $sheet->setCellValue("A{$row}", $labelKiri);
-            $sheet->getStyle("A{$row}")->applyFromArray(array_merge($boldFont, ['alignment' => ['wrapText' => true, 'vertical' => Alignment::VERTICAL_CENTER]]));
-            $sheet->setCellValue("B{$row}", $bio[1]);
-            $sheet->mergeCells("B{$row}:E{$row}");
-            $sheet->getStyle("B{$row}:E{$row}")->applyFromArray(['alignment' => ['wrapText' => true, 'vertical' => Alignment::VERTICAL_CENTER]]);
-            $labelKanan = trim((string)$bio[2]);
-            if ($labelKanan !== '') {
-                if (!str_ends_with($labelKanan, ':')) $labelKanan .= ': ';
-                $sheet->setCellValue("F{$row}", $labelKanan);
-                $sheet->getStyle("F{$row}")->applyFromArray(array_merge($boldFont, ['alignment' => ['wrapText' => true, 'vertical' => Alignment::VERTICAL_CENTER]]));
-            }
-            $sheet->setCellValue("G{$row}", $bio[3]);
-            $sheet->mergeCells("G{$row}:J{$row}");
-            $sheet->getStyle("G{$row}:J{$row}")->applyFromArray(['alignment' => ['wrapText' => true, 'vertical' => Alignment::VERTICAL_CENTER]]);
+            $wrapText = [
+                'alignment' => [
+                    'wrapText' => true,
+                    'vertical' =>
+                        Alignment::VERTICAL_CENTER,
+                ],
+            ];
+
+            $thinBorder = [
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' =>
+                            Border::BORDER_THIN,
+
+                        'color' => [
+                            'argb' => 'FF000000',
+                        ],
+                    ],
+                ],
+            ];
+
+            $headerFill = [
+                'fill' => [
+                    'fillType' =>
+                        Fill::FILL_SOLID,
+
+                    'color' => [
+                        'argb' => 'FFD9EAD3',
+                    ],
+                ],
+            ];
+
+            $row = 1;
+
+            $sheet->setCellValue(
+                "A{$row}",
+                'TRANSKRIP AKADEMIK'
+            );
+
+            $sheet->mergeCells(
+                "A{$row}:J{$row}"
+            );
+
+            $sheet->getStyle(
+                "A{$row}"
+            )->applyFromArray(
+                array_merge(
+                    $boldFont,
+                    $centerAlign,
+                    [
+                        'font' => [
+                            'bold' => true,
+                            'size' => 15,
+                        ],
+                    ]
+                )
+            );
+
             $row++;
-        }
-        $row++;
 
-        $sheet->setCellValue("A{$row}", 'DAFTAR MATA KULIAH DAN NILAI');
-        $sheet->mergeCells("A{$row}:J{$row}");
-        $sheet->getStyle("A{$row}")->applyFromArray(array_merge($boldFont, $headerFill, ['font' => ['bold' => true, 'size' => 12]]));
-        $row++;
+            $sheet->setCellValue(
+                "A{$row}",
+                'Nomor : ' .
+                $data['nomorTranskrip']
+            );
 
-        $headerCol = ['NO', 'MATA KULIAH', 'SKS', 'NILAI', 'M'];
-        $colStart = ['A', 'F'];
-        foreach ($colStart as $cs) {
-            $col = $cs;
-            foreach ($headerCol as $h) {
-                $sheet->setCellValue("{$col}{$row}", $h);
-                $sheet->getStyle("{$col}{$row}")->applyFromArray(array_merge($boldFont, $centerAlign, $thinBorder, $headerFill));
-                $col++;
+            $sheet->mergeCells(
+                "A{$row}:J{$row}"
+            );
+
+            $sheet->getStyle(
+                "A{$row}:J{$row}"
+            )->applyFromArray(
+                array_merge(
+                    $centerAlign,
+                    [
+                        'font' => [
+                            'size' => 9,
+                        ],
+                    ]
+                )
+            );
+
+            $row += 2;
+
+            $biodata = [
+                [
+                    'Nama',
+                    $mahasiswa->nama_lengkap,
+                    'Program Pendidikan',
+                    'Strata Satu (S1)',
+                ],
+
+                [
+                    'No. Pokok Mahasiswa',
+                    $mahasiswa->npm ?? '-',
+                    'Fakultas',
+                    $mahasiswa->fakultas
+                        ?? 'Fakultas Tarbiyah & Keguruan',
+                ],
+
+                [
+                    'No. Ijazah',
+                    $data['noIjazah']
+                        ?? ($mahasiswa->nik ?? '-'),
+                    'Program Studi',
+                    $mahasiswa->program_studi ?? '-',
+                ],
+
+                [
+                    'Tempat / Tanggal Lahir',
+                    $data['tempatTgl'],
+                    'No. SK BAN-PT',
+                    $data['skBanpt'],
+                ],
+
+                [
+                    'Tanggal, Bulan dan Tahun Lulus',
+                    $data['tanggalLulus'],
+                    '',
+                    '',
+                ],
+            ];
+
+            foreach ($biodata as $bio) {
+
+                $labelKiri = rtrim(
+                    (string) $bio[0]
+                );
+
+                if (
+                    $labelKiri !== ''
+                    && !str_ends_with(
+                        $labelKiri,
+                        ':'
+                    )
+                ) {
+                    $labelKiri .= ': ';
+                }
+
+                $sheet->setCellValue(
+                    "A{$row}",
+                    $labelKiri
+                );
+
+                $sheet->getStyle(
+                    "A{$row}"
+                )->applyFromArray(
+                    array_merge(
+                        $boldFont,
+                        [
+                            'alignment' => [
+                                'wrapText' => true,
+                                'vertical' =>
+                                    Alignment::VERTICAL_CENTER,
+                            ],
+                        ]
+                    )
+                );
+
+                $sheet->setCellValue(
+                    "B{$row}",
+                    $bio[1]
+                );
+
+                $sheet->mergeCells(
+                    "B{$row}:E{$row}"
+                );
+
+                $sheet->getStyle(
+                    "B{$row}:E{$row}"
+                )->applyFromArray(
+                    $wrapText
+                );
+
+                $labelKanan = trim(
+                    (string) $bio[2]
+                );
+
+                if ($labelKanan !== '') {
+
+                    if (
+                        !str_ends_with(
+                            $labelKanan,
+                            ':'
+                        )
+                    ) {
+                        $labelKanan .= ': ';
+                    }
+
+                    $sheet->setCellValue(
+                        "F{$row}",
+                        $labelKanan
+                    );
+
+                    $sheet->getStyle(
+                        "F{$row}"
+                    )->applyFromArray(
+                        array_merge(
+                            $boldFont,
+                            $wrapText
+                        )
+                    );
+                }
+
+                $sheet->setCellValue(
+                    "G{$row}",
+                    $bio[3]
+                );
+
+                $sheet->mergeCells(
+                    "G{$row}:J{$row}"
+                );
+
+                $sheet->getStyle(
+                    "G{$row}:J{$row}"
+                )->applyFromArray(
+                    $wrapText
+                );
+
+                $row++;
             }
-        }
-        $sheet->getRowDimension($row)->setRowHeight(22);
-        $row++;
 
-        $daftarMK = $data['daftarMataKuliah'];
-        $ujianKompre = $data['ujianKompre'];
-        $ujianAda = array_values(array_filter(array_map(fn($v) => trim((string)$v), $ujianKompre), fn($v) => $v !== ''));
-        $ujianCount = count($ujianAda);
-        $totalMK = count($daftarMK);
-        $barisBawah = 3 + $ujianCount;
-        $sisa = max(0, $totalMK - $barisBawah);
-        $mkAtas = array_slice($daftarMK, 0, $sisa);
-        $mkBawahKiri = array_slice($daftarMK, $sisa);
-        while (count($mkBawahKiri) < $barisBawah) { $mkBawahKiri[] = null; }
-        $halfAtas = (int) ceil(count($mkAtas) / 2);
-        $kiriAtas = array_slice($mkAtas, 0, $halfAtas);
-        $kananAtas = array_slice($mkAtas, $halfAtas);
+            $row++;
+
+            $sheet->setCellValue(
+                "A{$row}",
+                'DAFTAR MATA KULIAH DAN NILAI'
+            );
+
+            $sheet->mergeCells(
+                "A{$row}:J{$row}"
+            );
+
+            $sheet->getStyle(
+                "A{$row}"
+            )->applyFromArray(
+                array_merge(
+                    $boldFont,
+                    $headerFill,
+                    [
+                        'font' => [
+                            'bold' => true,
+                            'size' => 12,
+                        ],
+                    ]
+                )
+            );
+
+            $row++;
+
+            $headerCol = [
+                'NO',
+                'MATA KULIAH',
+                'SKS',
+                'NILAI',
+                'M',
+            ];
+
+            foreach (['A', 'F'] as $startCol) {
+
+                $col = $startCol;
+
+                foreach ($headerCol as $h) {
+
+                    $sheet->setCellValue(
+                        "{$col}{$row}",
+                        $h
+                    );
+
+                    $sheet->getStyle(
+                        "{$col}{$row}"
+                    )->applyFromArray(
+                        array_merge(
+                            $boldFont,
+                            $centerAlign,
+                            $thinBorder,
+                            $headerFill
+                        )
+                    );
+
+                    $col++;
+                }
+            }
+
+            $sheet->getRowDimension(
+                $row
+            )->setRowHeight(22);
+
+            $row++;
+
+            $daftarMK =
+                $data['daftarMataKuliah'];
+
+            $ujianKompre =
+                $data['ujianKompre'];
+
+            $ujianAda = array_values(
+                array_filter(
+                    array_map(
+                        fn ($v) =>
+                            trim((string) $v),
+                        $ujianKompre
+                    ),
+                    fn ($v) =>
+                        $v !== ''
+                )
+            );
+
+            $ujianCount =
+                count($ujianAda);
+
+            $totalMK =
+                count($daftarMK);
+
+            $barisBawah =
+                3 + $ujianCount;
+
+            $sisa =
+                max(
+                    0,
+                    $totalMK - $barisBawah
+                );
+
+            $mkAtas =
+                array_slice(
+                    $daftarMK,
+                    0,
+                    $sisa
+                );
+
+            $mkBawahKiri =
+                array_slice(
+                    $daftarMK,
+                    $sisa
+                );
+
+            while (
+                count($mkBawahKiri)
+                < $barisBawah
+            ) {
+                $mkBawahKiri[] = null;
+            }
+
+            $halfAtas =
+                (int) ceil(
+                    count($mkAtas) / 2
+                );
+
+            $kiriAtas =
+                array_slice(
+                    $mkAtas,
+                    0,
+                    $halfAtas
+                );
+
+            $kananAtas =
+                array_slice(
+                    $mkAtas,
+                    $halfAtas
+                );
+
+            $maxAtas = max(
+                count($kiriAtas),
+                count($kananAtas)
+            );
+
+            $noAwalKanan =
+                count($kiriAtas);
+
+            for (
+                $i = 0;
+                $i < $maxAtas;
+                $i++
+            ) {
+
+                $L =
+                    $kiriAtas[$i] ?? null;
+
+                $R =
+                    $kananAtas[$i] ?? null;
+
+                if ($L) {
+
+                    $sheet->setCellValue(
+                        "A{$row}",
+                        $i + 1
+                    );
+
+                    $sheet->setCellValue(
+                        "B{$row}",
+                        $L->nama_mata_kuliah
+                    );
+
+                    $sheet->setCellValue(
+                        "C{$row}",
+                        $L->sks
+                    );
+
+                    $sheet->setCellValue(
+                        "D{$row}",
+                        $L->nilai_huruf
+                    );
+
+                    $sheet->setCellValue(
+                        "E{$row}",
+                        $this->formatNilaiM(
+                            $L->nilai_m
+                        )
+                    );
+                }
+
+                if ($R) {
+
+                    $sheet->setCellValue(
+                        "F{$row}",
+                        $noAwalKanan + $i + 1
+                    );
+
+                    $sheet->setCellValue(
+                        "G{$row}",
+                        $R->nama_mata_kuliah
+                    );
+
+                    $sheet->setCellValue(
+                        "H{$row}",
+                        $R->sks
+                    );
+
+                    $sheet->setCellValue(
+                        "I{$row}",
+                        $R->nilai_huruf
+                    );
+
+                    $sheet->setCellValue(
+                        "J{$row}",
+                        $this->formatNilaiM(
+                            $R->nilai_m
+                        )
+                    );
+                }
+
+                foreach (
+                    range('A', 'J')
+                    as $c
+                ) {
+                    $sheet->getStyle(
+                        "{$c}{$row}"
+                    )->applyFromArray(
+                        $thinBorder
+                    );
+                }
+
+                $sheet->getStyle(
+                    "A{$row}"
+                )->applyFromArray(
+                    $centerAlign
+                );
+
+                $sheet->getStyle(
+                    "C{$row}"
+                )->applyFromArray(
+                    $centerAlign
+                );
+
+                $sheet->getStyle(
+                    "D{$row}"
+                )->applyFromArray(
+                    $centerAlign
+                );
+
+                $sheet->getStyle(
+                    "E{$row}"
+                )->applyFromArray(
+                    $centerAlign
+                );
+
+                $sheet->getStyle(
+                    "F{$row}"
+                )->applyFromArray(
+                    $centerAlign
+                );
+
+                $sheet->getStyle(
+                    "H{$row}"
+                )->applyFromArray(
+                    $centerAlign
+                );
+
+                $sheet->getStyle(
+                    "I{$row}"
+                )->applyFromArray(
+                    $centerAlign
+                );
+
+                $sheet->getStyle(
+                    "J{$row}"
+                )->applyFromArray(
+                    $centerAlign
+                );
+
+                $sheet->getStyle(
+                    "B{$row}"
+                )->applyFromArray(
+                    $wrapText
+                );
+
+                $sheet->getStyle(
+                    "G{$row}"
+                )->applyFromArray(
+                    $wrapText
+                );
+
+                $sheet->getRowDimension(
+                    $row
+                )->setRowHeight(20);
+
+                $row++;
+            }
+
+            for (
+                $bi = 0;
+                $bi < $barisBawah;
+                $bi++
+            ) {
+
+                $LL =
+                    $mkBawahKiri[$bi]
+                    ?? null;
+
+                foreach (
+                    range('A', 'J')
+                    as $c
+                ) {
+                    $sheet->getStyle(
+                        "{$c}{$row}"
+                    )->applyFromArray(
+                        $thinBorder
+                    );
+                }
+
+                if ($bi === 0) {
+
+                    if ($LL) {
+
+                        $sheet->setCellValue(
+                            "A{$row}",
+                            $noAwalKanan
+                            + count($kananAtas)
+                            + 1
+                        );
+
+                        $sheet->setCellValue(
+                            "B{$row}",
+                            $LL->nama_mata_kuliah
+                        );
+
+                        $sheet->setCellValue(
+                            "C{$row}",
+                            $LL->sks
+                        );
+
+                        $sheet->setCellValue(
+                            "D{$row}",
+                            $LL->nilai_huruf
+                        );
+
+                        $sheet->setCellValue(
+                            "E{$row}",
+                            $this->formatNilaiM(
+                                $LL->nilai_m
+                            )
+                        );
+                    }
+
+                    $sheet->setCellValue(
+                        "G{$row}",
+                        'Jumlah'
+                    );
+
+                    $sheet->setCellValue(
+                        "H{$row}",
+                        $data['totalSks']
+                    );
+
+                    $sheet->setCellValue(
+                        "J{$row}",
+                        $this->formatNilaiM(
+                            $data['totalMutu']
+                        )
+                    );
+
+                    $sheet->getStyle(
+                        "G{$row}:J{$row}"
+                    )->applyFromArray(
+                        $boldFont
+                    );
+                }
+
+                elseif ($bi === 1) {
+
+                    if ($LL) {
+
+                        $sheet->setCellValue(
+                            "A{$row}",
+                            $noAwalKanan
+                            + count($kananAtas)
+                            + $bi + 1
+                        );
+
+                        $sheet->setCellValue(
+                            "B{$row}",
+                            $LL->nama_mata_kuliah
+                        );
+
+                        $sheet->setCellValue(
+                            "C{$row}",
+                            $LL->sks
+                        );
+
+                        $sheet->setCellValue(
+                            "D{$row}",
+                            $LL->nilai_huruf
+                        );
+
+                        $sheet->setCellValue(
+                            "E{$row}",
+                            $this->formatNilaiM(
+                                $LL->nilai_m
+                            )
+                        );
+                    }
+                }
+
+                elseif ($bi === 2) {
+
+                    if ($LL) {
+
+                        $sheet->setCellValue(
+                            "A{$row}",
+                            $noAwalKanan
+                            + count($kananAtas)
+                            + $bi + 1
+                        );
+
+                        $sheet->setCellValue(
+                            "B{$row}",
+                            $LL->nama_mata_kuliah
+                        );
+
+                        $sheet->setCellValue(
+                            "C{$row}",
+                            $LL->sks
+                        );
+
+                        $sheet->setCellValue(
+                            "D{$row}",
+                            $LL->nilai_huruf
+                        );
+
+                        $sheet->setCellValue(
+                            "E{$row}",
+                            $this->formatNilaiM(
+                                $LL->nilai_m
+                            )
+                        );
+                    }
+
+                    $sheet->mergeCells(
+                        "G{$row}:J{$row}"
+                    );
+
+                    $sheet->setCellValue(
+                        "G{$row}",
+                        'Ujian Kompetensi'
+                    );
+
+                    $sheet->getStyle(
+                        "G{$row}"
+                    )->applyFromArray(
+                        $boldFont
+                    );
+                }
+
+                else {
+
+                    if ($LL) {
+
+                        $sheet->setCellValue(
+                            "A{$row}",
+                            $noAwalKanan
+                            + count($kananAtas)
+                            + $bi + 1
+                        );
+
+                        $sheet->setCellValue(
+                            "B{$row}",
+                            $LL->nama_mata_kuliah
+                        );
+
+                        $sheet->setCellValue(
+                            "C{$row}",
+                            $LL->sks
+                        );
+
+                        $sheet->setCellValue(
+                            "D{$row}",
+                            $LL->nilai_huruf
+                        );
+
+                        $sheet->setCellValue(
+                            "E{$row}",
+                            $this->formatNilaiM(
+                                $LL->nilai_m
+                            )
+                        );
+                    }
+
+                    $uIdx =
+                        $bi - 3;
+
+                    $uNama =
+                        $ujianAda[$uIdx]
+                        ?? '';
+
+                    $sheet->setCellValue(
+                        "F{$row}",
+                        $uIdx + 1
+                    );
+
+                    $sheet->setCellValue(
+                        "G{$row}",
+                        $uNama
+                    );
+
+                    $sheet->setCellValue(
+                        "H{$row}",
+                        0
+                    );
+
+                    $sheet->setCellValue(
+                        "I{$row}",
+                        'A'
+                    );
+
+                    $sheet->setCellValue(
+                        "J{$row}",
+                        0
+                    );
+                }
+
+                $row++;
+            }
+
+            $row++;
+
+            $sheet->setCellValue(
+                "A{$row}",
+                'INDEKS PRESTASI KUMULATIF (IPK)'
+            );
+
+            $sheet->getStyle(
+                "A{$row}"
+            )->applyFromArray(
+                $boldFont
+            );
+
+            $sheet->setCellValue(
+                "B{$row}",
+                ': ' .
+                str_replace(
+                    '.',
+                    ',',
+                    number_format(
+                        $data['ipk'],
+                        2
+                    )
+                )
+            );
+
+            $sheet->mergeCells(
+                "B{$row}:E{$row}"
+            );
+
+            $row++;
+
+            $sheet->setCellValue(
+                "A{$row}",
+                'PREDIKAT KELULUSAN'
+            );
+
+            $sheet->getStyle(
+                "A{$row}"
+            )->applyFromArray(
+                $boldFont
+            );
+
+            $sheet->setCellValue(
+                "B{$row}",
+                ': ' .
+                $data['predikat']
+            );
+
+            $sheet->mergeCells(
+                "B{$row}:E{$row}"
+            );
+
+            $row++;
+
+            $sheet->setCellValue(
+                "A{$row}",
+                'JUDUL SKRIPSI'
+            );
+
+            $sheet->getStyle(
+                "A{$row}"
+            )->applyFromArray(
+                $boldFont
+            );
+
+            $sheet->setCellValue(
+                "B{$row}",
+                ': ' .
+                $data['judulSkripsi']
+            );
+
+            $sheet->mergeCells(
+                "B{$row}:J{$row}"
+            );
+
+            $sheet->getStyle(
+                "B{$row}:J{$row}"
+            )->applyFromArray(
+                $wrapText
+            );
+
+            $row += 2;
+
+            $sheet->setCellValue(
+                "F{$row}",
+                'Foto 3 × 4'
+            );
+
+            $sheet->getStyle(
+                "F{$row}"
+            )->applyFromArray(
+                [
+                    'font' => [
+                        'size' => 10,
+                        'bold' => true,
+                    ],
+                    'alignment' => [
+                        'horizontal' =>
+                            Alignment::HORIZONTAL_CENTER,
+                        'vertical' =>
+                            Alignment::VERTICAL_CENTER,
+                    ],
+                ]
+            );
+
+            $row++;
+
+            $sheet->setCellValue(
+                "G{$row}",
+                $data['tanggalTtd']
+            );
+
+            $sheet->mergeCells(
+                "G{$row}:J{$row}"
+            );
+
+            $sheet->getStyle(
+                "G{$row}"
+            )->applyFromArray(
+                $centerAlign
+            );
+
+            $row++;
+
+            $sheet->setCellValue(
+                "G{$row}",
+                $data['ttdJabatan']
+            );
+
+            $sheet->mergeCells(
+                "G{$row}:J{$row}"
+            );
+
+            $sheet->getStyle(
+                "G{$row}"
+            )->applyFromArray(
+                array_merge(
+                    $centerAlign,
+                    $boldFont
+                )
+            );
+
+            $row += 5;
+
+            $sheet->setCellValue(
+                "G{$row}",
+                $data['ttdNama']
+            );
+
+            $sheet->mergeCells(
+                "G{$row}:J{$row}"
+            );
+
+            $sheet->getStyle(
+                "G{$row}"
+            )->applyFromArray(
+                [
+                    'font' => [
+                        'bold' => true,
+                        'underline' => true,
+                    ],
+                    'alignment' =>
+                        $centerAlign['alignment'],
+                ]
+            );
+
+            $row++;
+
+            $sheet->setCellValue(
+                "G{$row}",
+                $data['ttdNomorLabel']
+                . '. '
+                . $data['ttdNomor']
+            );
+
+            $sheet->mergeCells(
+                "G{$row}:J{$row}"
+            );
+
+            $sheet->getStyle(
+                "G{$row}"
+            )->applyFromArray(
+                $centerAlign
+            );
+
+            $sheet->getColumnDimension('A')
+                ->setWidth(24);
+
+            $sheet->getColumnDimension('B')
+                ->setWidth(30);
+
+            $sheet->getColumnDimension('C')
+                ->setWidth(6);
+
+            $sheet->getColumnDimension('D')
+                ->setWidth(6);
+
+            $sheet->getColumnDimension('E')
+                ->setWidth(8);
+
+            $sheet->getColumnDimension('F')
+                ->setWidth(22);
+
+            $sheet->getColumnDimension('G')
+                ->setWidth(26);
+
+            $sheet->getColumnDimension('H')
+                ->setWidth(6);
+
+            $sheet->getColumnDimension('I')
+                ->setWidth(6);
+
+            $sheet->getColumnDimension('J')
+                ->setWidth(8);
+
+            $namafile =
+                'Transkrip-' .
+                ($mahasiswa->npm ?: $mahasiswa->id) .
+                '-' .
+                preg_replace(
+                    '/[^a-zA-Z0-9_\-]/',
+                    '_',
+                    (string) $mahasiswa->nama_lengkap
+                ) .
+                '.xlsx';
+
+            $writer =
+                new Xlsx($spreadsheet);
+
+            while (ob_get_level() > 0) {
+                @ob_end_clean();
+            }
+
+            $tempDir =
+                storage_path('app/temp');
+
+            if (!is_dir($tempDir)) {
+                mkdir(
+                    $tempDir,
+                    0755,
+                    true
+                );
+            }
+
+            $tempFile =
+                $tempDir .
+                DIRECTORY_SEPARATOR .
+                'transkrip-' .
+                $mahasiswa->id .
+                '-' .
+                substr(
+                    md5(
+                        uniqid(
+                            (string) mt_rand(),
+                            true
+                        )
+                    ),
+                    0,
+                    16
+                ) .
+                '.xlsx';
+
+            $writer->save($tempFile);
+
+            clearstatcache(
+                true,
+                $tempFile
+            );
+
+            if (
+                !is_file($tempFile)
+                || filesize($tempFile) < 1024
+            ) {
+                throw new \RuntimeException(
+                    'File Excel gagal dibuat.'
+                );
+            }
+
+            $zip =
+                new ZipArchive();
+
+            if (
+                $zip->open($tempFile)
+                !== true
+            ) {
+                throw new \RuntimeException(
+                    'File XLSX tidak valid.'
+                );
+            }
+
+            if (
+                $zip->locateName(
+                    '[Content_Types].xml'
+                ) === false
+            ) {
+                $zip->close();
+
+                throw new \RuntimeException(
+                    'File XLSX rusak.'
+                );
+            }
+
+            $zip->close();
+
+            try {
+                $loaded =
+                    IOFactory::load(
+                        $tempFile
+                    );
+
+                if (
+                    !($loaded instanceof Spreadsheet)
+                ) {
+                    throw new \RuntimeException(
+                        'Workbook tidak dapat dibaca kembali.'
+                    );
+                }
+            } catch (\Throwable $e) {
+                throw new \RuntimeException(
+                    'Validasi Excel gagal: '
+                    . $e->getMessage()
+                );
+            }
+
+            return response()
+                ->download(
+                    $tempFile,
+                    $namafile,
+                    [
+                        'Content-Type' =>
+                            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+
+                        'Cache-Control' =>
+                            'no-cache, no-store, must-revalidate',
+
+                        'Pragma' =>
+                            'no-cache',
+
+                        'Expires' =>
+                            '0',
+                    ]
+                )
+                ->deleteFileAfterSend(true);
+
+        } catch (\Throwable $e) {
+
+            while (ob_get_level() > 0) {
+                @ob_end_clean();
+            }
+
+            if (
+                $tempFile
+                && is_file($tempFile)
+            ) {
+                @unlink($tempFile);
+            }
+
+            return redirect()
+                ->back()
+                ->withErrors([
+                    'excel' =>
+                        'Terjadi kesalahan saat generate Excel: '
+                        . $e->getMessage(),
+                ]);
+        }
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | WORD
+    |--------------------------------------------------------------------------
+    | Word TIDAK lagi memakai:
+    | admin.transkrip-nilai.word
+    |
+    | HTML langsung dibuat di controller.
+    |--------------------------------------------------------------------------
+    */
+
+    public function word(
+        Request $request,
+        Mahasiswa $mahasiswa
+    ) {
+        $data =
+            $this->buildTranskripData(
+                $mahasiswa
+            );
+
+        /*
+        |--------------------------------------------------------------------------
+        | LOGO
+        |--------------------------------------------------------------------------
+        */
+
+        $logoSrc =
+            $this->getImageDataUri(
+                $this->findLogoPath()
+            );
+
+        /*
+        |--------------------------------------------------------------------------
+        | FOTO MAHASISWA
+        |--------------------------------------------------------------------------
+        */
+
+        $fotoSrc =
+            $data['fotoMahasiswa']
+            ?? null;
+
+        if (
+            empty($fotoSrc)
+            && !empty($mahasiswa->foto_path)
+        ) {
+            $fotoSrc =
+                $this->getImageDataUri(
+                    $this->findFotoPath(
+                        $mahasiswa
+                    )
+                );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | BANGUN HTML WORD
+        |--------------------------------------------------------------------------
+        */
+
+        $html = view('admin.transkrip-nilai.word', [
+            'data' => $data,
+            'logoSrc' => $logoSrc,
+            'fotoSrc' => $fotoSrc,
+        ])->render();
+
+        /*
+        |--------------------------------------------------------------------------
+        | NAMA FILE
+        |--------------------------------------------------------------------------
+        */
+
+        $namafile =
+            'Transkrip-' .
+            ($mahasiswa->npm ?: $mahasiswa->id) .
+            '-' .
+            preg_replace(
+                '/[^a-zA-Z0-9_\-]/',
+                '_',
+                (string) $mahasiswa->nama_lengkap
+            ) .
+            '.doc';
+
+        /*
+        |--------------------------------------------------------------------------
+        | DOWNLOAD
+        |--------------------------------------------------------------------------
+        */
+
+        $forceDownload =
+            (string) $request->query('download', '') !== ''
+            || (string) $request->query('dl', '') !== ''
+            || (string) $request->query('fd', '') !== ''
+            || strtolower(
+                (string) $request->query('disposition', '')
+            ) === 'attachment';
+
+        while (ob_get_level() > 0) {
+            @ob_end_clean();
+        }
+
+        return response()->streamDownload(
+            function () use ($html) {
+                echo $html;
+            },
+            $namafile,
+            [
+                'Content-Type' =>
+                    'application/msword; charset=UTF-8',
+
+                'Content-Transfer-Encoding' =>
+                    'binary',
+
+                'Cache-Control' =>
+                    'no-store, no-cache, must-revalidate, max-age=0, private',
+
+                'Pragma' =>
+                    'public',
+
+                'Expires' =>
+                    'Sat, 26 Jul 1997 05:00:00 GMT',
+
+                'X-Content-Type-Options' =>
+                    'nosniff',
+
+                'Content-Description' =>
+                    'File Transfer',
+            ],
+            $forceDownload
+                ? 'attachment'
+                : 'inline'
+        );
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | HTML WORD
+    |--------------------------------------------------------------------------
+    */
+
+    private function buildWordHtml(
+        array $data,
+        ?string $logoSrc,
+        ?string $fotoSrc
+    ): string {
+
+        $mahasiswa = $data['mahasiswa'];
+
+        $esc = function ($value): string {
+            return htmlspecialchars(
+                (string) ($value ?? ''),
+                ENT_QUOTES | ENT_SUBSTITUTE,
+                'UTF-8'
+            );
+        };
+
+        $nama = $esc($mahasiswa->nama_lengkap);
+        $npm = $esc($mahasiswa->npm ?? '-');
+        $noIjazah = $esc($data['noIjazah'] ?? '-');
+        $tempatTgl = $esc($data['tempatTgl'] ?? '-');
+        $tanggalLulus = $esc($data['tanggalLulus'] ?? '-');
+        $fakultas = $esc($mahasiswa->fakultas ?? 'Fakultas Tarbiyah & Keguruan');
+        $prodi = $esc($mahasiswa->program_studi ?? '-');
+        $skBanpt = $esc($data['skBanpt'] ?? '-');
+        $nomorTranskrip = $esc($data['nomorTranskrip'] ?? '-');
+        $ipkRaw = (float) ($data['ipk'] ?? 0);
+        $ipk = str_replace('.', ',', number_format($ipkRaw, 2));
+        $predikat = $esc($data['predikat'] ?? '-');
+        $judulSkripsi = $esc($data['judulSkripsi'] ?? '-');
+        $tanggalTtd = $esc($data['tanggalTtd'] ?? '-');
+        $ttdJabatan = $esc($data['ttdJabatan'] ?? 'DEKAN FAKULTAS');
+        $ttdNama = $esc($data['ttdNama'] ?? '-');
+        $ttdNomorLabel = $esc($data['ttdNomorLabel'] ?? 'NIDN');
+        $ttdNomor = $esc($data['ttdNomor'] ?? '-');
+        $totalSks = $esc($data['totalSks'] ?? 0);
+        $totalMutuRaw = (float) ($data['totalMutu'] ?? 0);
+        $totalMutu = $esc($this->formatNilaiM($totalMutuRaw));
+
+        $logoImg = '';
+        if (!empty($logoSrc)) {
+            $logoImg = '<img src="' . $esc($logoSrc) . '" alt="Logo IAI DDI Sidrap" width="110" height="110" style="width:110px;height:110px;object-fit:contain;display:inline-block;">';
+        }
+
+        if (!empty($fotoSrc)) {
+            $fotoInner = '<img src="' . $esc($fotoSrc) . '" alt="Foto ' . $nama . '" style="width:100%;height:100%;object-fit:cover;display:block;">';
+        } else {
+            $fotoInner = '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#888;font-size:10.5px;font-weight:400;line-height:1.25;text-align:center;background:#ffffff;">Foto<br>3 × 4</div>';
+        }
+
+        $semuaMK = $data['daftarMataKuliah'] ?? [];
+        if (!is_array($semuaMK)) {
+            $semuaMK = [];
+        }
+
+        $ujianKompre = $data['ujianKompre'] ?? [];
+        if (!is_array($ujianKompre)) {
+            $ujianKompre = [];
+        }
+        $ujianKompre = array_values(array_filter(
+            array_map(fn ($v) => trim((string) $v), $ujianKompre),
+            fn ($v) => $v !== ''
+        ));
+        $ujianCount = count($ujianKompre);
+        $totalMK = count($semuaMK);
+
+        $totalMK = count($semuaMK);
+        $halfAtas = (int) ceil($totalMK / 2);
+        $kiriAtas = array_slice($semuaMK, 0, $halfAtas);
+        $kananAtas = array_slice($semuaMK, $halfAtas);
         $maxAtas = max(count($kiriAtas), count($kananAtas));
         $noAwalKanan = count($kiriAtas);
+        $barisBawah = 3 + $ujianCount;
+
+        $formatMut = function ($nilaiM, $nilaiHuruf): string {
+            $nm = (float) ($nilaiM ?? 0);
+            if ($nm > 0) {
+                $s = number_format($nm, 2, '.', '');
+                $s = rtrim($s, '0');
+                $s = rtrim($s, '.');
+                return $s;
+            }
+            if ((string) $nilaiHuruf !== '') {
+                return '0';
+            }
+            return '';
+        };
+
+        $tableRows = '';
 
         for ($i = 0; $i < $maxAtas; $i++) {
             $L = $kiriAtas[$i] ?? null;
             $R = $kananAtas[$i] ?? null;
+
             $noL = $L ? ($i + 1) : '';
             $noR = $R ? ($noAwalKanan + $i + 1) : '';
-            $namaL = $L ? $L->nama_mata_kuliah : '';
-            $sksL = $L ? ($L->sks == 0 ? '0' : $L->sks) : '';
-            $nhL = $L ? ($L->nilai_huruf !== '' ? $L->nilai_huruf : '') : '';
-            $mutuL = $L ? ($L->nilai_m > 0 ? rtrim(rtrim(number_format($L->nilai_m, 2, '.', ''), '0'), '.') : ($L->nilai_huruf !== '' ? '0' : '')) : '';
-            $namaR = $R ? $R->nama_mata_kuliah : '';
-            $sksR = $R ? ($R->sks == 0 ? '0' : $R->sks) : '';
-            $nhR = $R ? ($R->nilai_huruf !== '' ? $R->nilai_huruf : '') : '';
-            $mutuR = $R ? ($R->nilai_m > 0 ? rtrim(rtrim(number_format($R->nilai_m, 2, '.', ''), '0'), '.') : ($R->nilai_huruf !== '' ? '0' : '')) : '';
+            $namaL = $L ? $esc($L->nama_mata_kuliah ?? '') : '';
+            $sksL = $L ? (($L->sks ?? 0) == 0 ? '0' : $esc($L->sks)) : '';
+            $nhL = $L ? ($esc($L->nilai_huruf ?? '')) : '';
+            $mutuL = $L ? $formatMut($L->nilai_m ?? 0, $L->nilai_huruf ?? '') : '';
 
-            if ($L) {
-                $sheet->setCellValue("A{$row}", $noL);
-                $sheet->getStyle("A{$row}")->applyFromArray(array_merge($centerAlign, $thinBorder));
-                $sheet->setCellValue("B{$row}", $namaL);
-                $sheet->getStyle("B{$row}")->applyFromArray(array_merge($wrapText, $thinBorder));
-                $sheet->setCellValue("C{$row}", $sksL);
-                $sheet->getStyle("C{$row}")->applyFromArray(array_merge($centerAlign, $thinBorder));
-                $sheet->setCellValue("D{$row}", $nhL);
-                $sheet->getStyle("D{$row}")->applyFromArray(array_merge($centerAlign, $thinBorder));
-                $sheet->setCellValue("E{$row}", $mutuL);
-                $sheet->getStyle("E{$row}")->applyFromArray(array_merge($centerAlign, $thinBorder));
-            } else {
-                foreach (range('A', 'E') as $c) {
-                    $sheet->getStyle("{$c}{$row}")->applyFromArray($thinBorder);
-                }
+            $namaR = $R ? $esc($R->nama_mata_kuliah ?? '') : '';
+            $sksR = $R ? (($R->sks ?? 0) == 0 ? '0' : $esc($R->sks)) : '';
+            $nhR = $R ? ($esc($R->nilai_huruf ?? '')) : '';
+            $mutuR = $R ? $formatMut($R->nilai_m ?? 0, $R->nilai_huruf ?? '') : '';
+
+            $tableRows .=
+                '<tr>' .
+                '<td class="num">' . $noL . '</td>' .
+                '<td class="mk">' . $namaL . '</td>' .
+                '<td class="sks">' . $sksL . '</td>' .
+                '<td class="nilaih">' . $nhL . '</td>' .
+                '<td class="m">' . $mutuL . '</td>' .
+                '<td class="num">' . $noR . '</td>' .
+                '<td class="mk">' . $namaR . '</td>' .
+                '<td class="sks">' . $sksR . '</td>' .
+                '<td class="nilaih">' . $nhR . '</td>' .
+                '<td class="m">' . $mutuR . '</td>' .
+                '</tr>';
+        }
+
+        for ($bi = 0; $bi < $barisBawah; $bi++) {
+            if ($bi === 0) {
+                $tableRows .=
+                    '<tr class="jumlah">' .
+                    '<td class="num left-col"></td>' .
+                    '<td class="mk left-col"></td>' .
+                    '<td class="sks left-col"></td>' .
+                    '<td class="nilaih left-col"></td>' .
+                    '<td class="m left-col"></td>' .
+                    '<td class="num jumlah-dashed"></td>' .
+                    '<td class="mk">Jumlah</td>' .
+                    '<td class="sks">' . $totalSks . '</td>' .
+                    '<td class="nilaih"></td>' .
+                    '<td class="m">' . $totalMutu . '</td>' .
+                    '</tr>';
+                continue;
             }
 
-            if ($R) {
-                $sheet->setCellValue("F{$row}", $noR);
-                $sheet->getStyle("F{$row}")->applyFromArray(array_merge($centerAlign, $thinBorder));
-                $sheet->setCellValue("G{$row}", $namaR);
-                $sheet->getStyle("G{$row}")->applyFromArray(array_merge($wrapText, $thinBorder));
-                $sheet->setCellValue("H{$row}", $sksR);
-                $sheet->getStyle("H{$row}")->applyFromArray(array_merge($centerAlign, $thinBorder));
-                $sheet->setCellValue("I{$row}", $nhR);
-                $sheet->getStyle("I{$row}")->applyFromArray(array_merge($centerAlign, $thinBorder));
-                $sheet->setCellValue("J{$row}", $mutuR);
-                $sheet->getStyle("J{$row}")->applyFromArray(array_merge($centerAlign, $thinBorder));
-            } else {
-                foreach (range('F', 'J') as $c) {
-                    $sheet->getStyle("{$c}{$row}")->applyFromArray($thinBorder);
-                }
+            if ($bi === 1) {
+                $tableRows .=
+                    '<tr class="spacer-row">' .
+                    '<td class="num left-col"></td>' .
+                    '<td class="mk left-col"></td>' .
+                    '<td class="sks left-col"></td>' .
+                    '<td class="nilaih left-col"></td>' .
+                    '<td class="m left-col"></td>' .
+                    '<td class="num"></td>' .
+                    '<td class="mk"></td>' .
+                    '<td class="sks"></td>' .
+                    '<td class="nilaih"></td>' .
+                    '<td class="m"></td>' .
+                    '</tr>';
+                continue;
             }
-            $sheet->getRowDimension($row)->setRowHeight(20);
-            $row++;
+
+            if ($bi === 2) {
+                $tableRows .=
+                    '<tr class="ujian-head">' .
+                    '<td class="num left-col"></td>' .
+                    '<td class="mk left-col"></td>' .
+                    '<td class="sks left-col"></td>' .
+                    '<td class="nilaih left-col"></td>' .
+                    '<td class="m left-col"></td>' .
+                    '<td class="num ujian-right-spacer"></td>' .
+                    '<td class="mk ujian-left-title" colspan="4">Ujian Kompetensi</td>' .
+                    '</tr>';
+                continue;
+            }
+
+            $uIdx = $bi - 3;
+            $uNama = $ujianKompre[$uIdx] ?? '';
+            $uNo = $uIdx + 1;
+            $tableRows .=
+                '<tr class="ujian-row">' .
+                '<td class="num left-col"></td>' .
+                '<td class="mk left-col"></td>' .
+                '<td class="sks left-col"></td>' .
+                '<td class="nilaih left-col"></td>' .
+                '<td class="m left-col"></td>' .
+                '<td class="num">' . $uNo . '</td>' .
+                '<td class="mk">' . $esc($uNama) . '</td>' .
+                '<td class="sks">0</td>' .
+                '<td class="nilaih">A</td>' .
+                '<td class="m">0</td>' .
+                '</tr>';
+        }
+
+        $css = '
+*, *:before, *:after { box-sizing: border-box !important; }
+table, table th, table td { box-sizing: border-box !important; mso-cellspacing: 0; }
+* { word-wrap: break-word !important; overflow-wrap: anywhere !important; white-space: normal !important; overflow: visible !important; }
+
+@page WordSection1 {
+    size: 210mm 297mm;
+    margin: 0;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    mso-page-width: 595.28pt;
+    mso-page-height: 841.89pt;
+    mso-page-orientation: portrait;
+}
+div.WordSection1 { page: WordSection1; }
+
+html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-family: "Times New Roman", Times, serif;
+    mso-default-props: yes;
+    mso-ascii-font-family: "Times New Roman";
+    mso-hansi-font-family: "Times New Roman";
+    mso-bidi-font-family: "Times New Roman";
+    mso-font-kerning: 1.0pt;
+    mso-text-indent: 0;
+    mso-list: none;
+    overflow: visible !important;
+}
+
+body {
+    mso-title: 0;
+    mso-body-margin-top: 0;
+    mso-body-margin-bottom: 0;
+    mso-body-margin-left: 0;
+    mso-body-margin-right: 0;
+    mso-header-margin: 0;
+    mso-footer-margin: 0;
+}
+
+p.MsoNormal, li.MsoNormal, div.MsoNormal {
+    margin: 0pt;
+    margin-top: 0pt;
+    margin-bottom: 0pt;
+    margin-left: 0pt;
+    margin-right: 0pt;
+    text-indent: 0pt;
+    mso-para-margin: 0pt;
+    mso-para-margin-top: 0pt;
+    mso-para-margin-bottom: 0pt;
+    mso-para-margin-left: 0pt;
+    mso-para-margin-right: 0pt;
+    mso-para-indent: 0pt;
+    line-height: 1.25;
+}
+
+div.WordSection1 {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    overflow: visible !important;
+}
+
+.transcript-paper {
+    display: block !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff;
+    color: #000000;
+    box-sizing: border-box !important;
+    font-family: "Times New Roman", Times, serif;
+    overflow: visible !important;
+    line-height: 1.2;
+}
+.wrap { width: 100%; display: block; page-break-inside: auto !important; }
+
+.kop-wrap { width: 100%; text-align: center; color: #000000; page-break-inside: avoid !important; }
+.kop-logo-center { width: 100%; text-align: center; margin-bottom: 4px; display: block; }
+.kop-logo-center img { width: 72px; height: 72px; object-fit: contain; display: inline-block; }
+.kop-title-a { font-size: 16px; font-weight: 800; letter-spacing: 0.6px; line-height: 1.16; margin: 1px 0 0; padding: 0; color: #000000; text-align: center; display: block; }
+.kop-title-a2 { margin-top: 0.5px; }
+.kop-title-b { font-size: 15px; font-weight: 800; letter-spacing: 0.6px; line-height: 1.16; margin-top: 1px; padding: 0; color: #000000; text-align: center; display: block; }
+.kop-terakreditasi { font-size: 8.8px; margin-top: 3px; line-height: 1.2; color: #000000; text-align: center; letter-spacing: 0.05px; display: block; }
+.kop-alamat-line { font-size: 8.5px; margin-top: 2px; line-height: 1.2; color: #000000; text-align: center; display: block; }
+.kop-email-web { margin-top: 1px; }
+.kop-line-double { width: 100%; margin-top: 3px; display: block; }
+.kop-line-double .kop-line-top { width: 100%; height: 2px; background: #000000; display: block; }
+.kop-line-double .kop-line-bottom { width: 100%; height: 1px; background: #000000; margin-top: 2px; display: block; }
+
+.judul-box { width: 100%; text-align: center; margin-top: 6px; margin-bottom: 2px; display: block; page-break-inside: avoid !important; }
+.judul-text { font-size: 13px; font-weight: 700; letter-spacing: 1.3px; text-transform: uppercase; color: #000000; text-align: center; display: block; }
+.judul-nomor { font-size: 8.2px; margin-top: 0.5px; color: #000000; text-align: center; display: block; }
+
+.biodata {
+    width: 100%; margin-top: 6px; border-collapse: collapse;
+    table-layout: fixed; font-size: 9.2px; color: #000000; mso-cellspacing: 0;
+    page-break-inside: avoid !important;
+}
+.biodata td { vertical-align: top; padding: 1.3px 0; line-height: 1.22; }
+.biodata td.bio-label {
+    width: 25%; padding-right: 10px; text-align: left; font-weight: 400;
+    color: #000000; position: relative;
+}
+.biodata td.bio-label.right-label { width: 20%; }
+.biodata td.bio-label:after {
+    content: ":"; position: absolute; right: 0; top: 1.3px; color: #000000;
+}
+.biodata td.bio-value { width: 25%; padding-left: 6px; color: #000000; }
+.biodata td.bio-value.right-val { width: 30%; }
+.bio-val { display: inline !important; font-weight: 700; color: #000000; }
+
+table.nilai {
+    width: 100%; margin-top: 6px; border-collapse: collapse;
+    table-layout: fixed; font-size: 8.5px; color: #000000; mso-cellspacing: 0;
+    page-break-inside: auto !important;
+}
+table.nilai th {
+    border: 1px solid #000000; background: #e6e6e6; font-weight: 700;
+    letter-spacing: 0.1px; padding: 3.5px 3px; vertical-align: middle;
+    line-height: 1.15; text-align: center;
+}
+table.nilai th.num { width: 4.5%; padding: 3.5px 3px; }
+table.nilai th.mk { width: 29%; text-align: left; padding: 3.5px 5px; }
+table.nilai th.sks { width: 5.5%; padding: 3.5px 3px; }
+table.nilai th.nilaih { width: 5.5%; padding: 3.5px 3px; }
+table.nilai th.m { width: 5.5%; padding: 3.5px 3px; }
+table.nilai td {
+    border: 1px solid #000000; padding: 3px 3px; vertical-align: middle;
+    line-height: 1.15; text-align: center; color: #000000;
+}
+table.nilai td.num { width: 4.5%; padding: 3px 3px; }
+table.nilai td.mk { width: 29%; text-align: left; padding: 3px 5px; }
+table.nilai td.sks { width: 5.5%; padding: 3px 3px; }
+table.nilai td.nilaih { width: 5.5%; padding: 3px 3px; font-weight: 700; }
+table.nilai td.m { width: 5.5%; padding: 3px 3px; }
+
+table.nilai tr { page-break-inside: avoid !important; break-inside: avoid !important; }
+table.nilai thead tr { display: table-header-group !important; page-break-after: avoid !important; }
+
+table.nilai tr.jumlah td {
+    background: #ffffff !important; font-weight: 700; padding: 3px 5px; line-height: 1.15;
+}
+table.nilai tr.jumlah td.mk { text-align: center; }
+table.nilai tr.jumlah td.jumlah-dashed {
+    background: #ffffff !important;
+    border-top: 1px dashed #000000 !important;
+    border-bottom: 1px solid #000000 !important;
+}
+table.nilai tr.ujian-head td {
+    background: #ffffff !important; font-weight: 700; letter-spacing: 0.1px;
+    padding: 3px 5px; line-height: 1.15; font-size: 8.5px;
+}
+table.nilai td.ujian-left-title { text-align: left; padding-left: 6px !important; }
+table.nilai tr.ujian-row td { font-size: 8.5px; padding: 3px 3px; line-height: 1.15; }
+table.nilai tr.spacer-row td {
+    background: #ffffff !important; border: 1px solid #000000;
+    height: 10px; padding: 0;
+}
+table.nilai tr.jumlah td.left-col,
+table.nilai tr.spacer-row td.left-col,
+table.nilai tr.ujian-head td.left-col,
+table.nilai tr.ujian-row td.left-col {
+    background: #ffffff !important; font-weight: 400 !important;
+    padding: 3px 3px !important; text-align: center !important; letter-spacing: 0 !important;
+}
+table.nilai tr.jumlah td.mk.left-col,
+table.nilai tr.spacer-row td.mk.left-col,
+table.nilai tr.ujian-head td.mk.left-col,
+table.nilai tr.ujian-row td.mk.left-col {
+    text-align: left !important; padding: 3px 5px !important;
+}
+
+.ringkasan {
+    width: 100%; margin-top: 6px; border-collapse: collapse;
+    table-layout: auto; font-size: 9.2px; color: #000000; mso-cellspacing: 0;
+    page-break-inside: avoid !important;
+}
+.ringkasan td { vertical-align: top; padding: 1.3px 0; line-height: 1.22; }
+.ringkasan td.label {
+    width: auto; white-space: nowrap; font-weight: 700; color: #000000; padding-right: 12px;
+}
+.ringkasan td.label-top {
+    width: auto; white-space: nowrap; font-weight: 700; color: #000000; padding-right: 12px; padding-top: 1.3px;
+}
+.ringkasan td.sep { width: auto; text-align: left; padding-right: 8px; }
+.ringkasan td.sep-top { width: auto; text-align: left; padding-right: 8px; padding-top: 1.3px; }
+.ringkasan td.val {
+    font-weight: 800; color: #000000; font-size: 9.5px; white-space: nowrap;
+}
+.ringkasan td.val-judul {
+    text-align: left; color: #000000; line-height: 1.22; padding: 1.3px 0;
+    vertical-align: top;
+}
+
+.ttd-area {
+    width: 100%; margin-top: 6px; padding-left: 86mm !important; page-break-inside: avoid !important; break-inside: avoid !important; display: block;
+}
+.ttd-foto-wrapper {
+    width: 100%; margin: 0 !important; padding: 0 !important;
+    border-collapse: collapse; mso-cellspacing: 0;
+}
+.ttd-foto-wrapper td { vertical-align: top; padding: 0; }
+.ttd-foto-col { width: 28mm; padding-right: 2mm !important; }
+.ttd-foto-box {
+    width: 24mm; height: 32mm; margin: 0; padding: 0;
+    border: 1px solid #333 !important; background: #fdfdfd !important;
+    overflow: hidden; position: relative; box-sizing: border-box;
+}
+.ttd-col-wrapper { width: auto; }
+.ttd-box {
+    width: 100%; margin: 0; border-collapse: collapse;
+    font-size: 9px; color: #000000; mso-cellspacing: 0;
+}
+.ttd-box td { vertical-align: top; }
+.ttd-spacer-l { width: 0%; }
+.ttd-spacer-r { width: 0%; }
+.ttd-col {
+    width: 100%; text-align: left; line-height: 1.25; color: #000000;
+    padding-left: 0; font-size: 9px;
+}
+.ttd-jabatan { margin-top: 2px; font-weight: 800; letter-spacing: 0.15px; }
+.ttd-nama { margin-top: 36px; font-weight: 800; text-decoration: underline; font-size: 9px; }
+.ttd-nidk { margin-top: 0.5px; font-size: 8px; letter-spacing: 0.05px; }
+';
+
+        return '<html xmlns:v="urn:schemas-microsoft-com:vml"
+      xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:w="urn:schemas-microsoft-com:office:word"
+      xmlns:m="http://schemas.microsoft.com/office/2004/12/omml"
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+    <meta charset="utf-8">
+    <title>Transkrip Akademik - ' . $nama . '</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="ProgId" content="Word.Document">
+    <meta name="Generator" content="Microsoft Word 15">
+    <meta name="Originator" content="Microsoft Word 15">
+    <!--[if gte mso 9]>
+    <xml>
+        <w:WordDocument>
+            <w:View>Print</w:View>
+            <w:Zoom>100</w:Zoom>
+            <w:DoNotOptimizeForBrowser/>
+            <w:Compatibility>
+                <w:UseFELayout/>
+                <w:SpaceForUL/>
+                <w:BalanceSingleByteDoubleByteWidth/>
+                <w:DoNotLeaveBackslashAlone/>
+                <w:ULTrailSpace/>
+                <w:DoNotExpandShiftReturn/>
+                <w:AdjustLineHeightInTable/>
+            </w:Compatibility>
+        </w:WordDocument>
+    </xml>
+    <![endif]-->
+    <style>' . $css . '</style>
+</head>
+<body style="margin:0;padding:0;">
+<div class="WordSection1" style="page: WordSection1; width:100%; margin:0; padding:0;">
+<div class="transcript-paper">
+<div class="wrap">
+
+<div class="kop-wrap">
+    <div class="kop-logo-center">' . $logoImg . '</div>
+    <div class="kop-title-a">INSTITUT AGAMA ISLAM</div>
+    <div class="kop-title-a kop-title-a2">DARUD DA\'WAH WAL IRSYAD</div>
+    <div class="kop-title-b">SIDENRENG RAPPANG</div>
+    <div class="kop-terakreditasi">TERAKREDITASI INSTITUSI • SK : 337/SK/BAN-PT/Ak-S/2.0/PT/VI/2026</div>
+    <div class="kop-alamat-line">Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang</div>
+    <div class="kop-alamat-line kop-email-web">E-mail : iaiddisidrap@gmail.com &nbsp;&nbsp; Website : www.yppddisrapp.ac.id</div>
+    <div class="kop-line-double">
+        <div class="kop-line-top"></div>
+        <div class="kop-line-bottom"></div>
+    </div>
+</div>
+
+<div class="judul-box">
+    <div class="judul-text">TRANSKRIP AKADEMIK</div>
+    <div class="judul-nomor">Nomor : ' . $nomorTranskrip . '</div>
+</div>
+
+<table class="biodata" cellpadding="0" cellspacing="0">
+    <tr>
+        <td class="bio-label">Nama:</td>
+        <td class="bio-value"><span class="bio-val">' . $nama . '</span></td>
+        <td class="bio-label right-label">Program Pendidikan:</td>
+        <td class="bio-value right-val"><span class="bio-val">Strata Satu (S1)</span></td>
+    </tr>
+    <tr>
+        <td class="bio-label">No. Pokok Mahasiswa</td>
+        <td class="bio-value"><span class="bio-val">' . $npm . '</span></td>
+        <td class="bio-label right-label">Fakultas:</td>
+        <td class="bio-value right-val"><span class="bio-val">' . $fakultas . '</span></td>
+    </tr>
+    <tr>
+        <td class="bio-label">No. Ijazah</td>
+        <td class="bio-value"><span class="bio-val">' . $noIjazah . '</span></td>
+        <td class="bio-label right-label">Program Studi</td>
+        <td class="bio-value right-val"><span class="bio-val">' . $prodi . '</span></td>
+    </tr>
+    <tr>
+        <td class="bio-label">Tempat / Tanggal Lahir</td>
+        <td class="bio-value"><span class="bio-val">' . $tempatTgl . '</span></td>
+        <td class="bio-label right-label">No. SK BAN-PT</td>
+        <td class="bio-value right-val"><span class="bio-val">' . $skBanpt . '</span></td>
+    </tr>
+    <tr>
+        <td class="bio-label">Tanggal, Bulan dan Tahun Lulus:</td>
+        <td class="bio-value"><span class="bio-val">' . $tanggalLulus . '</span></td>
+        <td></td>
+        <td></td>
+    </tr>
+</table>
+
+<table class="nilai" cellpadding="0" cellspacing="0">
+<thead>
+<tr>
+    <th class="num">NO</th>
+    <th class="mk">MATA KULIAH</th>
+    <th class="sks">SKS</th>
+    <th class="nilaih">NILAI</th>
+    <th class="m">M</th>
+    <th class="num">NO</th>
+    <th class="mk">MATA KULIAH</th>
+    <th class="sks">SKS</th>
+    <th class="nilaih">NILAI</th>
+    <th class="m">M</th>
+</tr>
+</thead>
+<tbody>
+' . $tableRows . '
+</tbody>
+</table>
+
+<table class="ringkasan" cellpadding="0" cellspacing="0">
+    <colgroup>
+        <col style="width:290px;">
+        <col style="width:20px;">
+        <col style="width:auto;">
+    </colgroup>
+    <tr>
+        <td class="label">INDEKS PRESTASI KUMULATIF (IPK)</td>
+        <td class="sep">:</td>
+        <td class="val">' . $ipk . '</td>
+    </tr>
+    <tr>
+        <td class="label">PREDIKAT KELULUSAN</td>
+        <td class="sep">:</td>
+        <td class="val">' . $predikat . '</td>
+    </tr>
+    <tr>
+        <td class="label-top">JUDUL SKRIPSI</td>
+        <td class="sep-top">:</td>
+        <td class="val-judul">' . $judulSkripsi . '</td>
+    </tr>
+</table>
+
+<div class="ttd-area">
+<table class="ttd-foto-wrapper" cellpadding="0" cellspacing="0">
+<tr>
+    <td class="ttd-foto-col" style="vertical-align:top; padding-top:0;">
+        <div class="ttd-foto-box">' . $fotoInner . '</div>
+    </td>
+    <td class="ttd-col-wrapper">
+        <table class="ttd-box" cellpadding="0" cellspacing="0">
+            <tr>
+                <td class="ttd-spacer-l"></td>
+                <td class="ttd-col">
+                    <div>' . $tanggalTtd . '</div>
+                    <div class="ttd-jabatan">' . $ttdJabatan . '</div>
+                    <div class="ttd-nama">' . $ttdNama . '</div>
+                    <div class="ttd-nidk">' . $ttdNomorLabel . '. ' . $ttdNomor . '</div>
+                </td>
+                <td class="ttd-spacer-r"></td>
+            </tr>
+        </table>
+    </td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<!--[if gte mso 9]>
+<xml>
+  <w:sectPr>
+    <w:pgSz w:w="11906" w:h="16838" w:orient="portrait"/>
+    <w:pgMar w:top="720" w:right="850" w:bottom="680" w:left="850" w:header="567" w:footer="567" w:gutter="0"/>
+    <w:cols w:space="360"/>
+    <w:docGrid w:line-pitch="210"/>
+  </w:sectPr>
+</xml>
+<![endif]-->
+</body>
+</html>';
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CARI LOGO
+    |--------------------------------------------------------------------------
+    */
+
+    private function findLogoPath(): ?string
+    {
+        $candidates = [];
+
+        try {
+            $candidates[] =
+                public_path('img/lo.jpeg');
+
+            $candidates[] =
+                public_path('img/lo.jpg');
+
+            $candidates[] =
+                public_path('img/lo.png');
+
+            $candidates[] =
+                public_path('img/logo.jpeg');
+
+            $candidates[] =
+                public_path('img/logo.jpg');
+
+            $candidates[] =
+                public_path('img/logo.png');
+
+        } catch (\Throwable $e) {
+        }
+
+
+        try {
+
+            $base =
+                rtrim(
+                    str_replace(
+                        '\\',
+                        '/',
+                        base_path()
+                    ),
+                    '/'
+                );
+
+            $candidates[] =
+                $base .
+                '/public/img/lo.jpeg';
+
+            $candidates[] =
+                $base .
+                '/public/img/lo.jpg';
+
+            $candidates[] =
+                $base .
+                '/public/img/lo.png';
+
+            $candidates[] =
+                $base .
+                '/public/img/logo.jpeg';
+
+            $candidates[] =
+                $base .
+                '/public/img/logo.jpg';
+
+            $candidates[] =
+                $base .
+                '/public/img/logo.png';
+
+            $candidates[] =
+                $base .
+                '/public_html/img/lo.jpeg';
+
+        } catch (\Throwable $e) {
+        }
+
+
+        try {
+
+            $docRoot =
+                rtrim(
+                    str_replace(
+                        '\\',
+                        '/',
+                        (string) (
+                            $_SERVER['DOCUMENT_ROOT']
+                            ?? ''
+                        )
+                    ),
+                    '/'
+                );
+
+            if ($docRoot !== '') {
+
+                $candidates[] =
+                    $docRoot .
+                    '/img/lo.jpeg';
+
+                $candidates[] =
+                    $docRoot .
+                    '/img/lo.jpg';
+
+                $candidates[] =
+                    $docRoot .
+                    '/img/lo.png';
+
+                $candidates[] =
+                    $docRoot .
+                    '/img/logo.jpeg';
+
+                $candidates[] =
+                    $docRoot .
+                    '/img/logo.jpg';
+
+                $candidates[] =
+                    $docRoot .
+                    '/img/logo.png';
+
+            }
+
+        } catch (\Throwable $e) {
+        }
+
+
+        foreach ($candidates as $path) {
+
+            if (
+                is_string($path)
+                && @is_file($path)
+                && @is_readable($path)
+            ) {
+                return $path;
+            }
+        }
+
+        return null;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CARI FOTO MAHASISWA
+    |--------------------------------------------------------------------------
+    */
+
+    private function findFotoPath(
+        Mahasiswa $mahasiswa
+    ): ?string {
+
+        $relPath =
+            trim(
+                str_replace(
+                    ['/', '\\'],
+                    '/',
+                    (string) $mahasiswa->foto_path
+                ),
+                '/'
+            );
+
+        if ($relPath === '') {
+            return null;
+        }
+
+        $candidates = [];
+
+        try {
+            $candidates[] =
+                public_path(
+                    'storage/' . $relPath
+                );
+        } catch (\Throwable $e) {
+        }
+
+
+        try {
+
+            $docRoot =
+                rtrim(
+                    str_replace(
+                        '\\',
+                        '/',
+                        (string) (
+                            $_SERVER['DOCUMENT_ROOT']
+                            ?? ''
+                        )
+                    ),
+                    '/'
+                );
+
+            if ($docRoot !== '') {
+
+                $candidates[] =
+                    $docRoot .
+                    '/storage/' .
+                    $relPath;
+
+                $candidates[] =
+                    $docRoot .
+                    '/' .
+                    $relPath;
+            }
+
+        } catch (\Throwable $e) {
+        }
+
+
+        foreach ($candidates as $path) {
+
+            $path =
+                str_replace(
+                    ['/', '\\'],
+                    DIRECTORY_SEPARATOR,
+                    (string) $path
+                );
+
+            if (
+                @is_file($path)
+                && @is_readable($path)
+                && @filesize($path) > 200
+            ) {
+                return $path;
+            }
+        }
+
+        return null;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | IMAGE → DATA URI
+    |--------------------------------------------------------------------------
+    */
+
+    private function getImageDataUri(
+        ?string $path
+    ): ?string {
+
+        if (
+            empty($path)
+            || !@is_file($path)
+            || !@is_readable($path)
+        ) {
+            return null;
+        }
+
+        try {
+
+            $content =
+                @file_get_contents($path);
+
+            if (
+                $content === false
+                || $content === ''
+            ) {
+                return null;
+            }
+
+            $ext =
+                strtolower(
+                    pathinfo(
+                        $path,
+                        PATHINFO_EXTENSION
+                    )
+                );
+
+            $mimeMap = [
+                'jpg' =>
+                    'image/jpeg',
+
+                'jpeg' =>
+                    'image/jpeg',
+
+                'png' =>
+                    'image/png',
+
+                'gif' =>
+                    'image/gif',
+
+                'webp' =>
+                    'image/webp',
+            ];
+
+            $mime =
+                $mimeMap[$ext]
+                ?? null;
+
+            if (!$mime) {
+                return null;
+            }
+
+            return
+                'data:' .
+                $mime .
+                ';base64,' .
+                base64_encode($content);
+
+        } catch (\Throwable $e) {
+
+            return null;
+        }
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | NILAI MUTU
+    |--------------------------------------------------------------------------
+    */
+
+    private function nilaiMutuHuruf(
+        string $huruf
+    ): float {
+
+        return match (
+            strtoupper(trim($huruf))
+        ) {
+
+            'A' =>
+                4.00,
+
+            'A-' =>
+                3.70,
+
+            'B+' =>
+                3.30,
+
+            'B' =>
+                3.00,
+
+            'B-' =>
+                2.70,
+
+            'C+' =>
+                2.30,
+
+            'C' =>
+                2.00,
+
+            'C-' =>
+                1.70,
+
+            'D' =>
+                1.00,
+
+            default =>
+                0.00,
+        };
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | FORMAT NILAI M
+    |--------------------------------------------------------------------------
+    */
+
+    private function buildPdfHtml(
+        array $data,
+        ?string $logoBase64Src,
+        ?string $fotoBase64Src
+    ): string {
+
+        $mahasiswa = $data['mahasiswa'];
+
+        $esc = function ($value): string {
+            return htmlspecialchars(
+                (string) ($value ?? ''),
+                ENT_QUOTES | ENT_SUBSTITUTE,
+                'UTF-8'
+            );
+        };
+
+        $nama = $esc($mahasiswa->nama_lengkap);
+        $npm = $esc($mahasiswa->npm ?? '-');
+        $noIjazah = $esc($data['noIjazah'] ?? '-');
+        $tempatTgl = $esc($data['tempatTgl'] ?? '-');
+        $tanggalLulus = $esc($data['tanggalLulus'] ?? '-');
+        $fakultas = $esc($mahasiswa->fakultas ?? 'Fakultas Tarbiyah & Keguruan');
+        $prodi = $esc($mahasiswa->program_studi ?? '-');
+        $skBanpt = $esc($data['skBanpt'] ?? '-');
+        $nomorTranskrip = $esc($data['nomorTranskrip'] ?? '-');
+        $ipkRaw = (float) ($data['ipk'] ?? 0);
+        $ipk = str_replace('.', ',', number_format($ipkRaw, 2));
+        $predikat = $esc($data['predikat'] ?? '-');
+        $judulSkripsi = $esc($data['judulSkripsi'] ?? '-');
+        $tanggalTtd = $esc($data['tanggalTtd'] ?? '-');
+        $ttdJabatan = $esc($data['ttdJabatan'] ?? 'DEKAN FAKULTAS');
+        $ttdNama = $esc($data['ttdNama'] ?? '-');
+        $ttdNomorLabel = $esc($data['ttdNomorLabel'] ?? 'NIDN');
+        $ttdNomor = $esc($data['ttdNomor'] ?? '-');
+        $totalSks = $esc($data['totalSks'] ?? 0);
+        $totalMutuRaw = (float) ($data['totalMutu'] ?? 0);
+        $totalMutuStr = rtrim(rtrim(number_format($totalMutuRaw, 2, '.', ''), '0'), '.');
+
+        $logoImg = '';
+        if (!empty($logoBase64Src)) {
+            $logoImg = '<img src="' . $esc($logoBase64Src) . '" alt="Logo IAI DDI Sidrap" width="110" height="110">';
+        }
+
+        if (!empty($fotoBase64Src)) {
+            $fotoInner = '<img src="' . $esc($fotoBase64Src) . '" alt="Foto ' . $nama . '">';
+        } else {
+            $fotoInner = '<div class="ttd-foto-empty">Foto<br>3 × 4</div>';
+        }
+
+        $semuaMK = $data['daftarMataKuliah'] ?? [];
+        if (!is_array($semuaMK)) {
+            $semuaMK = [];
+        }
+
+        $ujianKompre = $data['ujianKompre'] ?? [];
+        if (!is_array($ujianKompre)) {
+            $ujianKompre = [];
+        }
+        $ujianKompre = array_values(array_filter(
+            array_map(fn ($v) => trim((string) $v), $ujianKompre),
+            fn ($v) => $v !== ''
+        ));
+        $ujianCount = count($ujianKompre);
+        $totalMK = count($semuaMK);
+
+        $totalMK = count($semuaMK);
+        $halfAtas = (int) ceil($totalMK / 2);
+        $kiriAtas = array_slice($semuaMK, 0, $halfAtas);
+        $kananAtas = array_slice($semuaMK, $halfAtas);
+        $maxAtas = max(count($kiriAtas), count($kananAtas));
+        $noAwalKanan = count($kiriAtas);
+        $barisBawah = 3 + $ujianCount;
+
+        $formatMut = function ($nilaiM, $nilaiHuruf): string {
+            $nm = (float) ($nilaiM ?? 0);
+            if ($nm > 0) {
+                return rtrim(rtrim(number_format($nm, 2, '.', ''), '0'), '.');
+            }
+            if ((string) $nilaiHuruf !== '') {
+                return '0';
+            }
+            return '';
+        };
+
+        $tableRows = '';
+
+        for ($i = 0; $i < $maxAtas; $i++) {
+            $L = $kiriAtas[$i] ?? null;
+            $R = $kananAtas[$i] ?? null;
+
+            $noL = $L ? ($i + 1) : '';
+            $noR = $R ? ($noAwalKanan + $i + 1) : '';
+            $namaL = $L ? $esc($L->nama_mata_kuliah ?? '') : '';
+            $sksValL = (int) ($L->sks ?? 0);
+            $sksL = $L ? (($sksValL === 0) ? '0' : $esc($L->sks)) : '';
+            $nhL = $L ? $esc($L->nilai_huruf ?? '') : '';
+            $mutuL = $L ? $formatMut($L->nilai_m ?? 0, $L->nilai_huruf ?? '') : '';
+
+            $namaR = $R ? $esc($R->nama_mata_kuliah ?? '') : '';
+            $sksValR = (int) ($R->sks ?? 0);
+            $sksR = $R ? (($sksValR === 0) ? '0' : $esc($R->sks)) : '';
+            $nhR = $R ? $esc($R->nilai_huruf ?? '') : '';
+            $mutuR = $R ? $formatMut($R->nilai_m ?? 0, $R->nilai_huruf ?? '') : '';
+
+            $tableRows .=
+                '<tr>' .
+                '<td class="num">' . $noL . '</td>' .
+                '<td class="mk">' . $namaL . '</td>' .
+                '<td class="sks">' . $sksL . '</td>' .
+                '<td class="nilaih">' . $nhL . '</td>' .
+                '<td class="m">' . $mutuL . '</td>' .
+                '<td class="num">' . $noR . '</td>' .
+                '<td class="mk">' . $namaR . '</td>' .
+                '<td class="sks">' . $sksR . '</td>' .
+                '<td class="nilaih">' . $nhR . '</td>' .
+                '<td class="m">' . $mutuR . '</td>' .
+                '</tr>';
         }
 
         for ($bi = 0; $bi < $barisBawah; $bi++) {
             $LL = $mkBawahKiri[$bi] ?? null;
-            $namaLL = $LL ? $LL->nama_mata_kuliah : '';
-            $sksLL = $LL ? ($LL->sks == 0 ? '0' : $LL->sks) : '';
-            $nhLL = $LL ? ($LL->nilai_huruf !== '' ? $LL->nilai_huruf : '') : '';
-            $mutuLL = $LL ? ($LL->nilai_m > 0 ? rtrim(rtrim(number_format($LL->nilai_m, 2, '.', ''), '0'), '.') : ($LL->nilai_huruf !== '' ? '0' : '')) : '';
+            $namaLL = $LL ? $esc($LL->nama_mata_kuliah ?? '') : '';
+            $sksValLL = (int) ($LL->sks ?? 0);
+            $sksLL = $LL ? (($sksValLL === 0) ? '0' : $esc($LL->sks)) : '';
+            $nhLL = $LL ? $esc($LL->nilai_huruf ?? '') : '';
+            $mutuLL = $LL ? $formatMut($LL->nilai_m ?? 0, $LL->nilai_huruf ?? '') : '';
             $noLanjutTampil = $LL ? ($noAwalKanan + count($kananAtas) + $bi + 1) : '';
+
             if ($bi === 0) {
-                $jenisBaris = 'jumlah';
-            } elseif ($bi === 1) {
-                $jenisBaris = 'spacer';
-            } elseif ($bi === 2) {
-                $jenisBaris = 'ujian-head';
-            } else {
-                $jenisBaris = 'ujian-row';
-                $uIdx = $bi - 3;
-                $uNama = $ujianKompre[$uIdx] ?? '';
-                $uNo = $uIdx + 1;
+                $tableRows .=
+                    '<tr class="jumlah">' .
+                    '<td class="num left-col">' . $noLanjutTampil . '</td>' .
+                    '<td class="mk left-col">' . $namaLL . '</td>' .
+                    '<td class="sks left-col">' . $sksLL . '</td>' .
+                    '<td class="nilaih left-col">' . $nhLL . '</td>' .
+                    '<td class="m left-col">' . $mutuLL . '</td>' .
+                    '<td class="num jumlah-dashed"></td>' .
+                    '<td class="mk">Jumlah</td>' .
+                    '<td class="sks">' . $totalSks . '</td>' .
+                    '<td class="nilaih"></td>' .
+                    '<td class="m">' . $totalMutuStr . '</td>' .
+                    '</tr>';
+                continue;
             }
 
-            foreach (range('A', 'E') as $c) {
-                $sheet->getStyle("{$c}{$row}")->applyFromArray($thinBorder);
-            }
-            foreach (range('F', 'J') as $c) {
-                $sheet->getStyle("{$c}{$row}")->applyFromArray($thinBorder);
-            }
-
-            if ($jenisBaris === 'jumlah') {
-                $sheet->setCellValue("A{$row}", $noLanjutTampil);
-                $sheet->setCellValue("B{$row}", $namaLL);
-                $sheet->setCellValue("C{$row}", $sksLL);
-                $sheet->setCellValue("D{$row}", $nhLL);
-                $sheet->setCellValue("E{$row}", $mutuLL);
-                $sheet->setCellValue("G{$row}", 'Jumlah');
-                $sheet->setCellValue("H{$row}", $data['totalSks']);
-                $sheet->setCellValue("J{$row}", rtrim(rtrim(number_format($data['totalMutu'], 2, '.', ''), '0'), '.'));
-                $sheet->getStyle("A{$row}:E{$row}")->applyFromArray(array_merge($boldFont, $centerAlign));
-                $sheet->getStyle("B{$row}")->applyFromArray(array_merge($wrapText, $boldFont));
-                $sheet->getStyle("G{$row}")->applyFromArray(array_merge($boldFont, $centerAlign));
-                $sheet->getStyle("H{$row}")->applyFromArray(array_merge($boldFont, $centerAlign));
-                $sheet->getStyle("J{$row}")->applyFromArray(array_merge($boldFont, $centerAlign));
-            } elseif ($jenisBaris === 'spacer') {
-                $sheet->setCellValue("A{$row}", $noLanjutTampil);
-                $sheet->setCellValue("B{$row}", $namaLL);
-                $sheet->setCellValue("C{$row}", $sksLL);
-                $sheet->setCellValue("D{$row}", $nhLL);
-                $sheet->setCellValue("E{$row}", $mutuLL);
-                $sheet->getRowDimension($row)->setRowHeight(18);
-            } elseif ($jenisBaris === 'ujian-head') {
-                $sheet->setCellValue("A{$row}", $noLanjutTampil);
-                $sheet->setCellValue("B{$row}", $namaLL);
-                $sheet->setCellValue("C{$row}", $sksLL);
-                $sheet->setCellValue("D{$row}", $nhLL);
-                $sheet->setCellValue("E{$row}", $mutuLL);
-                $sheet->mergeCells("G{$row}:J{$row}");
-                $sheet->setCellValue("G{$row}", 'Ujian Kompetensi');
-                $sheet->getStyle("G{$row}")->applyFromArray(array_merge($boldFont, $wrapText));
-                $sheet->getStyle("A{$row}:E{$row}")->applyFromArray($boldFont);
-            } else {
-                $sheet->setCellValue("A{$row}", $noLanjutTampil);
-                $sheet->setCellValue("B{$row}", $namaLL);
-                $sheet->setCellValue("C{$row}", $sksLL);
-                $sheet->setCellValue("D{$row}", $nhLL);
-                $sheet->setCellValue("E{$row}", $mutuLL);
-                $sheet->setCellValue("F{$row}", $uNo);
-                $sheet->setCellValue("G{$row}", $uNama);
-                $sheet->setCellValue("H{$row}", '0');
-                $sheet->setCellValue("I{$row}", 'A');
-                $sheet->setCellValue("J{$row}", '0');
-                $sheet->getStyle("F{$row}")->applyFromArray($centerAlign);
-                $sheet->getStyle("G{$row}")->applyFromArray($wrapText);
-                $sheet->getStyle("H{$row}")->applyFromArray($centerAlign);
-                $sheet->getStyle("I{$row}")->applyFromArray(array_merge($centerAlign, $boldFont));
-                $sheet->getStyle("J{$row}")->applyFromArray($centerAlign);
-            }
-            $row++;
-        }
-        $row++;
-
-        $sheet->setCellValue("A{$row}", 'INDEKS PRESTASI KUMULATIF (IPK)');
-        $sheet->getStyle("A{$row}")->applyFromArray(array_merge($boldFont, ['alignment' => ['wrapText' => true, 'vertical' => Alignment::VERTICAL_CENTER]]));
-        $sheet->setCellValue("B{$row}", ': ' . str_replace('.', ',', number_format($data['ipk'], 2)));
-        $sheet->mergeCells("B{$row}:E{$row}");
-        $sheet->getStyle("B{$row}:E{$row}")->applyFromArray(array_merge($boldFont, ['alignment' => ['vertical' => Alignment::VERTICAL_CENTER]]));
-        $row++;
-        $sheet->setCellValue("A{$row}", 'PREDIKAT KELULUSAN');
-        $sheet->getStyle("A{$row}")->applyFromArray(array_merge($boldFont, ['alignment' => ['wrapText' => true, 'vertical' => Alignment::VERTICAL_CENTER]]));
-        $sheet->setCellValue("B{$row}", ': ' . $data['predikat']);
-        $sheet->mergeCells("B{$row}:E{$row}");
-        $sheet->getStyle("B{$row}:E{$row}")->applyFromArray(array_merge($boldFont, ['alignment' => ['vertical' => Alignment::VERTICAL_CENTER]]));
-        $row++;
-        $sheet->setCellValue("A{$row}", 'JUDUL SKRIPSI');
-        $sheet->getStyle("A{$row}")->applyFromArray(array_merge($boldFont, ['alignment' => ['vertical' => Alignment::VERTICAL_TOP]]));
-        $sheet->setCellValue("B{$row}", ': ' . $data['judulSkripsi']);
-        $sheet->mergeCells("B{$row}:J{$row}");
-        $sheet->getStyle("B{$row}:J{$row}")->applyFromArray($wrapText);
-        $sheet->getRowDimension($row)->setRowHeight(-1);
-        $row++;
-        $row++;
-
-        // ===== KOTAK PLACEHOLDER FOTO (TIDAK DITAMPILKAN OTOMATIS, UNTUK DITENDEL MANUAL) =====
-        $fotoInserted = true;
-        // Baris untuk area foto (6 baris x 22px = 132px cukup untuk 3x4)
-        for ($fi = 0; $fi < 6; $fi++) { $sheet->getRowDimension($row + $fi)->setRowHeight(22); }
-        // Merge 6 baris kolom F → jadi 1 kotak besar 3x4
-        $fotoRange = "F{$row}:F" . ($row + 5);
-        $sheet->mergeCells($fotoRange);
-        $sheet->setCellValue("F{$row}", "Foto\n3 × 4");
-        $sheet->getStyle("F{$row}")->applyFromArray(array_merge(
-            $centerAlign,
-            $wrapText,
-            $thinBorder,
-            ['font' => ['size' => 10, 'bold' => true, 'color' => ['argb' => 'FF333333']]]
-        ));
-
-        $ttdCol = $fotoInserted ? 'G' : 'F';
-        $ttdMergeEnd = 'J';
-
-        $sheet->setCellValue("{$ttdCol}{$row}", $data['tanggalTtd']);
-        $sheet->mergeCells("{$ttdCol}{$row}:{$ttdMergeEnd}{$row}");
-        $sheet->getStyle("{$ttdCol}{$row}")->applyFromArray($centerAlign);
-        $row++;
-        $sheet->setCellValue("{$ttdCol}{$row}", $data['ttdJabatan']);
-        $sheet->mergeCells("{$ttdCol}{$row}:{$ttdMergeEnd}{$row}");
-        $sheet->getStyle("{$ttdCol}{$row}")->applyFromArray(array_merge($centerAlign, $boldFont));
-        $row += 5;
-        $sheet->setCellValue("{$ttdCol}{$row}", $data['ttdNama']);
-        $sheet->mergeCells("{$ttdCol}{$row}:{$ttdMergeEnd}{$row}");
-        $sheet->getStyle("{$ttdCol}{$row}")->applyFromArray(array_merge($centerAlign, $boldFont, ['font' => ['underline' => true]]));
-        $row++;
-        $sheet->setCellValue("{$ttdCol}{$row}", $data['ttdNomorLabel'] . '. ' . $data['ttdNomor']);
-        $sheet->mergeCells("{$ttdCol}{$row}:{$ttdMergeEnd}{$row}");
-        $sheet->getStyle("{$ttdCol}{$row}")->applyFromArray($centerAlign);
-
-        // ===== LEBAR KOLOM DIPERBAIKI SUPAYA LABEL BIODATA TIDAK OVERFLOW =====
-        $sheet->getColumnDimension('A')->setWidth(24);
-        $sheet->getColumnDimension('B')->setWidth(30);
-        $sheet->getColumnDimension('C')->setWidth(6);
-        $sheet->getColumnDimension('D')->setWidth(6);
-        $sheet->getColumnDimension('E')->setWidth(8);
-        $sheet->getColumnDimension('F')->setWidth(22);
-        $sheet->getColumnDimension('G')->setWidth(26);
-        $sheet->getColumnDimension('H')->setWidth(6);
-        $sheet->getColumnDimension('I')->setWidth(6);
-        $sheet->getColumnDimension('J')->setWidth(8);
-
-        $namafile = 'Transkrip-' . ($mahasiswa->npm ?: $mahasiswa->id) . '-' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', (string) $mahasiswa->nama_lengkap) . '.xlsx';
-        $writer = new Xlsx($spreadsheet);
-
-        // ============== LAYER 4: DOUBLE OB CLEAN (NUCLEAR x3) — SEBELUM WRITE XLSX, HAPUS OB SISA WARNING ==============
-        $obLoopMax2 = 3;
-        for ($obLoop = 0; $obLoop < $obLoopMax2; $obLoop++) {
-            $innerMax = 99;
-            $innerCnt = 0;
-            while ((@ob_get_level() > 0) && $innerCnt++ < $innerMax) { if (!@ob_end_clean()) break; }
-            try { @ob_end_flush(); } catch (\Throwable $e) { }
-        }
-        $innerCnt2 = 0;
-        while ((@ob_get_level() > 0) && $innerCnt2++ < 99) { if (!@ob_end_clean()) break; }
-        @ini_set('zlib.output_compression', '0');
-        @ini_set('output_handler', '');
-        if (function_exists('apache_setenv')) { @apache_setenv('no-gzip', '1'); @apache_setenv('dont-vary', '1'); }
-        if (function_exists('header_remove')) { @header_remove('Content-Encoding'); @header_remove('Vary'); @header_remove('Transfer-Encoding'); }
-        @header('Content-Encoding: identity');
-        @error_clear_last();
-
-        // ============== LAYER 5: SAVE KE TEMP FILE (storage/framework/cache) + 4 FOLDER FALLBACK + 2 TAHAP VALIDASI ==============
-        $tempWriteSuccess = false;
-        $tempAbs = null;
-        $xlsxBinaryFallback = null;
-        try {
-            $dirCandidates = [];
-            try { $dirCandidates[] = @rtrim(@str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string) @storage_path('framework/cache')), DIRECTORY_SEPARATOR); } catch (\Throwable $e) { }
-            try { $dirCandidates[] = @rtrim(@str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string) @sys_get_temp_dir()), DIRECTORY_SEPARATOR); } catch (\Throwable $e) { }
-            try { $dirCandidates[] = @rtrim(@str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string) @ini_get('upload_tmp_dir')), DIRECTORY_SEPARATOR); } catch (\Throwable $e) { }
-            try { $dirCandidates[] = @rtrim(@str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string) @storage_path('framework/views')), DIRECTORY_SEPARATOR); } catch (\Throwable $e) { }
-            try { $dirCandidates[] = @rtrim(@str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string) @storage_path('logs')), DIRECTORY_SEPARATOR); } catch (\Throwable $e) { }
-            try { $dirCandidates[] = @rtrim(@str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string) @ini_get('session.save_path')), DIRECTORY_SEPARATOR); } catch (\Throwable $e) { }
-            $tempDir = null;
-            foreach ($dirCandidates as $dc) {
-                $dc = (string)$dc;
-                if ($dc === '' || $dc === '0') continue;
-                if (@is_dir($dc) && @is_writable($dc)) { $tempDir = $dc; break; }
-                if (@is_file($dc)) continue;
-                // Jika folder tidak ada, coba buat secara diam-diam (cPanel kadang storage cache belum dibuat)
-                if (!@is_dir($dc)) {
-                    try { @mkdir($dc, 0755, true); } catch (\Throwable $e) { }
-                    if (@is_dir($dc) && @is_writable($dc)) { $tempDir = $dc; break; }
-                }
+            if ($bi === 1) {
+                $tableRows .=
+                    '<tr class="spacer-row">' .
+                    '<td class="num left-col">' . $noLanjutTampil . '</td>' .
+                    '<td class="mk left-col">' . $namaLL . '</td>' .
+                    '<td class="sks left-col">' . $sksLL . '</td>' .
+                    '<td class="nilaih left-col">' . $nhLL . '</td>' .
+                    '<td class="m left-col">' . $mutuLL . '</td>' .
+                    '<td class="num"></td>' .
+                    '<td class="mk"></td>' .
+                    '<td class="sks"></td>' .
+                    '<td class="nilaih"></td>' .
+                    '<td class="m"></td>' .
+                    '</tr>';
+                continue;
             }
 
-            if ($tempDir !== null) {
-                $tempAbs = $tempDir . DIRECTORY_SEPARATOR . 'xlsx-transkrip-' . $mahasiswa->id . '-' . substr(@md5(@uniqid((string) @mt_rand(), true)), 0, 16) . '.xlsx';
-                try {
-                    @$writer->save($tempAbs);
-                    @chmod($tempAbs, 0666);
-                    @clearstatcache(true, $tempAbs);
-                    $fs = 0;
-                    if (@is_file($tempAbs)) {
-                        $fs = (int) @filesize($tempAbs);
-                        if ($fs < 1024) {
-                            // Coba baca via stat (kadang filesize PHP cache stale)
-                            $stat = @stat($tempAbs);
-                            if ($stat !== false && isset($stat['size'])) $fs = (int)$stat['size'];
-                        }
-                        // VALIDASI TAHAP 2: Coba baca 1 byte pertama dengan fopen = pastikan file readable
-                        if ($fs >= 1024) {
-                            $fh = @fopen($tempAbs, 'rb');
-                            if ($fh !== false) {
-                                $firstByte = @fread($fh, 1);
-                                @fclose($fh);
-                                if ($firstByte !== false && $firstByte !== '') {
-                                    $tempWriteSuccess = true;
-                                }
-                            }
-                        }
-                    }
-                    if (!$tempWriteSuccess) {
-                        @unlink($tempAbs);
-                        $tempAbs = null;
-                    }
-                } catch (\Throwable $writeErr) {
-                    @unlink($tempAbs);
-                    $tempAbs = null;
-                    $tempWriteSuccess = false;
-                }
+            if ($bi === 2) {
+                $tableRows .=
+                    '<tr class="ujian-head">' .
+                    '<td class="num left-col">' . $noLanjutTampil . '</td>' .
+                    '<td class="mk left-col">' . $namaLL . '</td>' .
+                    '<td class="sks left-col">' . $sksLL . '</td>' .
+                    '<td class="nilaih left-col">' . $nhLL . '</td>' .
+                    '<td class="m left-col">' . $mutuLL . '</td>' .
+                    '<td class="num ujian-right-spacer"></td>' .
+                    '<td class="mk ujian-left-title" colspan="4">Ujian Kompetensi</td>' .
+                    '</tr>';
+                continue;
             }
 
-            // ============== LAYER 6: FALLBACK PLAN B (IN-MEMORY) JIKA TEMP FILE TIDAK DAPAT DITULIS DI HOSTING ==============
-            if (!$tempWriteSuccess) {
-                $tmpPhp = @fopen('php://temp/maxmemory:33554432', 'r+b'); // 32MB max di memory (cukup untuk 1 transkrip xlsx 1000 baris)
-                if ($tmpPhp !== false) {
-                    try {
-                        @$writer->save($tmpPhp);
-                        @rewind($tmpPhp);
-                        $rawFallback = '';
-                        while (!@feof($tmpPhp)) {
-                            $chunk = @fread($tmpPhp, 1048576); // 1MB per chunk
-                            if ($chunk === false) break;
-                            $rawFallback .= $chunk;
-                        }
-                        @fclose($tmpPhp);
-                        if (@is_string($rawFallback) && @strlen($rawFallback) >= 1024) {
-                            $xlsxBinaryFallback = $rawFallback;
-                            $tempWriteSuccess = true;
-                        }
-                    } catch (\Throwable $memErr) {
-                        @fclose($tmpPhp);
-                        $xlsxBinaryFallback = null;
-                        $tempWriteSuccess = false;
-                    }
-                }
-            }
-        } catch (\Throwable $outerWrite) {
-            @unlink($tempAbs);
-            $tempWriteSuccess = false;
-            $xlsxBinaryFallback = null;
+            $uIdx = $bi - 3;
+            $uNama = $ujianKompre[$uIdx] ?? '';
+            $uNo = $uIdx + 1;
+            $tableRows .=
+                '<tr class="ujian-row">' .
+                '<td class="num left-col">' . $noLanjutTampil . '</td>' .
+                '<td class="mk left-col">' . $namaLL . '</td>' .
+                '<td class="sks left-col">' . $sksLL . '</td>' .
+                '<td class="nilaih left-col">' . $nhLL . '</td>' .
+                '<td class="m left-col">' . $mutuLL . '</td>' .
+                '<td class="num">' . $uNo . '</td>' .
+                '<td class="mk">' . $esc($uNama) . '</td>' .
+                '<td class="sks">0</td>' .
+                '<td class="nilaih">A</td>' .
+                '<td class="m">0</td>' .
+                '</tr>';
         }
 
-        // ============== LAYER 7: VALIDASI TOTAL — JIKA KEDUA METODE GAGAL, RENDER TEXT PLAIN ERROR EXCEL CORRUPT TAPI DOWNLOAD OK ==============
-        if (!$tempWriteSuccess) {
-            $defaultMinXlsx = base64_decode('UEsDBBQAAAAIAGxJZk0RwR1sAgAAAAIAAAABAAAAAABtZW1iZXJWYXJzL3N0ZUF1dG9fc2VydmVyLnhscwAAUEsBAh8AFAAAAAgAbEllTRHBHXWwCAAAAAgAAAAEAAAAAAAAAAQAgAAAAAAAAAG1lbWJlclZhcnMvc3RlYUF1dG9fc2VydmVyLnhtbAAAAFBLBQYAAAAAAQABAD8AAABkAAAAAAA=');
-            $xlsxBinaryFallback = (@strlen((string)$defaultMinXlsx) >= 512) ? $defaultMinXlsx : '';
-            $tempWriteSuccess = (@strlen($xlsxBinaryFallback) >= 512);
+        $css = '
+@page {
+    size: 210mm 297mm portrait;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+*, *:before, *:after { box-sizing: border-box !important; }
+table, table th, table td { box-sizing: border-box !important; }
+* {
+    word-wrap: break-word !important;
+    overflow-wrap: anywhere !important;
+    white-space: normal !important;
+    text-overflow: clip !important;
+    overflow: visible !important;
+}
+html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 210mm !important;
+    height: auto !important;
+    min-height: 0 !important;
+    background: #fff !important;
+    color: #000 !important;
+    font-family: \'Times New Roman\', Times, serif;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    overflow: visible !important;
+}
+thead { display: table-header-group; }
+tfoot { display: table-footer-group; }
+tr { page-break-inside: avoid !important; break-inside: avoid !important; }
+th, td { page-break-inside: avoid !important; break-inside: avoid !important; }
+body::after, .wrap::after, .transcript-paper::after {
+    content: \'\' !important;
+    display: none !important;
+    clear: both;
+}
+/* ===== A4 PROFESSIONAL TRANSKRIP (COMPACT 12/15mm MARGIN) ===== */
+.transcript-paper {
+    width: 210mm !important;
+    height: auto !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 12mm 15mm 12mm 15mm !important;
+    background: #ffffff;
+    color: #000000;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+    box-sizing: border-box !important;
+    font-family: \'Times New Roman\', Times, serif;
+    page-break-after: avoid !important;
+    page-break-inside: auto !important;
+    line-height: 1.2;
+}
+.wrap { width: 100%; }
+
+.kop-wrap { width: 100%; text-align: center; color: #000000; page-break-inside: avoid !important; break-inside: avoid !important; }
+.kop-logo-center { width: 100%; text-align: center; margin-bottom: 4px; }
+.kop-logo-center img { width: 72px; height: 72px; object-fit: contain; display: inline-block; }
+.kop-title-a {
+    font-size: 16px; font-weight: 800; letter-spacing: 0.6px; line-height: 1.15; margin: 2px 0 0; padding: 0; color: #000000;
+}
+.kop-title-a2 { margin-top: 1px; }
+.kop-title-b {
+    font-size: 15px; font-weight: 800; letter-spacing: 0.6px; line-height: 1.15; margin: 2px 0 0; padding: 0; color: #000000;
+}
+.kop-terakreditasi {
+    font-size: 8.8px; margin-top: 4px; color: #000000; text-align: center; letter-spacing: 0.1px;
+}
+.kop-alamat-line {
+    font-size: 8.5px; margin-top: 3px; line-height: 1.2; color: #000000; text-align: center;
+}
+.kop-email-web { margin-top: 1px; }
+.kop-line-double {
+    margin-top: 4px;
+    width: 100%;
+    display: block;
+}
+.kop-line-double .kop-line-top {
+    width: 100%; height: 2px; background: #000000;
+}
+.kop-line-double .kop-line-bottom {
+    width: 100%; height: 1px; background: #000000; margin-top: 2px;
+}
+
+.judul-box { text-align: center; margin-top: 6px; page-break-inside: avoid !important; break-inside: avoid !important; }
+.judul-text {
+    font-size: 13px; font-weight: 700; letter-spacing: 1.3px; text-transform: uppercase;
+    text-decoration: none; color: #000000;
+}
+.judul-nomor { font-size: 8.5px; margin-top: 1px; color: #000000; }
+
+.biodata {
+    width: 100%; margin-top: 6px; border-collapse: collapse;
+    font-size: 9.2px; color: #000000; table-layout: fixed;
+    page-break-inside: avoid !important; break-inside: avoid !important;
+}
+.biodata td { vertical-align: top; padding: 1.3px 0; line-height: 1.25; }
+.biodata td.bio-label {
+    width: 25%;
+    padding: 1.3px 12px 1.3px 0;
+    text-align: left;
+    font-weight: 400;
+    color: #000000;
+    position: relative;
+}
+.biodata td.bio-label.right-label {
+    width: 20%;
+}
+.biodata td.bio-value {
+    width: 25%;
+    padding: 1.3px 0 1.3px 7px;
+    color: #000000;
+}
+.biodata td.bio-value.right-val {
+    width: 30%;
+}
+.bio-val { font-weight: 700; color: #000000; display: inline !important; }
+
+table.nilai {
+    width: 100%; border-collapse: collapse; margin-top: 6px;
+    font-size: 8.5px; color: #000000; table-layout: fixed;
+    page-break-inside: auto !important;
+}
+table.nilai tr { page-break-inside: avoid !important; break-inside: avoid !important; }
+table.nilai thead tr { display: table-header-group !important; page-break-after: avoid !important; }
+table.nilai th {
+    border: 1px solid #000; background: #e0f2ea; font-weight: 700; letter-spacing: 0.15px;
+    padding: 3.5px 3px; vertical-align: middle; line-height: 1.18; text-align: center;
+}
+table.nilai th.mk { text-align: left; padding: 3.5px 5px; width: 29%; }
+table.nilai th.num { width: 4.5%; padding: 3.5px 3px; }
+table.nilai th.sks { width: 5.5%; padding: 3.5px 3px; }
+table.nilai th.nilaih { width: 5.5%; padding: 3.5px 3px; }
+table.nilai th.m { width: 5.5%; padding: 3.5px 3px; }
+table.nilai td {
+    border: 1px solid #000; padding: 3px 3px; vertical-align: middle;
+    line-height: 1.18; text-align: center; color: #000000;
+}
+table.nilai td.mk { text-align: left; padding: 3px 5px; width: 29%; }
+table.nilai td.num { width: 4.5%; padding: 3px 3px; }
+table.nilai td.sks { width: 5.5%; padding: 3px 3px; }
+table.nilai td.nilaih { width: 5.5%; font-weight: 700; padding: 3px 3px; }
+table.nilai td.m { width: 5.5%; padding: 3px 3px; }
+table.nilai tr.jumlah td {
+    background: #ffffff !important; font-weight: 700; padding: 3px 5px;
+    letter-spacing: 0.2px; line-height: 1.18; font-size: 8.5px;
+}
+table.nilai tr.jumlah td.mk { text-align: center; }
+table.nilai tr.jumlah td.jumlah-dashed {
+    background: #ffffff !important;
+    border-top: 1px dashed #000000 !important;
+    border-bottom: 1px solid #000000 !important;
+}
+table.nilai tr.ujian-head td {
+    background: #ffffff !important; font-weight: 700; letter-spacing: 0.15px;
+    padding: 3px 5px; line-height: 1.18; font-size: 8.5px;
+}
+table.nilai td.ujian-left-title { text-align: left; padding-left: 6px !important; }
+table.nilai tr.spacer-row td {
+    background: #ffffff !important; border: 1px solid #000000;
+    height: 10px; padding: 0;
+}
+table.nilai tr.ujian-row td { font-size: 8.5px; padding: 3px 5px; line-height: 1.18; }
+table.nilai tr.jumlah td.left-col,
+table.nilai tr.spacer-row td.left-col,
+table.nilai tr.ujian-head td.left-col,
+table.nilai tr.ujian-row td.left-col {
+    background: #ffffff !important;
+    font-weight: 400 !important;
+    padding: 3px 5px !important;
+    text-align: center !important;
+    letter-spacing: 0 !important;
+}
+table.nilai tr.jumlah td.mk.left-col,
+table.nilai tr.spacer-row td.mk.left-col,
+table.nilai tr.ujian-head td.mk.left-col,
+table.nilai tr.ujian-row td.mk.left-col {
+    text-align: left !important;
+    padding: 3px 5px !important;
+}
+
+.ringkasan {
+    width: 100%; margin-top: 6px; border-collapse: collapse;
+    font-size: 9.2px; color: #000000; table-layout: auto;
+    page-break-inside: avoid !important; break-inside: avoid !important;
+}
+.ringkasan td { vertical-align: top; padding: 1.3px 0; line-height: 1.25; }
+.ringkasan td.label {
+    width: auto; white-space: nowrap; font-weight: 700; color: #000000; padding-right: 14px;
+}
+.ringkasan td.label-top {
+    width: auto; white-space: nowrap; font-weight: 700; color: #000000; padding: 1.3px 14px 0 0;
+}
+.ringkasan td.sep   { width: auto; text-align: left; padding-right: 10px; }
+.ringkasan td.sep-top { width: auto; text-align: left; padding: 1.3px 10px 0 0; }
+.ringkasan td.val   { font-weight: 800; color: #000000; font-size: 9.5px; width: auto; white-space: nowrap; }
+.ringkasan td.val-judul {
+    text-align: left; color: #000000; line-height: 1.25; padding: 1.3px 0;
+    vertical-align: top; width: auto;
+}
+
+.ttd-foto-wrapper {
+    width: 100%; margin-top: 6px !important; border-collapse: collapse;
+    padding-left: 0 !important;
+    page-break-inside: avoid !important; break-inside: avoid !important;
+}
+.ttd-foto-wrapper td { vertical-align: top; padding: 0; }
+.ttd-foto-col {
+    width: 28mm; padding-right: 2mm;
+}
+.ttd-foto-box {
+    width: 24mm; height: 32mm;
+    border: 1px solid #333; background: #fdfdfd;
+    overflow: hidden; box-sizing: border-box;
+    position: relative;
+    margin: 0;
+}
+.ttd-foto-box img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.ttd-foto-empty {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+    color: #888; font-size: 9px; font-weight: 400;
+    line-height: 1.2; text-align: center;
+    background: #ffffff;
+}
+.ttd-col-wrapper { width: auto; }
+.ttd-box {
+    width: 100%; margin-top: 0; border-collapse: collapse;
+    font-size: 9px; color: #000000;
+}
+.ttd-box td { vertical-align: top; }
+.ttd-spacer-l { width: 0%; }
+.ttd-spacer-r { width: 0%; }
+.ttd-col { width: 100%; text-align: left; line-height: 1.28; color: #000000; padding-left: 0; font-size: 9px; }
+.ttd-jabatan { margin-top: 3px; font-weight: 800; letter-spacing: 0.2px; }
+.ttd-nama    { margin-top: 36px; font-weight: 800; text-decoration: underline; font-size: 9px; }
+.ttd-nidk    { margin-top: 1px; font-size: 8.2px; letter-spacing: 0.1px; }
+';
+
+        return '<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Transkrip Akademik - ' . $nama . '</title>
+    <style>' . $css . '</style>
+</head>
+<body>
+<div class="transcript-paper">
+    <div class="wrap">
+        <div class="kop-wrap">
+            <div class="kop-logo-center">
+                ' . $logoImg . '
+            </div>
+            <div class="kop-title-a">INSTITUT AGAMA ISLAM</div>
+            <div class="kop-title-a kop-title-a2">DARUD DA\'WAH WAL IRSYAD</div>
+            <div class="kop-title-b">SIDENRENG RAPPANG</div>
+            <div class="kop-terakreditasi">TERAKREDITASI INSTITUSI • SK : 337/SK/BAN-PT/Ak-S/2.0/PT/VI/2026</div>
+            <div class="kop-alamat-line">Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang</div>
+            <div class="kop-alamat-line kop-email-web">E-mail : iaiddisidrap@gmail.com &nbsp;&nbsp; Website : www.yppddisrapp.ac.id</div>
+            <div class="kop-line-double">
+                <div class="kop-line-top"></div>
+                <div class="kop-line-bottom"></div>
+            </div>
+        </div>
+
+        <div class="judul-box">
+            <div class="judul-text">Transkrip Akademik</div>
+            <div class="judul-nomor">Nomor : ' . $nomorTranskrip . '</div>
+        </div>
+
+        <table class="biodata" cellpadding="0" cellspacing="0">
+            <tr>
+                <td class="bio-label">Nama:</td>
+                <td class="bio-value"><span class="bio-val">' . $nama . '</span></td>
+                <td class="bio-label right-label">Program Pendidikan:</td>
+                <td class="bio-value right-val"><span class="bio-val">Strata Satu (S1)</span></td>
+            </tr>
+            <tr>
+                <td class="bio-label">No. Pokok Mahasiswa</td>
+                <td class="bio-value"><span class="bio-val">' . $npm . '</span></td>
+                <td class="bio-label right-label">Fakultas:</td>
+                <td class="bio-value right-val"><span class="bio-val">' . $fakultas . '</span></td>
+            </tr>
+            <tr>
+                <td class="bio-label">No. Ijazah</td>
+                <td class="bio-value"><span class="bio-val">' . $noIjazah . '</span></td>
+                <td class="bio-label right-label">Program Studi</td>
+                <td class="bio-value right-val"><span class="bio-val">' . $prodi . '</span></td>
+            </tr>
+            <tr>
+                <td class="bio-label">Tempat / Tanggal Lahir</td>
+                <td class="bio-value"><span class="bio-val">' . $tempatTgl . '</span></td>
+                <td class="bio-label right-label">No. SK BAN-PT</td>
+                <td class="bio-value right-val"><span class="bio-val">' . $skBanpt . '</span></td>
+            </tr>
+            <tr>
+                <td class="bio-label">Tanggal, Bulan dan Tahun Lulus:</td>
+                <td class="bio-value"><span class="bio-val">' . $tanggalLulus . '</span></td>
+                <td></td>
+                <td></td>
+            </tr>
+        </table>
+
+        <table class="nilai" cellpadding="0" cellspacing="0">
+            <thead>
+                <tr>
+                    <th class="num">NO</th>
+                    <th class="mk">MATA KULIAH</th>
+                    <th class="sks">SKS</th>
+                    <th class="nilaih">NILAI</th>
+                    <th class="m">M</th>
+                    <th class="num">NO</th>
+                    <th class="mk">MATA KULIAH</th>
+                    <th class="sks">SKS</th>
+                    <th class="nilaih">NILAI</th>
+                    <th class="m">M</th>
+                </tr>
+            </thead>
+            <tbody>
+                ' . $tableRows . '
+            </tbody>
+        </table>
+
+        <table class="ringkasan" cellpadding="0" cellspacing="0">
+            <colgroup>
+                <col style="width:290px;">
+                <col style="width:22px;">
+                <col style="width:auto;">
+            </colgroup>
+            <tr>
+                <td class="label">INDEKS PRESTASI KUMULATIF (IPK)</td>
+                <td class="sep">:</td>
+                <td class="val">' . $ipk . '</td>
+            </tr>
+            <tr>
+                <td class="label">PREDIKAT KELULUSAN</td>
+                <td class="sep">:</td>
+                <td class="val">' . $predikat . '</td>
+            </tr>
+            <tr>
+                <td class="label-top">JUDUL SKRIPSI</td>
+                <td class="sep-top">:</td>
+                <td class="val-judul">' . $judulSkripsi . '</td>
+            </tr>
+        </table>
+
+        <div style="page-break-inside: avoid; padding-left:90mm !important; margin-top:10px !important;">
+            <table class="ttd-foto-wrapper" cellpadding="0" cellspacing="0" style="padding-left:0 !important; margin:0 !important; border-collapse: collapse;">
+                <tr>
+                    <td class="ttd-foto-col" style="vertical-align: top; padding-top: 0;">
+                        <div class="ttd-foto-box" style="margin-top: 0;">
+                            ' . $fotoInner . '
+                        </div>
+                    </td>
+                    <td class="ttd-col-wrapper">
+                        <table class="ttd-box" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td class="ttd-spacer-l"></td>
+                                <td class="ttd-col">
+                                    <div>' . $tanggalTtd . '</div>
+                                    <div class="ttd-jabatan">' . $ttdJabatan . '</div>
+                                    <div class="ttd-nama">' . $ttdNama . '</div>
+                                    <div class="ttd-nidk">' . $ttdNomorLabel . '. ' . $ttdNomor . '</div>
+                                </td>
+                                <td class="ttd-spacer-r"></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>';
+    }
+    private function formatNilaiM(
+        $nilai
+    ): string {
+
+        $nilai =
+            (float) $nilai;
+
+        if ($nilai <= 0) {
+            return '0';
         }
 
-        // ============== 🔑 KRITIS: EKSTRAK BINARY FINAL + VALIDASI MAGIC NUMBER ZIP (WAJIB 50 4B 03 04) ==============
-        $finalBinary = null;
-        $finalTempFile = null;
-        $finalSize = 0;
-
-        if ($tempAbs !== null && @is_file($tempAbs)) {
-            // PLAN A: Baca binary dari temp file filesystem
-            $fsRead = (int) @filesize($tempAbs);
-            if ($fsRead < 1024) { $st2 = @stat($tempAbs); if ($st2 && isset($st2['size'])) $fsRead = (int)$st2['size']; }
-            if ($fsRead >= 1024) {
-                $fhRead = @fopen($tempAbs, 'rb');
-                if ($fhRead !== false) {
-                    $binRead = '';
-                    while (!@feof($fhRead)) {
-                        $chk = @fread($fhRead, 1048576);
-                        if ($chk === false) break;
-                        $binRead .= $chk;
-                    }
-                    @fclose($fhRead);
-                    if (@is_string($binRead) && @strlen($binRead) >= 1024) {
-                        $finalBinary = $binRead;
-                        $finalTempFile = $tempAbs;
-                        $finalSize = (int) @strlen($binRead);
-                    }
-                }
-            }
-        }
-        // PLAN B: Pakai in-memory binary jika PLAN A gagal / binary tidak valid
-        if (($finalBinary === null || @strlen((string)$finalBinary) < 1024)
-            && $xlsxBinaryFallback !== null && @is_string($xlsxBinaryFallback) && @strlen($xlsxBinaryFallback) >= 512) {
-            $finalBinary = $xlsxBinaryFallback;
-            $finalTempFile = null;
-            $finalSize = (int) @strlen($xlsxBinaryFallback);
-        }
-
-        // ============== 🔑 VALIDASI MAGIC NUMBER ZIP / XLSX 4 BYTE PERTAMA WAJIB = PK\x03\x04 (0x50 0x4B 0x03 0x04) ==============
-        $magicNumberOK = false;
-        if (@is_string($finalBinary) && @strlen($finalBinary) >= 4) {
-            $magic = @substr($finalBinary, 0, 4);
-            $magicNumberOK = ($magic === "\x50\x4B\x03\x04");
-        }
-        // Jika magic number TIDAK SESUAI tapi punya temp file, coba baca ulang dari file (kadang php://temp corrupt)
-        if (!$magicNumberOK && $finalTempFile !== null && @is_file($finalTempFile)) {
-            try {
-                $fhReopen = @fopen($finalTempFile, 'rb');
-                if ($fhReopen !== false) {
-                    $binReopen = '';
-                    while (!@feof($fhReopen)) {
-                        $chk2 = @fread($fhReopen, 1048576);
-                        if ($chk2 === false) break;
-                        $binReopen .= $chk2;
-                    }
-                    @fclose($fhReopen);
-                    if (@is_string($binReopen) && @strlen($binReopen) >= 4) {
-                        $magic2 = @substr($binReopen, 0, 4);
-                        if ($magic2 === "\x50\x4B\x03\x04") {
-                            $finalBinary = $binReopen;
-                            $finalSize = (int) @strlen($binReopen);
-                            $magicNumberOK = true;
-                        }
-                    }
-                }
-            } catch (\Throwable $reopenErr) { }
-        }
-
-        // ============== 🔑 MODE DEBUG DIAGNOSTIK: SIMPAN SALINAN BINARY KE storage/logs/xlsx-debug/ (jika writable) ==============
-        try {
-            $debugBase = @rtrim(@str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string) @storage_path('logs')), DIRECTORY_SEPARATOR);
-            if ($debugBase !== '' && @is_dir($debugBase) && @is_writable($debugBase)) {
-                $debugDir = $debugBase . DIRECTORY_SEPARATOR . 'xlsx-debug';
-                if (!@is_dir($debugDir)) { @mkdir($debugDir, 0755, true); }
-                if (@is_dir($debugDir) && @is_writable($debugDir)) {
-                    $ts = @date('Ymd-His');
-                    $safeName = @preg_replace('/[^a-zA-Z0-9._-]/', '_', (string)$namafile);
-                    $debugFile = $debugDir . DIRECTORY_SEPARATOR . $ts . '-' . ($safeName ?: 'transkrip.xlsx');
-                    $fhDebug = @fopen($debugFile, 'wb');
-                    if ($fhDebug !== false) {
-                        if (@is_string($finalBinary) && @strlen($finalBinary) > 0) {
-                            @fwrite($fhDebug, $finalBinary);
-                        }
-                        @fflush($fhDebug);
-                        @fclose($fhDebug);
-                        @chmod($debugFile, 0666);
-                    }
-                }
-            }
-        } catch (\Throwable $dbgErr) { }
-
-        // ============== 🔑 OB NUCLEAR CLEAN 99 LEVEL SEBELUM KIRIM BINARY (PASTIKAN TIDAK ADA BYTE SISA DI BUFFER) ==============
-        $innerCnt3 = 0;
-        while ((@ob_get_level() > 0) && $innerCnt3++ < 99) { if (!@ob_end_clean()) break; }
-        @ob_clean();
-        if (function_exists('header_remove')) {
-            @header_remove();
-        }
-        @error_clear_last();
-        @ini_set('zlib.output_compression', '0');
-        @ini_set('output_handler', '');
-        if (function_exists('apache_setenv')) { @apache_setenv('no-gzip', '1'); @apache_setenv('dont-vary', '1'); }
-
-        // ============== 🔑 CHECK: BINARY SUDAH READY + MAGIC NUMBER OK? ==============
-        if ($magicNumberOK && @is_string($finalBinary) && $finalSize >= 1024) {
-
-            // 🔑🔑🔑 EXIT IMMEDIATELY PATTERN: KIRIM HEADERS + BINARY CHUNKED, EXIT(0) TANPA KEMBALI KE ROUTER LARAVEL 🔑🔑🔑
-            // JANGAN PERNAH return response()->download() atau return apapun ke Laravel Router!
-            // Di hosting cPanel CGI/FastCGI/FPM, shutdown function Laravel (session save, view composer, debugbar)
-            // akan INJECT BYTE TAMBAHAN di akhir binary → file corrupt "file format or extension is not valid".
-
-            $contentTypeXlsx = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-            @header('HTTP/1.1 200 OK', true, 200);
-            @header('Content-Type: ' . $contentTypeXlsx, true);
-            @header('Content-Transfer-Encoding: binary', true);
-            @header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0, private', true);
-            @header('Pragma: public', true);
-            @header('Expires: Sat, 26 Jul 1997 05:00:00 GMT', true);
-            @header('X-Content-Type-Options: nosniff', true);
-            @header('Accept-Ranges: bytes', true);
-            @header('Content-Description: File Transfer', true);
-            @header('Content-Disposition: attachment; filename="' . $namafile . '"', true);
-            @header('Content-Encoding: identity', true);
-            @header('Content-Length: ' . (string)$finalSize, true);
-
-            // Flush headers SEGERA ke web server buffer
-            if (function_exists('fastcgi_finish_request')) {
-                // Jangan panggil fastcgi_finish_request SEBELUM kirim binary! Panggil SESUDAH flush binary semua.
-            }
-            @flush();
-
-            // 🔑 KIRIM BINARY SECARA CHUNKED 1MB PER LOOP via php://output (aman memory limit)
-            $outStream = @fopen('php://output', 'wb');
-            if ($outStream !== false) {
-                $offset = 0;
-                $chunkSize = 1048576; // 1 MB per chunk
-                while ($offset < $finalSize) {
-                    $chunkPart = @substr($finalBinary, $offset, $chunkSize);
-                    if ($chunkPart === false || $chunkPart === '') break;
-                    @fwrite($outStream, $chunkPart);
-                    @fflush($outStream);
-                    if (function_exists('fastcgi_finish_request')) { /* flush chunk dulu */ }
-                    @flush();
-                    $offset += $chunkSize;
-                    unset($chunkPart);
-                }
-                @fflush($outStream);
-                @fclose($outStream);
-            } else {
-                // Fallback: echo langsung chunked (lebih riskan tapi lebih baik dari tidak ada)
-                $offset = 0;
-                $chunkSize = 1048576;
-                while ($offset < $finalSize) {
-                    $chunkPart = @substr($finalBinary, $offset, $chunkSize);
-                    if ($chunkPart === false || $chunkPart === '') break;
-                    echo $chunkPart;
-                    @flush();
-                    $offset += $chunkSize;
-                    unset($chunkPart);
-                }
-            }
-
-            @flush();
-
-            // 🔑 PANGGIL fastcgi_finish_request() DI HOSTING cPanel/FPM/FASTCGI:
-            // Ini MEMUTUS koneksi HTTP CLIENT SECARA LANGSUNG, sehingga byte apapun yang di-echo
-            // OLEH LARAVEL SHUTDOWN FUNCTION (setelah exit) TIDAK AKAN PERNAH SAMPAI KE BROWSER!
-            if (function_exists('fastcgi_finish_request')) {
-                try { @fastcgi_finish_request(); } catch (\Throwable $fpmErr) { }
-            }
-
-            // 🔑 HAPUS temp file (jika ada) DI BELAKANG LAYAR setelah koneksi diputus
-            try {
-                if ($finalTempFile !== null && @is_file($finalTempFile)) { @unlink($finalTempFile); }
-                if ($tempAbs !== null && $tempAbs !== $finalTempFile && @is_file($tempAbs)) { @unlink($tempAbs); }
-            } catch (\Throwable $unlinkErr) { }
-
-            // 🔑 KEMBALIKAN SETTING ERROR PHP SEBELUM EXIT (baik practice)
-            @ini_set('display_errors', (string) $prevDisplayErrors);
-            @error_reporting((int) $prevErrorReporting);
-            @libxml_disable_entity_loader((bool) $prevXmlLoader);
-            @restore_error_handler();
-            @restore_exception_handler();
-
-            // 🔑🔑🔑 EXIT(0) SEGERA! JANGAN SAMPAI KEMBALI KE KERNEL / ROUTER LARAVEL 🔑🔑🔑
-            exit(0);
-        }
-
-        // ============== FALLBACK: JIKA BINARY GAGAL / MAGIC NUMBER SALAH ==============
-        // Disini BOLEH return redirect back karena TIDAK mengirim binary strict.
-        @ini_set('display_errors', (string) $prevDisplayErrors);
-        @error_reporting((int) $prevErrorReporting);
-        @libxml_disable_entity_loader((bool) $prevXmlLoader);
-        @restore_error_handler();
-        @restore_exception_handler();
-        // Hapus sisa file temp
-        try {
-            if ($finalTempFile !== null && @is_file($finalTempFile)) { @unlink($finalTempFile); }
-            if ($tempAbs !== null && $tempAbs !== $finalTempFile && @is_file($tempAbs)) { @unlink($tempAbs); }
-        } catch (\Throwable $unlinkErr2) { }
-        return @redirect()->back()->withErrors(['excel' => 'Gagal mendownload file Excel. Silakan coba beberapa saat lagi atau hubungi administrator.']);
-        } catch (\Throwable $e) {
-            @ini_set('display_errors', (string) $prevDisplayErrors);
-            @error_reporting((int) $prevErrorReporting);
-            @libxml_disable_entity_loader((bool) ($prevXmlLoader ?? false));
-            @restore_error_handler();
-            @restore_exception_handler();
-            $innerCntFinal = 0;
-            while ((@ob_get_level() > 0) && $innerCntFinal++ < 99) { if (!@ob_end_clean()) break; }
-            @ob_clean();
-            if (function_exists('header_remove')) { @header_remove(); }
-            try {
-                return @redirect()->back()->withErrors(['excel' => 'Terjadi kesalahan saat generate file Excel. Silakan coba lagi atau hubungi administrator.']);
-            } catch (\Throwable $e2) {
-                throw $e;
-            }
-        }
+        return rtrim(
+            rtrim(
+                number_format(
+                    $nilai,
+                    2,
+                    '.',
+                    ''
+                ),
+                '0'
+            ),
+            '.'
+        );
     }
 
-    private function nilaiMutuHuruf(string $huruf): float
-    {
-        return match ($huruf) {
-            'A' => 4.00,
-            'A-' => 3.70,
-            'B+' => 3.30,
-            'B' => 3.00,
-            'B-' => 2.70,
-            'C+' => 2.30,
-            'C' => 2.00,
-            'D' => 1.00,
-            default => 0.00,
-        };
-    }
 
-    private function predikat(float $ipk): string
-    {
-        if ($ipk >= 3.75) return 'Dengan Pujian';
-        if ($ipk >= 3.50) return 'Sangat Memuaskan';
-        if ($ipk >= 3.00) return 'Memuaskan';
-        if ($ipk >= 2.00) return 'Cukup';
+    /*
+    |--------------------------------------------------------------------------
+    | PREDIKAT
+    |--------------------------------------------------------------------------
+    */
+
+    private function predikat(
+        float $ipk
+    ): string {
+
+        if ($ipk >= 3.75) {
+            return 'Dengan Pujian';
+        }
+
+        if ($ipk >= 3.50) {
+            return 'Sangat Memuaskan';
+        }
+
+        if ($ipk >= 3.00) {
+            return 'Memuaskan';
+        }
+
+        if ($ipk >= 2.00) {
+            return 'Cukup';
+        }
+
         return 'Kurang';
     }
 
-    private function formatTanggalID($tanggal, string $fallback = '-'): string
-    {
+
+    /*
+    |--------------------------------------------------------------------------
+    | FORMAT TANGGAL INDONESIA
+    |--------------------------------------------------------------------------
+    */
+
+    private function formatTanggalID(
+        $tanggal,
+        string $fallback = '-'
+    ): string {
+
         try {
-            if ($tanggal === null || $tanggal === '') {
+
+            if (
+                $tanggal === null
+                || $tanggal === ''
+            ) {
                 return $fallback;
             }
-            $c = $tanggal instanceof \Illuminate\Support\Carbon || $tanggal instanceof \DateTimeInterface
-                ? \Illuminate\Support\Carbon::instance($tanggal)
-                : \Illuminate\Support\Carbon::parse($tanggal);
-            if (!$c) return $fallback;
+
+            $c =
+                $tanggal instanceof \Illuminate\Support\Carbon
+                || $tanggal instanceof \DateTimeInterface
+
+                    ? \Illuminate\Support\Carbon::instance(
+                        $tanggal
+                    )
+
+                    : \Illuminate\Support\Carbon::parse(
+                        $tanggal
+                    );
 
             $bulanID = [
-                1  => 'Januari',
-                2  => 'Februari',
-                3  => 'Maret',
-                4  => 'April',
-                5  => 'Mei',
-                6  => 'Juni',
-                7  => 'Juli',
-                8  => 'Agustus',
-                9  => 'September',
-                10 => 'Oktober',
-                11 => 'November',
-                12 => 'Desember',
+                1 =>
+                    'Januari',
+
+                2 =>
+                    'Februari',
+
+                3 =>
+                    'Maret',
+
+                4 =>
+                    'April',
+
+                5 =>
+                    'Mei',
+
+                6 =>
+                    'Juni',
+
+                7 =>
+                    'Juli',
+
+                8 =>
+                    'Agustus',
+
+                9 =>
+                    'September',
+
+                10 =>
+                    'Oktober',
+
+                11 =>
+                    'November',
+
+                12 =>
+                    'Desember',
             ];
 
-            $hari   = (int) $c->format('j');
-            $bulan  = (int) $c->format('n');
-            $tahun  = (int) $c->format('Y');
-            $namaBulan = $bulanID[$bulan] ?? strtr((string)$c->format('F'), [
-                'January' => 'Januari', 'February' => 'Februari', 'March' => 'Maret',
-                'April' => 'April', 'May' => 'Mei', 'June' => 'Juni',
-                'July' => 'Juli', 'August' => 'Agustus', 'September' => 'September',
-                'October' => 'Oktober', 'November' => 'November', 'December' => 'Desember',
-            ]);
+            $hari =
+                (int) $c->format('j');
 
-            return sprintf('%02d %s %04d', $hari, $namaBulan, $tahun);
+            $bulan =
+                (int) $c->format('n');
+
+            $tahun =
+                (int) $c->format('Y');
+
+            return sprintf(
+                '%02d %s %04d',
+                $hari,
+                $bulanID[$bulan]
+                    ?? $c->format('F'),
+                $tahun
+            );
+
         } catch (\Throwable $e) {
+
             return $fallback;
         }
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | DEFAULT UJIAN
+    |--------------------------------------------------------------------------
+    */
 
     private function defaultUjianKompre(): array
     {
@@ -1096,124 +3568,17 @@ class TranskripNilaiController extends Controller
         ];
     }
 
-    public function word(Request $request, Mahasiswa $mahasiswa)
-    {
-        $data = $this->buildTranskripData($mahasiswa);
 
-        $logoCandidates = [];
-        try { $logoCandidates[] = rtrim(public_path(), '\\/') . DIRECTORY_SEPARATOR . 'img' . DIRECTORY_SEPARATOR . 'lo.jpeg'; } catch (\Throwable $e) {}
-        try {
-            $bp = rtrim(str_replace('\\', '/', base_path()), '/');
-            if ($bp !== '') {
-                $logoCandidates[] = $bp . '/public/img/lo.jpeg';
-                $logoCandidates[] = $bp . '/public/img/lo.jpg';
-                $logoCandidates[] = $bp . '/public/img/lo.png';
-                $logoCandidates[] = $bp . '/public_html/img/lo.jpeg';
-                $logoCandidates[] = $bp . '/public/img/logo.jpeg';
-                $logoCandidates[] = $bp . '/public/img/logo.jpg';
-                $logoCandidates[] = $bp . '/public/img/logo.png';
-            }
-        } catch (\Throwable $e) {}
-        try {
-            $docRoot = rtrim(str_replace('\\', '/', (string) ($_SERVER['DOCUMENT_ROOT'] ?? '')), '/');
-            if ($docRoot !== '') {
-                $logoCandidates[] = $docRoot . '/img/lo.jpeg';
-                $logoCandidates[] = $docRoot . '/img/lo.jpg';
-                $logoCandidates[] = $docRoot . '/img/lo.png';
-                $logoCandidates[] = $docRoot . '/public/img/lo.jpeg';
-                $logoCandidates[] = $docRoot . '/storage/img/lo.jpeg';
-            }
-        } catch (\Throwable $e) {}
-        $logoPath = null;
-        foreach ($logoCandidates as $lc) {
-            $lc = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string)$lc);
-            if (@is_file($lc) && @is_readable($lc)) { $logoPath = $lc; break; }
-        }
+    /*
+    |--------------------------------------------------------------------------
+    | DATA TRANSKRIP
+    |--------------------------------------------------------------------------
+    */
 
-        $logoLocalAbsPath = null;
-        if ($logoPath) {
-            try {
-                $tempDir = sys_get_temp_dir();
-                if (!@is_dir($tempDir)) { $tempDir = @ini_get('upload_tmp_dir') ?: storage_path('framework/cache'); }
-                $ext = strtolower(pathinfo($logoPath, PATHINFO_EXTENSION));
-                if (!in_array($ext, ['jpg','jpeg','png','gif'])) { $ext = 'jpg'; }
-                if ($ext === 'jpeg') { $ext = 'jpg'; }
-                $fn = 'transkrip-logo-' . md5($logoPath . '|' . filesize($logoPath)) . '.' . $ext;
-                $tempLogoAbs = rtrim($tempDir, '\\/') . DIRECTORY_SEPARATOR . $fn;
-                if (!@is_file($tempLogoAbs) || (@filemtime($tempLogoAbs) + 86400) < time()) {
-                    @copy($logoPath, $tempLogoAbs);
-                }
-                if (@is_file($tempLogoAbs)) {
-                    $logoLocalAbsPath = str_replace('\\', '/', $tempLogoAbs);
-                }
-            } catch (\Throwable $e) { $logoLocalAbsPath = null; }
-        }
+    private function buildTranskripData(
+        Mahasiswa $mahasiswa
+    ): array {
 
-        $data['logoLocalAbsPath'] = $logoLocalAbsPath;
-
-        $fotoLocalAbsPath = null;
-        $fotoOrEmptyPlaceholder = false;
-        $relPath = trim(str_replace(['/', '\\'], '/', (string)$mahasiswa->foto_path), '/');
-        if ($relPath !== '') {
-            $candidates = [
-                public_path('storage/' . $relPath),
-                rtrim((string) ($_SERVER['DOCUMENT_ROOT'] ?? ''), '\\/') . '/storage/' . $relPath,
-                rtrim((string) ($_SERVER['DOCUMENT_ROOT'] ?? ''), '\\/') . '/' . $relPath,
-            ];
-            foreach ($candidates as $c) {
-                $c = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, (string)$c);
-                if (@is_file($c) && @is_readable($c) && (@filesize($c) > 200)) {
-                    try {
-                        $tempDir = sys_get_temp_dir();
-                        if (!@is_dir($tempDir)) { $tempDir = @ini_get('upload_tmp_dir') ?: storage_path('framework/cache'); }
-                        $ext = strtolower(pathinfo($c, PATHINFO_EXTENSION));
-                        if (!in_array($ext, ['jpg','jpeg','png','gif'])) { $ext = 'jpg'; }
-                        if ($ext === 'jpeg') { $ext = 'jpg'; }
-                        $fn = 'transkrip-foto-' . md5($c . '|' . filesize($c)) . '.' . $ext;
-                        $tempF = rtrim($tempDir, '\\/') . DIRECTORY_SEPARATOR . $fn;
-                        if (!@is_file($tempF) || (@filemtime($tempF) + 86400) < time()) {
-                            @copy($c, $tempF);
-                        }
-                        if (@is_file($tempF)) { $fotoLocalAbsPath = str_replace('\\', '/', $tempF); break; }
-                    } catch (\Throwable $e) { $fotoLocalAbsPath = null; }
-                }
-            }
-        }
-        $data['fotoLocalAbsPath'] = $fotoLocalAbsPath;
-
-        while (ob_get_level() > 0) {
-            if (!@ob_end_clean()) {
-                break;
-            }
-        }
-        ob_start();
-
-        $html = view('admin.transkrip-nilai.word', $data)->render();
-
-        $namafile = 'Transkrip-' . ($mahasiswa->npm ?: $mahasiswa->id) . '-' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', (string) $mahasiswa->nama_lengkap) . '.doc';
-
-        $forceDownload = (string) $request->query('download', '') !== ''
-            || (string) $request->query('dl', '') !== ''
-            || (string) $request->query('fd', '') !== ''
-            || strtolower((string) $request->query('disposition', '')) === 'attachment';
-
-        $callback = function () use ($html) {
-            echo $html;
-        };
-
-        return response()->streamDownload($callback, $namafile, [
-            'Content-Type' => 'application/msword',
-            'Content-Transfer-Encoding' => 'binary',
-            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0, private',
-            'Pragma' => 'public',
-            'Expires' => 'Sat, 26 Jul 1997 05:00:00 GMT',
-            'X-Content-Type-Options' => 'nosniff',
-            'Content-Description' => 'File Transfer',
-        ], $forceDownload ? 'attachment' : 'inline');
-    }
-
-    private function buildTranskripData(Mahasiswa $mahasiswa): array
-    {
         $mahasiswa->load([
             'khs.items.mataKuliah',
             'dosenPenasehat',
@@ -1222,263 +3587,867 @@ class TranskripNilaiController extends Controller
 
         $items = [];
 
-        foreach ($mahasiswa->khs as $khs) {
-            foreach ($khs->items as $khsItem) {
-                if ($khsItem->mataKuliah) {
-                    $items[] = $khsItem;
+        foreach (
+            $mahasiswa->khs
+            as $khs
+        ) {
+
+            foreach (
+                $khs->items
+                as $khsItem
+            ) {
+
+                if (
+                    $khsItem->mataKuliah
+                ) {
+                    $items[] =
+                        $khsItem;
                 }
             }
         }
 
-        usort($items, function ($a, $b) {
-            $sa = (int) ($a->mataKuliah->semester ?? 0);
-            $sb = (int) ($b->mataKuliah->semester ?? 0);
-            if ($sa !== $sb) return $sa <=> $sb;
-            return strnatcasecmp((string) ($a->mataKuliah->kode ?? ''), (string) ($b->mataKuliah->kode ?? ''));
-        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | SORT MATA KULIAH
+        |--------------------------------------------------------------------------
+        */
+
+        usort(
+            $items,
+            function ($a, $b) {
+
+                $sa =
+                    (int) (
+                        $a->mataKuliah->semester
+                        ?? 0
+                    );
+
+                $sb =
+                    (int) (
+                        $b->mataKuliah->semester
+                        ?? 0
+                    );
+
+                if ($sa !== $sb) {
+                    return $sa <=> $sb;
+                }
+
+                return strnatcasecmp(
+                    (string) (
+                        $a->mataKuliah->kode
+                        ?? ''
+                    ),
+                    (string) (
+                        $b->mataKuliah->kode
+                        ?? ''
+                    )
+                );
+            }
+        );
+
 
         $totalSks = 0;
         $totalMutu = 0;
+
         $sksLulus = 0;
         $mutuLulus = 0;
 
         $daftarMataKuliah = [];
 
-        foreach ($items as $it) {
-            $mk = $it->mataKuliah;
-            $sks = (int) ($mk->sks ?? 0);
-            $huruf = (string) ($it->nilai_huruf ?? '');
-            $nilaiM = $this->nilaiMutuHuruf($huruf);
-            $m = $sks * $nilaiM;
 
-            $namaMk = (string) ($mk->nama ?? '');
+        /*
+        |--------------------------------------------------------------------------
+        | HITUNG NILAI
+        |--------------------------------------------------------------------------
+        */
+
+        foreach (
+            $items as $it
+        ) {
+
+            $mk =
+                $it->mataKuliah;
+
+            $sks =
+                (int) (
+                    $mk->sks
+                    ?? 0
+                );
+
+            $huruf =
+                (string) (
+                    $it->nilai_huruf
+                    ?? ''
+                );
+
+            $nilaiM =
+                $this->nilaiMutuHuruf(
+                    $huruf
+                );
+
+            $m =
+                $sks * $nilaiM;
+
+            $namaMk =
+                (string) (
+                    $mk->nama
+                    ?? ''
+                );
+
             if ($namaMk !== '') {
-                $daftarMataKuliah[] = (object) [
-                    'nama_mata_kuliah' => $namaMk,
-                    'sks' => $sks,
-                    'nilai_huruf' => $huruf,
-                    'nilai_m' => $m,
-                ];
+
+                $daftarMataKuliah[] =
+                    (object) [
+                        'nama_mata_kuliah' =>
+                            $namaMk,
+
+                        'sks' =>
+                            $sks,
+
+                        'nilai_huruf' =>
+                            $huruf,
+
+                        'nilai_m' =>
+                            $m,
+                    ];
             }
 
-            $it->_sks = $sks;
-            $it->_nilai_huruf = $huruf;
-            $it->_nilai_m = $m;
-            $it->_semester = $mk->semester ?? 0;
+            $it->_sks =
+                $sks;
 
-            $totalSks += $sks;
-            $totalMutu += $m;
+            $it->_nilai_huruf =
+                $huruf;
 
-            if ($huruf !== '' && $huruf !== 'E') {
-                $sksLulus += $sks;
-                $mutuLulus += $m;
+            $it->_nilai_m =
+                $m;
+
+            $it->_semester =
+                $mk->semester
+                ?? 0;
+
+            $totalSks +=
+                $sks;
+
+            $totalMutu +=
+                $m;
+
+
+            if (
+                $huruf !== ''
+                && strtoupper($huruf) !== 'E'
+            ) {
+
+                $sksLulus +=
+                    $sks;
+
+                $mutuLulus +=
+                    $m;
             }
         }
 
-        $ujianKompre = is_array($mahasiswa->ujian_kompre) ? $mahasiswa->ujian_kompre : [];
-        $ujianKompre = array_values(array_filter(array_map(fn($v) => trim((string) $v), $ujianKompre), fn($v) => $v !== ''));
-        if (count($ujianKompre) === 0) {
-            $ujianKompre = $this->defaultUjianKompre();
+
+        /*
+        |--------------------------------------------------------------------------
+        | UJIAN
+        |--------------------------------------------------------------------------
+        */
+
+        $ujianKompre =
+            is_array(
+                $mahasiswa->ujian_kompre
+            )
+                ? $mahasiswa->ujian_kompre
+                : [];
+
+        $ujianKompre =
+            array_values(
+                array_filter(
+                    array_map(
+                        fn ($v) =>
+                            trim((string) $v),
+                        $ujianKompre
+                    ),
+                    fn ($v) =>
+                        $v !== ''
+                )
+            );
+
+        if (
+            count($ujianKompre) === 0
+        ) {
+            $ujianKompre =
+                $this->defaultUjianKompre();
         }
 
-        $totalItem = count($daftarMataKuliah);
-        $jumlahKiri = (int) ceil($totalItem / 2);
-        $bagianKiri = array_slice($daftarMataKuliah, 0, $jumlahKiri);
-        $bagianKanan = array_slice($daftarMataKuliah, $jumlahKiri);
+
+        $ujianAda =
+            $ujianKompre;
+
+        $ujianCount =
+            count($ujianAda);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | BAGIAN KIRI / KANAN
+        |--------------------------------------------------------------------------
+        */
+
+        $totalItem =
+            count($daftarMataKuliah);
+
+        $jumlahKiri =
+            (int) ceil(
+                $totalItem / 2
+            );
+
+        $bagianKiri =
+            array_slice(
+                $daftarMataKuliah,
+                0,
+                $jumlahKiri
+            );
+
+        $bagianKanan =
+            array_slice(
+                $daftarMataKuliah,
+                $jumlahKiri
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | IPK
+        |--------------------------------------------------------------------------
+        */
 
         $ipk = 0;
-        if ($sksLulus > 0) {
-            $ipk = round($mutuLulus / $sksLulus, 2);
+
+        if (
+            $sksLulus > 0
+        ) {
+
+            $ipk =
+                round(
+                    $mutuLulus
+                    / $sksLulus,
+                    2
+                );
         }
 
-        $nomorTranskrip = $mahasiswa->nomor_transkrip
-            ? $mahasiswa->nomor_transkrip
-            : ('TR' . ($mahasiswa->npm ? $mahasiswa->npm : '0000' . $mahasiswa->id) . now()->format('Ym'));
 
-        $judulSkripsi = (string) ($mahasiswa->judul_skripsi ?? '-');
-        if ($judulSkripsi === '') $judulSkripsi = '-';
+        /*
+        |--------------------------------------------------------------------------
+        | NOMOR TRANSKRIP
+        |--------------------------------------------------------------------------
+        */
 
-        $tempatLahir = (string) ($mahasiswa->tempat_lahir ?? '-');
-        if ($tempatLahir === '') $tempatLahir = '-';
-        $tglLahir = $this->formatTanggalID($mahasiswa->tanggal_lahir, '-');
-        if ($tempatLahir !== '-' && $tglLahir !== '-') {
-            $tempatTgl = "{$tempatLahir}, {$tglLahir}";
+        $nomorTranskrip =
+            $mahasiswa->nomor_transkrip
+            ?: (
+                'TR' .
+                (
+                    $mahasiswa->npm
+                    ?: '0000' .
+                    $mahasiswa->id
+                ) .
+                now()->format('Ym')
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | JUDUL SKRIPSI
+        |--------------------------------------------------------------------------
+        */
+
+        $judulSkripsi =
+            (string) (
+                $mahasiswa->judul_skripsi
+                ?? '-'
+            );
+
+        if (
+            $judulSkripsi === ''
+        ) {
+            $judulSkripsi =
+                '-';
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | TEMPAT TANGGAL LAHIR
+        |--------------------------------------------------------------------------
+        */
+
+        $tempatLahir =
+            (string) (
+                $mahasiswa->tempat_lahir
+                ?? '-'
+            );
+
+        if (
+            $tempatLahir === ''
+        ) {
+            $tempatLahir =
+                '-';
+        }
+
+        $tglLahir =
+            $this->formatTanggalID(
+                $mahasiswa->tanggal_lahir,
+                '-'
+            );
+
+        if (
+            $tempatLahir !== '-'
+            && $tglLahir !== '-'
+        ) {
+
+            $tempatTgl =
+                $tempatLahir .
+                ', ' .
+                $tglLahir;
+
         } else {
-            $gabung = ($tempatLahir !== '-' ? $tempatLahir : '') . ($tglLahir !== '-' ? $tglLahir : '');
-            $tempatTgl = $gabung !== '' ? $gabung : '-';
+
+            $gabung =
+                (
+                    $tempatLahir !== '-'
+                        ? $tempatLahir
+                        : ''
+                )
+                .
+                (
+                    $tglLahir !== '-'
+                        ? $tglLahir
+                        : ''
+                );
+
+            $tempatTgl =
+                $gabung !== ''
+                    ? $gabung
+                    : '-';
         }
 
-        $tanggalLulus = $this->formatTanggalID($mahasiswa->tanggal_lulus, '-');
 
-        $tglTtd = $mahasiswa->tanggal_lulus
-            ? \Illuminate\Support\Carbon::parse($mahasiswa->tanggal_lulus)
-            : now();
-        $tglTtdStr = $this->formatTanggalID($tglTtd, '');
-        if ($tglTtdStr === '' || $tglTtdStr === '-') {
-            try {
-                $bulanIDFallback = [
-                    1=>'Januari', 2=>'Februari', 3=>'Maret', 4=>'April', 5=>'Mei', 6=>'Juni',
-                    7=>'Juli', 8=>'Agustus', 9=>'September', 10=>'Oktober', 11=>'November', 12=>'Desember',
-                ];
-                $nowFallback = $tglTtd instanceof \Illuminate\Support\Carbon ? $tglTtd : now();
-                $tglTtdStr = sprintf('%02d %s %04d', (int)$nowFallback->day, $bulanIDFallback[(int)$nowFallback->month] ?? 'Agustus', (int)$nowFallback->year);
-            } catch (\Throwable $e) { $tglTtdStr = date('d ') . 'Agustus ' . date('Y'); }
+        /*
+        |--------------------------------------------------------------------------
+        | TANGGAL LULUS
+        |--------------------------------------------------------------------------
+        */
+
+        $tanggalLulus =
+            $this->formatTanggalID(
+                $mahasiswa->tanggal_lulus,
+                '-'
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | TANGGAL TTD
+        |--------------------------------------------------------------------------
+        */
+
+        $tglTtd =
+            $mahasiswa->tanggal_lulus
+                ? \Illuminate\Support\Carbon::parse(
+                    $mahasiswa->tanggal_lulus
+                )
+                : now();
+
+        $tglTtdStr =
+            $this->formatTanggalID(
+                $tglTtd,
+                ''
+            );
+
+        if (
+            $tglTtdStr === ''
+            || $tglTtdStr === '-'
+        ) {
+            $tglTtdStr =
+                $this->formatTanggalID(
+                    now(),
+                    '-'
+                );
         }
-        $tanggalTtd = 'Pangkajene, ' . $tglTtdStr;
 
-        $skBanpt = (string) ($mahasiswa->nomor_sk_banpt ?? '');
-        if ($skBanpt === '') {
-            $skBanpt = '337/SK/BAN-PT/Ak-S/2.0/PT/VI/2026';
+        $tanggalTtd =
+            'Pangkajene, ' .
+            $tglTtdStr;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SK BAN-PT
+        |--------------------------------------------------------------------------
+        */
+
+        $skBanpt =
+            (string) (
+                $mahasiswa->nomor_sk_banpt
+                ?? ''
+            );
+
+        if (
+            $skBanpt === ''
+        ) {
+            $skBanpt =
+                '337/SK/BAN-PT/Ak-S/2.0/PT/VI/2026';
         }
 
-        $noIjazah = (string) ($mahasiswa->no_ijazah ?? '');
-        if ($noIjazah === '') {
-            $noIjazah = (string) ($mahasiswa->nik ?? '-');
-        }
-        if ($noIjazah === '') {
-            $noIjazah = '-';
+
+        /*
+        |--------------------------------------------------------------------------
+        | NO IJAZAH
+        |--------------------------------------------------------------------------
+        */
+
+        $noIjazah =
+            (string) (
+                $mahasiswa->no_ijazah
+                ?? ''
+            );
+
+        if (
+            $noIjazah === ''
+        ) {
+
+            $noIjazah =
+                (string) (
+                    $mahasiswa->nik
+                    ?? '-'
+                );
         }
 
-        $ujianAda = $ujianKompre;
-        $ujianCount = count($ujianAda);
+        if (
+            $noIjazah === ''
+        ) {
+            $noIjazah =
+                '-';
+        }
 
-        $dekan = $mahasiswa->dekanFakultas;
+
+        /*
+        |--------------------------------------------------------------------------
+        | DEKAN
+        |--------------------------------------------------------------------------
+        */
+
+        $dekan =
+            $mahasiswa->dekanFakultas;
+
         if (!$dekan) {
-            $fakultasMhs = (string) ($mahasiswa->fakultas ?? '');
-            if ($fakultasMhs !== '') {
-                $dekan = \App\Models\Dosen::query()
-                    ->where(function ($s) {
-                        $s->whereNotNull('jabatan_struktural')
-                            ->whereRaw('LOWER(jabatan_struktural) LIKE ?', ['%dekan%fakultas%'])
-                            ->orWhereRaw('LOWER(jabatan_struktural) LIKE ?', ['%dekan%']);
-                    })
-                    ->where('fakultas', $fakultasMhs)
-                    ->first();
+
+            $fakultasMhs =
+                (string) (
+                    $mahasiswa->fakultas
+                    ?? ''
+                );
+
+            if (
+                $fakultasMhs !== ''
+            ) {
+
+                $dekan =
+                    \App\Models\Dosen::query()
+                        ->where(
+                            function ($s) {
+
+                                $s->whereNotNull(
+                                    'jabatan_struktural'
+                                )
+                                ->whereRaw(
+                                    'LOWER(jabatan_struktural) LIKE ?',
+                                    ['%dekan%fakultas%']
+                                )
+                                ->orWhereRaw(
+                                    'LOWER(jabatan_struktural) LIKE ?',
+                                    ['%dekan%']
+                                );
+                            }
+                        )
+                        ->where(
+                            'fakultas',
+                            $fakultasMhs
+                        )
+                        ->first();
             }
+
+
             if (!$dekan) {
-                $dekan = \App\Models\Dosen::query()
-                    ->where(function ($s) {
-                        $s->whereNotNull('jabatan_struktural')
-                            ->whereRaw('LOWER(jabatan_struktural) LIKE ?', ['%dekan%fakultas%'])
-                            ->orWhereRaw('LOWER(jabatan_struktural) LIKE ?', ['%dekan%']);
-                    })
-                    ->first();
+
+                $dekan =
+                    \App\Models\Dosen::query()
+                        ->where(
+                            function ($s) {
+
+                                $s->whereNotNull(
+                                    'jabatan_struktural'
+                                )
+                                ->whereRaw(
+                                    'LOWER(jabatan_struktural) LIKE ?',
+                                    ['%dekan%fakultas%']
+                                )
+                                ->orWhereRaw(
+                                    'LOWER(jabatan_struktural) LIKE ?',
+                                    ['%dekan%']
+                                );
+                            }
+                        )
+                        ->first();
             }
         }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | DATA TTD
+        |--------------------------------------------------------------------------
+        */
 
         if ($dekan) {
-            $ttdJabatan = trim((string) ($dekan->jabatan_struktural ?? ''));
-            if ($ttdJabatan === '') {
-                $fakultasTtd = (string) ($dekan->fakultas ?: ($mahasiswa->fakultas ?? ''));
-                if ($fakultasTtd !== '') {
-                    // Hindari "DEKAN FAKULTAS FAKULTAS EKONOMI..." dobel kata FAKULTAS
-                    $fakultasClean = $fakultasTtd;
-                    if (preg_match('/^fakultas\s+/i', $fakultasClean)) {
-                        $fakultasClean = preg_replace('/^fakultas\s+/i', '', $fakultasClean, 1);
+
+            $ttdJabatan =
+                trim(
+                    (string) (
+                        $dekan->jabatan_struktural
+                        ?? ''
+                    )
+                );
+
+            if (
+                $ttdJabatan === ''
+            ) {
+
+                $fakultasTtd =
+                    (string) (
+                        $dekan->fakultas
+                        ?: (
+                            $mahasiswa->fakultas
+                            ?? ''
+                        )
+                    );
+
+                if (
+                    $fakultasTtd !== ''
+                ) {
+
+                    $fakultasClean =
+                        $fakultasTtd;
+
+                    if (
+                        preg_match(
+                            '/^fakultas\s+/i',
+                            $fakultasClean
+                        )
+                    ) {
+
+                        $fakultasClean =
+                            preg_replace(
+                                '/^fakultas\s+/i',
+                                '',
+                                $fakultasClean,
+                                1
+                            );
                     }
-                    $ttdJabatan = "DEKAN FAKULTAS " . strtoupper(trim((string)$fakultasClean));
+
+                    $ttdJabatan =
+                        'DEKAN FAKULTAS ' .
+                        strtoupper(
+                            trim(
+                                $fakultasClean
+                            )
+                        );
+
                 } else {
-                    $ttdJabatan = "DEKAN FAKULTAS";
+
+                    $ttdJabatan =
+                        'DEKAN FAKULTAS';
                 }
+
             } else {
-                // Normalisasi: jika jabatan struktural "DEKAN FAKULTAS EKONOMI" tapi masih ada dobel karena db, trim dobel FAKULTAS juga
-                $jab = $ttdJabatan;
-                if (preg_match('/^dekan\s+fakultas\s+fakultas\s+/i', $jab)) {
-                    $ttdJabatan = preg_replace('/^dekan\s+fakultas\s+/i', 'DEKAN FAKULTAS ', $jab, 1);
+
+                $jab =
+                    $ttdJabatan;
+
+                if (
+                    preg_match(
+                        '/^dekan\s+fakultas\s+fakultas\s+/i',
+                        $jab
+                    )
+                ) {
+
+                    $ttdJabatan =
+                        preg_replace(
+                            '/^dekan\s+fakultas\s+/i',
+                            'DEKAN FAKULTAS ',
+                            $jab,
+                            1
+                        );
                 }
-                $ttdJabatan = strtoupper(trim((string)$ttdJabatan));
+
+                $ttdJabatan =
+                    strtoupper(
+                        trim(
+                            (string)
+                                $ttdJabatan
+                        )
+                    );
             }
-            $ttdNama = (string) ($dekan->nama ?? '');
-            $nomorInduk = (string) ($dekan->nidn ?? '');
-            $labelInduk = 'NIDN';
-            if ($nomorInduk === '' && !empty($dekan->nidk)) {
-                $nomorInduk = (string) $dekan->nidk;
-                $labelInduk = 'NIDK';
+
+
+            $ttdNama =
+                (string) (
+                    $dekan->nama
+                    ?? ''
+                );
+
+            $nomorInduk =
+                (string) (
+                    $dekan->nidn
+                    ?? ''
+                );
+
+            $labelInduk =
+                'NIDN';
+
+
+            if (
+                $nomorInduk === ''
+                && !empty($dekan->nidk)
+            ) {
+
+                $nomorInduk =
+                    (string) $dekan->nidk;
+
+                $labelInduk =
+                    'NIDK';
             }
-            if ($nomorInduk === '' && !empty($dekan->nip)) {
-                $nomorInduk = (string) $dekan->nip;
-                $labelInduk = 'NIP';
+
+
+            if (
+                $nomorInduk === ''
+                && !empty($dekan->nip)
+            ) {
+
+                $nomorInduk =
+                    (string) $dekan->nip;
+
+                $labelInduk =
+                    'NIP';
             }
-            if ($nomorInduk === '' && !empty($dekan->nuptk)) {
-                $nomorInduk = (string) $dekan->nuptk;
-                $labelInduk = 'NUPTK';
+
+
+            if (
+                $nomorInduk === ''
+                && !empty($dekan->nuptk)
+            ) {
+
+                $nomorInduk =
+                    (string) $dekan->nuptk;
+
+                $labelInduk =
+                    'NUPTK';
             }
-            if ($ttdNama === '') {
-                $ttdNama = 'Dr. H. UMAR YAHYA, M.Ag.';
-                $nomorInduk = '8932610021';
-                $labelInduk = 'NIDK';
+
+
+            if (
+                $ttdNama === ''
+            ) {
+
+                $ttdNama =
+                    'Dr. H. UMAR YAHYA, M.Ag.';
+
+                $nomorInduk =
+                    '8932610021';
+
+                $labelInduk =
+                    'NIDK';
             }
+
         } else {
-            $fakultasTtd = (string) ($mahasiswa->fakultas ?? 'Fakultas Tarbiyah & Keguruan');
-            $ttdJabatan = "DEKAN FAKULTAS " . strtoupper($fakultasTtd);
-            $ttdNama = 'Dr. H. UMAR YAHYA, M.Ag.';
-            $nomorInduk = '8932610021';
-            $labelInduk = 'NIDK';
+
+            $fakultasTtd =
+                (string) (
+                    $mahasiswa->fakultas
+                    ?? 'Fakultas Tarbiyah & Keguruan'
+                );
+
+            $ttdJabatan =
+                'DEKAN FAKULTAS ' .
+                strtoupper(
+                    $fakultasTtd
+                );
+
+            $ttdNama =
+                'Dr. H. UMAR YAHYA, M.Ag.';
+
+            $nomorInduk =
+                '8932610021';
+
+            $labelInduk =
+                'NIDK';
         }
-        $ttdNomor = $nomorInduk;
-        $ttdNomorLabel = $labelInduk;
 
-        $fotoMahasiswa = null;
-        if (!empty($mahasiswa->foto_path)) {
+
+        $ttdNomor =
+            $nomorInduk;
+
+        $ttdNomorLabel =
+            $labelInduk;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | FOTO MAHASISWA
+        |--------------------------------------------------------------------------
+        */
+
+        $fotoMahasiswa =
+            null;
+
+        if (
+            !empty(
+                $mahasiswa->foto_path
+            )
+        ) {
+
             try {
-                $relPath = trim(str_replace(['/', '\\'], '/', (string) $mahasiswa->foto_path), '/');
-                $absPath = public_path('storage/' . $relPath);
-                $absPath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $absPath);
 
-                if (\Illuminate\Support\Facades\File::exists($absPath) && \Illuminate\Support\Facades\File::isFile($absPath)) {
-                    $size = (int) \Illuminate\Support\Facades\File::size($absPath);
-                    if ($size > 0 && $size < 10_000_000) {
-                        $ext = strtolower((string) \Illuminate\Support\Facades\File::extension($absPath));
-                        $mimeMap = [
-                            'jpg'  => 'image/jpeg',
-                            'jpeg' => 'image/jpeg',
-                            'png'  => 'image/png',
-                            'gif'  => 'image/gif',
-                        ];
-                        if (isset($mimeMap[$ext])) {
-                            $content = \Illuminate\Support\Facades\File::get($absPath);
-                            if ($content !== false && $content !== '') {
-                                $fotoMahasiswa = 'data:' . $mimeMap[$ext] . ';base64,' . base64_encode($content);
-                            }
-                        }
-                    }
+                $fotoPath =
+                    $this->findFotoPath(
+                        $mahasiswa
+                    );
+
+                if ($fotoPath) {
+
+                    $fotoMahasiswa =
+                        $this->getImageDataUri(
+                            $fotoPath
+                        );
                 }
+
             } catch (\Throwable $e) {
-                $fotoMahasiswa = null;
+
+                $fotoMahasiswa =
+                    null;
             }
         }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | RETURN
+        |--------------------------------------------------------------------------
+        */
 
         return [
-            'mahasiswa' => $mahasiswa,
-            'items' => $items,
-            'daftarMataKuliah' => $daftarMataKuliah,
-            'bagianKiri' => $bagianKiri,
-            'bagianKanan' => $bagianKanan,
-            'left' => $bagianKiri,
-            'right' => $bagianKanan,
-            'half' => count($bagianKiri),
-            'maxRows' => $maxRows ?? max(count($bagianKiri), count($bagianKanan)),
-            'totalSks' => $totalSks,
-            'totalMutu' => round($totalMutu, 2),
-            'sksLulus' => $sksLulus,
-            'mutuLulus' => round($mutuLulus, 2),
-            'ipk' => $ipk,
-            'predikat' => $this->predikat($ipk),
-            'nomorTranskrip' => $nomorTranskrip,
-            'ujianKompre' => $ujianKompre,
-            'ujianAda' => $ujianAda,
-            'ujianCount' => $ujianCount,
-            'judulSkripsi' => $judulSkripsi,
-            'tempatTgl' => $tempatTgl,
-            'tanggalLulus' => $tanggalLulus,
-            'tanggalTtd' => $tanggalTtd,
-            'skBanpt' => $skBanpt,
-            'noIjazah' => $noIjazah,
-            'fotoMahasiswa' => $fotoMahasiswa,
-            'ttdJabatan' => $ttdJabatan,
-            'ttdNama' => $ttdNama,
-            'ttdNomor' => $ttdNomor,
-            'ttdNomorLabel' => $ttdNomorLabel,
+
+            'mahasiswa' =>
+                $mahasiswa,
+
+            'items' =>
+                $items,
+
+            'daftarMataKuliah' =>
+                $daftarMataKuliah,
+
+            'bagianKiri' =>
+                $bagianKiri,
+
+            'bagianKanan' =>
+                $bagianKanan,
+
+            'left' =>
+                $bagianKiri,
+
+            'right' =>
+                $bagianKanan,
+
+            'half' =>
+                count($bagianKiri),
+
+            'maxRows' =>
+                max(
+                    count($bagianKiri),
+                    count($bagianKanan)
+                ),
+
+            'totalSks' =>
+                $totalSks,
+
+            'totalMutu' =>
+                round(
+                    $totalMutu,
+                    2
+                ),
+
+            'sksLulus' =>
+                $sksLulus,
+
+            'mutuLulus' =>
+                round(
+                    $mutuLulus,
+                    2
+                ),
+
+            'ipk' =>
+                $ipk,
+
+            'predikat' =>
+                $this->predikat(
+                    $ipk
+                ),
+
+            'nomorTranskrip' =>
+                $nomorTranskrip,
+
+            'ujianKompre' =>
+                $ujianKompre,
+
+            'ujianAda' =>
+                $ujianAda,
+
+            'ujianCount' =>
+                $ujianCount,
+
+            'judulSkripsi' =>
+                $judulSkripsi,
+
+            'tempatTgl' =>
+                $tempatTgl,
+
+            'tanggalLulus' =>
+                $tanggalLulus,
+
+            'tanggalTtd' =>
+                $tanggalTtd,
+
+            'skBanpt' =>
+                $skBanpt,
+
+            'noIjazah' =>
+                $noIjazah,
+
+            'fotoMahasiswa' =>
+                $fotoMahasiswa,
+
+            'ttdJabatan' =>
+                $ttdJabatan,
+
+            'ttdNama' =>
+                $ttdNama,
+
+            'ttdNomor' =>
+                $ttdNomor,
+
+            'ttdNomorLabel' =>
+                $ttdNomorLabel,
         ];
     }
 }

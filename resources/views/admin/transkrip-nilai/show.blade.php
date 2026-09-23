@@ -726,21 +726,28 @@
         .ttd-nidk    { margin-top: 1px; font-size: 8.5px; letter-spacing: 0.1px; }
 
         @page {
-            size: folio portrait;
-            margin: 0 !important;
+            size: A4 portrait;
+            margin: 12mm 15mm;
         }
         @media print {
+            @page {
+                size: A4 portrait;
+                margin: 12mm 15mm;
+            }
             html, body {
                 margin: 0 !important;
                 padding: 0 !important;
-                width: 210mm !important;
-                height: 330mm !important;
-                min-height: 330mm !important;
-                max-height: 330mm !important;
                 background: #fff !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
-                overflow: hidden !important;
+            }
+            .no-print, aside, nav, header, [x-data] > aside, nav.sidebar, .sidebar { display: none !important; }
+            main {
+                background: #fff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                max-width: none !important;
+                width: 100% !important;
             }
             .transcript-preview {
                 display: block !important;
@@ -749,32 +756,32 @@
                 background: #fff !important;
                 width: 100% !important;
                 min-height: auto !important;
-                height: 330mm !important;
-                max-height: 330mm !important;
-                overflow: hidden !important;
+                height: auto !important;
+                max-height: none !important;
             }
             .transcript-paper {
-                width: 210mm !important;
-                height: 330mm !important;
-                max-height: 330mm !important;
+                width: 100% !important;
+                height: auto !important;
+                max-height: none !important;
                 margin: 0 !important;
-                padding: 8mm 11mm 8mm !important;
+                padding: 0 !important;
                 box-shadow: none !important;
                 border-radius: 0 !important;
-                overflow: hidden !important;
-                box-sizing: border-box !important;
+                overflow: visible !important;
                 page-break-after: avoid !important;
-                page-break-inside: avoid !important;
+                page-break-inside: auto !important;
             }
-            .no-print, aside, nav, header, [x-data] > aside, nav.sidebar { display: none !important; }
-            main {
-                background: #fff !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                max-width: none !important;
-                width: 100% !important;
-                overflow: hidden !important;
-            }
+            table.nilai { font-size: 8.5pt; }
+            table.nilai th { padding: 3.5px 3px; }
+            table.nilai td { padding: 3px 3px; }
+            table.nilai td.mk, table.nilai th.mk { padding-left: 5px; padding-right: 5px; }
+            table.nilai tr { page-break-inside: avoid !important; break-inside: avoid !important; }
+            table.nilai thead { display: table-header-group; page-break-after: avoid; }
+            table.nilai tr.spacer-row { height: 10px; }
+            .biodata { font-size: 9.2pt; }
+            .ringkasan { font-size: 9.2pt; margin-top: 6px; }
+            .ttd-nama { margin-top: 36px; }
+            .transkrip-container { width: 100%; max-width: none; }
         }
     </style>
 </x-portal-layout>
