@@ -8,6 +8,7 @@
         $canReview = (bool) ($canReview ?? false);
         $indexUrl = $prefix === 'admin' ? route('admin.ppl.index') : route('dosen.ppl-pengajuan.index');
         $jurnalStatusUrl = $prefix === 'admin' ? 'admin.ppl.jurnal.status' : 'dosen.ppl.jurnal.status';
+        $jurnalApproveAllUrl = $prefix === 'admin' ? 'admin.ppl.jurnal.approve-all' : 'dosen.ppl.jurnal.approve-all';
         $jurnalPdfUrl = $prefix === 'admin' ? 'admin.ppl.jurnal.pdf' : 'dosen.ppl.jurnal.pdf';
         $jurnalEditUrl = $prefix === 'admin' ? 'admin.ppl.jurnal.edit' : 'dosen.ppl.jurnal.edit';
         $jurnalDestroyUrl = $prefix === 'admin' ? 'admin.ppl.jurnal.destroy' : 'dosen.ppl.jurnal.destroy';
@@ -25,6 +26,15 @@
                 <i class="fa-solid fa-arrow-left"></i>
                 <span class="text-sm font-medium">Kembali</span>
             </a>
+            @if($canReview && $jurnals->where('status', '!=', 'approved')->isNotEmpty())
+                <form method="POST" action="{{ route($jurnalApproveAllUrl, $ppl) }}" onsubmit="return confirm('Setujui semua jurnal kegiatan sekaligus?');" class="m-0">
+                    @csrf
+                    <button type="submit" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition">
+                        <i class="fa-solid fa-check-double"></i>
+                        <span class="text-sm font-medium">Verifikasi Semua</span>
+                    </button>
+                </form>
+            @endif
             <a href="{{ route($jurnalPdfUrl, $ppl) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-blue-500/15 hover:bg-blue-500/20 border border-blue-500/20 text-blue-100 transition">
                 <i class="fa-solid fa-file-pdf"></i>
                 <span class="text-sm font-medium">Cetak PDF</span>

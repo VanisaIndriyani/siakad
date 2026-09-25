@@ -85,9 +85,7 @@ class PplAbsensiController extends Controller
             }
         }
 
-        $canReview = ($context['canAssign'] ?? false)
-            || (($context['dosenId'] ?? 0) > 0
-                && in_array((int) $context['dosenId'], [(int) $ppl->dosen_pembimbing_id, (int) $ppl->dosen_pembimbing_id_2], true));
+        $canReview = $this->canReview($context, $ppl);
 
         return view('admin.ppl.absensi.index', [
             'ppl' => $ppl,
@@ -115,6 +113,31 @@ class PplAbsensiController extends Controller
         ]);
 
         return back()->with('success', 'Status absensi berhasil diperbarui.');
+    }
+
+    public function approveAll(Request $request, PplPengajuan $ppl): RedirectResponse
+    {
+        $context = $this->resolveContext($request);
+        $this->authorizeAccess($request, $ppl, $context);
+        abort_unless($this->canReview($context, $ppl), 403);
+
+        $updated = PplAbsensi::query()
+            ->where('ppl_pengajuan_id', $ppl->id)
+            ->where('status', '!=', 'approved')
+            ->update(['status' => 'approved']);
+
+        if ($updated === 0) {
+            return back()->with('success', 'Semua daftar hadir sudah terverifikasi.');
+        }
+
+        return back()->with('success', $updated.' daftar hadir berhasil diverifikasi.');
+    }
+
+    private function canReview(array $context, PplPengajuan $ppl): bool
+    {
+        return ($context['canAssign'] ?? false)
+            || (($context['dosenId'] ?? 0) > 0
+                && in_array((int) $context['dosenId'], [(int) $ppl->dosen_pembimbing_id, (int) $ppl->dosen_pembimbing_id_2], true));
     }
 
     public function edit(Request $request, PplPengajuan $ppl, PplAbsensi $absensi): View

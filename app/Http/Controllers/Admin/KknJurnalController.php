@@ -79,9 +79,7 @@ class KknJurnalController extends Controller
 
         $kkn->load(['jurnals', 'mahasiswa', 'posko.pembimbingS']);
 
-        $pembimbingIds = $kkn->posko?->pembimbingS?->pluck('id')->map(fn ($v) => (int) $v)->toArray() ?? [];
-        $canReview = ($context['canAssign'] ?? false)
-            || (($context['dosenId'] ?? 0) > 0 && in_array((int) $context['dosenId'], $pembimbingIds, true));
+        $canReview = $this->canReview($context, $kkn);
 
         return view('admin.kkn.jurnal.index', [
             'kkn' => $kkn,
@@ -108,6 +106,33 @@ class KknJurnalController extends Controller
         ]);
 
         return back()->with('success', 'Status jurnal berhasil diperbarui.');
+    }
+
+    public function approveAll(Request $request, KknPengajuan $kkn): RedirectResponse
+    {
+        $context = $this->resolveContext($request);
+        $this->authorizeAccess($request, $kkn, $context);
+        abort_unless($this->canReview($context, $kkn), 403);
+
+        $updated = KknJurnal::query()
+            ->where('kkn_pengajuan_id', $kkn->id)
+            ->where('status', '!=', 'approved')
+            ->update(['status' => 'approved']);
+
+        if ($updated === 0) {
+            return back()->with('success', 'Semua jurnal kegiatan sudah terverifikasi.');
+        }
+
+        return back()->with('success', $updated.' jurnal kegiatan berhasil diverifikasi.');
+    }
+
+    private function canReview(array $context, KknPengajuan $kkn): bool
+    {
+        $kkn->loadMissing('posko.pembimbingS');
+        $pembimbingIds = $kkn->posko?->pembimbingS?->pluck('id')->map(fn ($v) => (int) $v)->toArray() ?? [];
+
+        return ($context['canAssign'] ?? false)
+            || (($context['dosenId'] ?? 0) > 0 && in_array((int) $context['dosenId'], $pembimbingIds, true));
     }
 
     public function edit(Request $request, KknPengajuan $kkn, KknJurnal $jurnal): View

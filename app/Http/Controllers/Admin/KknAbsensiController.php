@@ -86,9 +86,7 @@ class KknAbsensiController extends Controller
             }
         }
 
-        $pembimbingIds = $kkn->posko?->pembimbingS?->pluck('id')->map(fn ($v) => (int) $v)->toArray() ?? [];
-        $canReview = ($context['canAssign'] ?? false)
-            || (($context['dosenId'] ?? 0) > 0 && in_array((int) $context['dosenId'], $pembimbingIds, true));
+        $canReview = $this->canReview($context, $kkn);
 
         return view('admin.kkn.absensi.index', [
             'kkn' => $kkn,
@@ -116,6 +114,33 @@ class KknAbsensiController extends Controller
         ]);
 
         return back()->with('success', 'Status absensi berhasil diperbarui.');
+    }
+
+    public function approveAll(Request $request, KknPengajuan $kkn): RedirectResponse
+    {
+        $context = $this->resolveContext($request);
+        $this->authorizeAccess($request, $kkn, $context);
+        abort_unless($this->canReview($context, $kkn), 403);
+
+        $updated = KknAbsensi::query()
+            ->where('kkn_pengajuan_id', $kkn->id)
+            ->where('status', '!=', 'approved')
+            ->update(['status' => 'approved']);
+
+        if ($updated === 0) {
+            return back()->with('success', 'Semua daftar hadir sudah terverifikasi.');
+        }
+
+        return back()->with('success', $updated.' daftar hadir berhasil diverifikasi.');
+    }
+
+    private function canReview(array $context, KknPengajuan $kkn): bool
+    {
+        $kkn->loadMissing('posko.pembimbingS');
+        $pembimbingIds = $kkn->posko?->pembimbingS?->pluck('id')->map(fn ($v) => (int) $v)->toArray() ?? [];
+
+        return ($context['canAssign'] ?? false)
+            || (($context['dosenId'] ?? 0) > 0 && in_array((int) $context['dosenId'], $pembimbingIds, true));
     }
 
     public function edit(Request $request, KknPengajuan $kkn, KknAbsensi $absensi): View

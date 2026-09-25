@@ -8,6 +8,7 @@
         $canReview = (bool) ($canReview ?? false);
         $indexUrl = $prefix === 'admin' ? route('admin.ppl.index') : route('dosen.ppl-pengajuan.index');
         $absensiStatusUrl = $prefix === 'admin' ? 'admin.ppl.absensi.status' : 'dosen.ppl.absensi.status';
+        $absensiApproveAllUrl = $prefix === 'admin' ? 'admin.ppl.absensi.approve-all' : 'dosen.ppl.absensi.approve-all';
         $absensiPdfUrl = $prefix === 'admin' ? 'admin.ppl.absensi.pdf' : 'dosen.ppl.absensi.pdf';
         $absensiEditUrl = $prefix === 'admin' ? 'admin.ppl.absensi.edit' : 'dosen.ppl.absensi.edit';
         $absensiDestroyUrl = $prefix === 'admin' ? 'admin.ppl.absensi.destroy' : 'dosen.ppl.absensi.destroy';
@@ -25,6 +26,15 @@
                 <i class="fa-solid fa-arrow-left"></i>
                 <span class="text-sm font-medium">Kembali</span>
             </a>
+            @if($canReview && $absensis->where('status', '!=', 'approved')->isNotEmpty())
+                <form method="POST" action="{{ route($absensiApproveAllUrl, $ppl) }}" onsubmit="return confirm('Setujui semua daftar hadir sekaligus?');" class="m-0">
+                    @csrf
+                    <button type="submit" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition">
+                        <i class="fa-solid fa-check-double"></i>
+                        <span class="text-sm font-medium">Verifikasi Semua</span>
+                    </button>
+                </form>
+            @endif
             <a href="{{ route($absensiPdfUrl, $ppl) }}" class="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-blue-500/15 hover:bg-blue-500/20 border border-blue-500/20 text-blue-100 transition">
                 <i class="fa-solid fa-file-pdf"></i>
                 <span class="text-sm font-medium">Cetak PDF</span>

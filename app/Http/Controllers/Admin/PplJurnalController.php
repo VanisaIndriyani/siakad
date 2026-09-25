@@ -82,9 +82,7 @@ class PplJurnalController extends Controller
             'ppl' => $ppl,
             'jurnals' => $ppl->jurnals,
             'routePrefix' => $context['routePrefix'],
-            'canReview' => ($context['canAssign'] ?? false)
-                || (($context['dosenId'] ?? 0) > 0
-                    && in_array((int) $context['dosenId'], [(int) $ppl->dosen_pembimbing_id, (int) $ppl->dosen_pembimbing_id_2], true)),
+            'canReview' => $this->canReview($context, $ppl),
         ]);
     }
 
@@ -105,6 +103,31 @@ class PplJurnalController extends Controller
         ]);
 
         return back()->with('success', 'Status jurnal berhasil diperbarui.');
+    }
+
+    public function approveAll(Request $request, PplPengajuan $ppl): RedirectResponse
+    {
+        $context = $this->resolveContext($request);
+        $this->authorizeAccess($request, $ppl, $context);
+        abort_unless($this->canReview($context, $ppl), 403);
+
+        $updated = PplJurnal::query()
+            ->where('ppl_pengajuan_id', $ppl->id)
+            ->where('status', '!=', 'approved')
+            ->update(['status' => 'approved']);
+
+        if ($updated === 0) {
+            return back()->with('success', 'Semua jurnal kegiatan sudah terverifikasi.');
+        }
+
+        return back()->with('success', $updated.' jurnal kegiatan berhasil diverifikasi.');
+    }
+
+    private function canReview(array $context, PplPengajuan $ppl): bool
+    {
+        return ($context['canAssign'] ?? false)
+            || (($context['dosenId'] ?? 0) > 0
+                && in_array((int) $context['dosenId'], [(int) $ppl->dosen_pembimbing_id, (int) $ppl->dosen_pembimbing_id_2], true));
     }
 
     public function edit(Request $request, PplPengajuan $ppl, PplJurnal $jurnal): View
