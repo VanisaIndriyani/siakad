@@ -279,10 +279,7 @@
             <div class="kop-alamat-line">E-mail : iaiddisidrap@gmail.com &nbsp;&nbsp; Website : www.yppddisrapp.ac.id</div>
 
             {{-- DOUBLE LINE PERSIS PDF --}}
-            <div class="kop-line-double">
-                <div class="kop-line-top">&nbsp;</div>
-                <div class="kop-line-bottom">&nbsp;</div>
-            </div>
+          
         </div>
 
         {{-- JUDUL --}}

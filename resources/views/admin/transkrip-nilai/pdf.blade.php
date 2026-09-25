@@ -201,8 +201,7 @@
             <div class="kop-alamat-line">Alamat : Jl. Tugu Tani Kel. Majelling Watang Sidenreng Rappang</div>
             <div class="kop-alamat-line">E-mail : iaiddisidrap@gmail.com &nbsp;&nbsp; Website : www.yppddisrapp.ac.id</div>
             <div class="kop-line-double">
-                <div class="kop-line-top"></div>
-                <div class="kop-line-bottom"></div>
+             
             </div>
         </div>
 
